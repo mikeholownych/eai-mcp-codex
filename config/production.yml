@@ -1,0 +1,56 @@
+# config/production.yml - Production Configuration
+services:
+  model_router:
+    log_level: INFO
+    performance_metrics: true
+    mock_anthropic_api: false
+    routing_rules:
+      default_model: claude-3-5-sonnet-20241022
+      fallback_enabled: true
+    rate_limiting:
+      requests_per_minute: 60
+      burst_size: 10
+    
+  plan_management:
+    log_level: INFO
+    auto_backup: true
+    backup_interval: 1800  # 30 minutes
+    validation_strict: true
+    retention_days: 90
+    
+  git_worktree:
+    log_level: INFO
+    auto_cleanup: true
+    cleanup_interval: 7200  # 2 hours
+    max_concurrent_operations: 3
+    
+  workflow_orchestrator:
+    log_level: INFO
+    max_concurrent_workflows: 5
+    step_timeout: 3600  # 1 hour
+    retry_attempts: 2
+    
+  verification_feedback:
+    log_level: INFO
+    strict_verification: true
+    parallel_verification: false  # Sequential for reliability
+
+database:
+  pool_size: 20
+  max_overflow: 30
+  echo: false
+
+redis:
+  max_connections: 100
+  retry_on_timeout: true
+  sentinel_enabled: false
+
+monitoring:
+  metrics_enabled: true
+  tracing_enabled: true
+  health_check_interval: 30
+
+security:
+  jwt_secret: ${JWT_SECRET}
+  token_expiry: 3600
+  rate_limiting_enabled: true
