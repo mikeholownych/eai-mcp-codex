@@ -1,0 +1,35 @@
+# monitoring/filebeat.yml - Log Shipping Configuration
+filebeat.inputs:
+- type: container
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+  processors:
+    - add_docker_metadata:
+        host: "unix:///var/run/docker.sock"
+
+- type: log
+  enabled: true
+  paths:
+    - '/var/log/mcp/model-router/*.log'
+    - '/var/log/mcp/plan-management/*.log'
+    - '/var/log/mcp/git-worktree/*.log'
+    - '/var/log/mcp/workflow-orchestrator/*.log'
+    - '/var/log/mcp/verification-feedback/*.log'
+  fields:
+    service: mcp-services
+  fields_under_root: true
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "mcp-logs-%{+yyyy.MM.dd}"
+
+setup.template.name: "mcp-logs"
+setup.template.pattern: "mcp-logs-*"
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
