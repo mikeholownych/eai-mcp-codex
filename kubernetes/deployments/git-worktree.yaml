@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-worktree
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-worktree
+  template:
+    metadata:
+      labels:
+        app: git-worktree
+    spec:
+      containers:
+        - name: git-worktree
+          image: mcp/git-worktree:latest
+          ports:
+            - containerPort: 80

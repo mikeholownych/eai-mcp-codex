@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plan-management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plan-management
+  template:
+    metadata:
+      labels:
+        app: plan-management
+    spec:
+      containers:
+        - name: plan-management
+          image: mcp/plan-management:latest
+          ports:
+            - containerPort: 80

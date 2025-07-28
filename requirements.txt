@@ -1,0 +1,12 @@
+fastapi
+pydantic
+pydantic-settings
+uvicorn
+requests
+pytest
+redis
+prometheus_client
+PyYAML
+
+types-requests
+types-PyYAML

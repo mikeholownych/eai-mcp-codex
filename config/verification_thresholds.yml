@@ -1,0 +1,3 @@
+thresholds:
+  security: 0.8
+  performance: 0.7

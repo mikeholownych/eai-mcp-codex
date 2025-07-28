@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: verification-feedback
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: verification-feedback
+  template:
+    metadata:
+      labels:
+        app: verification-feedback
+    spec:
+      containers:
+        - name: verification-feedback
+          image: mcp/verification-feedback:latest
+          ports:
+            - containerPort: 80
