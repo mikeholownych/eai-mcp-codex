@@ -1,1 +1,7 @@
-print("start workflow orchestrator")
+from uvicorn import run
+
+from src.workflow_orchestrator.app import app
+from src.workflow_orchestrator.config import SERVICE_PORT
+
+if __name__ == "__main__":
+    run(app, host="0.0.0.0", port=SERVICE_PORT)

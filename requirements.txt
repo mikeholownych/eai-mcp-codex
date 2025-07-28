@@ -3,3 +3,5 @@ pydantic
 uvicorn
 requests
 pytest
+redis
+prometheus_client

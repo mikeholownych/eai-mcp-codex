@@ -1,7 +1,8 @@
-"""Model Router metrics."""
+"""Model Router metrics helpers."""
 
-from ..common.metrics import record
+from src.common.metrics import record_request
 
 
-def record_request() -> str:
-    return record("model_router_request", 1.0)
+def record() -> None:
+    """Record a Model Router request."""
+    record_request("model-router")

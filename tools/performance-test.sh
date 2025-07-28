@@ -1,2 +1,3 @@
 #!/bin/sh
-echo perf
+# Run performance tests using pytest
+pytest tests/performance -v

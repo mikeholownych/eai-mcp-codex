@@ -1,2 +1,3 @@
 #!/bin/sh
-echo cleanup
+# Remove unused Docker resources
+docker system prune -af

@@ -1,1 +1,2 @@
-# Workflow Orchestrator API
+# Workflow orchestrator API
+\nThis document describes the REST endpoints for the service.

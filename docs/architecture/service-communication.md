@@ -1,1 +1,2 @@
-# Service Communication
+# Service communication
+\nOverview of system architecture.

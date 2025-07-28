@@ -1,1 +1,2 @@
-# Plan Management API
+# Plan management API
+\nThis document describes the REST endpoints for the service.

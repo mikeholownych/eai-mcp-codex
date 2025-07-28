@@ -6,7 +6,7 @@ Demonstration workflow to show MCP microservices in action
 import asyncio
 
 import requests
-from typing import Dict, Any
+from typing import Any
 
 
 class MCPClient:
@@ -18,8 +18,8 @@ class MCPClient:
         )
 
     def call_service(
-        self, service: str, endpoint: str, data: Dict[Any, Any] = None
-    ) -> Dict[Any, Any]:
+        self, service: str, endpoint: str, data: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Call a microservice endpoint"""
         url = f"{self.base_url}/api/{service}{endpoint}"
 

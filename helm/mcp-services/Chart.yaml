@@ -1,3 +1,4 @@
 apiVersion: v2
 name: mcp-services
+description: Helm chart for MCP microservices
 version: 0.1.0
