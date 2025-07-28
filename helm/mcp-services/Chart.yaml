@@ -1,0 +1,3 @@
+apiVersion: v2
+name: mcp-services
+version: 0.1.0
