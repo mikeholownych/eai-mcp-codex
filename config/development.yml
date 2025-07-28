@@ -1,0 +1,40 @@
+# config/development.yml - Development Configuration
+services:
+  model_router:
+    log_level: DEBUG
+    performance_metrics: true
+    mock_anthropic_api: false
+    routing_rules:
+      default_model: claude-3-haiku-20240307
+      fallback_enabled: true
+    
+  plan_management:
+    log_level: DEBUG
+    auto_backup: true
+    backup_interval: 3600  # 1 hour
+    validation_strict: false
+    
+  git_worktree:
+    log_level: DEBUG
+    auto_cleanup: false  # Keep worktrees for debugging
+    max_concurrent_operations: 5
+    
+  workflow_orchestrator:
+    log_level: DEBUG
+    max_concurrent_workflows: 10
+    step_timeout: 1800  # 30 minutes
+    retry_attempts: 3
+    
+  verification_feedback:
+    log_level: DEBUG
+    strict_verification: false  # More lenient in dev
+    parallel_verification: true
+
+database:
+  pool_size: 5
+  max_overflow: 10
+  echo: true  # Log SQL queries
+
+redis:
+  max_connections: 20
+  retry_on_timeout: true
