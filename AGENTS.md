@@ -16,7 +16,11 @@ Agents are core autonomous units responsible for executing specialized tasks in 
 
 | Agent | Capability | Input Format | Output Format | Access Level | Data Isolation |
 |-------|------------|--------------|---------------|--------------|----------------|
-| |  |  |  |  |  |
+| Model Router | Routes requests to the optimal Claude model | JSON over HTTP | JSON | internal (port 8001) | stateless |
+| Plan Management | Stores and versions project plans | JSON over HTTP | JSON | internal (port 8002) | volume `plan_storage` |
+| Git Worktree Manager | Manages Git repositories and worktrees | JSON over HTTP | JSON | internal (port 8003) | volume `git_repositories` |
+| Workflow Orchestrator | Coordinates multi-step workflows | JSON over HTTP | JSON | internal (port 8004) | database per workflow |
+| Verification Feedback | Performs code analysis and quality checks | JSON over HTTP | JSON | internal (port 8005) | ephemeral workspace |
 
 ---
 
