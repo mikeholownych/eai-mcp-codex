@@ -1,7 +1,7 @@
 """Business logic for plan management."""
 
 from itertools import count
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from .models import Plan
 
@@ -17,6 +17,16 @@ def create_plan(name: str) -> Plan:
     return plan
 
 
+def get_plan(plan_id: int) -> Optional[Plan]:
+    """Retrieve a plan by ID if it exists."""
+    return _plans.get(plan_id)
+
+
 def list_plans() -> List[Plan]:
     """Return all known plans."""
     return list(_plans.values())
+
+
+def delete_plan(plan_id: int) -> None:
+    """Remove a plan from the store."""
+    _plans.pop(plan_id, None)

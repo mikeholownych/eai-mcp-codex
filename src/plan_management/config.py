@@ -1,6 +1,17 @@
 """Plan Management configuration."""
 
-import os
+from pydantic_settings import SettingsConfigDict
 
-SERVICE_NAME = "plan-management"
-SERVICE_PORT = int(os.getenv("PLAN_MANAGEMENT_PORT", 8002))
+from src.common.settings import BaseServiceSettings
+
+
+class Settings(BaseServiceSettings):
+    """Configuration for the plan management service."""
+
+    service_name: str = "plan-management"
+    service_port: int = 8002
+
+    model_config = SettingsConfigDict(env_prefix="PLAN_MANAGEMENT_")
+
+
+settings = Settings()

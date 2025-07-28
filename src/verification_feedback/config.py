@@ -1,6 +1,17 @@
 """Verification Feedback configuration."""
 
-import os
+from pydantic_settings import SettingsConfigDict
 
-SERVICE_NAME = "verification-feedback"
-SERVICE_PORT = int(os.getenv("VERIFICATION_FEEDBACK_PORT", 8005))
+from src.common.settings import BaseServiceSettings
+
+
+class Settings(BaseServiceSettings):
+    """Configuration for the verification feedback service."""
+
+    service_name: str = "verification-feedback"
+    service_port: int = 8005
+
+    model_config = SettingsConfigDict(env_prefix="VERIFICATION_FEEDBACK_")
+
+
+settings = Settings()

@@ -1,6 +1,17 @@
 """Git Worktree configuration."""
 
-import os
+from pydantic_settings import SettingsConfigDict
 
-SERVICE_NAME = "git-worktree"
-SERVICE_PORT = int(os.getenv("GIT_WORKTREE_PORT", 8003))
+from src.common.settings import BaseServiceSettings
+
+
+class Settings(BaseServiceSettings):
+    """Configuration for the git worktree service."""
+
+    service_name: str = "git-worktree"
+    service_port: int = 8003
+
+    model_config = SettingsConfigDict(env_prefix="GIT_WORKTREE_")
+
+
+settings = Settings()
