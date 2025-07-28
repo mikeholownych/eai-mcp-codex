@@ -1,6 +1,17 @@
 """Workflow Orchestrator configuration."""
 
-import os
+from pydantic_settings import SettingsConfigDict
 
-SERVICE_NAME = "workflow-orchestrator"
-SERVICE_PORT = int(os.getenv("WORKFLOW_ORCHESTRATOR_PORT", 8004))
+from src.common.settings import BaseServiceSettings
+
+
+class Settings(BaseServiceSettings):
+    """Configuration for the workflow orchestrator service."""
+
+    service_name: str = "workflow-orchestrator"
+    service_port: int = 8004
+
+    model_config = SettingsConfigDict(env_prefix="WORKFLOW_ORCHESTRATOR_")
+
+
+settings = Settings()
