@@ -1,0 +1,475 @@
+# Docker Compose v2 Configuration for MCP Server Microservices
+services:
+  # =====================================
+  # INFRASTRUCTURE SERVICES
+  # =====================================
+  
+  # Message Broker for Inter-Service Communication
+  redis:
+    image: redis:7-alpine
+    container_name: mcp-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - mcp-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Database for Shared Data
+  postgres:
+    image: postgres:15-alpine
+    container_name: mcp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mcp_database
+      POSTGRES_USER: mcp_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mcp_secure_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcp_user -d mcp_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - mcp-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Service Discovery and Configuration
+  consul:
+    image: consul:1.15
+    container_name: mcp-consul
+    restart: unless-stopped
+    ports:
+      - "8500:8500"
+    command: consul agent -dev -client=0.0.0.0 -ui
+    volumes:
+      - consul_data:/consul/data
+    healthcheck:
+      test: ["CMD", "consul", "info"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - mcp-network
+
+  # =====================================
+  # CORE MCP MICROSERVICES
+  # =====================================
+
+  # Model Router Service
+  model-router:
+    build:
+      context: .
+      dockerfile: docker/model-router.Dockerfile
+    container_name: mcp-model-router
+    restart: unless-stopped
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=model-router
+      - SERVICE_PORT=8001
+      - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database
+    ports:
+      - "8001:8001"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+    volumes:
+      - ./logs/model-router:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Plan Management Service
+  plan-management:
+    build:
+      context: .
+      dockerfile: docker/plan-management.Dockerfile
+    container_name: mcp-plan-management
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=plan-management
+      - SERVICE_PORT=8002
+      - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database
+    ports:
+      - "8002:8002"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+    volumes:
+      - ./logs/plan-management:/app/logs
+      - ./config:/app/config:ro
+      - plan_storage:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.4'
+        reservations:
+          memory: 192M
+          cpus: '0.2'
+
+  # Git Worktree Manager Service
+  git-worktree-manager:
+    build:
+      context: .
+      dockerfile: docker/git-worktree.Dockerfile
+    container_name: mcp-git-worktree
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=git-worktree-manager
+      - SERVICE_PORT=8003
+      - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database
+    ports:
+      - "8003:8003"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+    volumes:
+      - ./logs/git-worktree:/app/logs
+      - ./config:/app/config:ro
+      - git_repositories:/app/repositories
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # For Git operations
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 128M
+          cpus: '0.15'
+
+  # Workflow Orchestrator Service
+  workflow-orchestrator:
+    build:
+      context: .
+      dockerfile: docker/workflow-orchestrator.Dockerfile
+    container_name: mcp-workflow-orchestrator
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=workflow-orchestrator
+      - SERVICE_PORT=8004
+      - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database
+      - MODEL_ROUTER_URL=http://model-router:8001
+      - PLAN_MANAGEMENT_URL=http://plan-management:8002
+      - GIT_WORKTREE_URL=http://git-worktree-manager:8003
+      - VERIFICATION_URL=http://verification-feedback:8005
+    ports:
+      - "8004:8004"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      model-router:
+        condition: service_healthy
+      plan-management:
+        condition: service_healthy
+      git-worktree-manager:
+        condition: service_healthy
+    volumes:
+      - ./logs/workflow-orchestrator:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.6'
+        reservations:
+          memory: 256M
+          cpus: '0.3'
+
+  # Verification & Feedback Service
+  verification-feedback:
+    build:
+      context: .
+      dockerfile: docker/verification-feedback.Dockerfile
+    container_name: mcp-verification-feedback
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=verification-feedback
+      - SERVICE_PORT=8005
+      - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database
+      - MODEL_ROUTER_URL=http://model-router:8001
+    ports:
+      - "8005:8005"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      model-router:
+        condition: service_healthy
+    volumes:
+      - ./logs/verification-feedback:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.4'
+        reservations:
+          memory: 192M
+          cpus: '0.2'
+
+  # =====================================
+  # MONITORING & OBSERVABILITY
+  # =====================================
+
+  # API Gateway / Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: mcp-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - model-router
+      - plan-management
+      - git-worktree-manager
+      - workflow-orchestrator
+      - verification-feedback
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+
+  # Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mcp-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - mcp-network
+
+  # Metrics Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mcp-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - mcp-network
+
+  # Log Aggregation
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: mcp-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - mcp-network
+
+  # Log Visualization
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    container_name: mcp-kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - mcp-network
+
+  # Log Shipping
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.8.0
+    container_name: mcp-filebeat
+    restart: unless-stopped
+    user: root
+    volumes:
+      - ./monitoring/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs:/var/log/mcp:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - elasticsearch
+    networks:
+      - mcp-network
+
+  # =====================================
+  # DEVELOPMENT & TESTING
+  # =====================================
+
+  # Development Tools Container
+  dev-tools:
+    build:
+      context: .
+      dockerfile: docker/dev-tools.Dockerfile
+    container_name: mcp-dev-tools
+    restart: "no"
+    profiles:
+      - dev
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database
+    volumes:
+      - .:/workspace
+      - ./logs:/workspace/logs
+    working_dir: /workspace
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - mcp-network
+    tty: true
+    stdin_open: true
+
+# =====================================
+# NETWORKS
+# =====================================
+networks:
+  mcp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# =====================================
+# VOLUMES
+# =====================================
+volumes:
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  consul_data:
+    driver: local
+  plan_storage:
+    driver: local
+  git_repositories:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
