@@ -5,3 +5,5 @@ requests
 pytest
 redis
 prometheus_client
+
+types-requests
