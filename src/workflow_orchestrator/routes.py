@@ -1,12 +1,16 @@
-"""Routes for Workflow Orchestrator."""
+"""API routes for the Workflow Orchestrator service."""
 
 from fastapi import APIRouter
 
+from src.common.metrics import record_request
+
 from .models import Workflow
+from .orchestrator import start
 
-router = APIRouter()
+router = APIRouter(prefix="/workflow", tags=["workflow-orchestrator"])
 
 
-@router.get("/workflows/{workflow_id}")
-def get_workflow(workflow_id: int) -> Workflow:
-    return Workflow(id=workflow_id)
+@router.post("/{workflow_id}", response_model=Workflow)
+def run(workflow_id: int) -> Workflow:
+    record_request("workflow-orchestrator")
+    return start(workflow_id)

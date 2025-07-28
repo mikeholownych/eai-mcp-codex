@@ -1,1 +1,2 @@
 # Contributing
+\nGuidelines for contributors.

@@ -1,12 +1,15 @@
-"""Routes for Git Worktree."""
+"""API routes for the Git Worktree service."""
 
 from fastapi import APIRouter
 
-from .models import Repo
+from src.common.metrics import record_request
 
-router = APIRouter()
+from .worktree_manager import create
+
+router = APIRouter(prefix="/worktree", tags=["git-worktree"])
 
 
-@router.get("/repos/{name}")
-def get_repo(name: str) -> Repo:
-    return Repo(name=name)
+@router.post("/", response_model=str)
+def create_worktree(path: str) -> str:
+    record_request("git-worktree")
+    return create(path)

@@ -1,1 +1,5 @@
-default: haiku
+rules:
+  - match: '^/analysis'
+    model: sonnet
+  - match: '.*'
+    model: haiku

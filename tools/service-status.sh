@@ -1,2 +1,3 @@
 #!/bin/sh
-echo status
+# Show status of services
+docker compose ps

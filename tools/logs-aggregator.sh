@@ -1,2 +1,3 @@
 #!/bin/sh
-echo logs
+# Tail logs of all running containers
+docker compose logs -f

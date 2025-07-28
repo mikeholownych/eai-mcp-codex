@@ -1,6 +1,8 @@
 """Health check utilities."""
 
+from typing import Dict
 
-def check() -> bool:
-    """Simple health check."""
-    return True
+
+def health() -> Dict[str, str]:
+    """Return the standard health payload."""
+    return {"status": "ok"}

@@ -1,1 +1,2 @@
-# Testing Guide
+# Testing guide
+\nGuidelines for contributors.

@@ -1,2 +1,2 @@
 service:
-  image: example
+  image: mcp-services:latest

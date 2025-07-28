@@ -1,1 +1,2 @@
-# Verification Feedback API
+# Verification feedback API
+\nThis document describes the REST endpoints for the service.

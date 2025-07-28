@@ -1,1 +1,2 @@
-# Coding Standards
+# Coding standards
+\nGuidelines for contributors.
