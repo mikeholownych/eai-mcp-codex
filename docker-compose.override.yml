@@ -1,6 +1,4 @@
 # docker-compose.override.yml - Development Overrides
-version: '3.8'
-
 services:
   # Development-specific overrides
   model-router:

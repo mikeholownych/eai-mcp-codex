@@ -299,6 +299,317 @@ services:
           cpus: '0.2'
 
   # =====================================
+  # AGENT FRAMEWORK SERVICES  
+  # =====================================
+
+  # A2A Communication Hub
+  a2a-communication:
+    build:
+      context: .
+      dockerfile: docker/a2a-communication.Dockerfile
+    container_name: mcp-a2a-communication
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=a2a-communication
+      - SERVICE_PORT=8010
+      - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database
+    ports:
+      - "8010:8010"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+    volumes:
+      - ./logs/a2a-communication:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 128M
+          cpus: '0.15'
+
+  # Agent Pool Manager
+  agent-pool:
+    build:
+      context: .
+      dockerfile: docker/agent-pool.Dockerfile
+    container_name: mcp-agent-pool
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=agent-pool
+      - SERVICE_PORT=8011
+      - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database
+      - A2A_COMMUNICATION_URL=http://a2a-communication:8010
+    ports:
+      - "8011:8011"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      a2a-communication:
+        condition: service_healthy
+    volumes:
+      - ./logs/agent-pool:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.4'
+        reservations:
+          memory: 192M
+          cpus: '0.2'
+
+  # Collaboration Orchestrator
+  collaboration-orchestrator:
+    build:
+      context: .
+      dockerfile: docker/collaboration-orchestrator.Dockerfile
+    container_name: mcp-collaboration-orchestrator
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=collaboration-orchestrator
+      - SERVICE_PORT=8012
+      - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database
+      - A2A_COMMUNICATION_URL=http://a2a-communication:8010
+      - AGENT_POOL_URL=http://agent-pool:8011
+    ports:
+      - "8012:8012"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      a2a-communication:
+        condition: service_healthy
+      agent-pool:
+        condition: service_healthy
+    volumes:
+      - ./logs/collaboration-orchestrator:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Specialized Agent Services
+  planner-agent:
+    build:
+      context: .
+      dockerfile: docker/planner-agent.Dockerfile
+    container_name: mcp-planner-agent
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=planner-agent
+      - SERVICE_PORT=8013
+      - A2A_COMMUNICATION_URL=http://a2a-communication:8010
+      - AGENT_ID=planner-001
+      - AGENT_NAME=Primary-Planner
+    ports:
+      - "8013:8013"
+    depends_on:
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      a2a-communication:
+        condition: service_healthy
+    volumes:
+      - ./logs/planner-agent:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8013/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 128M
+          cpus: '0.15'
+
+  security-agent:
+    build:
+      context: .
+      dockerfile: docker/security-agent.Dockerfile
+    container_name: mcp-security-agent
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=security-agent
+      - SERVICE_PORT=8014
+      - A2A_COMMUNICATION_URL=http://a2a-communication:8010
+      - AGENT_ID=security-001
+      - AGENT_NAME=Primary-Security
+    ports:
+      - "8014:8014"
+    depends_on:
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      a2a-communication:
+        condition: service_healthy
+    volumes:
+      - ./logs/security-agent:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8014/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 128M
+          cpus: '0.15'
+
+  developer-agent:
+    build:
+      context: .
+      dockerfile: docker/developer-agent.Dockerfile
+    container_name: mcp-developer-agent
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=developer-agent
+      - SERVICE_PORT=8015
+      - A2A_COMMUNICATION_URL=http://a2a-communication:8010
+      - AGENT_ID=developer-001
+      - AGENT_NAME=Primary-Developer
+      - SPECIALIZATIONS=python,javascript,fastapi
+    ports:
+      - "8015:8015"
+    depends_on:
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      a2a-communication:
+        condition: service_healthy
+    volumes:
+      - ./logs/developer-agent:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8015/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.4'
+        reservations:
+          memory: 192M
+          cpus: '0.2'
+
+  # Agent Monitor (for real-time agent activity monitoring)
+  agent-monitor:
+    build:
+      context: .
+      dockerfile: docker/agent-monitor.Dockerfile
+    container_name: mcp-agent-monitor
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=http://consul:8500
+      - SERVICE_NAME=agent-monitor
+      - SERVICE_PORT=8016
+      - A2A_COMMUNICATION_URL=http://a2a-communication:8010
+      - AGENT_POOL_URL=http://agent-pool:8011
+      - COLLABORATION_URL=http://collaboration-orchestrator:8012
+    ports:
+      - "8016:8016"
+    depends_on:
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      a2a-communication:
+        condition: service_healthy
+      agent-pool:
+        condition: service_healthy
+      collaboration-orchestrator:
+        condition: service_healthy
+    volumes:
+      - ./logs/agent-monitor:/app/logs
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8016/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mcp-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 128M
+          cpus: '0.15'
+
+  # =====================================
   # MONITORING & OBSERVABILITY
   # =====================================
 
@@ -451,7 +762,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.50.0.0/16
 
 # =====================================
 # VOLUMES

@@ -237,6 +237,138 @@ demo: ## Run demonstration workflow
 	docker compose -f docker-compose.yml -f docker-compose.override.yml run --rm dev-tools python scripts/demo_workflow.py
 	@echo "✅ Demo completed"
 
+##@ Agent Framework
+agent-list: ## List all registered agents
+	@echo "🤖 Listing registered agents..."
+	@curl -s http://localhost:8010/system/stats | python -m json.tool || echo "❌ A2A Communication service not available"
+
+agent-status: ## Show agent status and health
+	@echo "📊 Agent status overview:"
+	@curl -s http://localhost:8016/agents/status | python -m json.tool || echo "❌ Agent Monitor service not available"
+
+agent-conversations: ## Monitor active agent conversations
+	@echo "💬 Active agent conversations:"
+	@curl -s http://localhost:8016/conversations/active | python -m json.tool || echo "❌ Agent Monitor service not available"
+
+agent-collaborations: ## Show active collaboration sessions
+	@echo "🤝 Active collaboration sessions:"
+	@curl -s http://localhost:8016/collaborations/active | python -m json.tool || echo "❌ Agent Monitor service not available"
+
+agent-metrics: ## Show agent system metrics
+	@echo "📈 Agent system metrics:"
+	@curl -s http://localhost:8016/metrics/system | python -m json.tool || echo "❌ Agent Monitor service not available"
+
+agent-pool-stats: ## Show agent pool statistics
+	@echo "🏊 Agent pool statistics:"
+	@curl -s http://localhost:8011/stats | python -m json.tool || echo "❌ Agent Pool service not available"
+
+agent-workload: ## Show agent workload distribution
+	@echo "⚖️ Agent workload distribution:"
+	@curl -s http://localhost:8011/workload/distribution | python -m json.tool || echo "❌ Agent Pool service not available"
+
+start-agents: ## Start all agent services
+	@echo "🚀 Starting agent framework services..."
+	docker compose up -d a2a-communication agent-pool collaboration-orchestrator
+	@echo "🤖 Starting specialized agents..."
+	docker compose up -d planner-agent security-agent developer-agent agent-monitor
+	@echo "✅ All agent services started"
+
+stop-agents: ## Stop all agent services
+	@echo "🛑 Stopping agent services..."
+	docker compose stop planner-agent security-agent developer-agent agent-monitor
+	docker compose stop collaboration-orchestrator agent-pool a2a-communication
+	@echo "✅ All agent services stopped"
+
+restart-agents: ## Restart all agent services
+	@echo "🔄 Restarting agent services..."
+	$(MAKE) stop-agents
+	$(MAKE) start-agents
+
+agent-logs: ## Show logs for all agent services
+	docker compose logs -f a2a-communication agent-pool collaboration-orchestrator planner-agent security-agent developer-agent agent-monitor
+
+agent-logs-service: ## Show logs for specific agent service (usage: make agent-logs-service SERVICE=planner-agent)
+	@test -n "$(SERVICE)" || (echo "❌ Please specify SERVICE (e.g., planner-agent, security-agent, developer-agent)" && exit 1)
+	docker compose logs -f $(SERVICE)
+
+scale-agents: ## Scale agent services (usage: make scale-agents AGENT_TYPE=developer-agent REPLICAS=3)
+	@test -n "$(AGENT_TYPE)" || (echo "❌ Please specify AGENT_TYPE" && exit 1)
+	@test -n "$(REPLICAS)" || (echo "❌ Please specify REPLICAS" && exit 1)
+	docker compose up -d --scale $(AGENT_TYPE)=$(REPLICAS)
+	@echo "✅ Scaled $(AGENT_TYPE) to $(REPLICAS) replicas"
+
+##@ Agent Development
+agent-test-collaboration: ## Test agent collaboration with sample task
+	@echo "🧪 Testing agent collaboration..."
+	@curl -X POST http://localhost:8012/sessions/create \
+		-H "Content-Type: application/json" \
+		-d '{"title":"Test Collaboration","description":"Test multi-agent collaboration","lead_agent":"planner-001"}' \
+		|| echo "❌ Collaboration service not available"
+
+agent-test-consensus: ## Test consensus mechanism
+	@echo "🗳️ Testing consensus mechanism..."
+	@echo "This would create a test consensus item for agents to vote on"
+
+agent-simulate-task: ## Simulate a task submission to agent pool
+	@echo "⚡ Simulating task submission..."
+	@curl -X POST http://localhost:8011/tasks/submit \
+		-H "Content-Type: application/json" \
+		-d '{"task_type":"code_review","description":"Review sample code","required_agent_type":"security","priority":"medium","payload":{"code":"print(\"hello world\")"}}' \
+		|| echo "❌ Agent Pool service not available"
+
+agent-demo: ## Run comprehensive agent demonstration
+	@echo "🎭 Running agent demonstration..."
+	@echo "1. Starting collaboration session..."
+	@$(MAKE) agent-test-collaboration
+	@sleep 2
+	@echo "2. Submitting test task..."
+	@$(MAKE) agent-simulate-task
+	@sleep 2
+	@echo "3. Checking agent status..."
+	@$(MAKE) agent-status
+	@echo "✅ Demo completed"
+
+##@ A2A Communication
+a2a-stats: ## Show A2A communication statistics
+	@curl -s http://localhost:8010/system/stats | python -m json.tool || echo "❌ A2A service not available"
+
+a2a-cleanup: ## Clean up expired A2A messages and inactive agents
+	@echo "🧹 Cleaning up A2A system..."
+	@curl -X POST http://localhost:8010/system/cleanup || echo "❌ A2A service not available"
+
+a2a-send-message: ## Send test A2A message (usage: make a2a-send-message SENDER=agent1 RECIPIENT=agent2 MESSAGE="hello")
+	@test -n "$(SENDER)" || (echo "❌ Please specify SENDER" && exit 1)
+	@test -n "$(RECIPIENT)" || (echo "❌ Please specify RECIPIENT" && exit 1)
+	@test -n "$(MESSAGE)" || (echo "❌ Please specify MESSAGE" && exit 1)
+	@curl -X POST http://localhost:8010/messages/send \
+		-H "Content-Type: application/json" \
+		-d '{"sender_agent_id":"$(SENDER)","recipient_agent_id":"$(RECIPIENT)","message_type":"notification","payload":{"message":"$(MESSAGE)"}}' \
+		|| echo "❌ A2A service not available"
+
+##@ Quick Agent Actions
+quick-start-agents: setup build start-agents ## Quick start for agent framework
+	@echo "🎉 Agent framework started successfully!"
+	@echo "Visit http://localhost:8010 for A2A Communication Hub"
+	@echo "Visit http://localhost:8011 for Agent Pool Manager"
+	@echo "Visit http://localhost:8012 for Collaboration Orchestrator"
+	@echo "Visit http://localhost:8016 for Agent Monitor"
+
+quick-test-agents: ## Quick test to verify agent framework is working
+	@echo "🚀 Running agent framework verification..."
+	@sleep 30  # Wait for services to be fully ready
+	@curl -f http://localhost:8010/health || (echo "❌ A2A Communication health check failed" && exit 1)
+	@curl -f http://localhost:8011/health || (echo "❌ Agent Pool health check failed" && exit 1)
+	@curl -f http://localhost:8012/health || (echo "❌ Collaboration Orchestrator health check failed" && exit 1)
+	@curl -f http://localhost:8016/health || (echo "❌ Agent Monitor health check failed" && exit 1)
+	@echo "✅ Agent framework verification passed - all services responding"
+
+monitoring-agents: ## Open agent monitoring dashboards
+	@echo "📊 Opening agent monitoring interfaces..."
+	@command -v open >/dev/null 2>&1 && open http://localhost:8016 || echo "Agent Monitor: http://localhost:8016"
+	@command -v open >/dev/null 2>&1 && open http://localhost:8010 || echo "A2A Communication: http://localhost:8010"
+	@command -v open >/dev/null 2>&1 && open http://localhost:8011 || echo "Agent Pool: http://localhost:8011"
+	@command -v open >/dev/null 2>&1 && open http://localhost:8012 || echo "Collaboration: http://localhost:8012"
+
 ##@ Documentation
 docs: ## Generate documentation
 	@echo "📚 Generating documentation..."

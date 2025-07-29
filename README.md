@@ -489,10 +489,10 @@ make test-collaboration
 ## 📚 **Documentation**
 
 ### **Core Documentation**
-- **[Architecture Overview](docs/architecture-overview.md)**: System design and components
+- **[Architecture Overview](docs/architecture/overview.md)**: System design and components
 - **[A2A Communication Guide](docs/a2a-communication-guide.md)**: Agent collaboration details
-- **[Deployment Guide](docs/deployment-guide.md)**: Production deployment
-- **[API Documentation](docs/api-documentation.md)**: REST API reference
+- **[Deployment Guide](docs/deployment/production-guide.md)**: Production deployment
+- **[API Documentation](docs/api/)**: REST API reference
 - **[Troubleshooting Guide](docs/troubleshooting-guide.md)**: Common issues and solutions
 
 ### **Tutorials**
