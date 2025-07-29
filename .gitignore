@@ -11,6 +11,7 @@ dist/
 
 # Virtual environments
 venv/
+.venv/
 
 # Tool caches
 .mypy_cache/
@@ -19,3 +20,5 @@ venv/
 # Environment files
 .env
 
+# logs
+logs/
