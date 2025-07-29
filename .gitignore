@@ -1,24 +1,64 @@
-# Byte-compiled / optimized / DLL files
+# === ENVIRONMENT ===
+.venv/
+.env
+.env.*
+
+# === PYTHON ARTIFACTS ===
 __pycache__/
 *.py[cod]
 *.so
-
-# Distribution / packaging
-.Python
-build/
-dist/
 *.egg-info/
+*.pkl
+*.db
+*.sqlite3
 
-# Virtual environments
-venv/
-.venv/
+# === DOCKER ===
+*.log
+*.pid
+*.sock
+docker-compose.override.yml
 
-# Tool caches
-.mypy_cache/
-.pytest_cache/
+# === MODEL DATA / LLMs / RAG ===
+models/
+data/
+*.bin
+*.pt
+*.onnx
+*.jsonl
+index_store/
+rag_index/
 
-# Environment files
-.env
+# === GIT + VCS ===
+*.swp
+*.swo
+*.bak
+.DS_Store
+.idea/
+.vscode/
+.notion-backups/
 
-# logs
+# === TEST OUTPUT ===
+coverage.xml
+htmlcov/
+.tox/
+.junit/
+tests/__snapshots__/
+
+# === BUILD ARTIFACTS ===
+dist/
+build/
+site/
+*.tar.gz
+*.whl
+
+# === NODE ===
+node_modules/
+npm-debug.log*
+yarn-error.log
+
+# === LOGGING + CACHE ===
+*.log
 logs/**
+*.tmp
+.cache/
+*.pid
