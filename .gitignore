@@ -21,4 +21,4 @@ venv/
 .env
 
 # logs
-logs/
+logs/**

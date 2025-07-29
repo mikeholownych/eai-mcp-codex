@@ -11,3 +11,5 @@
 2025/07/29 17:16:17 [emerg] 1#1: host not found in upstream "workflow-orchestrator:8004" in /etc/nginx/nginx.conf:49
 2025/07/29 17:17:22 [emerg] 1#1: host not found in upstream "workflow-orchestrator:8004" in /etc/nginx/nginx.conf:49
 2025/07/29 17:18:28 [emerg] 1#1: host not found in upstream "workflow-orchestrator:8004" in /etc/nginx/nginx.conf:49
+2025/07/29 17:19:35 [emerg] 1#1: host not found in upstream "workflow-orchestrator:8004" in /etc/nginx/nginx.conf:49
+2025/07/29 17:20:41 [emerg] 1#1: host not found in upstream "workflow-orchestrator:8004" in /etc/nginx/nginx.conf:49
