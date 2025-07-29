@@ -1,16 +1,20 @@
 """API routes for the Verification Feedback service."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from src.common.metrics import record_request
 
 from .models import Feedback
-from .verification_engine import verify
+from .feedback_processor import get_feedback_processor
 
 router = APIRouter(prefix="/feedback", tags=["verification-feedback"])
 
 
 @router.get("/{feedback_id}", response_model=Feedback)
-def fetch(feedback_id: int) -> Feedback:
+async def fetch_feedback_route(feedback_id: str) -> Feedback:
     record_request("verification-feedback")
-    return verify(feedback_id)
+    processor = await get_feedback_processor()
+    feedback = await processor.get_feedback(feedback_id)
+    if not feedback:
+        raise HTTPException(status_code=404, detail="Feedback not found")
+    return feedback

@@ -4,18 +4,20 @@ from fastapi import APIRouter
 
 from src.common.metrics import record_request
 
-from .models import Plan
-from .plan_manager import create_plan, list_plans
+from .models import Plan, PlanRequest
+from .plan_manager import get_plan_manager
 
 router = APIRouter(prefix="/plans", tags=["plan-management"])
 
 
 @router.post("/", response_model=Plan)
-def create(name: str) -> Plan:
+async def create_plan_route(request: PlanRequest) -> Plan:
     record_request("plan-management")
-    return create_plan(name)
+    manager = await get_plan_manager()
+    return await manager.create_plan(request)
 
 
 @router.get("/", response_model=list[Plan])
-def get_all() -> list[Plan]:
-    return list_plans()
+async def get_all_plans_route() -> list[Plan]:
+    manager = await get_plan_manager()
+    return await manager.list_plans()

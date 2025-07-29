@@ -2,12 +2,13 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
 class VerificationStatus(str, Enum):
     """Verification status enumeration."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     PASSED = "passed"
@@ -18,6 +19,7 @@ class VerificationStatus(str, Enum):
 
 class FeedbackType(str, Enum):
     """Feedback type enumeration."""
+
     USER_FEEDBACK = "user_feedback"
     SYSTEM_FEEDBACK = "system_feedback"
     AUTOMATED_TEST = "automated_test"
@@ -28,6 +30,7 @@ class FeedbackType(str, Enum):
 
 class FeedbackSeverity(str, Enum):
     """Feedback severity enumeration."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -36,6 +39,7 @@ class FeedbackSeverity(str, Enum):
 
 class VerificationRule(BaseModel):
     """Rule for verification checks."""
+
     id: str
     name: str
     description: str = ""
@@ -52,6 +56,7 @@ class VerificationRule(BaseModel):
 
 class VerificationResult(BaseModel):
     """Result of a verification check."""
+
     rule_id: str
     status: VerificationStatus
     passed: bool
@@ -66,6 +71,7 @@ class VerificationResult(BaseModel):
 
 class Verification(BaseModel):
     """Complete verification session."""
+
     id: str
     name: str
     description: str = ""
@@ -87,6 +93,7 @@ class Verification(BaseModel):
 
 class Feedback(BaseModel):
     """Feedback record."""
+
     id: str
     verification_id: Optional[str] = None  # Associated verification if any
     feedback_type: FeedbackType
@@ -109,6 +116,7 @@ class Feedback(BaseModel):
 
 class FeedbackSummary(BaseModel):
     """Summary of feedback for a target."""
+
     target_type: str
     target_id: str
     total_feedback: int = 0
@@ -122,6 +130,7 @@ class FeedbackSummary(BaseModel):
 
 class VerificationRequest(BaseModel):
     """Request to perform verification."""
+
     name: str
     description: str = ""
     target_type: str
@@ -135,6 +144,7 @@ class VerificationRequest(BaseModel):
 
 class FeedbackRequest(BaseModel):
     """Request to submit feedback."""
+
     feedback_type: FeedbackType
     severity: FeedbackSeverity = FeedbackSeverity.MEDIUM
     title: str
@@ -147,6 +157,7 @@ class FeedbackRequest(BaseModel):
 
 class QualityMetrics(BaseModel):
     """Quality metrics for verification."""
+
     target_type: str
     target_id: str
     overall_score: float  # 0.0 to 1.0
@@ -159,6 +170,7 @@ class QualityMetrics(BaseModel):
 
 class ProcessingResult(BaseModel):
     """Result of processing feedback or verification."""
+
     success: bool
     message: str = ""
     processed_items: int = 0

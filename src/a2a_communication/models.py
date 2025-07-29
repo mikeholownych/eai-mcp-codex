@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 class MessageType(str, Enum):
     """Types of A2A messages."""
+
     REQUEST = "request"
     RESPONSE = "response"
     COLLABORATION = "collaboration"
@@ -20,6 +21,7 @@ class MessageType(str, Enum):
 
 class MessagePriority(str, Enum):
     """Message priority levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -28,6 +30,7 @@ class MessagePriority(str, Enum):
 
 class AgentStatus(str, Enum):
     """Agent availability status."""
+
     AVAILABLE = "available"
     BUSY = "busy"
     OFFLINE = "offline"
@@ -36,6 +39,7 @@ class AgentStatus(str, Enum):
 
 class A2AMessage(BaseModel):
     """Core A2A message structure."""
+
     id: UUID = Field(default_factory=uuid4)
     conversation_id: Optional[UUID] = None
     sender_agent_id: str
@@ -51,6 +55,7 @@ class A2AMessage(BaseModel):
 
 class AgentRegistration(BaseModel):
     """Agent registration information."""
+
     agent_id: str
     agent_type: str
     capabilities: List[str]
@@ -62,6 +67,7 @@ class AgentRegistration(BaseModel):
 
 class CollaborationRequest(BaseModel):
     """Request for agent collaboration."""
+
     task_id: UUID = Field(default_factory=uuid4)
     task_description: str
     required_capabilities: List[str]
@@ -73,6 +79,7 @@ class CollaborationRequest(BaseModel):
 
 class ConsensusItem(BaseModel):
     """Item requiring consensus among agents."""
+
     item_id: UUID = Field(default_factory=uuid4)
     conversation_id: UUID
     item_type: str  # "decision", "recommendation", "approval"
@@ -86,6 +93,7 @@ class ConsensusItem(BaseModel):
 
 class AgentCapabilities(BaseModel):
     """Agent capability definition."""
+
     planning: bool = False
     architecture: bool = False
     development: bool = False
@@ -98,6 +106,7 @@ class AgentCapabilities(BaseModel):
 
 class TrustScore(BaseModel):
     """Trust score between agents."""
+
     evaluating_agent: str
     evaluated_agent: str
     score: float = Field(ge=0.0, le=1.0)

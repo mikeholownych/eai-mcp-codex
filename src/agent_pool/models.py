@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 class AgentType(str, Enum):
     """Types of agents in the pool."""
+
     PLANNER = "planner"
     ARCHITECT = "architect"
     DEVELOPER = "developer"
@@ -21,6 +22,7 @@ class AgentType(str, Enum):
 
 class AgentState(str, Enum):
     """Agent execution states."""
+
     IDLE = "idle"
     WORKING = "working"
     WAITING = "waiting"
@@ -30,6 +32,7 @@ class AgentState(str, Enum):
 
 class TaskPriority(str, Enum):
     """Task priority levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -38,6 +41,7 @@ class TaskPriority(str, Enum):
 
 class AgentInstance(BaseModel):
     """Individual agent instance in the pool."""
+
     instance_id: UUID = Field(default_factory=uuid4)
     agent_type: AgentType
     agent_name: str
@@ -53,6 +57,7 @@ class AgentInstance(BaseModel):
 
 class TaskRequest(BaseModel):
     """Task request for agent execution."""
+
     task_id: UUID = Field(default_factory=uuid4)
     task_type: str
     description: str
@@ -67,6 +72,7 @@ class TaskRequest(BaseModel):
 
 class TaskResult(BaseModel):
     """Task execution result."""
+
     task_id: UUID
     agent_instance_id: UUID
     status: str  # "completed", "failed", "partial"
@@ -79,15 +85,18 @@ class TaskResult(BaseModel):
 
 class AgentPoolConfig(BaseModel):
     """Agent pool configuration."""
-    max_agents_per_type: Dict[AgentType, int] = Field(default_factory=lambda: {
-        AgentType.PLANNER: 2,
-        AgentType.ARCHITECT: 3,
-        AgentType.DEVELOPER: 10,
-        AgentType.SECURITY: 2,
-        AgentType.QA: 3,
-        AgentType.DOMAIN_EXPERT: 5,
-        AgentType.CODE_REVIEWER: 5
-    })
+
+    max_agents_per_type: Dict[AgentType, int] = Field(
+        default_factory=lambda: {
+            AgentType.PLANNER: 2,
+            AgentType.ARCHITECT: 3,
+            AgentType.DEVELOPER: 10,
+            AgentType.SECURITY: 2,
+            AgentType.QA: 3,
+            AgentType.DOMAIN_EXPERT: 5,
+            AgentType.CODE_REVIEWER: 5,
+        }
+    )
     auto_scaling_enabled: bool = True
     scale_up_threshold: float = 0.8  # Scale up when utilization > 80%
     scale_down_threshold: float = 0.3  # Scale down when utilization < 30%
@@ -98,6 +107,7 @@ class AgentPoolConfig(BaseModel):
 
 class WorkloadDistribution(BaseModel):
     """Workload distribution across agent types."""
+
     agent_type: AgentType
     total_instances: int
     active_instances: int

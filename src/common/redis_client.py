@@ -17,7 +17,7 @@ def get_redis_connection(url: str = None) -> Redis:
     """Get Redis connection with default configuration."""
     if url is None:
         url = os.getenv("REDIS_URL", "redis://localhost:6379")
-    
+
     try:
         client = Redis.from_url(url, decode_responses=True)
         # Test connection

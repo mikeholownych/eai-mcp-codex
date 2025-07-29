@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 class ModelRequest(BaseModel):
     """Request model for routing decisions."""
+
     text: str
     context: Optional[Dict[str, Any]] = None
     task_type: Optional[str] = None
@@ -19,6 +20,7 @@ class ModelRequest(BaseModel):
 
 class ModelResponse(BaseModel):
     """Response model from routing."""
+
     result: str
     model_used: str = "unknown"
     usage: Dict[str, Any] = Field(default_factory=dict)
@@ -31,6 +33,7 @@ class ModelResponse(BaseModel):
 
 class ModelInfo(BaseModel):
     """Information about available models."""
+
     name: str
     max_tokens: int
     context_window: int
@@ -41,6 +44,7 @@ class ModelInfo(BaseModel):
 
 class RoutingStats(BaseModel):
     """Statistics about model routing."""
+
     total_requests: int = 0
     requests_by_model: Dict[str, int] = Field(default_factory=dict)
     average_response_time: float = 0.0

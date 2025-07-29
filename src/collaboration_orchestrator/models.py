@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 class CollaborationStatus(str, Enum):
     """Status of a collaboration session."""
+
     INITIATED = "initiated"
     ACTIVE = "active"
     CONSENSUS_BUILDING = "consensus_building"
@@ -20,6 +21,7 @@ class CollaborationStatus(str, Enum):
 
 class ParticipantRole(str, Enum):
     """Roles participants can have in collaboration."""
+
     LEAD = "lead"
     CONTRIBUTOR = "contributor"
     REVIEWER = "reviewer"
@@ -28,6 +30,7 @@ class ParticipantRole(str, Enum):
 
 class DecisionType(str, Enum):
     """Types of decisions requiring consensus."""
+
     ARCHITECTURE = "architecture"
     TECHNOLOGY = "technology"
     APPROACH = "approach"
@@ -37,6 +40,7 @@ class DecisionType(str, Enum):
 
 class VoteChoice(str, Enum):
     """Vote choices for consensus items."""
+
     APPROVE = "approve"
     REJECT = "reject"
     ABSTAIN = "abstain"
@@ -45,6 +49,7 @@ class VoteChoice(str, Enum):
 
 class CollaborationSession(BaseModel):
     """A collaboration session between multiple agents."""
+
     session_id: UUID = Field(default_factory=uuid4)
     title: str
     description: str
@@ -63,6 +68,7 @@ class CollaborationSession(BaseModel):
 
 class CollaborationInvitation(BaseModel):
     """Invitation to participate in a collaboration."""
+
     invitation_id: UUID = Field(default_factory=uuid4)
     session_id: UUID
     invited_agent: str
@@ -77,6 +83,7 @@ class CollaborationInvitation(BaseModel):
 
 class CollaborationResponse(BaseModel):
     """Response to a collaboration invitation."""
+
     invitation_id: UUID
     agent_id: str
     accepted: bool
@@ -89,6 +96,7 @@ class CollaborationResponse(BaseModel):
 
 class ConsensusDecision(BaseModel):
     """A decision requiring consensus among participants."""
+
     decision_id: UUID = Field(default_factory=uuid4)
     session_id: UUID
     decision_type: DecisionType
@@ -108,6 +116,7 @@ class ConsensusDecision(BaseModel):
 
 class WorkflowStep(BaseModel):
     """A step in a collaborative workflow."""
+
     step_id: UUID = Field(default_factory=uuid4)
     session_id: UUID
     step_number: int
@@ -127,6 +136,7 @@ class WorkflowStep(BaseModel):
 
 class CollaborationMetrics(BaseModel):
     """Metrics for a collaboration session."""
+
     session_id: UUID
     total_participants: int
     active_participants: int
@@ -143,6 +153,7 @@ class CollaborationMetrics(BaseModel):
 
 class EscalationRequest(BaseModel):
     """Request to escalate an issue to higher-level agents."""
+
     escalation_id: UUID = Field(default_factory=uuid4)
     session_id: UUID
     issue_type: str  # "consensus_failure", "technical_dispute", "resource_conflict"
@@ -161,6 +172,7 @@ class EscalationRequest(BaseModel):
 
 class CollaborationTemplate(BaseModel):
     """Template for common collaboration patterns."""
+
     template_id: UUID = Field(default_factory=uuid4)
     name: str
     description: str

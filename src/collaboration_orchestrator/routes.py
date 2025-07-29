@@ -8,9 +8,15 @@ from fastapi import APIRouter, HTTPException, Query
 from src.common.logging import get_logger
 
 from .models import (
-    CollaborationSession, CollaborationInvitation, CollaborationResponse,
-    ConsensusDecision, DecisionType, VoteChoice, ParticipantRole,
-    EscalationRequest, CollaborationMetrics, WorkflowStep
+    CollaborationSession,
+    CollaborationInvitation,
+    ConsensusDecision,
+    DecisionType,
+    VoteChoice,
+    ParticipantRole,
+    EscalationRequest,
+    CollaborationMetrics,
+    WorkflowStep,
 )
 from .orchestrator import CollaborationOrchestrator
 
@@ -28,7 +34,7 @@ async def create_collaboration_session(
     description: str,
     lead_agent: str,
     deadline: Optional[datetime] = None,
-    context: Optional[Dict] = None
+    context: Optional[Dict] = None,
 ) -> CollaborationSession:
     """Create a new collaboration session."""
     try:
@@ -37,12 +43,14 @@ async def create_collaboration_session(
             description=description,
             lead_agent=lead_agent,
             deadline=deadline,
-            context=context or {}
+            context=context or {},
         )
         return session
     except Exception as e:
         logger.error(f"Failed to create collaboration session: {e}")
-        raise HTTPException(status_code=500, detail="Failed to create collaboration session")
+        raise HTTPException(
+            status_code=500, detail="Failed to create collaboration session"
+        )
 
 
 @router.post("/sessions/{session_id}/invite")
@@ -52,7 +60,7 @@ async def invite_agent_to_collaboration(
     inviting_agent: str,
     role: ParticipantRole = ParticipantRole.CONTRIBUTOR,
     capabilities_required: Optional[List[str]] = None,
-    expected_contribution: str = ""
+    expected_contribution: str = "",
 ) -> CollaborationInvitation:
     """Invite an agent to participate in a collaboration."""
     try:
@@ -62,7 +70,7 @@ async def invite_agent_to_collaboration(
             inviting_agent=inviting_agent,
             role=role,
             capabilities_required=capabilities_required or [],
-            expected_contribution=expected_contribution
+            expected_contribution=expected_contribution,
         )
         return invitation
     except ValueError as e:
@@ -78,7 +86,7 @@ async def respond_to_invitation(
     agent_id: str,
     accepted: bool,
     message: Optional[str] = None,
-    conditions: Optional[List[str]] = None
+    conditions: Optional[List[str]] = None,
 ) -> dict:
     """Respond to a collaboration invitation."""
     try:
@@ -87,16 +95,16 @@ async def respond_to_invitation(
             agent_id=agent_id,
             accepted=accepted,
             message=message,
-            conditions=conditions or []
+            conditions=conditions or [],
         )
-        
+
         if not success:
             raise HTTPException(status_code=500, detail="Failed to process response")
-        
+
         return {
             "status": "response_recorded",
             "invitation_id": str(invitation_id),
-            "accepted": accepted
+            "accepted": accepted,
         }
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -111,7 +119,7 @@ async def start_collaboration(session_id: UUID) -> dict:
     success = await orchestrator.start_collaboration(session_id)
     if not success:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     return {"status": "started", "session_id": str(session_id)}
 
 
@@ -121,7 +129,7 @@ async def get_collaboration_session(session_id: UUID) -> CollaborationSession:
     session = orchestrator.active_sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     return session
 
 
@@ -129,20 +137,20 @@ async def get_collaboration_session(session_id: UUID) -> CollaborationSession:
 async def list_collaboration_sessions(
     status: Optional[str] = None,
     lead_agent: Optional[str] = None,
-    limit: int = Query(50, ge=1, le=200)
+    limit: int = Query(50, ge=1, le=200),
 ) -> List[CollaborationSession]:
     """List collaboration sessions with optional filtering."""
     sessions = list(orchestrator.active_sessions.values())
-    
+
     if status:
         sessions = [s for s in sessions if s.status.value == status]
-    
+
     if lead_agent:
         sessions = [s for s in sessions if s.lead_agent == lead_agent]
-    
+
     # Sort by creation time (most recent first)
     sessions.sort(key=lambda s: s.created_at, reverse=True)
-    
+
     return sessions[:limit]
 
 
@@ -155,7 +163,7 @@ async def create_consensus_decision(
     options: List[str],
     created_by: str,
     required_consensus: float = 0.75,
-    voting_deadline: Optional[datetime] = None
+    voting_deadline: Optional[datetime] = None,
 ) -> ConsensusDecision:
     """Create a decision requiring consensus."""
     try:
@@ -167,36 +175,32 @@ async def create_consensus_decision(
             options=options,
             created_by=created_by,
             required_consensus=required_consensus,
-            voting_deadline=voting_deadline
+            voting_deadline=voting_deadline,
         )
         return decision
     except Exception as e:
         logger.error(f"Failed to create consensus decision: {e}")
-        raise HTTPException(status_code=500, detail="Failed to create consensus decision")
+        raise HTTPException(
+            status_code=500, detail="Failed to create consensus decision"
+        )
 
 
 @router.post("/decisions/{decision_id}/vote")
 async def submit_vote(
-    decision_id: UUID,
-    agent_id: str,
-    vote: VoteChoice,
-    comment: Optional[str] = None
+    decision_id: UUID, agent_id: str, vote: VoteChoice, comment: Optional[str] = None
 ) -> dict:
     """Submit a vote for a consensus decision."""
     success = await orchestrator.submit_vote(
-        decision_id=decision_id,
-        agent_id=agent_id,
-        vote=vote,
-        comment=comment
+        decision_id=decision_id, agent_id=agent_id, vote=vote, comment=comment
     )
-    
+
     if not success:
         raise HTTPException(status_code=400, detail="Invalid vote or decision")
-    
+
     return {
         "status": "vote_recorded",
         "decision_id": str(decision_id),
-        "vote": vote.value
+        "vote": vote.value,
     }
 
 
@@ -206,7 +210,7 @@ async def get_consensus_decision(decision_id: UUID) -> ConsensusDecision:
     decision = orchestrator.consensus_decisions.get(decision_id)
     if not decision:
         raise HTTPException(status_code=404, detail="Decision not found")
-    
+
     return decision
 
 
@@ -214,13 +218,14 @@ async def get_consensus_decision(decision_id: UUID) -> ConsensusDecision:
 async def get_session_decisions(session_id: UUID) -> List[ConsensusDecision]:
     """Get all consensus decisions for a session."""
     decisions = [
-        d for d in orchestrator.consensus_decisions.values()
+        d
+        for d in orchestrator.consensus_decisions.values()
         if d.session_id == session_id
     ]
-    
+
     # Sort by creation time
     decisions.sort(key=lambda d: d.created_at)
-    
+
     return decisions
 
 
@@ -231,7 +236,7 @@ async def escalate_issue(
     description: str,
     escalated_by: str,
     affected_participants: Optional[List[str]] = None,
-    priority: str = "medium"
+    priority: str = "medium",
 ) -> EscalationRequest:
     """Escalate an issue that cannot be resolved through normal collaboration."""
     try:
@@ -241,7 +246,7 @@ async def escalate_issue(
             description=description,
             escalated_by=escalated_by,
             affected_participants=affected_participants or [],
-            priority=priority
+            priority=priority,
         )
         return escalation
     except Exception as e:
@@ -251,18 +256,16 @@ async def escalate_issue(
 
 @router.post("/sessions/{session_id}/complete")
 async def complete_collaboration(
-    session_id: UUID,
-    outputs: Optional[Dict] = None
+    session_id: UUID, outputs: Optional[Dict] = None
 ) -> dict:
     """Complete a collaboration session."""
     success = await orchestrator.complete_collaboration(
-        session_id=session_id,
-        outputs=outputs or {}
+        session_id=session_id, outputs=outputs or {}
     )
-    
+
     if not success:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     return {"status": "completed", "session_id": str(session_id)}
 
 
@@ -272,15 +275,16 @@ async def get_session_metrics(session_id: UUID) -> CollaborationMetrics:
     session = orchestrator.active_sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     # For completed sessions, get stored metrics
     metrics_key = f"collaboration:metrics:{session_id}"
     metrics_data = orchestrator.redis.get(metrics_key)
-    
+
     if metrics_data:
         import json
+
         return CollaborationMetrics(**json.loads(metrics_data))
-    
+
     # For active sessions, calculate current metrics
     metrics = await orchestrator._calculate_session_metrics(session)
     return metrics
@@ -291,18 +295,29 @@ async def get_system_stats() -> dict:
     """Get collaboration system statistics."""
     try:
         total_sessions = len(orchestrator.active_sessions)
-        active_sessions = len([s for s in orchestrator.active_sessions.values() 
-                              if s.status.value == "active"])
-        completed_sessions = len([s for s in orchestrator.active_sessions.values() 
-                                 if s.status.value == "completed"])
-        
+        active_sessions = len(
+            [
+                s
+                for s in orchestrator.active_sessions.values()
+                if s.status.value == "active"
+            ]
+        )
+        completed_sessions = len(
+            [
+                s
+                for s in orchestrator.active_sessions.values()
+                if s.status.value == "completed"
+            ]
+        )
+
         total_decisions = len(orchestrator.consensus_decisions)
-        resolved_decisions = len([d for d in orchestrator.consensus_decisions.values() 
-                                 if d.resolved])
-        
+        resolved_decisions = len(
+            [d for d in orchestrator.consensus_decisions.values() if d.resolved]
+        )
+
         # Calculate success rate
         success_rate = resolved_decisions / max(1, total_decisions)
-        
+
         return {
             "total_sessions": total_sessions,
             "active_sessions": active_sessions,
@@ -311,7 +326,7 @@ async def get_system_stats() -> dict:
             "resolved_decisions": resolved_decisions,
             "consensus_success_rate": success_rate,
             "system_status": "operational",
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.utcnow(),
         }
     except Exception as e:
         logger.error(f"Failed to get system stats: {e}")
@@ -328,31 +343,31 @@ async def list_collaboration_templates() -> List[dict]:
             "description": "Multi-agent code review with security and performance analysis",
             "category": "code_review",
             "required_roles": ["developer", "security", "qa"],
-            "estimated_duration": 60
+            "estimated_duration": 60,
         },
         {
             "name": "Architecture Design",
             "description": "Collaborative system architecture design and consensus",
-            "category": "architecture_design", 
+            "category": "architecture_design",
             "required_roles": ["architect", "developer", "security"],
-            "estimated_duration": 120
+            "estimated_duration": 120,
         },
         {
             "name": "Sprint Planning",
             "description": "Collaborative sprint planning with task breakdown",
             "category": "planning",
             "required_roles": ["planner", "developer", "qa"],
-            "estimated_duration": 90
+            "estimated_duration": 90,
         },
         {
             "name": "Problem Solving",
             "description": "Multi-agent problem analysis and solution design",
             "category": "problem_solving",
             "required_roles": ["domain_expert", "architect", "developer"],
-            "estimated_duration": 45
-        }
+            "estimated_duration": 45,
+        },
     ]
-    
+
     return templates
 
 
@@ -364,13 +379,13 @@ async def add_workflow_step(
     step_number: int,
     assigned_agent: Optional[str] = None,
     required_capabilities: Optional[List[str]] = None,
-    dependencies: Optional[List[UUID]] = None
+    dependencies: Optional[List[UUID]] = None,
 ) -> WorkflowStep:
     """Add a workflow step to a collaboration session."""
     session = orchestrator.active_sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-    
+
     step = WorkflowStep(
         session_id=session_id,
         step_number=step_number,
@@ -378,13 +393,13 @@ async def add_workflow_step(
         description=description,
         assigned_agent=assigned_agent,
         required_capabilities=required_capabilities or [],
-        dependencies=dependencies or []
+        dependencies=dependencies or [],
     )
-    
+
     # Store workflow step
     step_key = f"collaboration:step:{step.step_id}"
     orchestrator.redis.setex(step_key, 86400, step.model_dump_json())
-    
+
     return step
 
 
@@ -392,18 +407,19 @@ async def add_workflow_step(
 async def get_workflow_steps(session_id: UUID) -> List[WorkflowStep]:
     """Get workflow steps for a collaboration session."""
     # Search for workflow steps in Redis
-    pattern = f"collaboration:step:*"
+    pattern = "collaboration:step:*"
     steps = []
-    
+
     for key in orchestrator.redis.scan_iter(match=pattern):
         step_data = orchestrator.redis.get(key)
         if step_data:
             import json
+
             step = WorkflowStep(**json.loads(step_data))
             if step.session_id == session_id:
                 steps.append(step)
-    
+
     # Sort by step number
     steps.sort(key=lambda s: s.step_number)
-    
+
     return steps

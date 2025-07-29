@@ -1,47 +1,63 @@
 """Plan Management business logic implementation."""
 
-import sqlite3
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
 from src.common.logging import get_logger
+from src.common.database import DatabaseManager, serialize_json_field, deserialize_json_field, serialize_datetime, deserialize_datetime
 from .models import (
-    Plan, Task, Milestone, PlanStatus, TaskStatus, 
-    PlanRequest, TaskRequest, EstimationResult, PlanSummary
+    Plan,
+    Task,
+    Milestone,
+    PlanStatus,
+    TaskStatus,
+    PlanRequest,
+    TaskRequest,
+    EstimationResult,
+    PlanSummary,
 )
+from .config import settings
 
 logger = get_logger("plan_manager")
 
 
 class PlanManager:
     """Core business logic for plan management operations."""
-    
-    def __init__(self, db_path: str = "data/plans.db"):
-        self.db_path = db_path
-        self._ensure_database()
-    
-    def _ensure_database(self):
+
+    def __init__(self, dsn: str = settings.database_url):
+        self.db_manager = DatabaseManager(dsn)
+        self.dsn = dsn # Store DSN for potential re-initialization if needed
+        # Initialize database connection pool on startup
+        # This will be called by the FastAPI app's startup event
+
+    async def initialize_database(self):
+        """Initialize database connection and create tables if they don't exist."""
+        await self.db_manager.connect()
+        await self._ensure_database()
+
+    async def shutdown_database(self):
+        """Shutdown database connection pool."""
+        await self.db_manager.disconnect()
+
+    async def _ensure_database(self):
         """Create database and tables if they don't exist."""
-        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
-        
-        with sqlite3.connect(self.db_path) as conn:
-            conn.executescript("""
+        script = """
                 CREATE TABLE IF NOT EXISTS plans (
                     id TEXT PRIMARY KEY,
                     title TEXT NOT NULL,
                     description TEXT DEFAULT '',
                     status TEXT DEFAULT 'draft',
                     priority TEXT DEFAULT 'medium',
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    start_date TIMESTAMP,
-                    end_date TIMESTAMP,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    start_date TIMESTAMP WITH TIME ZONE,
+                    end_date TIMESTAMP WITH TIME ZONE,
                     estimated_hours REAL,
                     actual_hours REAL,
                     progress REAL DEFAULT 0.0,
-                    metadata TEXT DEFAULT '{}',
+                    metadata JSONB DEFAULT '{}',
                     created_by TEXT DEFAULT 'system',
                     assigned_to TEXT
                 );
@@ -53,18 +69,18 @@ class PlanManager:
                     description TEXT DEFAULT '',
                     status TEXT DEFAULT 'todo',
                     priority TEXT DEFAULT 'medium',
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    start_date TIMESTAMP,
-                    due_date TIMESTAMP,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    start_date TIMESTAMP WITH TIME ZONE,
+                    due_date TIMESTAMP WITH TIME ZONE,
                     estimated_hours REAL,
                     actual_hours REAL,
                     progress REAL DEFAULT 0.0,
-                    dependencies TEXT DEFAULT '[]',
+                    dependencies JSONB DEFAULT '[]',
                     assignee TEXT,
-                    tags TEXT DEFAULT '[]',
-                    metadata TEXT DEFAULT '{}',
-                    FOREIGN KEY (plan_id) REFERENCES plans (id)
+                    tags JSONB DEFAULT '[]',
+                    metadata JSONB DEFAULT '{}',
+                    FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE
                 );
                 
                 CREATE TABLE IF NOT EXISTS milestones (
@@ -72,28 +88,29 @@ class PlanManager:
                     plan_id TEXT NOT NULL,
                     title TEXT NOT NULL,
                     description TEXT DEFAULT '',
-                    target_date TIMESTAMP NOT NULL,
-                    completion_date TIMESTAMP,
+                    target_date TIMESTAMP WITH TIME ZONE NOT NULL,
+                    completion_date TIMESTAMP WITH TIME ZONE,
                     status TEXT DEFAULT 'pending',
-                    criteria TEXT DEFAULT '[]',
+                    criteria JSONB DEFAULT '[]',
                     progress REAL DEFAULT 0.0,
-                    metadata TEXT DEFAULT '{}',
-                    FOREIGN KEY (plan_id) REFERENCES plans (id)
+                    metadata JSONB DEFAULT '{}',
+                    FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE
                 );
                 
                 CREATE INDEX IF NOT EXISTS idx_plans_status ON plans(status);
                 CREATE INDEX IF NOT EXISTS idx_tasks_plan_id ON tasks(plan_id);
                 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
                 CREATE INDEX IF NOT EXISTS idx_milestones_plan_id ON milestones(plan_id);
-            """)
-        
-        logger.info(f"Database initialized at {self.db_path}")
-    
-    def create_plan(self, request: PlanRequest, created_by: str = "system") -> Plan:
+            """
+        logger.info(f"Attempting to create tables in {self.dsn}")
+        await self.db_manager.execute_script(script)
+        logger.info("Database tables ensured.")
+
+    async def create_plan(self, request: PlanRequest, created_by: str = "system") -> Plan:
         """Create a new plan."""
         plan_id = str(uuid.uuid4())
         now = datetime.utcnow()
-        
+
         plan = Plan(
             id=plan_id,
             title=request.title,
@@ -104,106 +121,122 @@ class PlanManager:
             start_date=request.start_date,
             estimated_hours=request.estimated_hours,
             metadata=request.metadata,
-            created_by=created_by
+            created_by=created_by,
         )
-        
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
-                INSERT INTO plans (
-                    id, title, description, priority, created_at, updated_at,
-                    start_date, estimated_hours, metadata, created_by
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                plan.id, plan.title, plan.description, plan.priority,
-                plan.created_at.isoformat(), plan.updated_at.isoformat(),
-                plan.start_date.isoformat() if plan.start_date else None,
-                plan.estimated_hours, str(plan.metadata), plan.created_by
-            ))
-        
+
+        query = """
+            INSERT INTO plans (
+                id, title, description, status, priority, created_at, updated_at,
+                start_date, estimated_hours, metadata, created_by
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        """
+        values = (
+            plan.id,
+            plan.title,
+            plan.description,
+            plan.status.value,
+            plan.priority,
+            serialize_datetime(plan.created_at),
+            serialize_datetime(plan.updated_at),
+            serialize_datetime(plan.start_date),
+            plan.estimated_hours,
+            serialize_json_field(plan.metadata),
+            plan.created_by,
+        )
+        await self.db_manager.execute_update(query, values)
+
         logger.info(f"Created plan: {plan.id} - {plan.title}")
         return plan
-    
-    def get_plan(self, plan_id: str) -> Optional[Plan]:
+
+    async def get_plan(self, plan_id: str) -> Optional[Plan]:
         """Get a plan by ID."""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute("SELECT * FROM plans WHERE id = ?", (plan_id,))
-            row = cursor.fetchone()
-            
-            if not row:
-                return None
-            
-            return self._row_to_plan(row)
-    
-    def list_plans(
-        self, 
+        query = "SELECT * FROM plans WHERE id = $1"
+        row = await self.db_manager.execute_query(query, (plan_id,))
+
+        if not row:
+            return None
+
+        return self._row_to_plan(row[0])
+
+    async def list_plans(
+        self,
         status: Optional[str] = None,
         created_by: Optional[str] = None,
-        limit: int = 100
+        limit: int = 100,
     ) -> List[Plan]:
         """List plans with optional filtering."""
         query = "SELECT * FROM plans WHERE 1=1"
         params = []
-        
+        param_idx = 1
+
         if status:
-            query += " AND status = ?"
+            query += f" AND status = ${param_idx}"
             params.append(status)
-        
+            param_idx += 1
+
         if created_by:
-            query += " AND created_by = ?"
+            query += f" AND created_by = ${param_idx}"
             params.append(created_by)
-        
-        query += " ORDER BY updated_at DESC LIMIT ?"
+            param_idx += 1
+
+        query += f" ORDER BY updated_at DESC LIMIT ${param_idx}"
         params.append(limit)
-        
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute(query, params)
-            return [self._row_to_plan(row) for row in cursor.fetchall()]
-    
-    def update_plan(self, plan_id: str, updates: Dict[str, Any]) -> Optional[Plan]:
+
+        rows = await self.db_manager.execute_query(query, tuple(params))
+        return [self._row_to_plan(row) for row in rows]
+
+    async def update_plan(self, plan_id: str, updates: Dict[str, Any]) -> Optional[Plan]:
         """Update a plan with new values."""
-        updates["updated_at"] = datetime.utcnow().isoformat()
+        updates["updated_at"] = datetime.utcnow()
+
+        set_clauses = []
+        values = []
+        param_idx = 1
+
+        for key, value in updates.items():
+            if key in ["created_at", "updated_at", "start_date", "end_date"]:
+                value = serialize_datetime(value)
+            elif key in ["metadata"]:
+                value = serialize_json_field(value)
+            set_clauses.append(f"{key} = ${param_idx}")
+            values.append(value)
+            param_idx += 1
+
+        set_clause = ", ".join(set_clauses)
         
-        # Build dynamic update query
-        set_clause = ", ".join(f"{key} = ?" for key in updates.keys())
-        values = list(updates.values()) + [plan_id]
-        
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute(f"UPDATE plans SET {set_clause} WHERE id = ?", values)
-            
-            if conn.total_changes == 0:
-                return None
-        
+        query = f"UPDATE plans SET {set_clause} WHERE id = ${param_idx}"
+        values.append(plan_id)
+
+        rows_affected = await self.db_manager.execute_update(query, tuple(values))
+
+        if rows_affected == 0:
+            return None
+
         logger.info(f"Updated plan: {plan_id}")
-        return self.get_plan(plan_id)
-    
-    def delete_plan(self, plan_id: str) -> bool:
+        return await self.get_plan(plan_id)
+
+    async def delete_plan(self, plan_id: str) -> bool:
         """Delete a plan and all associated tasks/milestones."""
-        with sqlite3.connect(self.db_path) as conn:
-            # Delete associated records first
-            conn.execute("DELETE FROM tasks WHERE plan_id = ?", (plan_id,))
-            conn.execute("DELETE FROM milestones WHERE plan_id = ?", (plan_id,))
-            
-            # Delete the plan
-            cursor = conn.execute("DELETE FROM plans WHERE id = ?", (plan_id,))
-            
-            if cursor.rowcount > 0:
-                logger.info(f"Deleted plan: {plan_id}")
-                return True
-            
-            return False
-    
-    def add_task(self, plan_id: str, request: TaskRequest) -> Optional[Task]:
+        # ON DELETE CASCADE in table definition handles tasks and milestones
+        query = "DELETE FROM plans WHERE id = $1"
+        rows_affected = await self.db_manager.execute_update(query, (plan_id,))
+
+        if rows_affected > 0:
+            logger.info(f"Deleted plan: {plan_id}")
+            return True
+
+        return False
+
+    async def add_task(self, plan_id: str, request: TaskRequest) -> Optional[Task]:
         """Add a task to a plan."""
         # Verify plan exists
-        if not self.get_plan(plan_id):
+        if not await self.get_plan(plan_id):
             logger.error(f"Plan not found: {plan_id}")
             return None
-        
+
         task_id = str(uuid.uuid4())
         now = datetime.utcnow()
-        
+
         task = Task(
             id=task_id,
             plan_id=plan_id,
@@ -217,66 +250,85 @@ class PlanManager:
             dependencies=request.dependencies,
             assignee=request.assignee,
             tags=request.tags,
-            metadata=request.metadata
+            metadata=request.metadata,
         )
-        
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
-                INSERT INTO tasks (
-                    id, plan_id, title, description, priority, created_at, updated_at,
-                    due_date, estimated_hours, dependencies, assignee, tags, metadata
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                task.id, task.plan_id, task.title, task.description, task.priority,
-                task.created_at.isoformat(), task.updated_at.isoformat(),
-                task.due_date.isoformat() if task.due_date else None,
-                task.estimated_hours, str(task.dependencies), task.assignee,
-                str(task.tags), str(task.metadata)
-            ))
-        
+
+        query = """
+            INSERT INTO tasks (
+                id, plan_id, title, description, status, priority, created_at, updated_at,
+                due_date, estimated_hours, dependencies, assignee, tags, metadata
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        """
+        values = (
+            task.id,
+            task.plan_id,
+            task.title,
+            task.description,
+            task.status.value,
+            task.priority,
+            serialize_datetime(task.created_at),
+            serialize_datetime(task.updated_at),
+            serialize_datetime(task.due_date),
+            task.estimated_hours,
+            serialize_json_field(task.dependencies),
+            task.assignee,
+            serialize_json_field(task.tags),
+            serialize_json_field(task.metadata),
+        )
+        await self.db_manager.execute_update(query, values)
+
         logger.info(f"Added task: {task.id} to plan {plan_id}")
         return task
-    
-    def get_plan_tasks(self, plan_id: str) -> List[Task]:
+
+    async def get_plan_tasks(self, plan_id: str) -> List[Task]:
         """Get all tasks for a plan."""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute(
-                "SELECT * FROM tasks WHERE plan_id = ? ORDER BY created_at",
-                (plan_id,)
-            )
-            return [self._row_to_task(row) for row in cursor.fetchall()]
-    
-    def update_task_status(self, task_id: str, status: TaskStatus, progress: float = None) -> bool:
+        query = "SELECT * FROM tasks WHERE plan_id = $1 ORDER BY created_at"
+        rows = await self.db_manager.execute_query(query, (plan_id,))
+        return [self._row_to_task(row) for row in rows]
+
+    async def update_task_status(
+        self, task_id: str, status: TaskStatus, progress: Optional[float] = None
+    ) -> bool:
         """Update task status and optionally progress."""
-        updates = {
-            "status": status.value,
-            "updated_at": datetime.utcnow().isoformat()
-        }
-        
+        updates = {"status": status.value, "updated_at": datetime.utcnow()}
+
         if progress is not None:
             updates["progress"] = min(1.0, max(0.0, progress))
+
+        set_clauses = []
+        values = []
+        param_idx = 1
+
+        for key, value in updates.items():
+            if key in ["updated_at"]:
+                value = serialize_datetime(value)
+            set_clauses.append(f"{key} = ${param_idx}")
+            values.append(value)
+            param_idx += 1
+
+        set_clause = ", ".join(set_clauses)
         
-        set_clause = ", ".join(f"{key} = ?" for key in updates.keys())
-        values = list(updates.values()) + [task_id]
-        
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute(f"UPDATE tasks SET {set_clause} WHERE id = ?", values)
-            
-            if cursor.rowcount > 0:
-                logger.info(f"Updated task status: {task_id} -> {status}")
-                return True
-            
-            return False
-    
-    def estimate_plan(self, plan_id: str, method: str = "simple") -> Optional[EstimationResult]:
+        query = f"UPDATE tasks SET {set_clause} WHERE id = ${param_idx}"
+        values.append(task_id)
+
+        rows_affected = await self.db_manager.execute_update(query, tuple(values))
+
+        if rows_affected > 0:
+            logger.info(f"Updated task status: {task_id} -> {status}")
+            return True
+
+        return False
+
+    async def estimate_plan(
+        self, plan_id: str, method: str = "simple"
+    ) -> Optional[EstimationResult]:
         """Estimate plan completion time using specified method."""
-        plan = self.get_plan(plan_id)
+        plan = await self.get_plan(plan_id)
         if not plan:
             return None
-        
-        tasks = self.get_plan_tasks(plan_id)
-        
+
+        tasks = await self.get_plan_tasks(plan_id)
+
         if method == "simple":
             return self._simple_estimation(tasks)
         elif method == "three_point":
@@ -284,47 +336,51 @@ class PlanManager:
         else:
             logger.warning(f"Unknown estimation method: {method}")
             return self._simple_estimation(tasks)
-    
-    def get_plan_summary(self, plan_id: str) -> Optional[PlanSummary]:
+
+    async def get_plan_summary(self, plan_id: str) -> Optional[PlanSummary]:
         """Get comprehensive plan summary with metrics."""
-        plan = self.get_plan(plan_id)
+        plan = await self.get_plan(plan_id)
         if not plan:
             return None
-        
-        tasks = self.get_plan_tasks(plan_id)
-        milestones = self.get_plan_milestones(plan_id)
-        
+
+        tasks = await self.get_plan_tasks(plan_id)
+        milestones = await self.get_plan_milestones(plan_id)
+
         completed_tasks = sum(1 for task in tasks if task.status == TaskStatus.DONE)
         overdue_tasks = sum(
-            1 for task in tasks 
-            if task.due_date and task.due_date < datetime.utcnow() and task.status != TaskStatus.DONE
+            1
+            for task in tasks
+            if task.due_date
+            and task.due_date < datetime.utcnow()
+            and task.status != TaskStatus.DONE
         )
-        
+
         # Get upcoming milestones (next 30 days)
         upcoming_date = datetime.utcnow() + timedelta(days=30)
         upcoming_milestones = [
-            m for m in milestones 
+            m
+            for m in milestones
             if m.target_date <= upcoming_date and m.status == "pending"
         ]
-        
+
         # Estimate completion date
         remaining_hours = sum(
-            task.estimated_hours or 0 for task in tasks 
+            task.estimated_hours or 0
+            for task in tasks
             if task.status not in [TaskStatus.DONE, TaskStatus.CANCELLED]
         )
-        
+
         estimated_completion = None
         if remaining_hours > 0:
             # Assume 8 hours per day, 5 days per week
             working_days = remaining_hours / 8
-            estimated_completion = datetime.utcnow() + timedelta(days=working_days * 1.4)
-        
+            estimated_completion = datetime.utcnow() + timedelta(
+                days=working_days * 1.4
+            )
+
         # Get team members
-        team_members = list(set(
-            task.assignee for task in tasks 
-            if task.assignee
-        ))
-        
+        team_members = list(set(task.assignee for task in tasks if task.assignee))
+
         return PlanSummary(
             plan=plan,
             task_count=len(tasks),
@@ -332,31 +388,27 @@ class PlanManager:
             overdue_tasks=overdue_tasks,
             upcoming_milestones=upcoming_milestones,
             estimated_completion=estimated_completion,
-            team_members=team_members
+            team_members=team_members,
         )
-    
-    def get_plan_milestones(self, plan_id: str) -> List[Milestone]:
+
+    async def get_plan_milestones(self, plan_id: str) -> List[Milestone]:
         """Get all milestones for a plan."""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.execute(
-                "SELECT * FROM milestones WHERE plan_id = ? ORDER BY target_date",
-                (plan_id,)
-            )
-            return [self._row_to_milestone(row) for row in cursor.fetchall()]
-    
+        query = "SELECT * FROM milestones WHERE plan_id = $1 ORDER BY target_date"
+        rows = await self.db_manager.execute_query(query, (plan_id,))
+        return [self._row_to_milestone(row) for row in rows]
+
     def _simple_estimation(self, tasks: List[Task]) -> EstimationResult:
         """Simple sum of task estimates."""
         total_hours = sum(task.estimated_hours or 0 for task in tasks)
-        
+
         task_estimates = {
             task.id: {
                 "estimated_hours": task.estimated_hours or 0,
-                "method": "user_provided"
+                "method": "user_provided",
             }
             for task in tasks
         }
-        
+
         return EstimationResult(
             method="simple",
             total_estimated_hours=total_hours,
@@ -365,32 +417,32 @@ class PlanManager:
             recommendations=[
                 "Consider breaking down large tasks (>8 hours)",
                 "Add buffer time for unknown complexities",
-                "Review estimates with team members"
-            ]
+                "Review estimates with team members",
+            ],
         )
-    
+
     def _three_point_estimation(self, tasks: List[Task]) -> EstimationResult:
         """Three-point estimation (optimistic, most likely, pessimistic)."""
         total_hours = 0
         task_estimates = {}
-        
+
         for task in tasks:
             base_estimate = task.estimated_hours or 8
             optimistic = base_estimate * 0.7
             most_likely = base_estimate
             pessimistic = base_estimate * 1.5
-            
+
             # PERT formula: (O + 4M + P) / 6
             pert_estimate = (optimistic + 4 * most_likely + pessimistic) / 6
             total_hours += pert_estimate
-            
+
             task_estimates[task.id] = {
                 "optimistic": optimistic,
                 "most_likely": most_likely,
                 "pessimistic": pessimistic,
-                "pert_estimate": pert_estimate
+                "pert_estimate": pert_estimate,
             }
-        
+
         return EstimationResult(
             method="three_point",
             total_estimated_hours=total_hours,
@@ -399,36 +451,32 @@ class PlanManager:
             recommendations=[
                 "PERT estimation provides better accuracy",
                 "Consider risk factors in pessimistic estimates",
-                "Regular re-estimation as work progresses"
-            ]
+                "Regular re-estimation as work progresses",
+            ],
         )
-    
+
     def _row_to_plan(self, row) -> Plan:
         """Convert database row to Plan object."""
-        import json
-        
         return Plan(
             id=row["id"],
             title=row["title"],
             description=row["description"] or "",
             status=PlanStatus(row["status"]),
             priority=row["priority"],
-            created_at=datetime.fromisoformat(row["created_at"]),
-            updated_at=datetime.fromisoformat(row["updated_at"]),
-            start_date=datetime.fromisoformat(row["start_date"]) if row["start_date"] else None,
-            end_date=datetime.fromisoformat(row["end_date"]) if row["end_date"] else None,
+            created_at=deserialize_datetime(row["created_at"]),
+            updated_at=deserialize_datetime(row["updated_at"]),
+            start_date=deserialize_datetime(row["start_date"]),
+            end_date=deserialize_datetime(row["end_date"]),
             estimated_hours=row["estimated_hours"],
             actual_hours=row["actual_hours"],
             progress=row["progress"] or 0.0,
-            metadata=json.loads(row["metadata"] or "{}"),
+            metadata=deserialize_json_field(row["metadata"]),
             created_by=row["created_by"],
-            assigned_to=row["assigned_to"]
+            assigned_to=row["assigned_to"],
         )
-    
+
     def _row_to_task(self, row) -> Task:
         """Convert database row to Task object."""
-        import json
-        
         return Task(
             id=row["id"],
             plan_id=row["plan_id"],
@@ -436,34 +484,32 @@ class PlanManager:
             description=row["description"] or "",
             status=TaskStatus(row["status"]),
             priority=row["priority"],
-            created_at=datetime.fromisoformat(row["created_at"]),
-            updated_at=datetime.fromisoformat(row["updated_at"]),
-            start_date=datetime.fromisoformat(row["start_date"]) if row["start_date"] else None,
-            due_date=datetime.fromisoformat(row["due_date"]) if row["due_date"] else None,
+            created_at=deserialize_datetime(row["created_at"]),
+            updated_at=deserialize_datetime(row["updated_at"]),
+            start_date=deserialize_datetime(row["start_date"]),
+            due_date=deserialize_datetime(row["due_date"]),
             estimated_hours=row["estimated_hours"],
             actual_hours=row["actual_hours"],
             progress=row["progress"] or 0.0,
-            dependencies=json.loads(row["dependencies"] or "[]"),
+            dependencies=deserialize_json_field(row["dependencies"]),
             assignee=row["assignee"],
-            tags=json.loads(row["tags"] or "[]"),
-            metadata=json.loads(row["metadata"] or "{}")
+            tags=deserialize_json_field(row["tags"]),
+            metadata=deserialize_json_field(row["metadata"]),
         )
-    
+
     def _row_to_milestone(self, row) -> Milestone:
         """Convert database row to Milestone object."""
-        import json
-        
         return Milestone(
             id=row["id"],
             plan_id=row["plan_id"],
             title=row["title"],
             description=row["description"] or "",
-            target_date=datetime.fromisoformat(row["target_date"]),
-            completion_date=datetime.fromisoformat(row["completion_date"]) if row["completion_date"] else None,
+            target_date=deserialize_datetime(row["target_date"]),
+            completion_date=deserialize_datetime(row["completion_date"]),
             status=row["status"],
-            criteria=json.loads(row["criteria"] or "[]"),
+            criteria=deserialize_json_field(row["criteria"]),
             progress=row["progress"] or 0.0,
-            metadata=json.loads(row["metadata"] or "{}")
+            metadata=deserialize_json_field(row["metadata"]),
         )
 
 
@@ -471,9 +517,36 @@ class PlanManager:
 _plan_manager: Optional[PlanManager] = None
 
 
-def get_plan_manager() -> PlanManager:
+async def get_plan_manager() -> PlanManager:
     """Get singleton PlanManager instance."""
     global _plan_manager
     if _plan_manager is None:
         _plan_manager = PlanManager()
+        await _plan_manager.initialize_database()
     return _plan_manager
+
+
+# Convenience functions for backward compatibility
+async def create_plan(title: str, description: str = "", **kwargs) -> Plan:
+    """Create a new plan."""
+    request = PlanRequest(title=title, description=description, **kwargs)
+    manager = await get_plan_manager()
+    return await manager.create_plan(request)
+
+
+async def get_plan(plan_id: str) -> Optional[Plan]:
+    """Get a plan by ID."""
+    manager = await get_plan_manager()
+    return await manager.get_plan(plan_id)
+
+
+async def list_plans() -> List[Plan]:
+    """List all plans."""
+    manager = await get_plan_manager()
+    return await manager.list_plans()
+
+
+async def delete_plan(plan_id: str) -> bool:
+    """Delete a plan."""
+    manager = await get_plan_manager()
+    return await manager.delete_plan(plan_id)

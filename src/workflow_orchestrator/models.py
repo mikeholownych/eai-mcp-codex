@@ -2,12 +2,13 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
 class WorkflowStatus(str, Enum):
     """Workflow status enumeration."""
+
     DRAFT = "draft"
     ACTIVE = "active"
     PAUSED = "paused"
@@ -18,6 +19,7 @@ class WorkflowStatus(str, Enum):
 
 class StepStatus(str, Enum):
     """Workflow step status enumeration."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -28,6 +30,7 @@ class StepStatus(str, Enum):
 
 class StepType(str, Enum):
     """Workflow step type enumeration."""
+
     MODEL_ROUTER = "model_router"
     PLAN_MANAGEMENT = "plan_management"
     GIT_WORKTREE = "git_worktree"
@@ -38,6 +41,7 @@ class StepType(str, Enum):
 
 class ExecutionMode(str, Enum):
     """Workflow execution mode enumeration."""
+
     SEQUENTIAL = "sequential"
     PARALLEL = "parallel"
     CONDITIONAL = "conditional"
@@ -45,6 +49,7 @@ class ExecutionMode(str, Enum):
 
 class WorkflowStep(BaseModel):
     """Individual step in a workflow."""
+
     id: str
     workflow_id: str
     name: str
@@ -71,6 +76,7 @@ class WorkflowStep(BaseModel):
 
 class Workflow(BaseModel):
     """Complete workflow definition."""
+
     id: str
     name: str
     description: str = ""
@@ -92,6 +98,7 @@ class Workflow(BaseModel):
 
 class WorkflowExecution(BaseModel):
     """Workflow execution record."""
+
     id: str
     workflow_id: str
     execution_number: int  # Incremental execution number
@@ -111,6 +118,7 @@ class WorkflowExecution(BaseModel):
 
 class WorkflowRequest(BaseModel):
     """Request to create or execute a workflow."""
+
     name: str
     description: str = ""
     execution_mode: ExecutionMode = ExecutionMode.SEQUENTIAL
@@ -122,6 +130,7 @@ class WorkflowRequest(BaseModel):
 
 class StepExecutionResult(BaseModel):
     """Result of executing a workflow step."""
+
     step_id: str
     status: StepStatus
     started_at: datetime
@@ -135,6 +144,7 @@ class StepExecutionResult(BaseModel):
 
 class WorkflowTemplate(BaseModel):
     """Reusable workflow template."""
+
     id: str
     name: str
     description: str = ""

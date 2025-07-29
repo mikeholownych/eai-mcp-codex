@@ -2,13 +2,13 @@
 
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field
 
 
 class WorktreeStatus(str, Enum):
     """Worktree status enumeration."""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     LOCKED = "locked"
@@ -17,6 +17,7 @@ class WorktreeStatus(str, Enum):
 
 class BranchStatus(str, Enum):
     """Branch status enumeration."""
+
     UP_TO_DATE = "up_to_date"
     AHEAD = "ahead"
     BEHIND = "behind"
@@ -26,6 +27,7 @@ class BranchStatus(str, Enum):
 
 class Repo(BaseModel):
     """Git repository model."""
+
     name: str
     path: str
     remote_url: Optional[str] = None
@@ -36,6 +38,7 @@ class Repo(BaseModel):
 
 class Worktree(BaseModel):
     """Git worktree model."""
+
     id: str
     repo_name: str
     branch: str
@@ -52,6 +55,7 @@ class Worktree(BaseModel):
 
 class BranchInfo(BaseModel):
     """Branch information model."""
+
     name: str
     commit_hash: str
     commit_message: str
@@ -66,6 +70,7 @@ class BranchInfo(BaseModel):
 
 class WorktreeRequest(BaseModel):
     """Request model for creating worktrees."""
+
     repo_name: str
     branch: str
     path: Optional[str] = None
@@ -76,6 +81,7 @@ class WorktreeRequest(BaseModel):
 
 class WorktreeOperation(BaseModel):
     """Model for worktree operations."""
+
     operation: str  # create, delete, lock, unlock, move
     worktree_id: str
     params: Dict[str, Any] = Field(default_factory=dict)

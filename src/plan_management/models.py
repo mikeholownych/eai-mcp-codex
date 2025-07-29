@@ -3,12 +3,12 @@
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from uuid import UUID
 from pydantic import BaseModel, Field
 
 
 class PlanStatus(str, Enum):
     """Plan status enumeration."""
+
     DRAFT = "draft"
     ACTIVE = "active"
     ON_HOLD = "on_hold"
@@ -18,6 +18,7 @@ class PlanStatus(str, Enum):
 
 class TaskStatus(str, Enum):
     """Task status enumeration."""
+
     TODO = "todo"
     IN_PROGRESS = "in_progress"
     BLOCKED = "blocked"
@@ -28,6 +29,7 @@ class TaskStatus(str, Enum):
 
 class EstimationMethod(str, Enum):
     """Estimation methodology enumeration."""
+
     PLANNING_POKER = "planning_poker"
     THREE_POINT = "three_point"
     HISTORICAL = "historical"
@@ -36,6 +38,7 @@ class EstimationMethod(str, Enum):
 
 class Plan(BaseModel):
     """Project plan model."""
+
     id: str
     title: str
     description: str = ""
@@ -55,6 +58,7 @@ class Plan(BaseModel):
 
 class Task(BaseModel):
     """Task model."""
+
     id: str
     plan_id: str
     title: str
@@ -76,6 +80,7 @@ class Task(BaseModel):
 
 class Milestone(BaseModel):
     """Milestone model."""
+
     id: str
     plan_id: str
     title: str
@@ -90,6 +95,7 @@ class Milestone(BaseModel):
 
 class PlanRequest(BaseModel):
     """Request model for creating/updating plans."""
+
     title: str
     description: str = ""
     priority: str = "medium"
@@ -100,6 +106,7 @@ class PlanRequest(BaseModel):
 
 class TaskRequest(BaseModel):
     """Request model for creating/updating tasks."""
+
     title: str
     description: str = ""
     priority: str = "medium"
@@ -113,6 +120,7 @@ class TaskRequest(BaseModel):
 
 class EstimationResult(BaseModel):
     """Result of plan estimation."""
+
     method: str
     total_estimated_hours: float
     task_estimates: Dict[str, Any]
@@ -123,6 +131,7 @@ class EstimationResult(BaseModel):
 
 class PlanSummary(BaseModel):
     """Summary of a plan with key metrics."""
+
     plan: Plan
     task_count: int
     completed_tasks: int

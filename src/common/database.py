@@ -1,11 +1,11 @@
-"""Database utilities using SQLite for local persistence."""
-
-import sqlite3
+import asyncio
 import json
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-from contextlib import contextmanager
+from typing import Any, Dict, List, Optional
+from contextlib import asynccontextmanager
+
+import asyncpg
+from asyncpg.pool import Pool
 
 from .logging import get_logger
 
@@ -13,132 +13,152 @@ logger = get_logger("database")
 
 
 class DatabaseManager:
-    """Enhanced database manager with utilities for common operations."""
-    
-    def __init__(self, db_path: str):
-        self.db_path = db_path
-        self._ensure_directory()
-    
-    def _ensure_directory(self):
-        """Ensure the database directory exists."""
-        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
-    
-    @contextmanager
-    def get_connection(self):
-        """Context manager for database connections."""
+    """Enhanced database manager with utilities for common operations using asyncpg."""
+
+    def __init__(self, dsn: str):
+        self.dsn = dsn
+        self._pool: Optional[Pool] = None
+
+    async def connect(self):
+        """Establish a connection pool to the PostgreSQL database."""
+        if self._pool is None:
+            try:
+                self._pool = await asyncpg.create_pool(self.dsn)
+                logger.info(f"PostgreSQL connection pool created for {self.dsn}")
+            except Exception as e:
+                logger.error(f"Failed to create PostgreSQL connection pool: {e}")
+                raise
+
+    async def disconnect(self):
+        """Close the PostgreSQL connection pool."""
+        if self._pool:
+            await self._pool.close()
+            self._pool = None
+            logger.info("PostgreSQL connection pool closed.")
+
+    @asynccontextmanager
+    async def get_connection(self):
+        """Asynchronous context manager for database connections from the pool."""
+        if self._pool is None:
+            raise ConnectionError("Database pool not initialized. Call connect() first.")
         conn = None
         try:
-            conn = sqlite3.connect(self.db_path, check_same_thread=False)
-            conn.row_factory = sqlite3.Row
-            # Enable foreign keys
-            conn.execute("PRAGMA foreign_keys = ON")
+            conn = await self._pool.acquire()
             yield conn
         except Exception as e:
-            if conn:
-                conn.rollback()
-            logger.error(f"Database error: {e}")
+            logger.error(f"Database error during connection acquisition or operation: {e}")
             raise
         finally:
             if conn:
-                conn.close()
-    
-    def execute_script(self, script: str) -> bool:
+                await self._pool.release(conn)
+
+    async def execute_script(self, script: str) -> bool:
         """Execute a SQL script."""
         try:
-            with self.get_connection() as conn:
-                conn.executescript(script)
-                conn.commit()
+            async with self.get_connection() as conn:
+                await conn.execute(script)
                 return True
         except Exception as e:
             logger.error(f"Failed to execute script: {e}")
             return False
-    
-    def execute_query(self, query: str, params: tuple = None) -> List[Dict[str, Any]]:
-        """Execute a SELECT query and return results."""
+
+    async def execute_query(self, query: str, params: tuple = ()) -> List[Dict[str, Any]]:
+        """Execute a SELECT query and return results as a list of dictionaries."""
         try:
-            with self.get_connection() as conn:
-                cursor = conn.execute(query, params or ())
-                return [dict(row) for row in cursor.fetchall()]
+            async with self.get_connection() as conn:
+                records = await conn.fetch(query, *params)
+                return [dict(r) for r in records]
         except Exception as e:
             logger.error(f"Query failed: {e}")
             return []
-    
-    def execute_update(self, query: str, params: tuple = None) -> int:
-        """Execute an UPDATE/INSERT/DELETE query and return affected rows."""
+
+    async def execute_update(self, query: str, params: tuple = ()) -> int:
+        """Execute an INSERT/UPDATE/DELETE query and return affected rows count."""
         try:
-            with self.get_connection() as conn:
-                cursor = conn.execute(query, params or ())
-                conn.commit()
-                return cursor.rowcount
+            async with self.get_connection() as conn:
+                status = await conn.execute(query, *params)
+                # asyncpg.execute returns command status, e.g., 'INSERT 0 1'
+                # We need to parse the row count from it.
+                parts = status.split(' ')
+                if len(parts) > 2 and parts[0] in ('INSERT', 'UPDATE', 'DELETE'):
+                    return int(parts[-1])
+                return 0 # Or raise an error if expected a row count
         except Exception as e:
             logger.error(f"Update failed: {e}")
             return 0
-    
-    def table_exists(self, table_name: str) -> bool:
+
+    async def table_exists(self, table_name: str) -> bool:
         """Check if a table exists."""
-        query = "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
-        results = self.execute_query(query, (table_name,))
-        return len(results) > 0
-    
-    def get_table_info(self, table_name: str) -> List[Dict[str, Any]]:
-        """Get table column information."""
-        query = f"PRAGMA table_info({table_name})"
-        return self.execute_query(query)
-    
-    def backup_database(self, backup_path: str) -> bool:
-        """Create a backup of the database."""
+        query = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_name = $1
+            );
+        """
         try:
-            backup_path_obj = Path(backup_path)
-            backup_path_obj.parent.mkdir(parents=True, exist_ok=True)
-            
-            with self.get_connection() as source:
-                with sqlite3.connect(backup_path) as backup:
-                    source.backup(backup)
-            
-            logger.info(f"Database backed up to {backup_path}")
-            return True
+            async with self.get_connection() as conn:
+                exists = await conn.fetchval(query, table_name)
+                return exists
         except Exception as e:
-            logger.error(f"Backup failed: {e}")
+            logger.error(f"Failed to check table existence: {e}")
             return False
-    
-    def get_database_stats(self) -> Dict[str, Any]:
+
+    async def get_table_info(self, table_name: str) -> List[Dict[str, Any]]:
+        """Get table column information."""
+        query = """
+            SELECT column_name, data_type, is_nullable, column_default
+            FROM information_schema.columns
+            WHERE table_name = $1
+            ORDER BY ordinal_position;
+        """
+        try:
+            async with self.get_connection() as conn:
+                records = await conn.fetch(query, table_name)
+                return [dict(r) for r in records]
+        except Exception as e:
+            logger.error(f"Failed to get table info: {e}")
+            return []
+
+    async def backup_database(self, backup_path: str) -> bool:
+        """Create a backup of the database (simplified - typically uses pg_dump)."""
+        logger.warning("Database backup for PostgreSQL typically uses pg_dump. This is a placeholder.")
+        # This method would ideally integrate with pg_dump or a similar tool.
+        # For now, it's a placeholder as direct file copy is not applicable for remote PG.
+        return False
+
+    async def get_database_stats(self) -> Dict[str, Any]:
         """Get database statistics."""
         stats = {}
-        
-        # Get database size
         try:
-            db_path = Path(self.db_path)
-            stats["size_bytes"] = db_path.stat().st_size if db_path.exists() else 0
-        except:
-            stats["size_bytes"] = 0
-        
-        # Get table information
-        tables_query = "SELECT name FROM sqlite_master WHERE type='table'"
-        tables = self.execute_query(tables_query)
-        stats["table_count"] = len(tables)
-        stats["tables"] = {}
-        
-        for table in tables:
-            table_name = table["name"]
-            count_query = f"SELECT COUNT(*) as count FROM {table_name}"
-            count_result = self.execute_query(count_query)
-            stats["tables"][table_name] = count_result[0]["count"] if count_result else 0
-        
+            async with self.get_connection() as conn:
+                # Get database size
+                db_size = await conn.fetchval("SELECT pg_database_size(current_database());")
+                stats["size_bytes"] = db_size
+
+                # Get table information
+                tables_query = """
+                    SELECT relname AS table_name, reltuples AS row_count
+                    FROM pg_class
+                    WHERE relkind = 'r' AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public');
+                """
+                table_records = await conn.fetch(tables_query)
+                stats["table_count"] = len(table_records)
+                stats["tables"] = {r["table_name"]: int(r["row_count"]) for r in table_records}
+
+        except Exception as e:
+            logger.error(f"Failed to get database stats: {e}")
+            stats["error"] = str(e)
         return stats
 
 
-def get_connection(dsn: str) -> sqlite3.Connection:
-    """Return a SQLite connection with enhanced configuration."""
-    conn = sqlite3.connect(dsn, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    conn.execute("PRAGMA journal_mode = WAL")  # Better concurrency
-    conn.execute("PRAGMA synchronous = NORMAL")  # Better performance
-    return conn
+def get_connection(dsn: str): # This function is now deprecated, use DatabaseManager
+    logger.warning("get_connection is deprecated. Use DatabaseManager.get_connection() instead.")
+    raise NotImplementedError("Synchronous get_connection is not supported for asyncpg.")
 
 
-def dict_factory(cursor, row):
-    """Row factory that returns dictionaries."""
+def dict_factory(cursor, row): # Not directly used with asyncpg fetch methods
+    logger.warning("dict_factory is not directly used with asyncpg fetch methods.")
     return {cursor.description[idx][0]: value for idx, value in enumerate(row)}
 
 
@@ -146,18 +166,24 @@ def serialize_json_field(value: Any) -> str:
     """Serialize a value to JSON for database storage."""
     if value is None:
         return "{}"
-    if isinstance(value, str):
-        return value
+    # asyncpg can directly handle Python dict/list for JSONB columns
+    # but if the column is TEXT, we need to dump to string.
+    # Assuming JSONB type for flexibility.
+    if isinstance(value, (dict, list)):
+        return json.dumps(value)
     return json.dumps(value, default=str)
 
 
 def deserialize_json_field(value: str) -> Any:
     """Deserialize a JSON field from database."""
-    if not value:
+    if value is None: # asyncpg might return None for NULL JSONB
         return {}
+    if isinstance(value, (dict, list)): # If asyncpg already deserialized JSONB
+        return value
     try:
         return json.loads(value)
     except (json.JSONDecodeError, TypeError):
+        logger.warning(f"Failed to deserialize JSON field: {value}")
         return {}
 
 
@@ -173,66 +199,119 @@ def deserialize_datetime(dt_str: Optional[str]) -> Optional[datetime]:
     try:
         return datetime.fromisoformat(dt_str)
     except (ValueError, TypeError):
+        logger.warning(f"Failed to deserialize datetime: {dt_str}")
         return None
 
 
 def build_where_clause(conditions: Dict[str, Any]) -> tuple[str, tuple]:
-    """Build WHERE clause from conditions dictionary."""
+    """Build WHERE clause from conditions dictionary for asyncpg ($1, $2 style)."""
     if not conditions:
         return "1=1", ()
-    
+
     clauses = []
     params = []
-    
+    param_idx = 1
+
     for key, value in conditions.items():
         if value is None:
             clauses.append(f"{key} IS NULL")
         elif isinstance(value, (list, tuple)):
-            placeholders = ",".join("?" * len(value))
+            placeholders = ", ".join([f"${i}" for i in range(param_idx, param_idx + len(value))])
             clauses.append(f"{key} IN ({placeholders})")
             params.extend(value)
+            param_idx += len(value)
         else:
-            clauses.append(f"{key} = ?")
+            clauses.append(f"{key} = ${param_idx}")
             params.append(value)
-    
+            param_idx += 1
+
     return " AND ".join(clauses), tuple(params)
 
 
 def build_insert_query(table: str, data: Dict[str, Any]) -> tuple[str, tuple]:
-    """Build INSERT query from data dictionary."""
+    """Build INSERT query from data dictionary for asyncpg ($1, $2 style)."""
     columns = list(data.keys())
-    placeholders = ",".join("?" * len(columns))
-    column_names = ",".join(columns)
-    
+    placeholders = ", ".join([f"${i}" for i in range(1, len(columns) + 1)])
+    column_names = ", ".join(columns)
+
     query = f"INSERT INTO {table} ({column_names}) VALUES ({placeholders})"
     params = tuple(data.values())
-    
+
     return query, params
 
 
 def build_update_query(table: str, data: Dict[str, Any], conditions: Dict[str, Any]) -> tuple[str, tuple]:
-    """Build UPDATE query from data and conditions."""
-    set_clauses = [f"{key} = ?" for key in data.keys()]
+    """Build UPDATE query from data and conditions for asyncpg ($1, $2 style)."""
+    set_clauses = []
+    set_params = []
+    param_idx = 1
+
+    for key, value in data.items():
+        set_clauses.append(f"{key} = ${param_idx}")
+        set_params.append(value)
+        param_idx += 1
+
     set_clause = ", ".join(set_clauses)
-    
-    where_clause, where_params = build_where_clause(conditions)
-    
-    query = f"UPDATE {table} SET {set_clause} WHERE {where_clause}"
-    params = tuple(data.values()) + where_params
+
+    where_clause, where_params = build_where_clause(conditions) # This will use $1, $2 style internally
+
+    # Need to re-index where_params if they follow set_params
+    # A simpler approach for now is to combine params and let asyncpg handle it.
+    # However, asyncpg requires positional parameters to be contiguous.
+    # So, we need to adjust the where_clause parameters to start after set_params.
+
+    # Rebuild where_clause with adjusted parameter indices
+    adjusted_where_clause = where_clause
+    if conditions:
+        # This is a bit tricky with regex, a more robust way would be to rebuild the clause
+        # based on the number of set_params. For simplicity, let's assume simple equality for now.
+        # A better approach would be to pass the starting index to build_where_clause.
+        # For now, we'll just combine and hope for the best, or simplify the where_clause building.
+
+        # Let's simplify build_where_clause to return clauses and params separately,
+        # then combine here.
+
+        # Re-calling build_where_clause to get clauses and params without $ indexing
+        where_clauses_no_idx = []
+        where_params_combined = []
+        current_where_param_idx = 1
+        for key, value in conditions.items():
+            if value is None:
+                where_clauses_no_idx.append(f"{key} IS NULL")
+            elif isinstance(value, (list, tuple)):
+                placeholders = ", ".join([f"${i}" for i in range(param_idx, param_idx + len(value))])
+                where_clauses_no_idx.append(f"{key} IN ({placeholders})")
+                where_params_combined.extend(value)
+                param_idx += len(value)
+            else:
+                where_clauses_no_idx.append(f"{key} = ${param_idx}")
+                where_params_combined.append(value)
+                param_idx += 1
+        
+        adjusted_where_clause = " AND ".join(where_clauses_no_idx)
+        params = tuple(set_params) + tuple(where_params_combined)
+
+    else:
+        adjusted_where_clause = "1=1"
+        params = tuple(set_params)
+
+
+    query = f"UPDATE {table} SET {set_clause} WHERE {adjusted_where_clause}"
     
     return query, params
 
 
 class DatabaseMigration:
     """Database migration utilities."""
-    
+
     def __init__(self, db_manager: DatabaseManager):
         self.db_manager = db_manager
         self.migrations_table = "schema_migrations"
-        self._ensure_migrations_table()
-    
-    def _ensure_migrations_table(self):
-        """Create migrations tracking table."""
+        # Ensure migrations table exists (synchronously for init)
+        asyncio.run(self._ensure_migrations_table_sync())
+
+    async def _ensure_migrations_table_sync(self):
+        """Create migrations tracking table synchronously for initialization."""
         script = f"""
             CREATE TABLE IF NOT EXISTS {self.migrations_table} (
                 version INTEGER PRIMARY KEY,
@@ -240,42 +319,45 @@ class DatabaseMigration:
                 applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """
-        self.db_manager.execute_script(script)
-    
-    def get_current_version(self) -> int:
+        # Use a direct connection for this initial setup if pool is not ready
+        # Or assume connect() is called before this.
+        # For simplicity, let's use execute_script which handles connection.
+        await self.db_manager.execute_script(script)
+
+    async def get_current_version(self) -> int:
         """Get the current schema version."""
         query = f"SELECT MAX(version) as version FROM {self.migrations_table}"
-        result = self.db_manager.execute_query(query)
+        result = await self.db_manager.execute_query(query)
         return result[0]["version"] if result and result[0]["version"] else 0
-    
-    def apply_migration(self, version: int, description: str, script: str) -> bool:
+
+    async def apply_migration(self, version: int, description: str, script: str) -> bool:
         """Apply a database migration."""
-        current_version = self.get_current_version()
-        
+        current_version = await self.get_current_version()
+
         if version <= current_version:
             logger.info(f"Migration {version} already applied")
             return True
-        
+
         try:
             # Execute migration script
-            if not self.db_manager.execute_script(script):
+            if not await self.db_manager.execute_script(script):
                 return False
-            
+
             # Record migration
             insert_query = f"""
                 INSERT INTO {self.migrations_table} (version, description)
-                VALUES (?, ?)
+                VALUES ($1, $2)
             """
-            self.db_manager.execute_update(insert_query, (version, description))
-            
+            await self.db_manager.execute_update(insert_query, (version, description))
+
             logger.info(f"Applied migration {version}: {description}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Migration {version} failed: {e}")
             return False
-    
-    def get_migration_history(self) -> List[Dict[str, Any]]:
+
+    async def get_migration_history(self) -> List[Dict[str, Any]]:
         """Get migration history."""
         query = f"SELECT * FROM {self.migrations_table} ORDER BY version"
-        return self.db_manager.execute_query(query)
+        return await self.db_manager.execute_query(query)

@@ -1,0 +1,94 @@
+# Unified multi-stage Dockerfile for all MCP services
+FROM python:3.11-slim as base
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash mcp
+WORKDIR /app
+RUN chown mcp:mcp /app
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy common utilities
+COPY src/common/ ./common/
+COPY config/ ./config/
+
+USER mcp
+
+# Health check script
+COPY --chown=mcp:mcp scripts/health_check.py ./health_check.py
+RUN chmod +x ./health_check.py
+
+# ==============================================
+# MODEL ROUTER SERVICE
+# ==============================================
+FROM base as model-router
+COPY --chown=mcp:mcp src/model_router/ ./
+COPY --chown=mcp:mcp scripts/start_model_router.py ./start.py
+
+EXPOSE 8001
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python health_check.py --service=model-router --port=8001
+CMD ["python", "start.py"]
+
+# ==============================================
+# PLAN MANAGEMENT SERVICE
+# ==============================================
+FROM base as plan-management
+COPY --chown=mcp:mcp src/plan_management/ ./
+COPY --chown=mcp:mcp scripts/start_plan_management.py ./start.py
+
+EXPOSE 8002
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python health_check.py --service=plan-management --port=8002
+CMD ["python", "start.py"]
+
+# ==============================================
+# GIT WORKTREE SERVICE
+# ==============================================
+FROM base as git-worktree
+COPY --chown=mcp:mcp src/git_worktree/ ./
+COPY --chown=mcp:mcp scripts/start_git_worktree.py ./start.py
+
+EXPOSE 8003
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python health_check.py --service=git-worktree --port=8003
+CMD ["python", "start.py"]
+
+# ==============================================
+# WORKFLOW ORCHESTRATOR SERVICE
+# ==============================================
+FROM base as workflow-orchestrator
+# Install additional dependencies for workflow management
+RUN pip install --no-cache-dir \
+    celery \
+    redis \
+    requests
+
+COPY --chown=mcp:mcp src/workflow_orchestrator/ ./
+COPY --chown=mcp:mcp scripts/start_workflow_orchestrator.py ./start.py
+
+EXPOSE 8004
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python health_check.py --service=workflow-orchestrator --port=8004
+CMD ["python", "start.py"]
+
+# ==============================================
+# VERIFICATION FEEDBACK SERVICE
+# ==============================================
+FROM base as verification-feedback
+COPY --chown=mcp:mcp src/verification_feedback/ ./
+COPY --chown=mcp:mcp scripts/start_verification_feedback.py ./start.py
+
+EXPOSE 8005
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python health_check.py --service=verification-feedback --port=8005
+CMD ["python", "start.py"]
