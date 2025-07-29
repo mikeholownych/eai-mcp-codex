@@ -38,6 +38,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
       - redis_data:/data
     command: redis-server --appendonly yes
     healthcheck:
@@ -686,6 +687,11 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=postgres:5432
+      - GF_DATABASE_NAME=grafana_db
+      - GF_DATABASE_USER=mcp_user
+      - GF_DATABASE_PASSEORD=${POSTGRES_PASSWORD:-mcp_secure_password}
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
       - GF_USERS_ALLOW_SIGN_UP=false
@@ -695,6 +701,7 @@ services:
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
     depends_on:
       - prometheus
+      - postgres
     networks:
       - mcp-network
 
