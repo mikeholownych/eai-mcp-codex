@@ -3,7 +3,33 @@ services:
   # =====================================
   # INFRASTRUCTURE SERVICES
   # =====================================
-  
+
+  # Fluentd for Logging Requirements
+  mcp-fluentd:
+    image: fluent/fluentd:v1.16
+    container_name: mcp-fluentd
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    volumes:
+      - ./fluentd/conf:/fluentd/etc
+    command: ["fluentd", "-c", "/fluentd/etc/fluent.conf", "-v"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "fluentd --dry-run -c /fluentd/etc/fluent.conf || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      mcp-network:
+        aliases:
+          - fluentd
+
   # Message Broker for Inter-Service Communication
   redis:
     image: redis:7-alpine
@@ -21,11 +47,11 @@ services:
       retries: 3
     networks:
       - mcp-network
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
     logging:
       driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   # Database for Shared Data
   postgres:
@@ -48,11 +74,11 @@ services:
       retries: 3
     networks:
       - mcp-network
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
     logging:
       driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   # Service Discovery and Configuration
   consul:
@@ -81,7 +107,7 @@ services:
     build:
       context: .
       dockerfile: docker/model-router.Dockerfile
-    container_name: mcp-model-router
+    # container_name: mcp-model-router
     restart: unless-stopped
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
@@ -90,8 +116,8 @@ services:
       - SERVICE_NAME=model-router
       - SERVICE_PORT=8001
       # Model Router does not use a database directly
-    ports:
-      - "8001:8001"
+    # ports:
+    #   - "8001:8001"
     depends_on:
       redis:
         condition: service_healthy
@@ -121,7 +147,7 @@ services:
     build:
       context: .
       dockerfile: docker/plan-management.Dockerfile
-    container_name: mcp-plan-management
+    # container_name: mcp-plan-management
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -129,8 +155,8 @@ services:
       - SERVICE_NAME=plan-management
       - SERVICE_PORT=8002
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/plan_management_db
-    ports:
-      - "8002:8002"
+    # ports:
+    #   - "8002:8002"
     depends_on:
       redis:
         condition: service_healthy
@@ -171,8 +197,8 @@ services:
       - SERVICE_NAME=git-worktree-manager
       - SERVICE_PORT=8003
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/git_worktree_db
-    ports:
-      - "8003:8003"
+    # ports:
+    #   - "8003:8003"
     depends_on:
       redis:
         condition: service_healthy
@@ -206,7 +232,7 @@ services:
     build:
       context: .
       dockerfile: docker/workflow-orchestrator.Dockerfile
-    container_name: mcp-workflow-orchestrator
+    # container_name: mcp-workflow-orchestrator
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -218,8 +244,8 @@ services:
       - PLAN_MANAGEMENT_URL=http://plan-management:8002
       - GIT_WORKTREE_URL=http://git-worktree-manager:8003
       - VERIFICATION_URL=http://verification-feedback:8005
-    ports:
-      - "8004:8004"
+    # ports:
+    #   - "8004:8004"
     depends_on:
       redis:
         condition: service_healthy
@@ -257,7 +283,7 @@ services:
     build:
       context: .
       dockerfile: docker/verification-feedback.Dockerfile
-    container_name: mcp-verification-feedback
+    # container_name: mcp-verification-feedback
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -266,8 +292,8 @@ services:
       - SERVICE_PORT=8005
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/verification_feedback_db
       - MODEL_ROUTER_URL=http://model-router:8001
-    ports:
-      - "8005:8005"
+    # ports:
+    #   - "8005:8005"
     depends_on:
       redis:
         condition: service_healthy
@@ -313,8 +339,8 @@ services:
       - SERVICE_NAME=a2a-communication
       - SERVICE_PORT=8010
       # A2A Communication does not use a database directly
-    ports:
-      - "8010:8010"
+    # ports:
+    #   - "8010:8010"
     depends_on:
       redis:
         condition: service_healthy
@@ -353,8 +379,8 @@ services:
       - SERVICE_PORT=8011
       # Agent Pool does not use a database directly
       - A2A_COMMUNICATION_URL=http://a2a-communication:8010
-    ports:
-      - "8011:8011"
+    # ports:
+    #   - "8011:8011"
     depends_on:
       redis:
         condition: service_healthy
@@ -396,8 +422,8 @@ services:
       # Collaboration Orchestrator does not use a database directly
       - A2A_COMMUNICATION_URL=http://a2a-communication:8010
       - AGENT_POOL_URL=http://agent-pool:8011
-    ports:
-      - "8012:8012"
+    # ports:
+    #   - "8012:8012"
     depends_on:
       redis:
         condition: service_healthy
@@ -441,8 +467,8 @@ services:
       - A2A_COMMUNICATION_URL=http://a2a-communication:8010
       - AGENT_ID=planner-001
       - AGENT_NAME=Primary-Planner
-    ports:
-      - "8013:8013"
+    # ports:
+    #   - "8013:8013"
     depends_on:
       redis:
         condition: service_healthy
@@ -483,8 +509,8 @@ services:
       - A2A_COMMUNICATION_URL=http://a2a-communication:8010
       - AGENT_ID=security-001
       - AGENT_NAME=Primary-Security
-    ports:
-      - "8014:8014"
+    # ports:
+    #   - "8014:8014"
     depends_on:
       redis:
         condition: service_healthy
@@ -526,8 +552,8 @@ services:
       - AGENT_ID=developer-001
       - AGENT_NAME=Primary-Developer
       - SPECIALIZATIONS=python,javascript,fastapi
-    ports:
-      - "8015:8015"
+    # ports:
+    #   - "8015:8015"
     depends_on:
       redis:
         condition: service_healthy
@@ -569,8 +595,8 @@ services:
       - A2A_COMMUNICATION_URL=http://a2a-communication:8010
       - AGENT_POOL_URL=http://agent-pool:8011
       - COLLABORATION_URL=http://collaboration-orchestrator:8012
-    ports:
-      - "8016:8016"
+    # ports:
+    #   - "8016:8016"
     depends_on:
       redis:
         condition: service_healthy

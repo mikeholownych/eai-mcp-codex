@@ -1,6 +1,4 @@
 # docker-compose.prod.yml - Production Overrides
-version: '3.8'
-
 services:
   # Production-specific overrides
   model-router:
@@ -18,11 +16,14 @@ services:
           memory: 512M
           cpus: '0.5'
     restart: always
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
     logging:
       driver: "fluentd"
       options:
         fluentd-address: "localhost:24224"
-        tag: "mcp.model-router"
+        tag: "{{.Name}}"
 
   plan-management:
     environment:
@@ -87,12 +88,29 @@ services:
           cpus: '0.4'
     restart: always
 
+  # Production fluentd
+  mcp-fluentd:
+    restart: always
+
   # Production database with performance tuning
   postgres:
+    image: postgres:15-alpine
+    container_name: mcp-postgres
+    restart: unless-stopped
+
     environment:
-      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
-      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
-    command: |
+      POSTGRES_DB: mcp_database
+      POSTGRES_USER: mcp_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mcp_secure_password}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./database/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+
+    command: >
       postgres
       -c max_connections=200
       -c shared_buffers=256MB
@@ -105,6 +123,25 @@ services:
       -c log_connections=on
       -c log_disconnections=on
       -c log_lock_waits=on
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcp_user -d mcp_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    ports:
+      - "5432:5432"
+
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "mcp-postgres"
+
+    networks:
+      - mcp-network
+
     deploy:
       resources:
         limits:
@@ -113,11 +150,18 @@ services:
         reservations:
           memory: 1G
           cpus: '0.75'
-    restart: always
+
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
 
   # Production Redis with persistence
   redis:
-    command: |
+    image: redis:7-alpine
+    container_name: mcp-redis
+    restart: always
+
+    command: >
       redis-server
       --appendonly yes
       --appendfsync everysec
@@ -125,6 +169,28 @@ services:
       --maxmemory-policy allkeys-lru
       --tcp-keepalive 300
       --timeout 0
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "localhost:24224"
+        tag: "mcp-redis"
+
+    networks:
+      - mcp-network
+
     deploy:
       resources:
         limits:
@@ -133,7 +199,6 @@ services:
         reservations:
           memory: 384M
           cpus: '0.25'
-    restart: always
 
   # Production Nginx with SSL
   nginx:

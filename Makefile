@@ -1,6 +1,5 @@
 # MCP Microservices Makefile
 # Docker Compose v2 Management Commands
-
 .PHONY: help build up down logs clean test lint format check-env backup restore scale monitoring dev prod
 
 # Default target
@@ -64,7 +63,11 @@ prod-update: ## Update production environment
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 ##@ Service Management
-build: ## Build all services
+base: ## Build base image
+	@echo "🔨 Building Base Image..."
+	docker build -t base -f docker/base.Dockerfile .
+
+build: base ## Build all services
 	@echo "🔨 Building all services..."
 	docker compose build --parallel
 

@@ -1,12 +1,7 @@
-# database/init.sql - Database Initialization
--- Create databases for each service
-CREATE DATABASE IF NOT EXISTS model_router_db;
-CREATE DATABASE IF NOT EXISTS plan_management_db;
-CREATE DATABASE IF NOT EXISTS git_worktree_db;
-CREATE DATABASE IF NOT EXISTS workflow_orchestrator_db;
-CREATE DATABASE IF NOT EXISTS verification_feedback_db;
+-- database/init.sql - Database Initialization
+-- Create databases for each service safely
 
--- Create shared tables for cross-service data
+-- Create shared tables in mcp_database
 CREATE TABLE IF NOT EXISTS service_registry (
     id SERIAL PRIMARY KEY,
     service_name VARCHAR(100) NOT NULL,

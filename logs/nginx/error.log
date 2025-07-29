@@ -1,0 +1,7 @@
+2025/07/29 17:13:47 [emerg] 1#1: "proxy_timeout" directive is not allowed here in /etc/nginx/nginx.conf:82
+2025/07/29 17:13:53 [emerg] 1#1: "proxy_timeout" directive is not allowed here in /etc/nginx/nginx.conf:82
+2025/07/29 17:13:55 [emerg] 1#1: "proxy_timeout" directive is not allowed here in /etc/nginx/nginx.conf:82
+2025/07/29 17:14:00 [emerg] 1#1: "proxy_timeout" directive is not allowed here in /etc/nginx/nginx.conf:82
+2025/07/29 17:14:04 [emerg] 1#1: "proxy_timeout" directive is not allowed here in /etc/nginx/nginx.conf:82
+2025/07/29 17:14:08 [emerg] 1#1: host not found in upstream "workflow-orchestrator:8004" in /etc/nginx/nginx.conf:49
+2025/07/29 17:14:19 [emerg] 1#1: host not found in upstream "verification-feedback:8005" in /etc/nginx/nginx.conf:54

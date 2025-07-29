@@ -8,6 +8,9 @@ redis
 prometheus_client
 PyYAML
 asyncpg
-
 types-requests
 types-PyYAML
+psutil>=5.9.0
+jwt
+httpx
+numpy

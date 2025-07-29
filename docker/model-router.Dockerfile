@@ -4,7 +4,12 @@
 # docker/model-router.Dockerfile
 FROM base as model-router
 
-COPY --chown=mcp:mcp src/model_router/ ./
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Fix the path so `src/model_router/...` is preserved
+COPY --chown=mcp:mcp src/ ./src
 COPY --chown=mcp:mcp scripts/start_model_router.py ./start.py
 
 EXPOSE 8001
