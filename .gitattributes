@@ -1,0 +1,18 @@
+# Mark generated/volatile files as not worth diffing
+*.log          linguist-generated
+*.jsonl        linguist-generated
+*.tmp          linguist-generated
+*.lock         linguist-generated
+*.db           linguist-generated
+*.sqlite3      linguist-generated
+*.pkl          linguist-generated
+*.pt           linguist-generated
+
+# Ensure shell and Python scripts get correct language handling
+*.sh           text eol=lf
+*.py           text eol=lf
+Dockerfile     text eol=lf
+
+# Git LFS candidate examples (optional)
+# *.onnx        filter=lfs diff=lfs merge=lfs -text
+# *.bin         filter=lfs diff=lfs merge=lfs -text
