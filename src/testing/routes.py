@@ -4,7 +4,6 @@ from typing import Dict, List, Any, Optional
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from datetime import datetime
-import json
 
 from .ai_test_generator import (
     ai_test_generator,
@@ -13,8 +12,7 @@ from .ai_test_generator import (
     TestType,
     TestFramework,
     TestSuite,
-    TestCase,
-    TestAnalysis
+    TestCase
 )
 from ..common.logging import get_logger
 

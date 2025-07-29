@@ -1,10 +1,8 @@
 """Enhanced Model Router integrating ensemble capabilities."""
 
-import asyncio
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Dict, Any
 
-from fastapi import HTTPException
 from .models import ModelRequest, ModelResponse
 from .ensemble_router import EnsembleModelRouter, AdaptiveModelRouter
 from .claude_client import ClaudeClient

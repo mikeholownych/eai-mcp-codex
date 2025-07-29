@@ -9,18 +9,14 @@ security policies, and service-specific security settings.
 import os
 import json
 import logging
-from typing import Dict, Any, Optional, List, Union, Type
-from datetime import datetime, timedelta
+from typing import Dict, Any, Optional, List
 from enum import Enum
 from pathlib import Path
 import secrets
 from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
 
 from pydantic import BaseSettings, Field, validator, SecretStr
-from pydantic.env_settings import SettingsSourceCallable
 
 logger = logging.getLogger(__name__)
 
@@ -447,7 +443,7 @@ class SecurityConfigManager:
                     return {k: mask_secrets(v) for k, v in obj.items()}
                 elif isinstance(obj, SecretStr):
                     return "***MASKED***"
-                elif isinstance(obj, str) and any(keyword in k.lower() 
+                elif isinstance(obj, str) and any(keyword in obj.lower() 
                     for keyword in ['password', 'secret', 'key', 'token']):
                     return "***MASKED***"
                 else:

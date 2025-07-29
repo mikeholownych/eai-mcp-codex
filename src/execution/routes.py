@@ -9,9 +9,7 @@ from .fault_tolerant_executor import (
     fault_tolerant_executor, 
     CircuitBreakerConfig, 
     RetryConfig, 
-    FaultDetectionConfig,
-    RetryStrategy,
-    ExecutionResult
+    RetryStrategy
 )
 from ..common.logging import get_logger
 from ..plan_management.models import Plan, Task

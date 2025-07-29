@@ -7,7 +7,7 @@ Includes CSRF protection, XSS prevention, clickjacking protection, and more.
 
 import secrets
 import uuid
-from typing import Dict, List, Optional, Any
+from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse

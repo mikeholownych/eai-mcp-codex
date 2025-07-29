@@ -2,7 +2,7 @@
 
 from typing import Dict, Any
 from src.common.logging import get_logger
-from .models import Workflow, WorkflowExecution, WorkflowStatus, StepStatus
+from .models import Workflow, WorkflowExecution
 from .orchestrator import get_orchestrator
 
 logger = get_logger("workflow_engine")
@@ -41,4 +41,4 @@ def status(workflow: Workflow) -> str:
     workflow_obj = orchestrator.get_workflow(workflow.id)
     if workflow_obj:
         return f"status:{workflow_obj.status.value}"
-    return f"status:not_found"
+    return "status:not_found"

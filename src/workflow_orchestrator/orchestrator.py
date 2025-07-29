@@ -529,7 +529,7 @@ class WorkflowOrchestrator:
             params.append(created_by)
             param_idx += 1
 
-        query += f" ORDER BY updated_at DESC"
+        query += " ORDER BY updated_at DESC"
 
         rows = await self.db_manager.execute_query(query, tuple(params))
         return [self._row_to_workflow(row) for row in rows]

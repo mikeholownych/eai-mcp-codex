@@ -7,15 +7,15 @@ reusable schema components.
 """
 
 import re
-from typing import Any, Dict, List, Optional, Union, ForwardRef
-from datetime import datetime, date, time
+from typing import Any, Dict, List, Optional, Union
+from datetime import datetime, date
 from enum import Enum
 from uuid import UUID
 import ipaddress
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, validator, root_validator, constr, conint, conlist
-from pydantic.networks import EmailStr, HttpUrl, AnyUrl
+from pydantic.networks import EmailStr, HttpUrl
 
 
 # Common validation patterns
@@ -256,7 +256,7 @@ class ModelRequest(BaseSecureModel):
         v_lower = v.lower()
         for pattern in dangerous_patterns:
             if pattern in v_lower:
-                raise ValueError(f'Prompt contains potentially dangerous content')
+                raise ValueError('Prompt contains potentially dangerous content')
         
         return v
     

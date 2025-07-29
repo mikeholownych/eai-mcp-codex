@@ -138,3 +138,19 @@ if global_settings.anthropic_api_key:
 
 # For production, use a .env file or proper environment variables.
 # Ensure .env is not committed to version control.
+
+def get_service_config(service_name: str = "") -> BaseServiceSettings:
+    """Get configuration for a specific service."""
+    return BaseServiceSettings(service_name=service_name)
+
+def validate_required_env_vars(required_vars: List[str]) -> bool:
+    """Validate that all required environment variables are set."""
+    missing_vars = []
+    for var in required_vars:
+        if not os.getenv(var):
+            missing_vars.append(var)
+    
+    if missing_vars:
+        raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
+    
+    return True

@@ -30,7 +30,7 @@ Every agent must fully comply with **all** of the following before merge or depl
 
 | Requirement                          | Description                                                                                 | Status Check |
 |--------------------------------------|---------------------------------------------------------------------------------------------|--------------|
-| **✅ NO PLACEHOLDERS**               | All files must contain complete, working code. No stubs, no empty functions.               | ✔ Required   |
+| **✅ NO PLACEHOLDERS**               | Verify all placeholders and TODOs are replaced with production-ready, enterprise-grade code. No stubs, no empty functions. | ✔ Required   |
 | **✅ NO `TODO:` COMMENTS**           | If a feature is listed, it must be implemented in full. No scaffolding or intent-only code.| ✔ Required   |
 | **✅ NO PSEUDO-CODE**                | Only executable Python (or approved language) code permitted.                              | ✔ Required   |
 | **✅ NO MISSING IMPORTS**            | All external dependencies must be declared and imported cleanly.                           | ✔ Required   |

@@ -14,19 +14,16 @@ import asyncio
 import json
 import logging
 import time
-from typing import Dict, Any, List, Optional, Callable, Protocol, Union
-from datetime import datetime, timedelta
+from typing import Dict, Any, List, Optional, Protocol
+from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, field
-from contextlib import asynccontextmanager
-import uuid
 import secrets
 import aiohttp
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 
-from pydantic import BaseModel, Field
 import jinja2
 
 from ..common.redis_client import RedisClient

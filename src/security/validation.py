@@ -9,11 +9,10 @@ import re
 import html
 import json
 import urllib.parse
-from typing import Any, Dict, List, Optional, Union, Callable
-from datetime import datetime
+from typing import Any, Dict, List, Optional, Callable
 import bleach
 from pydantic import BaseModel, ValidationError, validator
-from fastapi import Request, Response, HTTPException, status
+from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 import logging
 

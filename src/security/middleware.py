@@ -5,8 +5,8 @@ Combines all Tier 2 security components into a comprehensive security middleware
 Provides easy integration with FastAPI applications and configurable security layers.
 """
 
-from typing import Optional, List, Callable, Any
-from fastapi import FastAPI, Request, Response
+from typing import Optional, List
+from fastapi import FastAPI
 from fastapi.middleware.base import BaseHTTPMiddleware
 import logging
 

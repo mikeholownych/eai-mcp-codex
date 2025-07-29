@@ -1,20 +1,17 @@
 """AI-Powered Test Generation for Comprehensive Quality Assurance."""
 
 import ast
-import asyncio
 import json
 import re
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
-import inspect
 from pathlib import Path
 
 from ..common.logging import get_logger
-from ..model_router.models import ModelRequest, ModelResponse
+from ..model_router.models import ModelRequest
 from ..model_router.claude_client import get_claude_client
-from ..plan_management.models import Plan, Task
 
 logger = get_logger("ai_test_generator")
 
@@ -553,8 +550,8 @@ Please generate {request.max_tests_per_function} test cases that cover:
 2. Edge cases and boundary conditions
 3. Error handling and exception cases
 4. Input validation
-{f'5. Performance characteristics' if request.include_performance_tests else ''}
-{f'6. Security vulnerabilities' if request.include_security_tests else ''}
+{'5. Performance characteristics' if request.include_performance_tests else ''}
+{'6. Security vulnerabilities' if request.include_security_tests else ''}
 
 For each test case, provide:
 - Test name and description
@@ -770,7 +767,7 @@ def test_{function_name}_performance():
     assert execution_time < 1.0, f"Performance test failed: {{execution_time:.3f}}s"
 """,
                 description=f"Performance test for {function_name}",
-                assertions=[f"assert execution_time < 1.0"],
+                assertions=["assert execution_time < 1.0"],
                 estimated_execution_time=2.0
             )
             

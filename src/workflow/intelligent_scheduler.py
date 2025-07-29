@@ -1,18 +1,15 @@
 """Intelligent Scheduler with Dependency-Aware Logic and Optimization."""
 
-import asyncio
-import heapq
 import networkx as nx
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor
 import random
 
 from ..common.logging import get_logger
-from ..plan_management.models import Task, Plan
+from ..plan_management.models import Task
 
 logger = get_logger("intelligent_scheduler")
 

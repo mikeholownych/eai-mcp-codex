@@ -2,7 +2,7 @@
 
 import numpy as np
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
@@ -10,7 +10,7 @@ import sqlite3
 from pathlib import Path
 
 from ..common.logging import get_logger
-from ..plan_management.models import Plan, Task
+from ..plan_management.models import Plan
 
 logger = get_logger("prediction_engine")
 

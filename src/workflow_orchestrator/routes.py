@@ -1,5 +1,6 @@
 """API routes for the Workflow Orchestrator service."""
 
+from typing import List
 from fastapi import APIRouter, HTTPException
 
 from src.common.metrics import record_request

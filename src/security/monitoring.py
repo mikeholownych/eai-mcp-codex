@@ -14,24 +14,18 @@ import asyncio
 import json
 import logging
 import time
-from typing import Dict, Any, List, Optional, Callable, Set
+from typing import Dict, Any, List, Optional, Callable
 from datetime import datetime, timedelta
 from enum import Enum
 from dataclasses import dataclass, field
 from collections import defaultdict, deque
-import statistics
-import numpy as np
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.templating import Jinja2Templates
-import plotly.graph_objs as go
-import plotly.utils
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 
 from ..common.redis_client import RedisClient
-from .threat_detection import ThreatDetectionEngine, ThreatEvent, ThreatType, ThreatLevel
-from .incident_response import IncidentResponseEngine, IncidentEvent, IncidentStatus, IncidentSeverity
+from .threat_detection import ThreatDetectionEngine
+from .incident_response import IncidentResponseEngine, IncidentStatus
 from .session_management import SessionManager
-from .audit_logging import AuditLogger
 
 logger = logging.getLogger(__name__)
 

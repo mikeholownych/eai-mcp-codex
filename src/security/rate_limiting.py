@@ -5,15 +5,10 @@ Provides configurable rate limiting for API endpoints using Redis as the storage
 Supports different rate limiting strategies including sliding window and token bucket.
 """
 
-import asyncio
 import time
 from typing import Optional, Dict, Any, Tuple
-from datetime import datetime, timedelta
-import redis.asyncio as redis
 from fastapi import Request, HTTPException, status
 from functools import wraps
-import json
-import hashlib
 from enum import Enum
 
 from ..common.redis_client import RedisClient

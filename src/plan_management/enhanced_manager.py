@@ -1,6 +1,5 @@
 """Enhanced Plan Manager with predictive analytics and security integration."""
 
-import asyncio
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 

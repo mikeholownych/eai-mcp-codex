@@ -10,8 +10,7 @@ from .quality_monitor import (
     Metric,
     MetricType,
     AlertSeverity,
-    QualityThreshold,
-    QualityAlert
+    QualityThreshold
 )
 from ..common.logging import get_logger
 

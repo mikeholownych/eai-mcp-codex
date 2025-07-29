@@ -11,15 +11,14 @@ import logging
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List
 from enum import Enum
 from contextlib import contextmanager
 from functools import wraps
 import asyncio
 from threading import local
-import hashlib
 
-from fastapi import Request, Response
+from fastapi import Request
 from pydantic import BaseModel
 import structlog
 

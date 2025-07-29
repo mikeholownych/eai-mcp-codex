@@ -11,31 +11,22 @@ Provides comprehensive secrets management with:
 - Secret sharing with time-limited access
 """
 
-import os
 import json
 import logging
-import asyncio
-from typing import Dict, Any, Optional, List, Union, Protocol, Callable
+from typing import Dict, Any, Optional, List, Protocol, Callable
 from datetime import datetime, timedelta
 from enum import Enum
 from dataclasses import dataclass, field
 from contextlib import asynccontextmanager
 import secrets
 import hashlib
-import base64
-from urllib.parse import urlparse
 
-import aiohttp
-import jwt
-from cryptography.fernet import Fernet
-from pydantic import BaseModel, Field, SecretStr, validator
+from pydantic import SecretStr
 import hvac  # HashiCorp Vault client
 import boto3
-from azure.keyvault.secrets import SecretClient
-from azure.identity import DefaultAzureCredential
 
 from ..common.redis_client import RedisClient
-from .encryption import EncryptionService, EncryptionKey, KeyType
+from .encryption import EncryptionService
 from .audit_logging import AuditLogger, AuditEventType, AuditEventSeverity
 
 logger = logging.getLogger(__name__)
@@ -741,7 +732,7 @@ class SecretsManager:
         
         # Load from Redis if available
         if self.redis_client:
-            grant_keys = await self.redis_client.client.keys(f"secret_grant:*")
+            grant_keys = await self.redis_client.client.keys("secret_grant:*")
             for key in grant_keys:
                 grant_data = await self.redis_client.client.get(key)
                 if grant_data:

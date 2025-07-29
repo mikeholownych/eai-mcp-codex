@@ -22,15 +22,11 @@ from datetime import datetime, timedelta
 from enum import Enum
 from dataclasses import dataclass, field
 from contextlib import asynccontextmanager
-import ipaddress
-from urllib.parse import unquote
 import geoip2.database
 import geoip2.errors
 from user_agents import parse as parse_user_agent
 
-import jwt
-from cryptography.fernet import Fernet
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from ..common.redis_client import RedisClient
 from .encryption import EncryptionService

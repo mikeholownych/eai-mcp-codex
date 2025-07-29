@@ -1,6 +1,5 @@
 """Developer Agent - Specializes in code generation, review, and debugging."""
 
-import asyncio
 import re
 from typing import Any, Dict, List
 from datetime import datetime

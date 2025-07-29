@@ -23,18 +23,13 @@ from dataclasses import dataclass, field
 from contextlib import asynccontextmanager
 
 from cryptography.fernet import Fernet, MultiFernet
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
-from cryptography.exceptions import InvalidSignature
 import nacl.secret
 import nacl.public
 import nacl.utils
 from nacl.exceptions import InvalidMessage
 
-from pydantic import BaseModel, Field, SecretStr, validator
+from pydantic import BaseModel
 from ..common.redis_client import RedisClient
 
 logger = logging.getLogger(__name__)
@@ -416,7 +411,7 @@ class KeyManager:
         
         if self.redis_client:
             # Load from Redis
-            pattern = f"encryption_key:*"
+            pattern = "encryption_key:*"
             key_ids = await self.redis_client.client.keys(pattern)
             
             for key_id_bytes in key_ids:

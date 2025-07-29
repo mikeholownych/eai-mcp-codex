@@ -2,8 +2,8 @@
 
 import asyncio
 import numpy as np
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Tuple
+from datetime import datetime
+from typing import Dict, List, Any, Tuple
 from dataclasses import dataclass
 from enum import Enum
 

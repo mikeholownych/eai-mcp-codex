@@ -4,17 +4,13 @@ import asyncio
 import time
 import statistics
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Set
+from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from enum import Enum
-import json
 from collections import defaultdict, deque
 import psutil
-import hashlib
 
 from ..common.logging import get_logger
-from ..plan_management.models import Plan, Task
-from ..model_router.models import ModelRequest, ModelResponse
 
 logger = get_logger("quality_monitor")
 

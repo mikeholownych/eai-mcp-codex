@@ -3,7 +3,6 @@
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
-from pathlib import Path
 
 from src.common.logging import get_logger
 from src.common.database import DatabaseManager, serialize_json_field, deserialize_json_field, serialize_datetime, deserialize_datetime

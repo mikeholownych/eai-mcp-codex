@@ -18,20 +18,12 @@ from datetime import datetime, timedelta
 from enum import Enum
 from dataclasses import dataclass, field
 from collections import defaultdict, deque
-import statistics
 import ipaddress
-import re
 import hashlib
 import numpy as np
-from scipy import stats
-import joblib
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import DBSCAN
 
-from fastapi import Request
-import geoip2.database
-import geoip2.errors
 from user_agents import parse as parse_user_agent
 
 from ..common.redis_client import RedisClient
