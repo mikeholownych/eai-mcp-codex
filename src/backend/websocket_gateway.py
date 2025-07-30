@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
@@ -11,6 +11,8 @@ from src.a2a_communication.message_broker import A2AMessageBroker
 from src.a2a_communication.models import A2AMessage
 from src.common.logging import get_logger
 from src.common.metrics import MetricsCollector, get_metrics_collector
+from src.common.health_check import detailed_health
+from src.common.service_registry import ServiceRegistry, ServiceInfo
 
 logger = get_logger("websocket_gateway")
 
@@ -76,11 +78,16 @@ class WebSocketGateway:
             pubsub.close()
 
 
-def create_app(broker: Optional[A2AMessageBroker] = None) -> FastAPI:
-    """Create FastAPI application with WebSocket endpoint."""
+def create_app(
+    broker: Optional[A2AMessageBroker] = None,
+    service_registry: Optional[ServiceRegistry] = None,
+) -> FastAPI:
+    """Create FastAPI application with WebSocket and service endpoints."""
 
     app = FastAPI()
     gateway = WebSocketGateway(broker=broker)
+
+    registry = service_registry
 
     @app.websocket("/ws/{agent_id}")
     async def websocket_endpoint(websocket: WebSocket, agent_id: str) -> None:
@@ -92,5 +99,35 @@ def create_app(broker: Optional[A2AMessageBroker] = None) -> FastAPI:
                 await gateway.handle_incoming(agent_id, data)
         except WebSocketDisconnect:
             await gateway.disconnect(agent_id)
+
+    @app.get("/health")
+    async def health() -> Dict[str, object]:
+        return detailed_health("websocket-gateway")
+
+    if registry is not None:
+
+        @app.get("/services")
+        async def list_services() -> List[ServiceInfo]:
+            return await registry.list_services()
+
+        @app.get("/services/{service_name}")
+        async def get_service(service_name: str) -> Optional[ServiceInfo]:
+            return await registry.get_service(service_name)
+
+        @app.post("/services")
+        async def register_service(
+            service_name: str,
+            service_url: str,
+            metadata: Optional[Dict[str, object]] = None,
+        ) -> Dict[str, bool]:
+            result = await registry.register_service(
+                service_name, service_url, metadata
+            )
+            return {"success": result}
+
+        @app.post("/services/{service_name}/heartbeat")
+        async def heartbeat(service_name: str) -> Dict[str, bool]:
+            result = await registry.heartbeat(service_name)
+            return {"success": result}
 
     return app
