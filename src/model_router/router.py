@@ -179,9 +179,9 @@ async def route_async(req: ModelRequest) -> ModelResponse:
                 "timestamp": claude_response.timestamp.isoformat(),
                 "routing_decision": {
                     "selected_model": selected_model,
-                    "selection_reason": "rule_based"
-                    if selected_model
-                    else "intelligent_routing",
+                    "selection_reason": (
+                        "rule_based" if selected_model else "intelligent_routing"
+                    ),
                 },
             },
         )
@@ -279,9 +279,11 @@ async def test_routing() -> Dict[str, Any]:
         selected_model = _table.select(req.text)
         results.append(
             {
-                "text": case["text"][:50] + "..."
-                if len(case["text"]) > 50
-                else case["text"],
+                "text": (
+                    case["text"][:50] + "..."
+                    if len(case["text"]) > 50
+                    else case["text"]
+                ),
                 "selected_model": selected_model,
                 "expected_model": case["expected_model"],
                 "correct": selected_model == case["expected_model"],
