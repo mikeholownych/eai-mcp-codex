@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tokens>
+  <Category name="Voices" categoryBase="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech_OneCore">
+    <Token name="MSTTS_V110_frCA_CarolineM">
+      <String name="" value="Microsoft Caroline - French (Canada)" />
+      <String name="LangDataPath" value="%windir%\Speech_OneCore\Engines\TTS\fr-CA\MSTTSLocfrCA.dat" />
+      <String name="VoicePath" value="%windir%\Speech_OneCore\Engines\TTS\fr-CA\M3084Caroline" />
+      <String name="C0C" value="Microsoft Caroline - French (Canada)" />
+      <String name="CLSID" value="{179F3D56-1B0B-42B2-A962-59B7EF59FE1B}" />
+      <Attribute name="Version" value="11.0" />
+      <Attribute name="Language" value="C0C" />
+      <Attribute name="Gender" value="Female" />
+      <Attribute name="Age" value="Adult" />
+      <Attribute name="DataVersion" value="11.0.2015.1012" />
+      <Attribute name="SharedPronunciation" value="" />
+      <Attribute name="Name" value="Microsoft Caroline" />
+      <Attribute name="Vendor" value="Microsoft" />
+      <Attribute name="SayAsSupport" value="spell=NativeSupported; cardinal=NativeSupported; ordinal=NativeSupported; date=NativeSupported; time=NativeSupported; telephone=NativeSupported; computer=NativeSupported; address=NativeSupported; currency=NativeSupported; message=NativeSupported; url=NativeSupported; media=NativeSupported; alphanumeric=NativeSupported" />
+      <Attribute name="SampleText" value="Vous avez sélectionné %1 comme voix par défaut." />
+    </Token>
+  </Category>
+  <Category name="Voices" categoryBase="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech_OneCore">
+    <Token name="MSTTS_V110_frCA_ClaudeM">
+      <String name="" value="Microsoft Claude - French (Canada)" />
+      <String name="LangDataPath" value="%windir%\Speech_OneCore\Engines\TTS\fr-CA\MSTTSLocfrCA.dat" />
+      <String name="VoicePath" value="%windir%\Speech_OneCore\Engines\TTS\fr-CA\M3084Claude" />
+      <String name="C0C" value="Microsoft Claude - French (Canada)" />
+      <String name="CLSID" value="{179F3D56-1B0B-42B2-A962-59B7EF59FE1B}" />
+      <Attribute name="Version" value="11.0" />
+      <Attribute name="Language" value="C0C" />
+      <Attribute name="Gender" value="Male" />
+      <Attribute name="Age" value="Adult" />
+      <Attribute name="DataVersion" value="11.0.2015.1012" />
+      <Attribute name="SharedPronunciation" value="" />
+      <Attribute name="Name" value="Microsoft Claude" />
+      <Attribute name="Vendor" value="Microsoft" />
+      <Attribute name="SayAsSupport" value="spell=NativeSupported; cardinal=NativeSupported; ordinal=NativeSupported; date=NativeSupported; time=NativeSupported; telephone=NativeSupported; computer=NativeSupported; address=NativeSupported; currency=NativeSupported; message=NativeSupported; url=NativeSupported; media=NativeSupported; alphanumeric=NativeSupported" />
+      <Attribute name="SampleText" value="Vous avez sélectionné %1 comme voix par défaut." />
+    </Token>
+  </Category>
+</Tokens>

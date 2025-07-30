@@ -10,7 +10,9 @@ RUN pip install --no-cache-dir \
     redis \
     requests
 
-COPY --chown=mcp:mcp src/workflow_orchestrator/ ./
+COPY --chown=mcp:mcp src/ ./src/
+COPY --chown=mcp:mcp src/common/ ./src/common/
+COPY --chown=mcp:mcp src/workflow_orchestrator/ ./src/workflow_orchestrator/
 COPY --chown=mcp:mcp scripts/start_workflow_orchestrator.py ./start.py
 
 EXPOSE 8004

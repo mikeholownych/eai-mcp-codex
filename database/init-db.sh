@@ -6,8 +6,7 @@ set -e
 DB_USER="mcp_user"
 DB_PASS="${POSTGRES_PASSWORD:-mcp_secure_password}"
 DB_HOST="localhost"
-DB_NAMES=(model_router_db plan_management_db git_worktree_db workflow_orchestrator_db verification_feedback_db)
-
+DB_NAMES=(model_router_db plan_management_db git_worktree_db workflow_orchestrator_db verification_feedback_db grafana_db)
 echo "Waiting for PostgreSQL to be ready..."
 until pg_isready -h "$DB_HOST" -U "$DB_USER" > /dev/null 2>&1; do
   sleep 1

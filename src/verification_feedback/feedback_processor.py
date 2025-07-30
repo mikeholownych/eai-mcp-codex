@@ -1,9 +1,9 @@
 """Feedback Processing business logic implementation."""
 
+import asyncio
 import uuid
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-import re
 
 from src.common.logging import get_logger
 from src.common.database import (
@@ -25,6 +25,9 @@ from .config import settings
 
 logger = get_logger("feedback_processor")
 
+# Global instance
+_feedback_processor = None
+
 
 class FeedbackProcessor:
     """Core business logic for feedback processing."""
@@ -45,46 +48,24 @@ class FeedbackProcessor:
     async def _ensure_database(self):
         """Create database and tables if they don't exist."""
         script = """
-                CREATE TABLE IF NOT EXISTS feedback (
-                    id TEXT PRIMARY KEY,
-                    verification_id TEXT,
-                    feedback_type TEXT NOT NULL,
-                    severity TEXT DEFAULT 'medium',
-                    title TEXT NOT NULL,
-                    content TEXT NOT NULL,
-                    source TEXT DEFAULT 'system',
-                    target_type TEXT,
-                    target_id TEXT,
-                    tags JSONB DEFAULT '[]',
-                    attachments JSONB DEFAULT '[]',
-                    is_resolved BOOLEAN DEFAULT FALSE,
-                    resolution_notes TEXT,
-                    resolved_by TEXT,
-                    resolved_at TIMESTAMP WITH TIME ZONE,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    metadata JSONB DEFAULT '{}'
-                );
-                
-                CREATE TABLE IF NOT EXISTS feedback_processing_log (
-                    id SERIAL PRIMARY KEY,
-                    feedback_id TEXT NOT NULL,
-                    action TEXT NOT NULL,
-                    result TEXT,
-                    error_message TEXT,
-                    processed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    processed_by TEXT DEFAULT 'system',
-                    metadata JSONB DEFAULT '{}',
-                    FOREIGN KEY (feedback_id) REFERENCES feedback (id) ON DELETE CASCADE
-                );
-                
-                CREATE INDEX IF NOT EXISTS idx_feedback_type ON feedback(feedback_type);
-                CREATE INDEX IF NOT EXISTS idx_feedback_severity ON feedback(severity);
-                CREATE INDEX IF NOT EXISTS idx_feedback_target ON feedback(target_type, target_id);
-                CREATE INDEX IF NOT EXISTS idx_feedback_resolved ON feedback(is_resolved);
-                CREATE INDEX IF NOT EXISTS idx_processing_log_feedback ON feedback_processing_log(feedback_id);
-            """
-        logger.info(f"Attempting to create tables in {self.dsn}")
+        CREATE TABLE IF NOT EXISTS feedback (
+            id VARCHAR(255) PRIMARY KEY,
+            feedback_type VARCHAR(50) NOT NULL,
+            severity VARCHAR(20) NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            description TEXT,
+            metadata JSONB DEFAULT '{}',
+            status VARCHAR(50) DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE INDEX IF NOT EXISTS idx_feedback_type ON feedback(feedback_type);
+        CREATE INDEX IF NOT EXISTS idx_feedback_severity ON feedback(severity);
+        CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status);
+        CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at);
+        """
+        
         await self.db_manager.execute_script(script)
         logger.info("Database tables ensured.")
 
@@ -111,52 +92,13 @@ class FeedbackProcessor:
             metadata=request.metadata,
         )
 
+    async def get_feedback(self, feedback_id: str) -> Optional[Feedback]:
+        """Get feedback by ID."""
         query = """
-            INSERT INTO feedback (
-                id, verification_id, feedback_type, severity, title, content, source,
-                target_type, target_id, tags, attachments, is_resolved, resolution_notes,
-                resolved_by, resolved_at, created_at, updated_at, metadata
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+        SELECT id, feedback_type, severity, title, description, metadata, status, created_at, updated_at
+        FROM feedback WHERE id = $1
         """
-        values = (
-            feedback.id,
-            feedback.verification_id,
-            feedback.feedback_type.value,
-            feedback.severity.value,
-            feedback.title,
-            feedback.content,
-            feedback.source,
-            feedback.target_type,
-            feedback.target_id,
-            serialize_json_field(feedback.tags),
-            serialize_json_field(feedback.attachments),
-            feedback.is_resolved,
-            feedback.resolution_notes,
-            feedback.resolved_by,
-            serialize_datetime(feedback.resolved_at),
-            serialize_datetime(feedback.created_at),
-            serialize_datetime(feedback.updated_at),
-            serialize_json_field(feedback.metadata),
-        )
-        await self.db_manager.execute_update(query, values)
-
-        # Log the submission
-        await self._log_processing(
-            feedback.id, "submitted", f"Feedback submitted by {source}"
-        )
-
-        # Process the feedback based on type and severity
-        await self._auto_process_feedback(feedback)
-
-        logger.info(f"Submitted feedback: {feedback.id} - {feedback.title}")
-        return feedback
-
-    async def process(
-        self, feedback: Feedback, processor: str = "system"
-    ) -> ProcessingResult:
-        """Process feedback with enhanced logic."""
-        start_time = datetime.utcnow()
-
+        
         try:
             # Determine processing actions based on feedback type and severity
             actions_taken = []
@@ -361,27 +303,8 @@ class FeedbackProcessor:
         feedback = await self.get_feedback(feedback_id)
         if not feedback:
             return None
-
-        feedback.is_resolved = True
-        feedback.resolution_notes = resolution_notes
-        feedback.resolved_by = resolved_by
-        feedback.resolved_at = datetime.utcnow()
-        feedback.updated_at = datetime.utcnow()
-
-        await self._update_feedback(feedback)
-        await self._log_processing(
-            feedback.id, "resolved", f"Resolved by {resolved_by}: {resolution_notes}"
-        )
-
-        logger.info(f"Resolved feedback: {feedback.id}")
-        return feedback
-
-    async def get_feedback(self, feedback_id: str) -> Optional[Feedback]:
-        """Get feedback by ID."""
-        query = "SELECT * FROM feedback WHERE id = $1"
-        row = await self.db_manager.execute_query(query, (feedback_id,))
-
-        if not row:
+        except Exception as e:
+            logger.error(f"Error getting feedback {feedback_id}: {e}")
             return None
 
         return self._row_to_feedback(row[0])
@@ -728,66 +651,79 @@ class FeedbackProcessor:
     ):
         """Log feedback processing action."""
         query = """
-            INSERT INTO feedback_processing_log (
-                feedback_id, action, result, error_message, processed_at, processed_by, metadata
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO feedback (id, feedback_type, severity, title, description, metadata, status, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """
+        
         values = (
             feedback_id,
-            action,
-            result,
-            error_message,
-            serialize_datetime(datetime.utcnow()),
-            "system",
-            serialize_json_field({}),
+            feedback_data.get('feedback_type', 'general'),
+            feedback_data.get('severity', 'medium'),
+            feedback_data.get('title', ''),
+            feedback_data.get('description', ''),
+            feedback_data.get('metadata', {}),
+            'pending',
+            now,
+            now
         )
+        
         await self.db_manager.execute_update(query, values)
-
-    def _row_to_feedback(self, row) -> Feedback:
-        """Convert database row to Feedback object."""
+        
         return Feedback(
-            id=row["id"],
-            verification_id=row["verification_id"],
-            feedback_type=FeedbackType(row["feedback_type"]),
-            severity=FeedbackSeverity(row["severity"]),
-            title=row["title"],
-            content=row["content"],
-            source=row["source"],
-            target_type=row["target_type"],
-            target_id=row["target_id"],
-            tags=deserialize_json_field(row["tags"]),
-            attachments=deserialize_json_field(row["attachments"]),
-            is_resolved=bool(row["is_resolved"]),
-            resolution_notes=row["resolution_notes"],
-            resolved_by=row["resolved_by"],
-            resolved_at=deserialize_datetime(row["resolved_at"]),
-            created_at=deserialize_datetime(row["created_at"]),
-            updated_at=deserialize_datetime(row["updated_at"]),
-            metadata=deserialize_json_field(row["metadata"]),
+            id=feedback_id,
+            feedback_type=FeedbackType(values[1]),
+            severity=FeedbackSeverity(values[2]),
+            title=values[3],
+            description=values[4],
+            metadata=values[5],
+            status=values[6],
+            created_at=values[7],
+            updated_at=values[8]
         )
 
+    async def list_feedback(self, limit: int = 100, offset: int = 0) -> List[Feedback]:
+        """List feedback entries."""
+        query = """
+        SELECT id, feedback_type, severity, title, description, metadata, status, created_at, updated_at
+        FROM feedback 
+        ORDER BY created_at DESC 
+        LIMIT $1 OFFSET $2
+        """
+        
+        try:
+            rows = await self.db_manager.execute_query(query, (limit, offset))
+            return [
+                Feedback(
+                    id=row[0],
+                    feedback_type=FeedbackType(row[1]),
+                    severity=FeedbackSeverity(row[2]),
+                    title=row[3],
+                    description=row[4],
+                    metadata=row[5] or {},
+                    status=row[6],
+                    created_at=row[7],
+                    updated_at=row[8]
+                )
+                for row in rows
+            ]
+        except Exception as e:
+            logger.error(f"Error listing feedback: {e}")
+            return []
 
-# Singleton instance
-_feedback_processor: Optional[FeedbackProcessor] = None
 
-
-async def get_feedback_processor() -> FeedbackProcessor:
-    """Get singleton FeedbackProcessor instance."""
+async def initialize_feedback_processor():
+    """Initialize the global feedback processor."""
     global _feedback_processor
     if _feedback_processor is None:
         _feedback_processor = FeedbackProcessor()
         await _feedback_processor.initialize_database()
+
+
+def get_feedback_processor() -> FeedbackProcessor:
+    """Get the feedback processor instance."""
+    if _feedback_processor is None:
+        raise RuntimeError("Feedback processor not initialized. Call initialize_feedback_processor() first.")
     return _feedback_processor
 
-
-# Legacy function for backward compatibility
-async def process(feedback: Any) -> bool:
-    """Process feedback using the enhanced processor."""
-    processor = await get_feedback_processor()
-
-    # Handle legacy Feedback object or convert if needed
-    if hasattr(feedback, "id"):
-        result = await processor.process(feedback)
-        return result.success
 
     return True
