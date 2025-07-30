@@ -705,7 +705,6 @@ class PerformancePredictionEngine:
     def _generate_milestone_predictions(self, duration: float, 
                                       features: Dict[str, float]) -> List[Dict[str, Any]]:
         """Generate milestone predictions."""
-        task_count = features.get('task_count', 1)
         complexity_score = features.get('complexity_score', 0.5)
         
         # Standard milestone breakdown

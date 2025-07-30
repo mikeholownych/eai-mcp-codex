@@ -274,7 +274,6 @@ def build_update_query(table: str, data: Dict[str, Any], conditions: Dict[str, A
         # Re-calling build_where_clause to get clauses and params without $ indexing
         where_clauses_no_idx = []
         where_params_combined = []
-        current_where_param_idx = 1
         for key, value in conditions.items():
             if value is None:
                 where_clauses_no_idx.append(f"{key} IS NULL")
