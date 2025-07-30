@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Dict, List
 
+from src.a2a_communication.message_broker import A2AMessageBroker
+
 from fastapi.testclient import TestClient
 
 from src.backend.websocket_gateway import create_app
@@ -32,8 +34,9 @@ class FakeRedis:
         return self.pubsub_instance
 
 
-class DummyBroker:
+class DummyBroker(A2AMessageBroker):
     def __init__(self) -> None:
+        # Avoid connecting to a real Redis instance
         self.redis = FakeRedis()
         self.sent: List[A2AMessage] = []
         self.pending: Dict[str, List[A2AMessage]] = {}
