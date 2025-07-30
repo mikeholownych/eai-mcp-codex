@@ -227,21 +227,19 @@ async def route_async(req: ModelRequest) -> ModelResponse:
                 "provider": "claude",
             }
 
-            return ModelResponse(
-                result=claude_response.content,
-                model_used=claude_response.model,
-                usage=usage_info,
-                request_id=claude_response.id,
-                metadata={
-                    "stop_reason": claude_response.stop_reason,
-                    "timestamp": claude_response.timestamp.isoformat(),
-                    "routing_decision": {
-                        "selected_model": selected_model,
-                        "selection_reason": "rule_based"
-                        if selected_model
-                        else "intelligent_routing",
-                    },
-                    "provider": "claude",
+        return ModelResponse(
+            result=claude_response.content,
+            model_used=claude_response.model,
+            usage=usage_info,
+            request_id=claude_response.id,
+            metadata={
+                "stop_reason": claude_response.stop_reason,
+                "timestamp": claude_response.timestamp.isoformat(),
+                "routing_decision": {
+                    "selected_model": selected_model,
+                    "selection_reason": (
+                        "rule_based" if selected_model else "intelligent_routing"
+                    ),
                 },
             )
 
@@ -338,9 +336,11 @@ async def test_routing() -> Dict[str, Any]:
         selected_model = _table.select(req.text)
         results.append(
             {
-                "text": case["text"][:50] + "..."
-                if len(case["text"]) > 50
-                else case["text"],
+                "text": (
+                    case["text"][:50] + "..."
+                    if len(case["text"]) > 50
+                    else case["text"]
+                ),
                 "selected_model": selected_model,
                 "expected_model": case["expected_model"],
                 "correct": selected_model == case["expected_model"],

@@ -7,7 +7,13 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 
 from src.common.logging import get_logger
-from src.common.database import DatabaseManager, serialize_json_field, deserialize_json_field, serialize_datetime, deserialize_datetime
+from src.common.database import (
+    DatabaseManager,
+    serialize_json_field,
+    deserialize_json_field,
+    serialize_datetime,
+    deserialize_datetime,
+)
 from .models import (
     Workflow,
     WorkflowStep,
@@ -34,8 +40,8 @@ class WorkflowOrchestrator:
             "model_router": "http://localhost:8001",
             "plan_management": "http://localhost:8002",
             "git_worktree": "http://localhost:8003",
-            "verification": "http://localhost:8005", # Corrected port
-            "feedback": "http://localhost:8005", # Corrected port
+            "verification": "http://localhost:8005",  # Corrected port
+            "feedback": "http://localhost:8005",  # Corrected port
         }
 
     async def initialize_database(self):
@@ -505,7 +511,9 @@ class WorkflowOrchestrator:
         workflow = self._row_to_workflow(workflow_row[0])
 
         # Get steps
-        step_query = "SELECT * FROM workflow_steps WHERE workflow_id = $1 ORDER BY order_index"
+        step_query = (
+            "SELECT * FROM workflow_steps WHERE workflow_id = $1 ORDER BY order_index"
+        )
         step_rows = await self.db_manager.execute_query(step_query, (workflow_id,))
         workflow.steps = [self._row_to_step(row) for row in step_rows]
 
@@ -534,7 +542,9 @@ class WorkflowOrchestrator:
         rows = await self.db_manager.execute_query(query, tuple(params))
         return [self._row_to_workflow(row) for row in rows]
 
-    async def get_workflow_executions(self, workflow_id: str) -> List[WorkflowExecution]:
+    async def get_workflow_executions(
+        self, workflow_id: str
+    ) -> List[WorkflowExecution]:
         """Get all executions for a workflow."""
         query = "SELECT * FROM workflow_executions WHERE workflow_id = $1 ORDER BY execution_number DESC"
         rows = await self.db_manager.execute_query(query, (workflow_id,))
@@ -620,7 +630,7 @@ class WorkflowOrchestrator:
             param_idx += 1
 
         set_clause = ", ".join(set_clauses)
-        
+
         query = f"UPDATE workflows SET {set_clause} WHERE id = ${param_idx}"
         values.append(workflow_id)
 
@@ -662,7 +672,7 @@ class WorkflowOrchestrator:
             param_idx += 1
 
         set_clause = ", ".join(set_clauses)
-        
+
         query = f"UPDATE workflow_steps SET {set_clause} WHERE id = ${param_idx}"
         values.append(step_id)
 
