@@ -17,6 +17,7 @@ This project implements a **complete microservices architecture** that transform
 - **Agent-to-Agent Communication**: Autonomous agents collaborate, build consensus, and escalate issues
 - **Collaborative Planning**: Multiple AI agents work together to create comprehensive implementation plans
 - **Multi-Agent Verification**: Code is reviewed by specialized agents (security, performance, QA)
+- **Service Registry & Health Checks**: Built-in registry to track services and expose health status
 - **Consensus Building**: Agents vote and reach consensus on architectural decisions
 - **Automated Git Workflows**: Intelligent worktree management with collaborative code reviews
 

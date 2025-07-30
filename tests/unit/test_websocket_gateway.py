@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from typing import Dict, List
+from unittest.mock import AsyncMock
+from datetime import datetime
+import pytest
 
 from src.a2a_communication.message_broker import A2AMessageBroker
 
@@ -8,6 +11,7 @@ from fastapi.testclient import TestClient
 
 from src.backend.websocket_gateway import create_app
 from src.a2a_communication.models import A2AMessage, MessageType
+from src.common.service_registry import ServiceInfo
 
 
 class FakePubSub:
@@ -77,3 +81,49 @@ def test_websocket_send_and_receive() -> None:
             assert received["payload"] == {"msg": "hello"}
 
     assert broker.sent[0].payload == {"foo": "bar"}
+
+
+@pytest.mark.asyncio
+async def test_health_and_service_endpoints() -> None:
+    broker = DummyBroker()
+    registry = AsyncMock()
+    registry.list_services.return_value = [
+        ServiceInfo(
+            service_name="svc",
+            service_url="http://svc",
+            health_status="healthy",
+            last_heartbeat=datetime.utcnow(),
+            metadata={},
+        )
+    ]
+    registry.get_service.return_value = registry.list_services.return_value[0]
+    registry.register_service.return_value = True
+    registry.heartbeat.return_value = True
+
+    app = create_app(broker=broker, service_registry=registry)
+
+    with TestClient(app) as client:
+        r = client.get("/health")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["service"] == "websocket-gateway"
+
+        r = client.get("/services")
+        assert r.status_code == 200
+        assert r.json()[0]["service_name"] == "svc"
+
+        r = client.get("/services/svc")
+        assert r.status_code == 200
+        assert r.json()["service_url"] == "http://svc"
+
+        r = client.post(
+            "/services", params={"service_name": "svc", "service_url": "http://svc"}
+        )
+        assert r.status_code == 200
+        assert r.json() == {"success": True}
+        registry.register_service.assert_awaited()
+
+        r = client.post("/services/svc/heartbeat")
+        assert r.status_code == 200
+        assert r.json() == {"success": True}
+        registry.heartbeat.assert_awaited()

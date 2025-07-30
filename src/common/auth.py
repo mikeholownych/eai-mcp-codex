@@ -10,6 +10,8 @@ from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from enum import Enum
 
+import httpx
+
 from .logging import get_logger
 
 logger = get_logger("auth")
@@ -238,6 +240,53 @@ class AuthManager:
 
         return False
 
+    async def authenticate_github_oauth(
+        self,
+        code: str,
+        client_id: str,
+        client_secret: str,
+        redirect_uri: str,
+    ) -> AuthResult:
+        """Authenticate a user via GitHub OAuth."""
+        async with httpx.AsyncClient() as client:
+            token_resp = await client.post(
+                "https://github.com/login/oauth/access_token",
+                headers={"Accept": "application/json"},
+                data={
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "code": code,
+                    "redirect_uri": redirect_uri,
+                },
+            )
+            token_resp.raise_for_status()
+            access_token = token_resp.json().get("access_token")
+            if not access_token:
+                return AuthResult(success=False, error_message="Failed to obtain token")
+
+            user_resp = await client.get(
+                "https://api.github.com/user",
+                headers={"Authorization": f"token {access_token}"},
+            )
+            user_resp.raise_for_status()
+            user_data = user_resp.json()
+
+        username = user_data.get("login")
+        if not username:
+            return AuthResult(success=False, error_message="GitHub user missing login")
+
+        if username not in self._users:
+            # Create a basic user entry for new GitHub user
+            self.create_user(username, secrets.token_urlsafe(8))
+        user = self._users[username]
+
+        return AuthResult(
+            success=True,
+            user_id=user["user_id"],
+            username=username,
+            roles=user["roles"],
+        )
+
     def check_permission(self, user_roles: List[str], required_role: str) -> bool:
         """Check if user has required permission."""
         if UserRole.ADMIN.value in user_roles:
@@ -256,9 +305,9 @@ class AuthManager:
                 "roles": user["roles"],
                 "is_active": user["is_active"],
                 "created_at": user["created_at"].isoformat(),
-                "last_login": user["last_login"].isoformat()
-                if user["last_login"]
-                else None,
+                "last_login": (
+                    user["last_login"].isoformat() if user["last_login"] else None
+                ),
             }
         return None
 
@@ -289,9 +338,11 @@ class AuthManager:
                     {
                         "key_prefix": api_key[:12] + "...",
                         "created_at": key_info["created_at"].isoformat(),
-                        "last_used": key_info["last_used"].isoformat()
-                        if key_info["last_used"]
-                        else None,
+                        "last_used": (
+                            key_info["last_used"].isoformat()
+                            if key_info["last_used"]
+                            else None
+                        ),
                     }
                 )
         return keys

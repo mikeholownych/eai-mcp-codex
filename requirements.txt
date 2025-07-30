@@ -14,3 +14,5 @@ psutil>=5.9.0
 jwt
 httpx
 numpy
+alembic
+pytest-asyncio
