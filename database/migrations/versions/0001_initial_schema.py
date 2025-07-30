@@ -23,7 +23,11 @@ def upgrade() -> None:
             sa.DateTime(timezone=True),
             server_default=sa.text("CURRENT_TIMESTAMP"),
         ),
-        sa.Column("metadata", sa.JSON(), server_default=sa.text("'{}'")),
+        sa.Column(
+            "metadata",
+            sa.JSON(),
+            server_default=sa.text("'{}'::jsonb"),
+        ),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -60,7 +64,11 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("metric_name", sa.String(100), nullable=False),
         sa.Column("metric_value", sa.Numeric()),
-        sa.Column("labels", sa.JSON(), server_default=sa.text("'{}'")),
+        sa.Column(
+            "labels",
+            sa.JSON(),
+            server_default=sa.text("'{}'::jsonb"),
+        ),
         sa.Column(
             "timestamp",
             sa.DateTime(timezone=True),
