@@ -41,8 +41,10 @@ class WebSocketGateway:
         task = self._tasks.pop(agent_id, None)
         if task:
             task.cancel()
-        self.connections.pop(agent_id, None)
+        websocket = self.connections.pop(agent_id, None)
         self.metrics.set_active_connections(len(self.connections))
+        if websocket:
+            await websocket.close()
         logger.info("Agent %s disconnected", agent_id)
 
     async def handle_incoming(self, agent_id: str, data: str) -> None:
