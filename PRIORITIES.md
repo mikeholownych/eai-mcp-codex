@@ -5,9 +5,9 @@ Ensure progress tracking in this file: mark items "in progress" before starting 
 ### **1. Production Readiness Gaps (URGENT - Week 1)**
 
 **High Priority Issues:**
-- **Docker Sandbox Build Failures**: Critical container execution issues need immediate resolution
-- **Backend Service Implementation**: Core WebSocket, Redis pub/sub, and metrics collection are incomplete
-- **Database Schema Migration**: Missing production-ready database initialization and seeding
+- **Docker Sandbox Build Failures** *(complete)*: Critical container execution issues need immediate resolution
+- **Backend Service Implementation** *(in progress)*: Core WebSocket, Redis pub/sub, and metrics collection are incomplete
+- **Database Schema Migration** *(in progress)*: Missing production-ready database initialization and seeding
 - **Authentication Integration**: GitHub OAuth implementation gaps for enterprise use
 
 **Technical Debt:**
@@ -27,10 +27,10 @@ Ensure progress tracking in this file: mark items "in progress" before starting 
 **Implementation Priority:**
 ```bash
 # Fixes needed immediately:
-1. ./docker/sandbox.Dockerfile - container build errors
-2. src/backend/websocket_gateway.py - missing implementation
-3. src/backend/metrics_collector.py - duplicate collectors issue
-4. database/migrations/ - production schema setup
+1. ./docker/sandbox.Dockerfile - container build errors [complete]
+2. src/backend/websocket_gateway.py - missing implementation [in progress]
+3. src/backend/metrics_collector.py - duplicate collectors issue [complete]
+4. database/migrations/ - production schema setup [in progress]
 ```
 
 ### **3. Feature Completeness (Week 2-3)**
