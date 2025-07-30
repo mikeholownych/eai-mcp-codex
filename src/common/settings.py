@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional, List
+import secrets
 import os
 
 
@@ -122,7 +123,7 @@ class GlobalSettings(BaseSettings):
     environment: str = "development"
     debug: bool = False
     log_level: str = "INFO"
-    jwt_secret: str = "super-secret-jwt-key"  # IMPORTANT: Change this in production!
+    jwt_secret: str = os.getenv("JWT_SECRET") or secrets.token_urlsafe(32)
     database_url: str = "sqlite:///data/mcp_global.db"  # For global data if any
     redis_url: str = "redis://localhost:6379"
     consul_url: str = "http://localhost:8500"
