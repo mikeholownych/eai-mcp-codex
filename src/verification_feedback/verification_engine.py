@@ -6,7 +6,13 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable
 
 from src.common.logging import get_logger
-from src.common.database import DatabaseManager, serialize_json_field, deserialize_json_field, serialize_datetime, deserialize_datetime
+from src.common.database import (
+    DatabaseManager,
+    serialize_json_field,
+    deserialize_json_field,
+    serialize_datetime,
+    deserialize_datetime,
+)
 from .models import (
     Verification,
     VerificationRule,
@@ -615,7 +621,8 @@ class VerificationEngine:
             for result in verification.results:
                 if result.score is not None:
                     rule = next(
-                        (r for r in await self.get_rules() if r.id == result.rule_id), None
+                        (r for r in await self.get_rules() if r.id == result.rule_id),
+                        None,
                     )
                     if rule:
                         rule_type = rule.rule_type

@@ -6,7 +6,13 @@ from typing import Dict, List, Optional, Any
 import re
 
 from src.common.logging import get_logger
-from src.common.database import DatabaseManager, serialize_json_field, deserialize_json_field, serialize_datetime, deserialize_datetime
+from src.common.database import (
+    DatabaseManager,
+    serialize_json_field,
+    deserialize_json_field,
+    serialize_datetime,
+    deserialize_datetime,
+)
 from .models import (
     Feedback,
     FeedbackType,
@@ -91,7 +97,7 @@ class FeedbackProcessor:
 
         feedback = Feedback(
             id=feedback_id,
-            verification_id=None, # This is set by verification_engine if applicable
+            verification_id=None,  # This is set by verification_engine if applicable
             feedback_type=request.feedback_type,
             severity=request.severity,
             title=request.title,
@@ -170,7 +176,9 @@ class FeedbackProcessor:
             if feedback.severity == FeedbackSeverity.CRITICAL:
                 actions_taken.extend(await self._handle_critical_feedback(feedback))
             elif feedback.severity == FeedbackSeverity.HIGH:
-                actions_taken.extend(await self._handle_high_priority_feedback(feedback))
+                actions_taken.extend(
+                    await self._handle_high_priority_feedback(feedback)
+                )
 
             # Update feedback processing timestamp
             feedback.updated_at = datetime.utcnow()
@@ -712,7 +720,11 @@ class FeedbackProcessor:
         await self.db_manager.execute_update(query, values)
 
     async def _log_processing(
-        self, feedback_id: str, action: str, result: str, error_message: Optional[str] = None
+        self,
+        feedback_id: str,
+        action: str,
+        result: str,
+        error_message: Optional[str] = None,
     ):
         """Log feedback processing action."""
         query = """

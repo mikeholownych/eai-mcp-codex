@@ -39,79 +39,92 @@ async def route_model(req: ModelRequest) -> ModelResponse:
             return response
         except Exception as fallback_e:
             logger.error(f"Fallback routing also failed: {fallback_e}")
-            raise HTTPException(status_code=500, detail=f"All routing methods failed: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"All routing methods failed: {str(e)}"
+            )
 
 
 @router.post("/ensemble/generate", response_model=ModelResponse)
-async def generate_ensemble_response(request: ModelRequest, confidence_threshold: float = 0.85) -> ModelResponse:
+async def generate_ensemble_response(
+    request: ModelRequest, confidence_threshold: float = 0.85
+) -> ModelResponse:
     """Generate response using ensemble consensus routing."""
     record_request("model-router-ensemble")
     try:
         logger.info(f"Processing ensemble request: {request.request_id}")
-        
+
         ensemble_result = await enhanced_router.ensemble_router.route_with_consensus(
             request, confidence_threshold
         )
-        
+
         # Convert to ModelResponse
         response = ModelResponse(
             result=ensemble_result.final_response,
             model_used=f"ensemble({','.join(ensemble_result.participating_models)})",
             usage={
-                'total_tokens': sum(p.tokens_used for p in ensemble_result.prediction_details),
-                'consensus_confidence': ensemble_result.consensus_confidence,
-                'participating_models': len(ensemble_result.participating_models)
+                "total_tokens": sum(
+                    p.tokens_used for p in ensemble_result.prediction_details
+                ),
+                "consensus_confidence": ensemble_result.consensus_confidence,
+                "participating_models": len(ensemble_result.participating_models),
             },
             request_id=request.request_id,
             metadata={
-                'routing_strategy': ensemble_result.routing_strategy,
-                'processing_time': ensemble_result.processing_time,
-                'confidence_threshold': confidence_threshold,
-                'model_predictions': [
+                "routing_strategy": ensemble_result.routing_strategy,
+                "processing_time": ensemble_result.processing_time,
+                "confidence_threshold": confidence_threshold,
+                "model_predictions": [
                     {
-                        'model': p.model_id,
-                        'confidence': p.confidence,
-                        'latency': p.latency,
-                        'tokens_used': p.tokens_used
-                    } for p in ensemble_result.prediction_details
-                ]
+                        "model": p.model_id,
+                        "confidence": p.confidence,
+                        "latency": p.latency,
+                        "tokens_used": p.tokens_used,
+                    }
+                    for p in ensemble_result.prediction_details
+                ],
             },
             success=True,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
-        
+
         logger.info(f"Ensemble routing completed for {request.request_id}")
         return response
-        
+
     except Exception as e:
         logger.error(f"Ensemble generation failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Ensemble generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Ensemble generation failed: {str(e)}"
+        )
 
 
-@router.post("/adaptive/generate", response_model=ModelResponse) 
+@router.post("/adaptive/generate", response_model=ModelResponse)
 async def generate_adaptive_response(request: ModelRequest) -> ModelResponse:
     """Generate response using adaptive performance-based routing."""
     record_request("model-router-adaptive")
     try:
         logger.info(f"Processing adaptive request: {request.request_id}")
-        
+
         response = await enhanced_router.adaptive_router.adaptive_route(request)
-        
+
         # Add adaptive routing metadata
         if response.metadata is None:
             response.metadata = {}
-        
-        response.metadata.update({
-            'routing_strategy': 'adaptive_performance',
-            'model_selection_reason': 'real_time_performance_optimization'
-        })
-        
+
+        response.metadata.update(
+            {
+                "routing_strategy": "adaptive_performance",
+                "model_selection_reason": "real_time_performance_optimization",
+            }
+        )
+
         logger.info(f"Adaptive routing completed for {request.request_id}")
         return response
-        
+
     except Exception as e:
         logger.error(f"Adaptive generation failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Adaptive generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Adaptive generation failed: {str(e)}"
+        )
 
 
 @router.get("/enhanced/stats", response_model=Dict[str, Any])
@@ -119,21 +132,23 @@ async def get_enhanced_routing_statistics() -> Dict[str, Any]:
     """Get comprehensive enhanced routing performance statistics."""
     try:
         stats = await enhanced_router.get_routing_stats()
-        
+
         # Add additional metrics
-        stats['service_status'] = 'operational'
-        stats['features'] = {
-            'ensemble_routing': True,
-            'adaptive_routing': True,
-            'performance_tracking': True,
-            'multi_model_support': True
+        stats["service_status"] = "operational"
+        stats["features"] = {
+            "ensemble_routing": True,
+            "adaptive_routing": True,
+            "performance_tracking": True,
+            "multi_model_support": True,
         }
-        
+
         return stats
-        
+
     except Exception as e:
         logger.error(f"Failed to get enhanced routing stats: {e}")
-        raise HTTPException(status_code=500, detail=f"Enhanced stats retrieval failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Enhanced stats retrieval failed: {str(e)}"
+        )
 
 
 @router.get("/models", response_model=Dict[str, ModelInfo])

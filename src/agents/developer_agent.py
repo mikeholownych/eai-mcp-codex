@@ -170,9 +170,9 @@ class DeveloperAgent(BaseAgent):
 
         # Best practices
         if review_type in ["best_practices", "comprehensive"]:
-            review_results[
-                "best_practice_violations"
-            ] = await self._check_best_practices(code, language)
+            review_results["best_practice_violations"] = (
+                await self._check_best_practices(code, language)
+            )
 
         # Documentation
         if review_type in ["documentation", "comprehensive"]:
@@ -324,10 +324,10 @@ class DeveloperAgent(BaseAgent):
             )
 
         if test_type in ["integration", "all"]:
-            generated_tests[
-                "integration_tests"
-            ] = await self._generate_integration_tests(
-                code, language, test_framework, code_analysis
+            generated_tests["integration_tests"] = (
+                await self._generate_integration_tests(
+                    code, language, test_framework, code_analysis
+                )
             )
 
         if test_type in ["functional", "all"]:
