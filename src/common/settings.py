@@ -156,6 +156,10 @@ agent_monitor_settings = AgentMonitorSettings(_env_prefix="AGENT_MONITOR_")
 
 global_settings = GlobalSettings()
 
+# Enforce explicit secret in production
+if global_settings.environment == "production" and not os.getenv("JWT_SECRET"):
+    raise ValueError("JWT_SECRET environment variable must be set in production")
+
 # Set Anthropic API key globally if available
 if global_settings.anthropic_api_key:
     os.environ["ANTHROPIC_API_KEY"] = global_settings.anthropic_api_key
