@@ -112,16 +112,16 @@ export default function HomePage() {
               <span className="text-xl font-bold text-white">Ethical AI Insider</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="#features" className="text-dark-300 hover:text-white transition-colors">
                 Features
               </Link>
-              <Link href="#pricing" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="#pricing" className="text-dark-300 hover:text-white transition-colors">
                 Pricing
               </Link>
-              <Link href="/docs" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="/docs" className="text-dark-300 hover:text-white transition-colors">
                 Docs
               </Link>
-              <Link href="/blog" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="/blog" className="text-dark-300 hover:text-white transition-colors">
                 Blog
               </Link>
             </div>
@@ -144,14 +144,14 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
             The Future of{' '}
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
+            <span className="bg-gradient-primary bg-clip-text text-transparent animate-pulse-glow">
               Ethical AI
             </span>{' '}
             Development
           </h1>
-          <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-dark-300 mb-8 max-w-3xl mx-auto leading-relaxed">
             Secure, multi-tenant platform for code generation via agentic AI with real-time collaboration, 
             comprehensive video library, and enterprise-grade security features.
           </p>
@@ -187,13 +187,13 @@ export default function HomePage() {
             {features.map((feature, index) => (
               <Card key={index} hover className="h-full">
                 <Card.Header>
-                  <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center mb-4 shadow-glow">
+                    <feature.icon className="w-6 h-6 text-white feature-icon" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
                 </Card.Header>
                 <Card.Content>
-                  <p className="text-gray-300">{feature.description}</p>
+                  <p className="text-dark-300">{feature.description}</p>
                 </Card.Content>
               </Card>
             ))}
@@ -208,7 +208,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Choose Your Plan
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-xl text-dark-300 max-w-2xl mx-auto">
               Flexible pricing for teams of all sizes. Start free and upgrade as you grow.
             </p>
           </div>
@@ -225,10 +225,10 @@ export default function HomePage() {
                     <div className="mb-4">
                       <span className="text-4xl font-bold text-white">{plan.price}</span>
                       {plan.price !== 'Custom' && (
-                        <span className="text-gray-400 ml-2">{plan.period}</span>
+                        <span className="text-dark-400 ml-2">{plan.period}</span>
                       )}
                     </div>
-                    <p className="text-gray-300">{plan.description}</p>
+                    <p className="text-dark-300">{plan.description}</p>
                   </div>
                 </Card.Header>
                 
@@ -237,7 +237,7 @@ export default function HomePage() {
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center">
                         <CheckIcon className="w-5 h-5 text-primary-400 mr-3 flex-shrink-0" />
-                        <span className="text-gray-300">{feature}</span>
+                        <span className="text-dark-300">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -261,22 +261,30 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <Card className="bg-gradient-primary text-white">
-            <Card.Content>
+          <Card className="bg-gradient-primary text-white shadow-glow border-0 overflow-hidden">
+            <Card.Content className="py-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Ready to Transform Your Development Process?
               </h2>
-              <p className="text-xl mb-8 opacity-90">
+              <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
                 Join thousands of developers who trust Ethical AI Insider for their AI-powered development needs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/register">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                  <Button 
+                    variant="secondary" 
+                    size="lg" 
+                    className="w-full sm:w-auto bg-white text-primary-600 hover:bg-gray-100 hover:text-primary-700 shadow-lg"
+                  >
                     Start Free Trial
                   </Button>
                 </Link>
                 <Link href="/contact">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-primary-600">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full sm:w-auto border-2 border-white text-white hover:bg-white hover:text-primary-600 backdrop-blur-sm"
+                  >
                     Contact Sales
                   </Button>
                 </Link>
@@ -297,7 +305,7 @@ export default function HomePage() {
                 </div>
                 <span className="text-xl font-bold text-white">Ethical AI Insider</span>
               </div>
-              <p className="text-gray-400">
+              <p className="text-dark-400">
                 Building the future of ethical AI development with secure, collaborative tools.
               </p>
             </div>
@@ -305,42 +313,42 @@ export default function HomePage() {
             <div>
               <h3 className="text-white font-semibold mb-4">Product</h3>
               <ul className="space-y-2">
-                <li><Link href="/features" className="text-gray-400 hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="/docs" className="text-gray-400 hover:text-white transition-colors">Documentation</Link></li>
-                <li><Link href="/api" className="text-gray-400 hover:text-white transition-colors">API</Link></li>
+                <li><Link href="/features" className="text-dark-400 hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/pricing" className="text-dark-400 hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/docs" className="text-dark-400 hover:text-white transition-colors">Documentation</Link></li>
+                <li><Link href="/api" className="text-dark-400 hover:text-white transition-colors">API</Link></li>
               </ul>
             </div>
             
             <div>
               <h3 className="text-white font-semibold mb-4">Company</h3>
               <ul className="space-y-2">
-                <li><Link href="/about" className="text-gray-400 hover:text-white transition-colors">About</Link></li>
-                <li><Link href="/blog" className="text-gray-400 hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="/careers" className="text-gray-400 hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/about" className="text-dark-400 hover:text-white transition-colors">About</Link></li>
+                <li><Link href="/blog" className="text-dark-400 hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="/careers" className="text-dark-400 hover:text-white transition-colors">Careers</Link></li>
+                <li><Link href="/contact" className="text-dark-400 hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
             
             <div>
               <h3 className="text-white font-semibold mb-4">Support</h3>
               <ul className="space-y-2">
-                <li><Link href="/help" className="text-gray-400 hover:text-white transition-colors">Help Center</Link></li>
-                <li><Link href="/community" className="text-gray-400 hover:text-white transition-colors">Community</Link></li>
-                <li><Link href="/status" className="text-gray-400 hover:text-white transition-colors">Status</Link></li>
-                <li><Link href="/security" className="text-gray-400 hover:text-white transition-colors">Security</Link></li>
+                <li><Link href="/help" className="text-dark-400 hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link href="/community" className="text-dark-400 hover:text-white transition-colors">Community</Link></li>
+                <li><Link href="/status" className="text-dark-400 hover:text-white transition-colors">Status</Link></li>
+                <li><Link href="/security" className="text-dark-400 hover:text-white transition-colors">Security</Link></li>
               </ul>
             </div>
           </div>
           
           <div className="mt-12 pt-8 border-t border-dark-700 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400">
+            <p className="text-dark-400">
               © 2024 Ethical AI Insider. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy</Link>
-              <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">Terms</Link>
-              <Link href="/cookies" className="text-gray-400 hover:text-white transition-colors">Cookies</Link>
+              <Link href="/privacy" className="text-dark-400 hover:text-white transition-colors">Privacy</Link>
+              <Link href="/terms" className="text-dark-400 hover:text-white transition-colors">Terms</Link>
+              <Link href="/cookies" className="text-dark-400 hover:text-white transition-colors">Cookies</Link>
             </div>
           </div>
         </div>

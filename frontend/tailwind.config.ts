@@ -37,18 +37,18 @@ const config: Config = {
           900: '#1e468a',
           950: '#172c54',
         },
-        // Dark theme colors
+        // Dark theme colors (matching globals.css variables)
         dark: {
           50: '#f8fafc',
           100: '#f1f5f9',
           200: '#e2e8f0',
-          300: '#cbd5e1',
+          300: '#cbd5e1', // --muted-foreground
           400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b', // Main dark background
-          900: '#0f172a', // Darker background
+          500: '#64748b', // --muted
+          600: '#475569', // --border
+          700: '#334155', // --surface-hover, --card-border
+          800: '#1e293b', // --surface, --card-background
+          900: '#0f172a', // --background, --code-background
           950: '#020617', // Darkest background
         },
         // Success, warning, error colors

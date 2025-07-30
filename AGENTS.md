@@ -40,6 +40,11 @@ Every agent must fully comply with **all** of the following before merge or depl
 
 ---
 
+## Progress tracking and Priorites
+Check PRIORITIES.md for current priorities and status. This file should always be updated to reflect current status to avoid collisions or duplicated work effort.
+
+---
+
 ## 📦 Standard Agent Folder Structure
 
 ```bash
