@@ -17,6 +17,7 @@ from .metrics import get_metrics_collector, record_request, get_metrics_output
 from .database import DatabaseManager, get_connection
 from .redis_client import get_redis, get_redis_connection
 from .consul_client import register_service
+from .service_registry import ServiceRegistry
 
 # Advanced utilities
 from .auth import AuthManager, get_auth_manager, authenticate, authenticate_request
@@ -69,6 +70,7 @@ __all__ = [
     "get_redis",
     "get_redis_connection",
     "register_service",
+    "ServiceRegistry",
     # Advanced
     "AuthManager",
     "get_auth_manager",
