@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import re
 from pathlib import Path
 from typing import Iterable, List, Pattern, Tuple, Dict, Any, Optional
@@ -14,6 +15,7 @@ from src.common.logging import get_logger
 from .config import settings
 from .models import ModelRequest, ModelResponse
 from .claude_client import get_claude_client
+from .local_client import get_local_client
 
 
 logger = get_logger("model_router")
@@ -39,20 +41,29 @@ class RoutingTable:
         return self._intelligent_route(text, context)
 
     def _normalize_model_name(self, model: str) -> str:
-        """Normalize model names from config to actual Claude model names."""
+        """Normalize model names from config to actual model names."""
         model_mapping = {
+            # Claude models
             "opus": "claude-3-opus-20240229",
             "sonnet": "claude-3-5-sonnet-20241022",
             "haiku": "claude-3-5-haiku-20241022",
             "o3": "claude-3-opus-20240229",  # Treat O3 requests as Opus
             "4": "claude-3-5-sonnet-20241022",  # Treat Sonnet 4 as 3.5 Sonnet
+            # Local models
+            "mistral": "mistral",
+            "local": "mistral",
+            "ollama": "mistral",
+            "local-llm": "local-llm",
         }
-        return model_mapping.get(model.lower(), "claude-3-5-haiku-20241022")
+        return model_mapping.get(model.lower(), "mistral")  # Default to local mistral
 
     def _intelligent_route(
         self, text: str, context: Optional[Dict[str, Any]] = None
     ) -> str:
         """Intelligent model selection based on content analysis."""
+        # Check for preference for local models
+        prefer_local = os.getenv("PREFER_LOCAL_MODELS", "true").lower() == "true"
+        
         # Analyze text complexity and requirements
         complexity_indicators = {
             "high": [
@@ -78,17 +89,27 @@ class RoutingTable:
 
         # Check for high complexity indicators
         if any(indicator in text_lower for indicator in complexity_indicators["high"]):
-            return "claude-3-opus-20240229"
+            return "claude-3-opus-20240229" if not prefer_local else "mistral"
 
+        # Check for coding-specific indicators
+        coding_indicators = [
+            "code", "function", "class", "algorithm", "programming", "debug", 
+            "implement", "python", "javascript", "java", "c++", "sql", "api",
+            "refactor", "optimize", "bug", "error", "syntax", "variable"
+        ]
+        
+        if any(indicator in text_lower for indicator in coding_indicators):
+            return "claude-3-5-sonnet-20241022" if not prefer_local else "deepseek-coder"
+        
         # Check for medium complexity indicators
         if any(
             indicator in text_lower for indicator in complexity_indicators["medium"]
         ):
-            return "claude-3-5-sonnet-20241022"
+            return "claude-3-5-sonnet-20241022" if not prefer_local else "deepseek-coder"
 
         # Check text length
         if len(text) > 1000:
-            return "claude-3-5-sonnet-20241022"
+            return "claude-3-5-sonnet-20241022" if not prefer_local else "mistral"
 
         # Context-based routing
         if context:
@@ -98,12 +119,12 @@ class RoutingTable:
                 "security_analysis",
                 "complex_planning",
             ]:
-                return "claude-3-opus-20240229"
-            elif task_type in ["code_generation", "code_review", "debugging"]:
-                return "claude-3-5-sonnet-20241022"
+                return "claude-3-opus-20240229" if not prefer_local else "mistral"
+            elif task_type in ["code_generation", "code_review", "debugging", "programming"]:
+                return "claude-3-5-sonnet-20241022" if not prefer_local else "deepseek-coder"
 
-        # Default to most cost-effective model
-        return "claude-3-5-haiku-20241022"
+        # Default to local model if preferred, otherwise cost-effective Claude model
+        return "mistral" if prefer_local else "claude-3-5-haiku-20241022"
 
 
 def _load_rules(file_path: str) -> RoutingTable:
@@ -136,16 +157,13 @@ _table = _load_rules(settings.rules_file)
 
 
 async def route_async(req: ModelRequest) -> ModelResponse:
-    """Asynchronously route request to Claude API and return response."""
+    """Asynchronously route request to appropriate LLM (Claude or local) and return response."""
     try:
-        # Get Claude client
-        claude_client = get_claude_client()
-
         # Select model
         selected_model = _table.select(req.text, req.context)
         logger.info(f"Selected model: {selected_model} for request")
 
-        # Prepare context for Claude
+        # Prepare system prompt
         system_prompt = None
         if req.context:
             if req.context.get("system_prompt"):
@@ -153,38 +171,79 @@ async def route_async(req: ModelRequest) -> ModelResponse:
             elif req.context.get("task_type"):
                 system_prompt = _get_system_prompt_for_task(req.context["task_type"])
 
-        # Send request to Claude
-        claude_response = await claude_client.route_and_send(
-            text=req.text, context=req.context, system_prompt=system_prompt
-        )
+        # Determine if we should use local or Claude API
+        is_local_model = selected_model in ["mistral", "local-llm"]
+        
+        if is_local_model:
+            # Use local LLM client
+            local_client = get_local_client()
+            response = await local_client.route_and_send(
+                text=req.text, context=req.context, system_prompt=system_prompt
+            )
+            
+            # Calculate usage metrics
+            usage_info = {
+                "input_tokens": len(req.text.split()),  # Approximate
+                "output_tokens": response.usage.get("output_tokens", 0),
+                "model_used": response.model,
+                "response_time_ms": (
+                    datetime.utcnow() - response.timestamp
+                ).total_seconds() * 1000,
+                "cost": 0.0,  # Local models are free
+                "provider": "local",
+            }
 
-        # Calculate usage metrics
-        usage_info = {
-            "input_tokens": claude_response.usage.get("input_tokens", 0),
-            "output_tokens": claude_response.usage.get("output_tokens", 0),
-            "model_used": claude_response.model,
-            "response_time_ms": (
-                datetime.utcnow() - claude_response.timestamp
-            ).total_seconds()
-            * 1000,
-        }
-
-        return ModelResponse(
-            result=claude_response.content,
-            model_used=claude_response.model,
-            usage=usage_info,
-            request_id=claude_response.id,
-            metadata={
-                "stop_reason": claude_response.stop_reason,
-                "timestamp": claude_response.timestamp.isoformat(),
-                "routing_decision": {
-                    "selected_model": selected_model,
-                    "selection_reason": "rule_based"
-                    if selected_model
-                    else "intelligent_routing",
+            return ModelResponse(
+                result=response.content,
+                model_used=response.model,
+                usage=usage_info,
+                request_id=response.id,
+                metadata={
+                    "stop_reason": response.stop_reason,
+                    "timestamp": response.timestamp.isoformat(),
+                    "routing_decision": {
+                        "selected_model": selected_model,
+                        "selection_reason": "local_preferred",
+                    },
+                    "provider": "local",
                 },
-            },
-        )
+            )
+        else:
+            # Use Claude API client
+            claude_client = get_claude_client()
+            claude_response = await claude_client.route_and_send(
+                text=req.text, context=req.context, system_prompt=system_prompt
+            )
+
+            # Calculate usage metrics
+            usage_info = {
+                "input_tokens": claude_response.usage.get("input_tokens", 0),
+                "output_tokens": claude_response.usage.get("output_tokens", 0),
+                "model_used": claude_response.model,
+                "response_time_ms": (
+                    datetime.utcnow() - claude_response.timestamp
+                ).total_seconds()
+                * 1000,
+                "provider": "claude",
+            }
+
+            return ModelResponse(
+                result=claude_response.content,
+                model_used=claude_response.model,
+                usage=usage_info,
+                request_id=claude_response.id,
+                metadata={
+                    "stop_reason": claude_response.stop_reason,
+                    "timestamp": claude_response.timestamp.isoformat(),
+                    "routing_decision": {
+                        "selected_model": selected_model,
+                        "selection_reason": "rule_based"
+                        if selected_model
+                        else "intelligent_routing",
+                    },
+                    "provider": "claude",
+                },
+            )
 
     except Exception as e:
         logger.error(f"Error routing request: {e}")

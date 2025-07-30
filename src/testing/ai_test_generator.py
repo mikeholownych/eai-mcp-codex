@@ -430,31 +430,31 @@ class AITestGenerator:
         
         # Generate tests for each function
         for function_name in request.code_context.functions:
-            function_tests = await self._generate_function_tests(
+            function_tests = await asyncio.gather(*self._generate_function_tests() if isinstance(self._generate_function_tests(, list) else (await self._generate_function_tests( if asyncio.iscoroutine(self._generate_function_tests() else self._generate_function_tests()
                 function_name, request
             )
             test_cases.extend(function_tests)
         
         # Generate class tests
         for class_name in request.code_context.classes:
-            class_tests = await self._generate_class_tests(
+            class_tests = await asyncio.gather(*self._generate_class_tests() if isinstance(self._generate_class_tests(, list) else (await self._generate_class_tests( if asyncio.iscoroutine(self._generate_class_tests() else self._generate_class_tests()
                 class_name, request
             )
             test_cases.extend(class_tests)
         
         # Generate integration tests if requested
         if TestType.INTEGRATION in request.test_types:
-            integration_tests = await self._generate_integration_tests(request)
+            integration_tests = await asyncio.gather(*self._generate_integration_tests(request) if isinstance(self._generate_integration_tests(request, list) else (await self._generate_integration_tests(request if asyncio.iscoroutine(self._generate_integration_tests(request) else self._generate_integration_tests(request))
             test_cases.extend(integration_tests)
         
         # Generate performance tests if requested
         if TestType.PERFORMANCE in request.test_types or request.include_performance_tests:
-            performance_tests = await self._generate_performance_tests(request)
+            performance_tests = await asyncio.gather(*self._generate_performance_tests(request) if isinstance(self._generate_performance_tests(request, list) else (await self._generate_performance_tests(request if asyncio.iscoroutine(self._generate_performance_tests(request) else self._generate_performance_tests(request))
             test_cases.extend(performance_tests)
         
         # Generate security tests if requested
         if TestType.SECURITY in request.test_types or request.include_security_tests:
-            security_tests = await self._generate_security_tests(request)
+            security_tests = await asyncio.gather(*self._generate_security_tests(request) if isinstance(self._generate_security_tests(request, list) else (await self._generate_security_tests(request if asyncio.iscoroutine(self._generate_security_tests(request) else self._generate_security_tests(request))
             test_cases.extend(security_tests)
         
         # Calculate coverage estimate
@@ -491,7 +491,7 @@ class AITestGenerator:
         # Generate AI-powered tests if enabled
         if self.ai_enabled:
             try:
-                ai_tests = await self._generate_ai_tests(function_name, function_context, request)
+                ai_tests = await asyncio.gather(*self._generate_ai_tests(function_name,) if isinstance(self._generate_ai_tests(function_name,, list) else (await self._generate_ai_tests(function_name, if asyncio.iscoroutine(self._generate_ai_tests(function_name,) else self._generate_ai_tests(function_name,) function_context, request)
                 test_cases.extend(ai_tests)
             except Exception as e:
                 logger.warning(f"AI test generation failed for {function_name}: {e}")
@@ -516,7 +516,7 @@ class AITestGenerator:
         )
         
         try:
-            response = await self.claude_client.generate_response(model_request)
+            response = await asyncio.gather(*self.claude_client.generate_response(model_request) if isinstance(self.claude_client.generate_response(model_request, list) else (await self.claude_client.generate_response(model_request if asyncio.iscoroutine(self.claude_client.generate_response(model_request) else self.claude_client.generate_response(model_request))
             return self._parse_ai_test_response(response.result, function_name, request)
         except Exception as e:
             logger.error(f"AI test generation failed: {e}")

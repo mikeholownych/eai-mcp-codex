@@ -4,8 +4,14 @@ services:
     log_level: DEBUG
     performance_metrics: true
     mock_anthropic_api: false
+    local_llm_enabled: true
+    local_llm_url: "http://fastapi-llm:8000"
+    ollama_url: "http://ollama:11434"
+    qdrant_url: "http://qdrant:6333"
+    prefer_local_models: true
     routing_rules:
-      default_model: claude-3-haiku-20240307
+      default_model: mistral
+      claude_fallback: claude-3-haiku-20240307
       fallback_enabled: true
     
   plan_management:
@@ -24,11 +30,15 @@ services:
     max_concurrent_workflows: 10
     step_timeout: 1800  # 30 minutes
     retry_attempts: 3
+    qdrant_url: "http://qdrant:6333"
+    use_rag: true
     
   verification_feedback:
     log_level: DEBUG
     strict_verification: false  # More lenient in dev
     parallel_verification: true
+    qdrant_url: "http://qdrant:6333"
+    use_vector_search: true
 
 database:
   pool_size: 5

@@ -1,5 +1,17 @@
 rules:
+  # Coding-specific tasks get the specialized model
+  - match: '(?i).*(code|function|class|algorithm|programming|debug|implement|python|javascript|java|c\+\+|sql|api|refactor|optimize|bug|error|syntax|variable).*'
+    model: deepseek-coder
+  # Local models for development and general use
+  - match: '(?i).*(local|offline|mistral).*'
+    model: mistral
+  - match: '(?i).*(simple|quick|basic|test).*'
+    model: deepseek-coder
+  # Complex tasks that might benefit from Claude
+  - match: '(?i).*(architecture|security|complex|analysis|research).*'
+    model: sonnet
   - match: '^/analysis'
     model: sonnet
+  # Default to coding model for development efficiency
   - match: '.*'
-    model: haiku
+    model: deepseek-coder

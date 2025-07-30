@@ -6,6 +6,7 @@ from src.common.logging import get_logger
 from src.common.health_check import health
 
 from .routes import router
+from .feedback_processor import initialize_feedback_processor, shutdown_feedback_processor
 
 app = FastAPI(title="Verification Feedback")
 app.include_router(router)
@@ -18,5 +19,12 @@ def health_check() -> dict:
 
 
 @app.on_event("startup")
-def startup() -> None:
+async def startup() -> None:
+    await initialize_feedback_processor()
     logger.info("Verification Feedback service started")
+
+
+@app.on_event("shutdown")
+async def shutdown() -> None:
+    await shutdown_feedback_processor()
+    logger.info("Verification Feedback service shutdown")

@@ -372,6 +372,87 @@ monitoring-agents: ## Open agent monitoring dashboards
 	@command -v open >/dev/null 2>&1 && open http://localhost:8011 || echo "Agent Pool: http://localhost:8011"
 	@command -v open >/dev/null 2>&1 && open http://localhost:8012 || echo "Collaboration: http://localhost:8012"
 
+##@ Frontend Management
+frontend-dev: ## Start frontend in development mode (both customer and staff)
+	@echo "🌐 Starting frontend development servers..."
+	cd frontend && npm run dev &
+	cd frontend && npm run dev:staff &
+	@echo "✅ Frontend servers started:"
+	@echo "   Customer Frontend: http://localhost:3000"
+	@echo "   Staff Frontend: http://localhost:3001"
+
+frontend-build: ## Build frontend applications
+	@echo "🔨 Building frontend applications..."
+	cd frontend && npm run build
+	@echo "✅ Frontend build completed"
+
+frontend-start: ## Start production frontend servers
+	@echo "🚀 Starting production frontend servers..."
+	./scripts/start_frontend.sh
+
+frontend-stop: ## Stop frontend servers
+	@echo "🛑 Stopping frontend servers..."
+	@pkill -f "next start" || true
+	@echo "✅ Frontend servers stopped"
+
+frontend-restart: frontend-stop frontend-start ## Restart frontend servers
+
+frontend-logs: ## Show frontend container logs
+	docker compose logs -f frontend staff-frontend
+
+frontend-shell: ## Open shell in frontend container
+	docker compose exec frontend /bin/bash
+
+frontend-install: ## Install frontend dependencies
+	@echo "📦 Installing frontend dependencies..."
+	cd frontend && npm install
+	@echo "✅ Dependencies installed"
+
+frontend-lint: ## Lint frontend code
+	@echo "🔍 Linting frontend code..."
+	cd frontend && npm run lint
+	@echo "✅ Frontend linting completed"
+
+frontend-test: ## Run frontend tests (when available)
+	@echo "🧪 Running frontend tests..."
+	cd frontend && npm test 2>/dev/null || echo "No tests configured"
+
+##@ Tunnel Management
+tunnel-start: ## Start Cloudflare tunnel
+	@echo "🚇 Starting Cloudflare tunnel..."
+	cd cloudflare-tunnel && ./setup.sh
+	@echo "✅ Tunnel started"
+
+tunnel-stop: ## Stop Cloudflare tunnel
+	@echo "🛑 Stopping Cloudflare tunnel..."
+	cd cloudflare-tunnel && ./manage.sh stop
+	@echo "✅ Tunnel stopped"
+
+tunnel-status: ## Check tunnel status
+	@echo "📊 Checking tunnel status..."
+	cd cloudflare-tunnel && ./verify.sh
+
+tunnel-logs: ## Show tunnel logs
+	cd cloudflare-tunnel && ./manage.sh logs
+
+##@ Full Stack Management
+full-stack: build up frontend-start tunnel-start ## Start complete stack (backend + frontend + tunnel)
+	@echo "🎉 Full stack started successfully!"
+	@echo "🌐 External URLs:"
+	@echo "   Customer Frontend: https://new.ethical-ai-insider.com"
+	@echo "   Staff Frontend: https://staff.ethical-ai-insider.com"
+	@echo "   API Gateway: https://newapi.ethical-ai-insider.com"
+	@echo "🏠 Local URLs:"
+	@echo "   Customer Frontend: http://localhost:3000"
+	@echo "   Staff Frontend: http://localhost:3001"
+	@echo "   API Gateway: http://localhost"
+	@echo "   Grafana: http://localhost:3000"
+
+full-stack-stop: tunnel-stop frontend-stop down ## Stop complete stack
+	@echo "✅ Full stack stopped"
+
+full-stack-restart: full-stack-stop full-stack ## Restart complete stack
+
 ##@ Documentation
 docs: ## Generate documentation
 	@echo "📚 Generating documentation..."

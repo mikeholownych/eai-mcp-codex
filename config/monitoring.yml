@@ -1,0 +1,320 @@
+# Performance Monitoring Configuration for RAG Agent System
+# This configuration defines metrics, alerts, and monitoring dashboards
+
+metrics:
+  collection_interval: 30  # seconds
+  retention_period: 7  # days
+  
+  # Model performance metrics
+  model_metrics:
+    response_time:
+      name: "llm_response_time_seconds"
+      description: "Time taken to generate model response"
+      type: "histogram"
+      buckets: [0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0]
+      labels: ["model", "request_type", "success"]
+    
+    token_throughput:
+      name: "llm_tokens_per_second"
+      description: "Tokens generated per second"
+      type: "gauge"
+      labels: ["model"]
+    
+    token_usage:
+      name: "llm_token_count_total"
+      description: "Total tokens processed"
+      type: "counter"
+      labels: ["model", "token_type"]  # input, output
+    
+    error_rate:
+      name: "llm_error_rate"
+      description: "Rate of failed requests"
+      type: "counter"
+      labels: ["model", "error_type"]
+    
+    context_window_usage:
+      name: "llm_context_usage_ratio"
+      description: "Percentage of context window utilized"
+      type: "histogram"
+      buckets: [0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9, 0.95, 1.0]
+      labels: ["model"]
+  
+  # RAG system metrics
+  rag_metrics:
+    vector_search_time:
+      name: "rag_vector_search_time_seconds"
+      description: "Time taken for vector similarity search"
+      type: "histogram"
+      buckets: [0.01, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0]
+      labels: ["collection", "search_type"]
+    
+    context_retrieval_accuracy:
+      name: "rag_context_relevance_score"
+      description: "Relevance score of retrieved context"
+      type: "histogram"
+      buckets: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+      labels: ["collection"]
+    
+    context_length:
+      name: "rag_context_length_chars"
+      description: "Length of retrieved context in characters"
+      type: "histogram"
+      buckets: [100, 500, 1000, 2000, 4000, 8000, 16000]
+      labels: ["collection"]
+    
+    embedding_cache_hit_rate:
+      name: "rag_embedding_cache_hit_rate"
+      description: "Cache hit rate for embeddings"
+      type: "gauge"
+      labels: ["cache_type"]
+  
+  # Agent collaboration metrics
+  agent_metrics:
+    collaboration_success_rate:
+      name: "agent_collaboration_success_rate"
+      description: "Success rate of multi-agent collaborations"
+      type: "gauge"
+      labels: ["collaboration_type", "agents_involved"]
+    
+    consensus_time:
+      name: "agent_consensus_time_seconds"
+      description: "Time to reach consensus in multi-agent scenarios"
+      type: "histogram"
+      buckets: [1, 5, 15, 30, 60, 120, 300]
+      labels: ["consensus_type", "agent_count"]
+    
+    agent_utilization:
+      name: "agent_utilization_ratio"
+      description: "Percentage of time agents are actively processing"
+      type: "gauge"
+      labels: ["agent_type"]
+    
+    handoff_latency:
+      name: "agent_handoff_latency_seconds"
+      description: "Time taken for agent-to-agent task handoff"
+      type: "histogram"
+      buckets: [0.1, 0.5, 1.0, 2.0, 5.0]
+      labels: ["from_agent", "to_agent"]
+
+# Alert configurations
+alerts:
+  # Model performance alerts
+  slow_response:
+    metric: "llm_response_time_seconds"
+    condition: "p95 > 10"  # 95th percentile over 10 seconds
+    duration: "2m"
+    severity: "warning"
+    description: "Model response time is consistently slow"
+    
+  high_error_rate:
+    metric: "llm_error_rate"
+    condition: "rate > 0.1"  # Error rate above 10%
+    duration: "1m"
+    severity: "critical"
+    description: "High model error rate detected"
+  
+  context_overflow:
+    metric: "llm_context_usage_ratio"
+    condition: "p90 > 0.9"  # 90th percentile over 90% context usage
+    duration: "5m"
+    severity: "warning"
+    description: "Context window utilization is very high"
+  
+  # RAG system alerts
+  poor_retrieval_quality:
+    metric: "rag_context_relevance_score"
+    condition: "avg < 0.6"  # Average relevance below 60%
+    duration: "5m"
+    severity: "warning"
+    description: "RAG context retrieval quality is poor"
+  
+  slow_vector_search:
+    metric: "rag_vector_search_time_seconds"
+    condition: "p95 > 1.0"  # 95th percentile over 1 second
+    duration: "2m"
+    severity: "warning"
+    description: "Vector database search is slow"
+  
+  # Agent collaboration alerts
+  consensus_timeout:
+    metric: "agent_consensus_time_seconds"
+    condition: "p90 > 120"  # 90th percentile over 2 minutes
+    duration: "3m"
+    severity: "warning"
+    description: "Agent consensus taking too long"
+  
+  collaboration_failures:
+    metric: "agent_collaboration_success_rate"
+    condition: "rate < 0.8"  # Success rate below 80%
+    duration: "5m"
+    severity: "critical"
+    description: "High rate of collaboration failures"
+
+# Dashboard configurations for Grafana
+dashboards:
+  model_performance:
+    title: "LLM Model Performance"
+    panels:
+      - title: "Response Time Distribution"
+        type: "histogram"
+        metric: "llm_response_time_seconds"
+        time_range: "1h"
+        
+      - title: "Tokens per Second by Model"
+        type: "graph"
+        metric: "llm_tokens_per_second"
+        group_by: ["model"]
+        
+      - title: "Error Rate by Model"
+        type: "singlestat"
+        metric: "llm_error_rate"
+        aggregation: "rate"
+        
+      - title: "Context Window Utilization"
+        type: "heatmap"
+        metric: "llm_context_usage_ratio"
+        group_by: ["model"]
+  
+  rag_system:
+    title: "RAG System Performance"
+    panels:
+      - title: "Vector Search Performance"
+        type: "graph"
+        metric: "rag_vector_search_time_seconds"
+        
+      - title: "Context Relevance Scores"
+        type: "histogram"
+        metric: "rag_context_relevance_score"
+        
+      - title: "Context Length Distribution"
+        type: "histogram"
+        metric: "rag_context_length_chars"
+        
+      - title: "Cache Hit Rate"
+        type: "singlestat"
+        metric: "rag_embedding_cache_hit_rate"
+  
+  agent_collaboration:
+    title: "Agent Collaboration Metrics"
+    panels:
+      - title: "Collaboration Success Rate"
+        type: "singlestat"
+        metric: "agent_collaboration_success_rate"
+        
+      - title: "Consensus Time Distribution"
+        type: "histogram"
+        metric: "agent_consensus_time_seconds"
+        
+      - title: "Agent Utilization"
+        type: "graph"
+        metric: "agent_utilization_ratio"
+        group_by: ["agent_type"]
+        
+      - title: "Handoff Latency"
+        type: "heatmap"
+        metric: "agent_handoff_latency_seconds"
+
+# Performance optimization thresholds
+optimization_thresholds:
+  model_selection:
+    # Automatically switch models based on performance
+    response_time_threshold: 5.0  # seconds
+    error_rate_threshold: 0.05   # 5%
+    context_usage_threshold: 0.85  # 85%
+  
+  caching:
+    # Enable aggressive caching when performance degrades
+    enable_embedding_cache: true
+    enable_response_cache: true
+    cache_ttl: 3600  # 1 hour
+    max_cache_size: "1GB"
+  
+  load_balancing:
+    # Distribute load across multiple model instances
+    enable_load_balancing: true
+    max_requests_per_model: 10
+    request_timeout: 30  # seconds
+    
+  scaling:
+    # Auto-scaling configuration
+    scale_up_threshold: 0.8   # 80% utilization
+    scale_down_threshold: 0.3  # 30% utilization
+    min_instances: 1
+    max_instances: 5
+
+# Logging configuration for performance analysis
+logging:
+  performance_logs:
+    enabled: true
+    level: "INFO"
+    format: "json"
+    include_metrics:
+      - request_id
+      - model_name
+      - response_time
+      - token_count
+      - context_length
+      - error_details
+    
+  slow_query_logging:
+    enabled: true
+    threshold: 5.0  # seconds
+    include_full_context: false  # Privacy consideration
+    max_log_size: "100MB"
+  
+  error_logging:
+    enabled: true
+    include_stack_trace: true
+    alert_on_new_errors: true
+    error_aggregation_window: "5m"
+
+# Health check configuration
+health_checks:
+  model_availability:
+    check_interval: 30  # seconds
+    timeout: 10  # seconds
+    retry_attempts: 3
+    
+  vector_database:
+    check_interval: 60  # seconds
+    timeout: 5  # seconds
+    test_query: "test connection"
+    
+  agent_communication:
+    check_interval: 45  # seconds
+    ping_timeout: 3  # seconds
+    test_collaboration: true
+
+# Resource monitoring
+resources:
+  cpu_monitoring:
+    enabled: true
+    alert_threshold: 85  # percent
+    
+  memory_monitoring:
+    enabled: true
+    alert_threshold: 90  # percent
+    
+  disk_monitoring:
+    enabled: true
+    alert_threshold: 85  # percent
+    
+  gpu_monitoring:
+    enabled: true
+    alert_threshold: 95  # percent
+    track_vram_usage: true
+
+# Performance testing schedule
+automated_testing:
+  benchmark_schedule: "0 2 * * *"  # Daily at 2 AM
+  load_test_schedule: "0 3 * * 0"  # Weekly on Sunday at 3 AM
+  
+  benchmark_config:
+    test_duration: 300  # 5 minutes
+    concurrent_requests: 5
+    test_scenarios: ["code_generation", "code_review", "debugging"]
+    
+  load_test_config:
+    duration: 1800  # 30 minutes
+    max_concurrent_users: 50
+    ramp_up_time: 300  # 5 minutes

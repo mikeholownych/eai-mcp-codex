@@ -96,7 +96,7 @@ async def generate_tests(request: GenerateTestsRequest) -> TestSuiteResponse:
         )
         
         # Generate test suite
-        test_suite = await ai_test_generator.generate_test_suite(test_request)
+        test_suite = await asyncio.gather(*ai_test_generator.generate_test_suite(test_request) if isinstance(ai_test_generator.generate_test_suite(test_request, list) else (await ai_test_generator.generate_test_suite(test_request if asyncio.iscoroutine(ai_test_generator.generate_test_suite(test_request) else ai_test_generator.generate_test_suite(test_request))
         
         # Convert test cases to serializable format
         test_cases_data = []
@@ -144,7 +144,7 @@ async def generate_tests_from_file(file: UploadFile = File(...),
             raise HTTPException(status_code=400, detail="No filename provided")
         
         # Read file content
-        content = await file.read()
+        content = await asyncio.gather(*file.read() if isinstance(file.read(, list) else (await file.read( if asyncio.iscoroutine(file.read() else file.read())
         try:
             code_content = content.decode('utf-8')
         except UnicodeDecodeError:
@@ -162,7 +162,7 @@ async def generate_tests_from_file(file: UploadFile = File(...),
             coverage_target=coverage_target
         )
         
-        return await generate_tests(request)
+        return await asyncio.gather(*generate_tests(request) if isinstance(generate_tests(request, list) else (await generate_tests(request if asyncio.iscoroutine(generate_tests(request) else generate_tests(request))
         
     except HTTPException:
         raise
@@ -209,7 +209,7 @@ async def analyze_test_quality(request: AnalyzeTestsRequest) -> Dict[str, Any]:
         )
         
         # Analyze test quality
-        analysis = await ai_test_generator.analyze_test_quality(mock_suite)
+        analysis = await asyncio.gather(*ai_test_generator.analyze_test_quality(mock_suite) if isinstance(ai_test_generator.analyze_test_quality(mock_suite, list) else (await ai_test_generator.analyze_test_quality(mock_suite if asyncio.iscoroutine(ai_test_generator.analyze_test_quality(mock_suite) else ai_test_generator.analyze_test_quality(mock_suite))
         
         return {
             "suite_id": request.test_suite_id,
@@ -279,7 +279,7 @@ async def generate_tests_for_function(function_name: str,
         )
         
         # Generate tests for the specific function
-        test_cases = await ai_test_generator._generate_function_tests(function_name, test_request)
+        test_cases = await asyncio.gather(*ai_test_generator._generate_function_tests(function_name,) if isinstance(ai_test_generator._generate_function_tests(function_name,, list) else (await ai_test_generator._generate_function_tests(function_name, if asyncio.iscoroutine(ai_test_generator._generate_function_tests(function_name,) else ai_test_generator._generate_function_tests(function_name,) test_request)
         
         # Convert to serializable format
         test_cases_data = []
