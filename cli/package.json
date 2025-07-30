@@ -1,0 +1,53 @@
+{
+  "name": "mcp-agent-cli",
+  "version": "1.0.0",
+  "description": "Command-line interface for MCP Agent Network",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "node --watch dist/index.js",
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "mcp",
+    "agent",
+    "cli",
+    "microservices",
+    "ai"
+  ],
+  "author": "MCP Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1",
+    "inquirer": "^8.2.6",
+    "mcp-agent-cli": "^1.0.0",
+    "node-fetch": "^3.3.2",
+    "ora": "^5.4.1",
+    "table": "^6.8.1",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.1.0",
+    "@types/node-fetch": "^2.6.12",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

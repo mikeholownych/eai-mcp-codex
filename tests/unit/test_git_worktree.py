@@ -1,9 +1,15 @@
 from pathlib import Path
+import pytest
+import sys
+import os
+
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
 
 from src.git_worktree.worktree_manager import create
 
 
-def test_create(tmp_path: Path) -> None:
+@pytest.mark.asyncio
+async def test_create(tmp_path: Path) -> None:
     path = tmp_path / "repo"
-    result = create(str(path))
+    result = await create(str(path))
     assert Path(result).exists()

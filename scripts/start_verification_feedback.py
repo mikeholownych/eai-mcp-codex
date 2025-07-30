@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.getcwd())
+
 from uvicorn import run
 
 from src.verification_feedback.app import app

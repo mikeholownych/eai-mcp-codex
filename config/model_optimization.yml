@@ -1,0 +1,200 @@
+# Model Optimization Configuration for RAG Agent System
+# This file contains optimized parameters for different models and use cases
+
+models:
+  deepseek-coder:
+    name: "deepseek-coder:6.7b"
+    provider: "ollama"
+    context_window: 32768
+    max_tokens: 8192
+    temperature: 0.1  # Very low for precise code generation
+    top_p: 0.95
+    repeat_penalty: 1.05
+    num_thread: 8
+    num_ctx: 32768
+    system_prompt: |
+      You are an expert software engineer working in a multi-agent collaborative environment. 
+      Your responses should be:
+      - Precise and technically accurate
+      - Well-documented with clear comments
+      - Following best practices and security guidelines
+      - Optimized for maintainability and performance
+    use_cases:
+      - code_generation
+      - debugging
+      - code_review
+      - architecture_design
+      - security_analysis
+    optimization_notes: |
+      - Excellent for coding tasks requiring precision
+      - Large context window allows for complex codebases
+      - Low temperature ensures consistent, reliable outputs
+
+  mistral:
+    name: "mistral"
+    provider: "ollama"
+    context_window: 8192
+    max_tokens: 4096
+    temperature: 0.3
+    top_p: 0.9
+    repeat_penalty: 1.1
+    num_thread: 4
+    num_ctx: 8192
+    system_prompt: |
+      You are a helpful AI assistant working in a collaborative agent environment.
+      Provide clear, concise, and accurate responses while maintaining a professional tone.
+    use_cases:
+      - general_purpose
+      - analysis
+      - brainstorming
+      - documentation
+    optimization_notes: |
+      - Good balance between creativity and consistency
+      - Suitable for general-purpose tasks
+      - Moderate context window for most use cases
+
+  codellama:
+    name: "codellama:13b"
+    provider: "ollama"
+    context_window: 16384
+    max_tokens: 6144
+    temperature: 0.2
+    top_p: 0.9
+    repeat_penalty: 1.1
+    num_thread: 6
+    num_ctx: 16384
+    system_prompt: |
+      You are a coding assistant focused on generating clean, maintainable code solutions.
+      Prioritize code clarity, documentation, and adherence to software engineering principles.
+    use_cases:
+      - code_generation
+      - code_explanation
+      - refactoring
+      - testing
+    optimization_notes: |
+      - Specialized for code-related tasks
+      - Good balance of model size and performance
+      - Excellent for educational coding scenarios
+
+# RAG-specific optimizations
+rag:
+  embedding:
+    model: "all-MiniLM-L6-v2"
+    vector_size: 384
+    chunk_size: 512
+    chunk_overlap: 50
+    max_context_length: 4096
+  
+  search:
+    default_limit: 5
+    score_threshold: 0.7
+    max_results: 10
+    rerank_results: true
+  
+  context_integration:
+    max_context_tokens: 2048
+    context_template: |
+      Based on the following relevant information:
+      
+      {context}
+      
+      Please answer: {query}
+    
+    response_template: |
+      System: You have access to relevant context information. Use it to provide accurate, well-informed responses.
+      
+      Context: {context}
+      
+      User: {query}
+      
+      Assistant:
+
+# Performance optimization settings
+performance:
+  ollama:
+    parallel_requests: 4
+    request_timeout: 120
+    keep_alive: "5m"
+    gpu_layers: -1  # Use all available GPU layers
+    
+  qdrant:
+    collection_settings:
+      vector_size: 384
+      distance: "Cosine"
+      on_disk_payload: true
+      hnsw_config:
+        m: 16
+        ef_construct: 200
+        ef: 128
+        max_indexing_threads: 4
+    
+    search_params:
+      exact: false
+      hnsw_ef: 128
+
+# Agent collaboration optimization
+collaboration:
+  consensus_threshold: 0.8
+  max_iterations: 5
+  timeout_seconds: 300
+  
+  agent_specialization:
+    planner:
+      model: "deepseek-coder"
+      temperature: 0.2
+      focus: "architectural_planning"
+      
+    developer:
+      model: "deepseek-coder"
+      temperature: 0.1
+      focus: "code_implementation"
+      
+    reviewer:
+      model: "deepseek-coder"
+      temperature: 0.15
+      focus: "code_quality"
+      
+    security:
+      model: "deepseek-coder"
+      temperature: 0.1
+      focus: "security_analysis"
+
+# Monitoring and metrics
+monitoring:
+  enable_metrics: true
+  log_level: "INFO"
+  performance_tracking:
+    - response_time
+    - token_usage
+    - context_length
+    - model_switching
+    - rag_effectiveness
+  
+  alerts:
+    slow_response_threshold: 30  # seconds
+    high_error_rate_threshold: 0.05  # 5%
+    context_overflow_threshold: 0.9  # 90% of context window
+
+# Environment-specific overrides
+environments:
+  development:
+    models:
+      deepseek-coder:
+        temperature: 0.2  # Slightly higher for development
+        max_tokens: 4096  # Smaller for faster responses in dev
+    
+    performance:
+      ollama:
+        parallel_requests: 2
+        request_timeout: 60
+  
+  production:
+    models:
+      deepseek-coder:
+        temperature: 0.1  # Lower for consistency in production
+        max_tokens: 8192  # Full capacity for production
+    
+    performance:
+      ollama:
+        parallel_requests: 8
+        request_timeout: 180  # Higher timeout for complex production queries

@@ -16,6 +16,7 @@ class ModelRequest(BaseModel):
     max_tokens: Optional[int] = 4096
     temperature: Optional[float] = 0.7
     metadata: Optional[Dict[str, Any]] = None
+    request_id: Optional[str] = None
 
 
 class ModelResponse(BaseModel):
