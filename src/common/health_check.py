@@ -1,5 +1,3 @@
-"""Health check utilities."""
-
 import time
 import psutil
 from typing import Dict, Any, Optional
@@ -7,6 +5,7 @@ from datetime import datetime
 from dataclasses import dataclass
 
 from .logging import get_logger
+from .database import DatabaseManager # Import DatabaseManager
 
 logger = get_logger("health")
 
@@ -149,11 +148,11 @@ def check_disk_usage(
     }
 
 
-def check_database_connection(db_manager) -> Dict[str, Any]:
+async def check_database_connection(db_manager: DatabaseManager) -> Dict[str, Any]:
     """Check database connectivity."""
     try:
-        with db_manager.get_connection() as conn:
-            conn.execute("SELECT 1")
+        # Attempt to execute a simple query to check connection
+        await db_manager.execute("SELECT 1")
 
         return {"status": "healthy", "message": "Database connection OK"}
     except Exception as e:

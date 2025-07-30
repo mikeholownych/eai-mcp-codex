@@ -1,7 +1,15 @@
+import pytest
 import os
-import sys
+import asyncio
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
-)
+@pytest.fixture(scope="session", autouse=True)
+def set_testing_mode():
+    os.environ["TESTING_MODE"] = "true"
+    yield
+    os.environ["TESTING_MODE"] = "false"
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()

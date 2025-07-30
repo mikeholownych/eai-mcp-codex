@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.getcwd())
+
 #!/usr/bin/env python3
 """Start the Developer Agent service."""
 

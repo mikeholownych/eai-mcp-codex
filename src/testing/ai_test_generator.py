@@ -455,7 +455,7 @@ class AITestGenerator:
 
         # Generate integration tests if requested
         if TestType.INTEGRATION in request.test_types:
-            integration_tests = await self._generate_integration_tests(request)
+            integration_tests = await asyncio.gather(*self._generate_integration_tests(request) if isinstance(self._generate_integration_tests(request, list) else (await self._generate_integration_tests(request if asyncio.iscoroutine(self._generate_integration_tests(request) else self._generate_integration_tests(request))
             test_cases.extend(integration_tests)
 
         # Generate performance tests if requested
@@ -468,7 +468,7 @@ class AITestGenerator:
 
         # Generate security tests if requested
         if TestType.SECURITY in request.test_types or request.include_security_tests:
-            security_tests = await self._generate_security_tests(request)
+            security_tests = await asyncio.gather(*self._generate_security_tests(request) if isinstance(self._generate_security_tests(request, list) else (await self._generate_security_tests(request if asyncio.iscoroutine(self._generate_security_tests(request) else self._generate_security_tests(request))
             test_cases.extend(security_tests)
 
         # Calculate coverage estimate
@@ -545,7 +545,7 @@ class AITestGenerator:
         )
 
         try:
-            response = await self.claude_client.generate_response(model_request)
+            response = await asyncio.gather(*self.claude_client.generate_response(model_request) if isinstance(self.claude_client.generate_response(model_request, list) else (await self.claude_client.generate_response(model_request if asyncio.iscoroutine(self.claude_client.generate_response(model_request) else self.claude_client.generate_response(model_request))
             return self._parse_ai_test_response(response.result, function_name, request)
         except Exception as e:
             logger.error(f"AI test generation failed: {e}")
