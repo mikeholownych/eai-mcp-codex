@@ -1,5 +1,7 @@
 ## **🚨 CRITICAL CURRENT DEVELOPMENT PRIORITIES**
 
+Ensure progress tracking in this file: mark items "in progress" before starting any work, "partial" if more is required, or "complete" as items get completed.
+
 ### **1. Production Readiness Gaps (URGENT - Week 1)**
 
 **High Priority Issues:**
