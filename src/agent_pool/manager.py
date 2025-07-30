@@ -186,9 +186,9 @@ class AgentPoolManager:
 
             # Update performance metrics
             if "avg_execution_time" not in agent.performance_metrics:
-                agent.performance_metrics[
-                    "avg_execution_time"
-                ] = task_result.execution_time
+                agent.performance_metrics["avg_execution_time"] = (
+                    task_result.execution_time
+                )
             else:
                 current_avg = agent.performance_metrics["avg_execution_time"]
                 agent.performance_metrics["avg_execution_time"] = (

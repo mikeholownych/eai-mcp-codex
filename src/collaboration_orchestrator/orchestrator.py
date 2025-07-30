@@ -103,9 +103,9 @@ class CollaborationOrchestrator:
                 "role": role.value,
                 "capabilities_required": capabilities_required or [],
                 "expected_contribution": expected_contribution,
-                "deadline": invitation.deadline.isoformat()
-                if invitation.deadline
-                else None,
+                "deadline": (
+                    invitation.deadline.isoformat() if invitation.deadline else None
+                ),
             },
             requires_response=True,
             response_timeout=1800,  # 30 minutes
@@ -253,9 +253,9 @@ class CollaborationOrchestrator:
                     "title": title,
                     "description": description,
                     "options": options,
-                    "voting_deadline": voting_deadline.isoformat()
-                    if voting_deadline
-                    else None,
+                    "voting_deadline": (
+                        voting_deadline.isoformat() if voting_deadline else None
+                    ),
                 },
                 requires_response=True,
                 response_timeout=3600,  # 1 hour

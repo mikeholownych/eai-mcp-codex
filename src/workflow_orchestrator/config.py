@@ -10,7 +10,9 @@ class Settings(BaseServiceSettings):
 
     service_name: str = "workflow-orchestrator"
     service_port: int = 8004
-    database_url: str = "postgresql://mcp_user:mcp_password@localhost:5432/workflow_orchestrator_db"
+    database_url: str = (
+        "postgresql://mcp_user:mcp_password@localhost:5432/workflow_orchestrator_db"
+    )
 
     model_config = SettingsConfigDict(env_prefix="WORKFLOW_ORCHESTRATOR_")
 
