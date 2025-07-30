@@ -5,7 +5,13 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
 from src.common.logging import get_logger
-from src.common.database import DatabaseManager, serialize_json_field, deserialize_json_field, serialize_datetime, deserialize_datetime
+from src.common.database import (
+    DatabaseManager,
+    serialize_json_field,
+    deserialize_json_field,
+    serialize_datetime,
+    deserialize_datetime,
+)
 from .models import (
     Plan,
     Task,
@@ -27,7 +33,7 @@ class PlanManager:
 
     def __init__(self, dsn: str = settings.database_url):
         self.db_manager = DatabaseManager(dsn)
-        self.dsn = dsn # Store DSN for potential re-initialization if needed
+        self.dsn = dsn  # Store DSN for potential re-initialization if needed
         # Initialize database connection pool on startup
         # This will be called by the FastAPI app's startup event
 
@@ -105,7 +111,9 @@ class PlanManager:
         await self.db_manager.execute_script(script)
         logger.info("Database tables ensured.")
 
-    async def create_plan(self, request: PlanRequest, created_by: str = "system") -> Plan:
+    async def create_plan(
+        self, request: PlanRequest, created_by: str = "system"
+    ) -> Plan:
         """Create a new plan."""
         plan_id = str(uuid.uuid4())
         now = datetime.utcnow()
@@ -184,7 +192,9 @@ class PlanManager:
         rows = await self.db_manager.execute_query(query, tuple(params))
         return [self._row_to_plan(row) for row in rows]
 
-    async def update_plan(self, plan_id: str, updates: Dict[str, Any]) -> Optional[Plan]:
+    async def update_plan(
+        self, plan_id: str, updates: Dict[str, Any]
+    ) -> Optional[Plan]:
         """Update a plan with new values."""
         updates["updated_at"] = datetime.utcnow()
 
@@ -202,7 +212,7 @@ class PlanManager:
             param_idx += 1
 
         set_clause = ", ".join(set_clauses)
-        
+
         query = f"UPDATE plans SET {set_clause} WHERE id = ${param_idx}"
         values.append(plan_id)
 
@@ -306,7 +316,7 @@ class PlanManager:
             param_idx += 1
 
         set_clause = ", ".join(set_clauses)
-        
+
         query = f"UPDATE tasks SET {set_clause} WHERE id = ${param_idx}"
         values.append(task_id)
 

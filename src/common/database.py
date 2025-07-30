@@ -40,13 +40,17 @@ class DatabaseManager:
     async def get_connection(self):
         """Asynchronous context manager for database connections from the pool."""
         if self._pool is None:
-            raise ConnectionError("Database pool not initialized. Call connect() first.")
+            raise ConnectionError(
+                "Database pool not initialized. Call connect() first."
+            )
         conn = None
         try:
             conn = await self._pool.acquire()
             yield conn
         except Exception as e:
-            logger.error(f"Database error during connection acquisition or operation: {e}")
+            logger.error(
+                f"Database error during connection acquisition or operation: {e}"
+            )
             raise
         finally:
             if conn:
@@ -62,7 +66,9 @@ class DatabaseManager:
             logger.error(f"Failed to execute script: {e}")
             return False
 
-    async def execute_query(self, query: str, params: tuple = ()) -> List[Dict[str, Any]]:
+    async def execute_query(
+        self, query: str, params: tuple = ()
+    ) -> List[Dict[str, Any]]:
         """Execute a SELECT query and return results as a list of dictionaries."""
         try:
             async with self.get_connection() as conn:
@@ -79,10 +85,10 @@ class DatabaseManager:
                 status = await conn.execute(query, *params)
                 # asyncpg.execute returns command status, e.g., 'INSERT 0 1'
                 # We need to parse the row count from it.
-                parts = status.split(' ')
-                if len(parts) > 2 and parts[0] in ('INSERT', 'UPDATE', 'DELETE'):
+                parts = status.split(" ")
+                if len(parts) > 2 and parts[0] in ("INSERT", "UPDATE", "DELETE"):
                     return int(parts[-1])
-                return 0 # Or raise an error if expected a row count
+                return 0  # Or raise an error if expected a row count
         except Exception as e:
             logger.error(f"Update failed: {e}")
             return 0
@@ -122,7 +128,9 @@ class DatabaseManager:
 
     async def backup_database(self, backup_path: str) -> bool:
         """Create a backup of the database (simplified - typically uses pg_dump)."""
-        logger.warning("Database backup for PostgreSQL typically uses pg_dump. This is a placeholder.")
+        logger.warning(
+            "Database backup for PostgreSQL typically uses pg_dump. This is a placeholder."
+        )
         # This method would ideally integrate with pg_dump or a similar tool.
         # For now, it's a placeholder as direct file copy is not applicable for remote PG.
         return False
@@ -133,7 +141,9 @@ class DatabaseManager:
         try:
             async with self.get_connection() as conn:
                 # Get database size
-                db_size = await conn.fetchval("SELECT pg_database_size(current_database());")
+                db_size = await conn.fetchval(
+                    "SELECT pg_database_size(current_database());"
+                )
                 stats["size_bytes"] = db_size
 
                 # Get table information
@@ -144,7 +154,9 @@ class DatabaseManager:
                 """
                 table_records = await conn.fetch(tables_query)
                 stats["table_count"] = len(table_records)
-                stats["tables"] = {r["table_name"]: int(r["row_count"]) for r in table_records}
+                stats["tables"] = {
+                    r["table_name"]: int(r["row_count"]) for r in table_records
+                }
 
         except Exception as e:
             logger.error(f"Failed to get database stats: {e}")
@@ -152,12 +164,16 @@ class DatabaseManager:
         return stats
 
 
-def get_connection(dsn: str): # This function is now deprecated, use DatabaseManager
-    logger.warning("get_connection is deprecated. Use DatabaseManager.get_connection() instead.")
-    raise NotImplementedError("Synchronous get_connection is not supported for asyncpg.")
+def get_connection(dsn: str):  # This function is now deprecated, use DatabaseManager
+    logger.warning(
+        "get_connection is deprecated. Use DatabaseManager.get_connection() instead."
+    )
+    raise NotImplementedError(
+        "Synchronous get_connection is not supported for asyncpg."
+    )
 
 
-def dict_factory(cursor, row): # Not directly used with asyncpg fetch methods
+def dict_factory(cursor, row):  # Not directly used with asyncpg fetch methods
     logger.warning("dict_factory is not directly used with asyncpg fetch methods.")
     return {cursor.description[idx][0]: value for idx, value in enumerate(row)}
 
@@ -176,9 +192,9 @@ def serialize_json_field(value: Any) -> str:
 
 def deserialize_json_field(value: str) -> Any:
     """Deserialize a JSON field from database."""
-    if value is None: # asyncpg might return None for NULL JSONB
+    if value is None:  # asyncpg might return None for NULL JSONB
         return {}
-    if isinstance(value, (dict, list)): # If asyncpg already deserialized JSONB
+    if isinstance(value, (dict, list)):  # If asyncpg already deserialized JSONB
         return value
     try:
         return json.loads(value)
@@ -216,7 +232,9 @@ def build_where_clause(conditions: Dict[str, Any]) -> tuple[str, tuple]:
         if value is None:
             clauses.append(f"{key} IS NULL")
         elif isinstance(value, (list, tuple)):
-            placeholders = ", ".join([f"${i}" for i in range(param_idx, param_idx + len(value))])
+            placeholders = ", ".join(
+                [f"${i}" for i in range(param_idx, param_idx + len(value))]
+            )
             clauses.append(f"{key} IN ({placeholders})")
             params.extend(value)
             param_idx += len(value)
@@ -240,7 +258,9 @@ def build_insert_query(table: str, data: Dict[str, Any]) -> tuple[str, tuple]:
     return query, params
 
 
-def build_update_query(table: str, data: Dict[str, Any], conditions: Dict[str, Any]) -> tuple[str, tuple]:
+def build_update_query(
+    table: str, data: Dict[str, Any], conditions: Dict[str, Any]
+) -> tuple[str, tuple]:
     """Build UPDATE query from data and conditions for asyncpg ($1, $2 style)."""
     set_clauses = []
     set_params = []
@@ -253,7 +273,9 @@ def build_update_query(table: str, data: Dict[str, Any], conditions: Dict[str, A
 
     set_clause = ", ".join(set_clauses)
 
-    where_clause, where_params = build_where_clause(conditions) # This will use $1, $2 style internally
+    where_clause, where_params = build_where_clause(
+        conditions
+    )  # This will use $1, $2 style internally
 
     # Need to re-index where_params if they follow set_params
     # A simpler approach for now is to combine params and let asyncpg handle it.
@@ -274,12 +296,13 @@ def build_update_query(table: str, data: Dict[str, Any], conditions: Dict[str, A
         # Re-calling build_where_clause to get clauses and params without $ indexing
         where_clauses_no_idx = []
         where_params_combined = []
-        current_where_param_idx = 1
         for key, value in conditions.items():
             if value is None:
                 where_clauses_no_idx.append(f"{key} IS NULL")
             elif isinstance(value, (list, tuple)):
-                placeholders = ", ".join([f"${i}" for i in range(param_idx, param_idx + len(value))])
+                placeholders = ", ".join(
+                    [f"${i}" for i in range(param_idx, param_idx + len(value))]
+                )
                 where_clauses_no_idx.append(f"{key} IN ({placeholders})")
                 where_params_combined.extend(value)
                 param_idx += len(value)
@@ -287,7 +310,7 @@ def build_update_query(table: str, data: Dict[str, Any], conditions: Dict[str, A
                 where_clauses_no_idx.append(f"{key} = ${param_idx}")
                 where_params_combined.append(value)
                 param_idx += 1
-        
+
         adjusted_where_clause = " AND ".join(where_clauses_no_idx)
         params = tuple(set_params) + tuple(where_params_combined)
 
@@ -295,9 +318,8 @@ def build_update_query(table: str, data: Dict[str, Any], conditions: Dict[str, A
         adjusted_where_clause = "1=1"
         params = tuple(set_params)
 
-
     query = f"UPDATE {table} SET {set_clause} WHERE {adjusted_where_clause}"
-    
+
     return query, params
 
 
@@ -330,7 +352,9 @@ class DatabaseMigration:
         result = await self.db_manager.execute_query(query)
         return result[0]["version"] if result and result[0]["version"] else 0
 
-    async def apply_migration(self, version: int, description: str, script: str) -> bool:
+    async def apply_migration(
+        self, version: int, description: str, script: str
+    ) -> bool:
         """Apply a database migration."""
         current_version = await self.get_current_version()
 

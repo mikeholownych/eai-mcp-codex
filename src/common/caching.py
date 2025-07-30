@@ -208,13 +208,17 @@ class RedisCache(CacheBackend):
             entry = CacheEntry(
                 value=entry_data["value"],
                 created_at=datetime.fromisoformat(entry_data["created_at"]),
-                expires_at=datetime.fromisoformat(entry_data["expires_at"])
-                if entry_data["expires_at"]
-                else None,
+                expires_at=(
+                    datetime.fromisoformat(entry_data["expires_at"])
+                    if entry_data["expires_at"]
+                    else None
+                ),
                 access_count=entry_data.get("access_count", 0),
-                last_accessed=datetime.fromisoformat(entry_data["last_accessed"])
-                if entry_data.get("last_accessed")
-                else None,
+                last_accessed=(
+                    datetime.fromisoformat(entry_data["last_accessed"])
+                    if entry_data.get("last_accessed")
+                    else None
+                ),
                 size_bytes=entry_data.get("size_bytes", 0),
             )
 
@@ -259,9 +263,9 @@ class RedisCache(CacheBackend):
             "created_at": entry.created_at.isoformat(),
             "expires_at": entry.expires_at.isoformat() if entry.expires_at else None,
             "access_count": entry.access_count,
-            "last_accessed": entry.last_accessed.isoformat()
-            if entry.last_accessed
-            else None,
+            "last_accessed": (
+                entry.last_accessed.isoformat() if entry.last_accessed else None
+            ),
             "size_bytes": entry.size_bytes,
         }
 
