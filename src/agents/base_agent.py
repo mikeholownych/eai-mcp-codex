@@ -253,9 +253,11 @@ class BaseAgent(ABC):
                 task_type=payload["task_type"],
                 description=payload["description"],
                 context=payload.get("context", {}),
-                deadline=datetime.fromisoformat(payload["deadline"])
-                if payload.get("deadline")
-                else None,
+                deadline=(
+                    datetime.fromisoformat(payload["deadline"])
+                    if payload.get("deadline")
+                    else None
+                ),
                 priority=payload.get("priority", "medium"),
                 requesting_agent=message.sender_agent_id,
             )
@@ -300,9 +302,11 @@ class BaseAgent(ABC):
                     "invitation_id": payload.get("invitation_id"),
                     "accepted": can_participate,
                     "capabilities": self.config.capabilities,
-                    "message": "Available for collaboration"
-                    if can_participate
-                    else "Currently at capacity",
+                    "message": (
+                        "Available for collaboration"
+                        if can_participate
+                        else "Currently at capacity"
+                    ),
                 },
                 conversation_id=message.conversation_id,
             )

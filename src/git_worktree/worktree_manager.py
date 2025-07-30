@@ -7,7 +7,13 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 
 from src.common.logging import get_logger
-from src.common.database import DatabaseManager, serialize_json_field, deserialize_json_field, serialize_datetime, deserialize_datetime
+from src.common.database import (
+    DatabaseManager,
+    serialize_json_field,
+    deserialize_json_field,
+    serialize_datetime,
+    deserialize_datetime,
+)
 from .models import (
     Repo,
     Worktree,
@@ -232,7 +238,7 @@ class WorktreeManager:
             self._run_git_command(cmd, cwd=repo.path)
 
             query = "DELETE FROM worktrees WHERE id = $1"
-            rows_affected = await self.db_manager.execute_update(query, (worktree_id,))
+            await self.db_manager.execute_update(query, (worktree_id,))
 
             operation.success = True
             operation.completed_at = datetime.utcnow()
@@ -270,7 +276,7 @@ class WorktreeManager:
             self._run_git_command(cmd, cwd=repo.path)
 
             query = "UPDATE worktrees SET status = $1 WHERE id = $2"
-            rows_affected = await self.db_manager.execute_update(
+            await self.db_manager.execute_update(
                 query, (WorktreeStatus.LOCKED.value, worktree_id)
             )
 
@@ -307,7 +313,7 @@ class WorktreeManager:
             self._run_git_command(cmd, cwd=repo.path)
 
             query = "UPDATE worktrees SET status = $1 WHERE id = $2"
-            rows_affected = await self.db_manager.execute_update(
+            await self.db_manager.execute_update(
                 query, (WorktreeStatus.ACTIVE.value, worktree_id)
             )
 
