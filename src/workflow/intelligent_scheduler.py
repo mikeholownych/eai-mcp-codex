@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import numpy as np
 import random
+import re
 
 from ..common.logging import get_logger
 from ..plan_management.models import Task
@@ -733,11 +734,17 @@ class IntelligentScheduler:
         # Extract implicit dependencies from description
         description = task.description.lower()
 
-        # Look for dependency keywords
-        if "after" in description or "depends on" in description:
-            # This would be more sophisticated in production
-            # For now, create a simple dependency pattern
-            pass
+        # Look for dependency keywords like "after <task_id>" or "depends on <task_id>"
+        match = re.search(r"(?:after|depends on)\s+(\w+)", description)
+        if match:
+            predecessor_id = match.group(1)
+            dependency = TaskDependency(
+                predecessor=predecessor_id,
+                successor=task.id,
+                dependency_type="finish_to_start",
+                lag_time=0.0,
+            )
+            dependencies.append(dependency)
 
         return dependencies
 
