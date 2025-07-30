@@ -1,0 +1,71 @@
+# Cloudflare Tunnel Configuration for MCP Agent Network
+# This configuration sets up tunnels for both frontend and API access
+
+tunnel: 657508b0-1901-4e6d-b33f-3273cc8f5ab2
+credentials-file: /opt/llm-stack/rag-agent/cloudflare-tunnel/credentials.json
+
+# Ingress rules - order matters, most specific first
+ingress:
+  # Staff Frontend domain - Staff portal application (port 3001)
+  - hostname: staff.ethical-ai-insider.com
+    service: http://localhost:3001
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: staff.ethical-ai-insider.com
+      originServerName: staff.ethical-ai-insider.com
+
+  # Frontend domain - Next.js application (direct connection)  
+  - hostname: new.ethical-ai-insider.com
+    service: http://localhost:3000
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: new.ethical-ai-insider.com
+      originServerName: new.ethical-ai-insider.com
+
+  # API domain - Nginx gateway for MCP services (same as frontend, different routing)
+  - hostname: newapi.ethical-ai-insider.com
+    service: http://localhost:80
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: newapi.ethical-ai-insider.com
+      originServerName: newapi.ethical-ai-insider.com
+
+  # Catch-all rule (required) - redirect to main site
+  - service: http_status:404
+
+# Tunnel-wide settings
+retries: 3
+no-autoupdate: false
+grace-period: 30s
+
+# Logging configuration
+loglevel: info
+transport-loglevel: warn
+
+# Metrics server (optional - for monitoring)
+metrics: localhost:9080
+
+# Edge configuration
+edge-ip-version: auto
+
+# Protocol optimization
+protocol: quic
+
+# Additional security headers for API
+warp-routing:
+  enabled: false

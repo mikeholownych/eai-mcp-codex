@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tokens>
+  <Category name="Recognizers" categoryBase="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech_OneCore">
+    <Token name="MS-2058-110-WINMO-DNN">
+      <String name="" value="Microsoft Speech Recognition Engine - es-MX Embedded DNN v11.1" />
+      <Dword name="Persist Language Model Adaptation" value="00000000" />
+      <Dword name="Background Adaptation" value="00000000" />
+      <String name="RecoExtension" value="{2984A9DB-5689-43AD-877D-14999A15DD46}" />
+      <Dword name="PreferredAudioRate" value="16000" />
+      <String name="80A" value="Microsoft Speech Recognition Engine - es-MX Embedded DNN v11.1" />
+      <Dword name="Autodetection" value="00000000" />
+      <Dword name="Server Mode" value="00000000" />
+      <String name="AlternatesCLSID" value="{06405088-BC01-4E08-B392-5303E75090C8}" />
+      <String name="CLSID" value="{BAE3E62C-37D4-49AC-A6F1-0E485ECD6757}" />
+      <String name="FEConfigDataFile" value="%windir%\Speech_OneCore\Engines\SR\es-MX-N\c2058.fe" />
+      <Attribute name="VendorPreferred" value="" />
+      <Attribute name="Language" value="80A" />
+      <Attribute name="Desktop" value="" />
+      <Attribute name="SpeakingStyle" value="Discrete;Continuous" />
+      <Attribute name="WildcardInCFG" value="Anywhere;Trailing" />
+      <Attribute name="Hypotheses" value="" />
+      <Attribute name="Alternates" value="CC" />
+      <Attribute name="Name" value="MS-2058-110-WINMO-DNN" />
+      <Attribute name="DictationInCFG" value="Anywhere;Trailing" />
+      <Attribute name="UPSPhoneSet" value="" />
+      <Attribute name="WordSequences" value="" />
+      <Attribute name="AudioFormats" value="6;18;22" />
+      <Attribute name="Vendor" value="Microsoft" />
+      <Attribute name="Distance" value="Near" />
+      <Attribute name="Revision" value="5110959" />
+    </Token>
+    <Token name="MS-2058-110-WINMO-DNN\LocaleHandler">
+      <String name="" value="SR es-MX Locale Handler" />
+      <String name="CLSID" value="{31350404-77AC-4471-B33A-9020A2EDA1D1}" />
+    </Token>
+    <Token name="MS-2058-110-WINMO-DNN\Lookup">
+      <String name="" value="SR es-MX Lookup Lexicon" />
+      <String name="Datafile" value="%windir%\Speech_OneCore\Engines\SR\es-MX-N\lsr2058.lxa" />
+    </Token>
+    <Token name="MS-2058-110-WINMO-DNN\Lts">
+      <String name="" value="SR es-MX Lts Lexicon" />
+      <String name="Datafile" value="%windir%\Speech_OneCore\Engines\SR\es-MX-N\r2058sr.lxa" />
+    </Token>
+    <Token name="MS-2058-110-WINMO-DNN\Models\2058">
+      <String name="" value="L2058" />
+    </Token>
+    <Token name="MS-2058-110-WINMO-DNN\Models\2058\L2058">
+      <String name="" value="%windir%\Speech_OneCore\Engines\SR\es-MX-N\L2058" />
+    </Token>
+    <Token name="MS-2058-110-WINMO-DNN\Models\2058\L2058\AMs">
+      <String name="AI042058" value="%windir%\Speech_OneCore\Engines\SR\es-MX-N\AI042058" />
+    </Token>
+    <Token name="MS-2058-110-WINMO-DNN\TextNorm">
+      <String name="" value="SR Engine (11.0) Text Normalization" />
+      <String name="Datafile" value="%windir%\Speech_OneCore\Engines\SR\es-MX-N\tn2058.bin" />
+    </Token>
+  </Category>
+</Tokens>

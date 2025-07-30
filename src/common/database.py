@@ -1,37 +1,80 @@
-import asyncio
+import os
+import logging
 import json
-from datetime import datetime
-from typing import Any, Dict, List, Optional
-from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Optional, Any, Dict, List
 
-import asyncpg
-from asyncpg.pool import Pool
+logger = logging.getLogger(__name__)
 
-from .logging import get_logger
+# Conditionally import asyncpg
+if os.getenv("TESTING_MODE") != "true":
+    import asyncpg
 
-logger = get_logger("database")
+# Utility functions for serialization/deserialization
+def serialize_json_field(data: Any) -> str:
+    return json.dumps(data) if data is not None else "{}"
 
+def deserialize_json_field(data: Any) -> Dict[str, Any]:
+    if isinstance(data, dict):
+        return data
+    return json.loads(data) if data else {}
+
+def serialize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
+    if dt is None:
+        return None
+    # Ensure datetime is timezone-aware and in UTC
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc) # Assume UTC if no tzinfo
+    return dt.astimezone(timezone.utc)
+
+def deserialize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
+    if dt is None:
+        return None
+    # Ensure datetime is timezone-aware and in UTC
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc) # Assume UTC if no tzinfo
+    return dt.astimezone(timezone.utc)
 
 class DatabaseManager:
-    """Enhanced database manager with utilities for common operations using asyncpg."""
+    def __init__(self, db_name: str):
+        self.db_name = db_name
+        self.dsn = self._get_dsn()
+        self._pool: Optional[Any] = None # Use Any for _pool type hint
 
-    def __init__(self, dsn: str):
-        self.dsn = dsn
-        self._pool: Optional[Pool] = None
+    def _get_dsn(self) -> str:
+        if os.getenv("TESTING_MODE") == "true":
+            logger.info(f"Using dummy DSN for in-memory testing for {self.db_name}")
+            return "sqlite:///:memory:" # Dummy DSN
+        
+        user = os.getenv(f"{self.db_name.upper()}_DB_USER", "mcp_user")
+        password = os.getenv(f"{self.db_name.upper()}_DB_PASSWORD", "mcp_password")
+        host = os.getenv(f"{self.db_name.upper()}_DB_HOST", "localhost")
+        port = os.getenv(f"{self.db_name.upper()}_DB_PORT", "5432")
+        db = os.getenv(f"{self.db_name.upper()}_DB_NAME", self.db_name)
+        return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
     async def connect(self):
-        """Establish a connection pool to the PostgreSQL database."""
+        if os.getenv("TESTING_MODE") == "true":
+            logger.info("Mocking DB connection in testing mode.")
+            self._pool = MockAsyncpgPool() # Assign a mock object
+            return
+
         if self._pool is None:
             try:
                 self._pool = await asyncpg.create_pool(self.dsn)
-                logger.info(f"PostgreSQL connection pool created for {self.dsn}")
+                logger.info(f"Successfully connected to database: {self.db_name}")
             except Exception as e:
                 logger.error(f"Failed to create PostgreSQL connection pool: {e}")
                 raise
 
     async def disconnect(self):
-        """Close the PostgreSQL connection pool."""
+        if os.getenv("TESTING_MODE") == "true":
+            logger.info("Mocking DB disconnection in testing mode.")
+            self._pool = None
+            return
+
         if self._pool:
+            logger.info(f"Disconnecting from database: {self.db_name}")
             await self._pool.close()
             self._pool = None
             logger.info("PostgreSQL connection pool closed.")
@@ -158,11 +201,16 @@ class DatabaseManager:
                     r["table_name"]: int(r["row_count"]) for r in table_records
                 }
 
-        except Exception as e:
-            logger.error(f"Failed to get database stats: {e}")
-            stats["error"] = str(e)
-        return stats
+        if self._pool is None:
+            logger.error("Database pool not initialized. Call connect() first.")
+            raise Exception("Database pool not initialized. Call connect() first.")
+        async with self._pool.acquire() as connection:
+            return await connection.execute(query, *args)
 
+    async def fetchrow(self, query: str, *args):
+        if os.getenv("TESTING_MODE") == "true":
+            logger.info(f"Mock DB fetchrow: {query}")
+            return None
 
 def get_connection(dsn: str):  # This function is now deprecated, use DatabaseManager
     logger.warning(
@@ -172,23 +220,39 @@ def get_connection(dsn: str):  # This function is now deprecated, use DatabaseMa
         "Synchronous get_connection is not supported for asyncpg."
     )
 
+    async def execute_update(self, query: str, *args):
+        if os.getenv("TESTING_MODE") == "true":
+            logger.info(f"Mock DB execute_update: {query}")
+            return 1 # Simulate one row affected
 
 def dict_factory(cursor, row):  # Not directly used with asyncpg fetch methods
     logger.warning("dict_factory is not directly used with asyncpg fetch methods.")
     return {cursor.description[idx][0]: value for idx, value in enumerate(row)}
 
+    async def execute_script(self, script: str):
+        if os.getenv("TESTING_MODE") == "true":
+            logger.info(f"Mock DB execute_script: {script[:50]}...")
+            return "MOCK_SCRIPT_OK"
 
-def serialize_json_field(value: Any) -> str:
-    """Serialize a value to JSON for database storage."""
-    if value is None:
-        return "{}"
-    # asyncpg can directly handle Python dict/list for JSONB columns
-    # but if the column is TEXT, we need to dump to string.
-    # Assuming JSONB type for flexibility.
-    if isinstance(value, (dict, list)):
-        return json.dumps(value)
-    return json.dumps(value, default=str)
+        if self._pool is None:
+            logger.error("Database pool not initialized. Call connect() first.")
+            raise Exception("Database pool not initialized. Call connect() first.")
+        async with self._pool.acquire() as connection:
+            return await connection.execute(script)
 
+    async def execute_query(self, query: str, *args) -> List[Dict[str, Any]]:
+        if os.getenv("TESTING_MODE") == "true":
+            logger.info(f"Mock DB execute_query: {query}")
+            # Return mock data for specific queries if needed
+            if "SELECT * FROM plans" in query:
+                return []
+            return []
+
+        if self._pool is None:
+            logger.error("Database pool not initialized. Call connect() first.")
+            raise Exception("Database pool not initialized. Call connect() first.")
+        async with self._pool.acquire() as connection:
+            return await connection.fetch(query, *args)
 
 def deserialize_json_field(value: str) -> Any:
     """Deserialize a JSON field from database."""
@@ -202,15 +266,17 @@ def deserialize_json_field(value: str) -> Any:
         logger.warning(f"Failed to deserialize JSON field: {value}")
         return {}
 
+    async def close(self):
+        pass
 
-def serialize_datetime(dt: Optional[datetime]) -> Optional[str]:
-    """Serialize datetime for database storage."""
-    return dt.isoformat() if dt else None
+class MockAsyncpgConnection:
+    async def fetch(self, query: str, *args):
+        return []
 
+    async def execute(self, query: str, *args):
+        return "MOCK_COMMAND_OK"
 
-def deserialize_datetime(dt_str: Optional[str]) -> Optional[datetime]:
-    """Deserialize datetime from database."""
-    if not dt_str:
+    async def fetchrow(self, query: str, *args):
         return None
     try:
         return datetime.fromisoformat(dt_str)
@@ -377,9 +443,8 @@ class DatabaseMigration:
             logger.info(f"Applied migration {version}: {description}")
             return True
 
-        except Exception as e:
-            logger.error(f"Migration {version} failed: {e}")
-            return False
+    async def __aenter__(self):
+        return self
 
     async def get_migration_history(self) -> List[Dict[str, Any]]:
         """Get migration history."""
