@@ -2,7 +2,7 @@
 # MODEL ROUTER SERVICE
 # =====================================
 # docker/model-router.Dockerfile
-FROM llm-stack-base as model-router
+FROM mcp-base as model-router
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .

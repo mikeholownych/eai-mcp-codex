@@ -2,7 +2,7 @@
 # DEVELOPMENT TOOLS CONTAINER
 # =====================================
 # docker/dev-tools.Dockerfile
-FROM llm-stack-base as dev-tools
+FROM mcp-base as dev-tools
 
 # Install core tools and docker-compose-plugin
 RUN apt-get update && \
