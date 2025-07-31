@@ -618,3 +618,9 @@ async def delete_plan(plan_id: str) -> bool:
     """Delete a plan."""
     manager = await get_plan_manager()
     return await manager.delete_plan(plan_id)
+
+
+async def update_plan(plan_id: str, updates: Dict[str, Any]) -> Optional[Plan]:
+    """Update a plan."""
+    manager = await get_plan_manager()
+    return await manager.update_plan(plan_id, updates)
