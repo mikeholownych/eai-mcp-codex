@@ -32,7 +32,7 @@ services:
     container_name: mcp-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+     - "6379:6379"
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
       - redis_data:/data
@@ -116,8 +116,8 @@ services:
       - SERVICE_NAME=model-router
       - SERVICE_PORT=8001
       # Model Router does not use a database directly
-    ports:
-      - "8001:8001"
+    # ports:
+    #   - "8001:8001"
     depends_on:
       redis:
         condition: service_healthy
@@ -155,8 +155,8 @@ services:
       - SERVICE_NAME=plan-management
       - SERVICE_PORT=8002
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/plan_management_db
-    ports:
-      - "8002:8002"
+    # ports:
+    #   - "8002:8002"
     depends_on:
       redis:
         condition: service_healthy
@@ -197,8 +197,8 @@ services:
       - SERVICE_NAME=git-worktree-manager
       - SERVICE_PORT=8003
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/git_worktree_db
-    ports:
-      - "8003:8003"
+    # ports:
+    #   - "8003:8003"
     depends_on:
       redis:
         condition: service_healthy
@@ -244,8 +244,8 @@ services:
       - PLAN_MANAGEMENT_URL=http://plan-management:8002
       - GIT_WORKTREE_URL=http://git-worktree-manager:8003
       - VERIFICATION_URL=http://verification-feedback:8005
-    ports:
-      - "8004:8004"
+    # ports:
+    #   - "8004:8004"
     depends_on:
       redis:
         condition: service_healthy
@@ -288,8 +288,8 @@ services:
       - SERVICE_PORT=8005
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/verification_feedback_db
       - MODEL_ROUTER_URL=http://model-router:8001
-    ports:
-      - "8005:8005"
+    # ports:
+    #   - "8005:8005"
     depends_on:
       redis:
         condition: service_healthy
@@ -333,8 +333,8 @@ services:
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/staff_db
       - STAFF_REQUIRE_AUTH=true
       - STAFF_ALLOWED_ROLES=admin,manager,support
-    ports:
-      - "8006:8006"
+    # ports:
+    #   - "8006:8006"
     depends_on:
       redis:
         condition: service_healthy
