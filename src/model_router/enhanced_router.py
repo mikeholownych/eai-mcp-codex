@@ -14,8 +14,8 @@ logger = get_logger("enhanced_router")
 class EnhancedModelRouter:
     """Enhanced model router with ensemble and adaptive capabilities."""
 
-    def __init__(self):
-        self.claude_client = ClaudeClient()
+    def __init__(self, claude_client: ClaudeClient | None = None):
+        self.claude_client = claude_client
         self.ensemble_router = EnsembleModelRouter()
         self.adaptive_router = AdaptiveModelRouter()
 
@@ -127,6 +127,8 @@ class EnhancedModelRouter:
     async def _route_standard(self, request: ModelRequest) -> ModelResponse:
         """Standard routing fallback."""
         logger.info(f"Using standard routing for request: {request.request_id}")
+        if self.claude_client is None:
+            self.claude_client = ClaudeClient()
 
         response = await self.claude_client.generate_response(request)
 

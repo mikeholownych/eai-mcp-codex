@@ -7,6 +7,10 @@ from .prediction_engine import (
     AnomalyDetection,
     RiskLevel,
 )
+from .user_engagement import EngagementEvent, UserEngagementTracker
+from .cost_tracker import CostTracker, CostEvent
+from .roi_tracker import ROITracker, ValueEvent
+from .capacity_planner import CapacityPlanner, CapacityEstimate
 
 __all__ = [
     "PerformancePredictionEngine",
@@ -14,4 +18,12 @@ __all__ = [
     "HistoricalDataPoint",
     "AnomalyDetection",
     "RiskLevel",
+    "EngagementEvent",
+    "UserEngagementTracker",
+    "CostTracker",
+    "CostEvent",
+    "ROITracker",
+    "ValueEvent",
+    "CapacityPlanner",
+    "CapacityEstimate",
 ]

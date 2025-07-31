@@ -11,7 +11,7 @@ from .routes import router
 app = FastAPI(
     title="Staff Management Service",
     description="Administrative interface for user and system management",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Add CORS middleware
