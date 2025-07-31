@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import asyncio
 import time
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 import os
+
+import httpx
 
 try:
     from abacusai import ApiClient
@@ -220,16 +221,16 @@ class AbacusAIClient:
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": text})
 
-            # For now, we'll use a simplified approach since the exact Abacus.ai chat API
-            # may require ChatLLM project setup. This is a placeholder implementation.
-            # In production, you'd use the actual ChatLLM API endpoints.
+            async with httpx.AsyncClient(timeout=30) as client:
+                response = await client.post(
+                    "https://api.abacus.ai/v1/chat",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json={"model": selected_model, "messages": messages},
+                )
+                response.raise_for_status()
+                data = response.json()
+                response_content = data["choices"][0]["message"]["content"]
 
-            # Simulate API call (replace with actual Abacus.ai API call)
-            await asyncio.sleep(0.1)  # Simulate network delay
-
-            response_content = (
-                f"[Abacus.ai {selected_model}] Response to: {text[:100]}..."
-            )
             response_time = time.time() - start_time
 
             # Create response object
