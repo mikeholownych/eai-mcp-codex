@@ -1,6 +1,5 @@
 """Verification Feedback configuration."""
 
-import os
 from pydantic_settings import SettingsConfigDict
 
 from src.common.settings import BaseServiceSettings
