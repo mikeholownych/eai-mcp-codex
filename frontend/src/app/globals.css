@@ -4,21 +4,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Ethical AI Insider Brand Colors */
-  --primary-50: #fef7ec;
-  --primary-500: #f37a0a;
-  --primary-600: #e45e07;
-  --secondary-500: #2477eb;
-  --secondary-600: #1d63d8;
+  /* MCP Codex Brand Colors - Purple Theme */
+  --primary-50: #faf5ff;
+  --primary-400: #c084fc;
+  --primary-500: #a855f7;
+  --primary-600: #9333ea;
+  --primary-700: #7c3aed;
+  --secondary-500: #6366f1;
+  --secondary-600: #4f46e5;
   
-  /* Dark theme - always dark for Ethical AI Insider */
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --surface: #1e293b;
-  --surface-hover: #334155;
-  --border: #475569;
-  --muted: #64748b;
-  --muted-foreground: #94a3b8;
+  /* Dark theme - deep charcoal for modern professional look */
+  --background: #0a0a0b;
+  --foreground: #fafafa;
+  --surface: #18181b;
+  --surface-hover: #27272a;
+  --border: #3f3f46;
+  --muted: #71717a;
+  --muted-foreground: #a1a1aa;
   
   /* Semantic colors */
   --success: #22c55e;
@@ -26,17 +28,17 @@
   --error: #ef4444;
   --info: #3b82f6;
   
-  /* Card and component styling */
-  --card-background: #1e293b;
-  --card-border: #334155;
-  --input-background: #334155;
-  --input-border: #475569;
+  /* Card and component styling - updated for deeper theme */
+  --card-background: #18181b;
+  --card-border: #27272a;
+  --input-background: #27272a;
+  --input-border: #3f3f46;
   
   /* Code editor theme */
   --code-background: #0f172a;
   --code-foreground: #f8fafc;
   --code-comment: #64748b;
-  --code-keyword: #f37a0a;
+  --code-keyword: #a855f7;
   --code-string: #22c55e;
   --code-number: #2477eb;
 }
@@ -83,12 +85,12 @@ body {
 
 /* Selection styling */
 ::selection {
-  background-color: rgba(243, 122, 10, 0.3);
+  background-color: rgba(168, 85, 247, 0.3);
   color: var(--foreground);
 }
 
 ::-moz-selection {
-  background-color: rgba(243, 122, 10, 0.3);
+  background-color: rgba(168, 85, 247, 0.3);
   color: var(--foreground);
 }
 
@@ -122,7 +124,7 @@ body {
 .card-hover:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-  border-color: rgba(243, 122, 10, 0.4);
+  border-color: rgba(168, 85, 247, 0.4);
 }
 
 /* Image optimization */

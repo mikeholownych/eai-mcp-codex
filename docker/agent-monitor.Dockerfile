@@ -1,5 +1,5 @@
 # Agent Monitor Service Dockerfile
-FROM llm-stack-base as agent-monitor
+FROM mcp-base as agent-monitor
 
 # Set working directory
 WORKDIR /app

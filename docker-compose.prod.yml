@@ -71,6 +71,11 @@ services:
           memory: 512M
           cpus: '0.5'
     restart: always
+    networks:
+      - mcp-network
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
 
   verification-feedback:
     environment:
@@ -87,6 +92,11 @@ services:
           memory: 384M
           cpus: '0.4'
     restart: always
+    networks:
+      - mcp-network
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
 
   # Production fluentd
   mcp-fluentd:
@@ -217,6 +227,8 @@ services:
           memory: 128M
           cpus: '0.25'
     restart: always
+    networks:
+      - mcp-network
 
   # Remove development tools in production
   dev-tools:

@@ -1,7 +1,7 @@
 # =====================================
 # PLAN MANAGEMENT SERVICE
 # =====================================
-FROM llm-stack-base as plan-management
+FROM mcp-base as plan-management
 
 # Set working directory and Python module path
 WORKDIR /app

@@ -45,7 +45,7 @@ ingress:
       httpHostHeader: new.ethical-ai-insider.com
       originServerName: new.ethical-ai-insider.com
 
-  # API domain - Nginx gateway for MCP services (same as frontend, different routing)
+  # API domain - Nginx gateway for MCP services (main API gateway)
   - hostname: newapi.ethical-ai-insider.com
     service: http://localhost:80
     originRequest:
