@@ -9,7 +9,6 @@ import * as planManagement from './commands/plan-management';
 import * as gitWorktree from './commands/git-worktree';
 import * as workflowOrchestrator from './commands/workflow-orchestrator';
 import * as verificationFeedback from './commands/verification-feedback';
-import * as system from './commands/system';
 import { interactive } from './commands/interactive';
 import { chat } from './commands/chat';
 
@@ -27,15 +26,6 @@ program
   .option('--json', 'output in JSON format');
 
 // System commands
-program
-  .command('status')
-  .description('Check status of all services')
-  .action(system.status);
-
-program
-  .command('health')
-  .description('Check health of all services')
-  .action(system.health);
 
 // Model Router commands
 const modelCmd = program
