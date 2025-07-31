@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import contextvars
-from contextlib import contextmanager
+from contextlib import contextmanager, asynccontextmanager
 
 _current_tenant: contextvars.ContextVar[str] = contextvars.ContextVar(
     "current_tenant", default="public"
@@ -25,6 +25,17 @@ def get_current_tenant() -> str:
 @contextmanager
 def tenant_context(tenant_id: str):
     """Context manager to temporarily switch the active tenant."""
+
+    token = _current_tenant.set(tenant_id)
+    try:
+        yield
+    finally:
+        _current_tenant.reset(token)
+
+
+@asynccontextmanager
+async def async_tenant_context(tenant_id: str):
+    """Asynchronous context manager to temporarily switch the active tenant."""
 
     token = _current_tenant.set(tenant_id)
     try:
