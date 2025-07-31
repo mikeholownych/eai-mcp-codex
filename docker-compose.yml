@@ -746,11 +746,10 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./ssl:/etc/nginx/ssl:ro
+      - /etc/letsencrypt/live/ethical-ai-insider.com/:/etc/nginx/ssl:ro
       - ./logs/nginx:/var/log/nginx
     depends_on:
       - frontend
-      - staff-frontend
       - model-router
       - plan-management
       - git-worktree-manager
@@ -801,7 +800,8 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
       - GF_USERS_ALLOW_SIGN_UP=false
-    volumes:
+      - GF_DOMAIN=grafana.ethical-ai-insider.com  
+  volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
@@ -856,6 +856,36 @@ services:
       - elasticsearch
     networks:
       - mcp-network
+
+  # Cloudflare Tunnel Service
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: mcp-cloudflare-tunnel
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflare-tunnel/config.yml:/etc/cloudflared/config.yml:ro
+      - ./cloudflare-tunnel/credentials.json:/etc/cloudflared/credentials.json:ro
+    environment:
+      - TUNNEL_METRICS=0.0.0.0:9080
+    networks:
+      - mcp-network
+    depends_on:
+      - nginx
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9080/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+
 
   # =====================================
   # DEVELOPMENT & TESTING
