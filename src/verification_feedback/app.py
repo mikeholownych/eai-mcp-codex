@@ -7,7 +7,10 @@ from src.common.health_check import health
 from src.common.metrics import setup_metrics_endpoint
 
 from .routes import router
-from .feedback_processor import initialize_feedback_processor, shutdown_feedback_processor
+from .feedback_processor import (
+    initialize_feedback_processor,
+    shutdown_feedback_processor,
+)
 
 app = FastAPI(title="Verification Feedback")
 app.include_router(router)

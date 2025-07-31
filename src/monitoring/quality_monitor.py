@@ -11,6 +11,7 @@ from collections import defaultdict, deque
 import psutil
 
 from ..common.logging import get_logger
+from .slo_manager import SLOManager, SLOResult
 
 logger = get_logger("quality_monitor")
 
@@ -104,6 +105,7 @@ class QualityReport:
     metric_summaries: Dict[MetricType, Dict[str, float]]
     active_alerts: List[QualityAlert]
     trends: Dict[MetricType, str]  # "improving", "stable", "degrading"
+    slo_results: List[SLOResult] = field(default_factory=list)
     recommendations: List[str]
     generated_at: datetime = field(default_factory=datetime.utcnow)
 
@@ -642,6 +644,7 @@ class ContinuousQualityMonitor:
         self.metric_collector = MetricCollector()
         self.quality_analyzer = QualityAnalyzer()
         self.alert_manager = AlertManager()
+        self.slo_manager = SLOManager()
 
         self.monitoring_enabled = False
         self.monitoring_interval = 60.0  # seconds
@@ -745,6 +748,9 @@ class ContinuousQualityMonitor:
         # Analyze trends
         trends = await self.quality_analyzer.analyze_trends(metrics)
 
+        # Evaluate SLOs
+        slo_results = self.slo_manager.evaluate_slos(metrics)
+
         # Generate recommendations
         recommendations = self._generate_recommendations(
             metric_summaries, trends, quality_score
@@ -760,6 +766,7 @@ class ContinuousQualityMonitor:
             metric_summaries=metric_summaries,
             active_alerts=self.alert_manager.get_active_alerts(),
             trends=trends,
+            slo_results=slo_results,
             recommendations=recommendations,
         )
 
@@ -843,6 +850,7 @@ class ContinuousQualityMonitor:
             metric_summaries
         )
         status = self.quality_analyzer.determine_quality_status(quality_score)
+        slo_results = self.slo_manager.evaluate_slos(recent_metrics)
 
         return {
             "monitoring_enabled": self.monitoring_enabled,
@@ -853,6 +861,7 @@ class ContinuousQualityMonitor:
                 self.alert_manager.get_active_alerts(AlertSeverity.CRITICAL)
             ),
             "metrics_collected": len(recent_metrics),
+            "slo_compliance": {res.slo.name: res.met for res in slo_results},
             "last_report": self.reports[-1].report_id if self.reports else None,
             "uptime_hours": "continuous" if self.monitoring_enabled else "stopped",
         }
@@ -865,6 +874,8 @@ class ContinuousQualityMonitor:
             metric_summaries
         )
         trends = await self.quality_analyzer.analyze_trends(recent_metrics)
+
+        slo_results = self.slo_manager.evaluate_slos(recent_metrics)
 
         # Get metric trends for charts
         metric_trends = {}
@@ -896,6 +907,14 @@ class ContinuousQualityMonitor:
                 metric_type.value: trend for metric_type, trend in trends.items()
             },
             "metric_trends": metric_trends,
+            "slo_results": [
+                {
+                    "name": res.slo.name,
+                    "met": res.met,
+                    "percentage": res.percentage,
+                }
+                for res in slo_results
+            ],
             "alerts": [
                 {
                     "alert_id": alert.alert_id,
