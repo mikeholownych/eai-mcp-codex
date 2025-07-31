@@ -1,5 +1,5 @@
 # A2A Communication Hub Service Dockerfile
-FROM llm-stack-base as a2a-communication
+FROM mcp-base as a2a-communication
 
 # Set working directory
 WORKDIR /app
