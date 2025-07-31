@@ -1,5 +1,5 @@
 # Agent Pool Manager Service Dockerfile
-FROM llm-stack-base as agent-pool
+FROM mcp-base as agent-pool
 
 # Set working directory
 WORKDIR /app
