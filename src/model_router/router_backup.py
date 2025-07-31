@@ -16,7 +16,6 @@ from .config import settings
 from .models import ModelRequest, ModelResponse
 from .claude_client import get_claude_client
 from .local_client import get_local_client
-from .abacus_client import get_abacus_client
 
 
 logger = get_logger("model_router")
@@ -46,7 +45,7 @@ class RoutingTable:
         model_mapping = {
             # Abacus.ai models (primary)
             "o3": "o3",
-            "gpt-4o": "gpt-4o", 
+            "gpt-4o": "gpt-4o",
             "sonnet-4": "sonnet-4",
             "sonnet": "sonnet-4",
             "deepseek-r1": "deepseek-r1",
@@ -54,20 +53,20 @@ class RoutingTable:
             "gemini-2.5": "gemini-2.5",
             "llama-4": "llama-4",
             "gpt-4o-mini": "gpt-4o-mini",
-            
             # Claude models (fallback)
             "opus": "claude-3-opus-20240229",
             "claude-sonnet": "claude-3-5-sonnet-20241022",
             "haiku": "claude-3-5-haiku-20241022",
             "4": "sonnet-4",  # Default to Abacus.ai Sonnet 4
-            
             # Local models (final fallback)
             "mistral": "mistral",
-            "local": "mistral", 
+            "local": "mistral",
             "ollama": "mistral",
             "local-llm": "local-llm",
         }
-        return model_mapping.get(model.lower(), "gpt-4o-mini")  # Default to efficient Abacus.ai model
+        return model_mapping.get(
+            model.lower(), "gpt-4o-mini"
+        )  # Default to efficient Abacus.ai model
 
     def _intelligent_route(
         self, text: str, context: Optional[Dict[str, Any]] = None
@@ -76,20 +75,31 @@ class RoutingTable:
         # Check for preference hierarchy: Abacus.ai -> Claude -> Local
         prefer_local_only = os.getenv("PREFER_LOCAL_MODELS", "false").lower() == "true"
         use_abacus = os.getenv("USE_ABACUS_AI", "true").lower() == "true"
-        
+
         # If local-only mode, skip cloud models
         if prefer_local_only:
             return "mistral"
-        
+
         # Analyze text complexity and requirements
         complexity_indicators = {
             "high": [
-                "architecture", "design", "complex analysis", "research", 
-                "planning", "security audit", "strategic", "comprehensive"
+                "architecture",
+                "design",
+                "complex analysis",
+                "research",
+                "planning",
+                "security audit",
+                "strategic",
+                "comprehensive",
             ],
             "medium": [
-                "code review", "debugging", "implementation", "refactor", 
-                "optimize", "analysis", "documentation"
+                "code review",
+                "debugging",
+                "implementation",
+                "refactor",
+                "optimize",
+                "analysis",
+                "documentation",
             ],
             "low": ["simple", "basic", "quick", "summary", "list", "format"],
         }
@@ -106,19 +116,38 @@ class RoutingTable:
 
         # Coding-specific indicators - use specialized coding models
         coding_indicators = [
-            "code", "function", "class", "algorithm", "programming", "debug", 
-            "implement", "python", "javascript", "java", "c++", "sql", "api",
-            "refactor", "optimize", "bug", "error", "syntax", "variable", "repository"
+            "code",
+            "function",
+            "class",
+            "algorithm",
+            "programming",
+            "debug",
+            "implement",
+            "python",
+            "javascript",
+            "java",
+            "c++",
+            "sql",
+            "api",
+            "refactor",
+            "optimize",
+            "bug",
+            "error",
+            "syntax",
+            "variable",
+            "repository",
         ]
-        
+
         if any(indicator in text_lower for indicator in coding_indicators):
             if use_abacus:
                 return "deepseek-r1"  # Abacus.ai specialized coding model
             else:
                 return "claude-3-5-sonnet-20241022"  # Claude coding fallback
-        
+
         # Medium complexity indicators
-        if any(indicator in text_lower for indicator in complexity_indicators["medium"]):
+        if any(
+            indicator in text_lower for indicator in complexity_indicators["medium"]
+        ):
             if use_abacus:
                 return "gpt-4o"  # Balanced Abacus.ai model
             else:
@@ -130,24 +159,33 @@ class RoutingTable:
                 return "sonnet-4"  # Good for long context
             else:
                 return "claude-3-5-sonnet-20241022"  # Claude fallback
-        
+
         # Context-based routing
         if context:
             task_type = context.get("task_type", "").lower()
             priority = context.get("priority", "medium").lower()
-            
-            if task_type in ["architecture_design", "security_analysis", "complex_planning"]:
+
+            if task_type in [
+                "architecture_design",
+                "security_analysis",
+                "complex_planning",
+            ]:
                 if use_abacus:
                     return "o3" if priority == "high" else "gpt-4o"
                 else:
                     return "claude-3-opus-20240229"
-                    
-            elif task_type in ["code_generation", "code_review", "debugging", "programming"]:
+
+            elif task_type in [
+                "code_generation",
+                "code_review",
+                "debugging",
+                "programming",
+            ]:
                 if use_abacus:
                     return "deepseek-r1"
                 else:
                     return "claude-3-5-sonnet-20241022"
-                    
+
             elif task_type in ["creative_writing", "content_generation"]:
                 if use_abacus:
                     return "gpt-4o"
@@ -207,14 +245,14 @@ async def route_async(req: ModelRequest) -> ModelResponse:
 
         # Determine if we should use local or Claude API
         is_local_model = selected_model in ["mistral", "local-llm"]
-        
+
         if is_local_model:
             # Use local LLM client
             local_client = get_local_client()
             response = await local_client.route_and_send(
                 text=req.text, context=req.context, system_prompt=system_prompt
             )
-            
+
             # Calculate usage metrics
             usage_info = {
                 "input_tokens": len(req.text.split()),  # Approximate
@@ -222,7 +260,8 @@ async def route_async(req: ModelRequest) -> ModelResponse:
                 "model_used": response.model,
                 "response_time_ms": (
                     datetime.utcnow() - response.timestamp
-                ).total_seconds() * 1000,
+                ).total_seconds()
+                * 1000,
                 "cost": 0.0,  # Local models are free
                 "provider": "local",
             }
@@ -275,7 +314,8 @@ async def route_async(req: ModelRequest) -> ModelResponse:
                         "rule_based" if selected_model else "intelligent_routing"
                     ),
                 },
-            )
+            },
+        )
 
     except Exception as e:
         logger.error(f"Error routing request: {e}")
