@@ -1,34 +1,7 @@
 import chalk from 'chalk';
 import { table } from 'table';
 import ora from 'ora';
-
-// Placeholder client
-class ModelRouterClient {
-  async routeRequest(prompt: string, options: any): Promise<any> {
-    return {
-      response: `Echo: ${prompt}`,
-      model: options.model || 'mock-model',
-      metadata: { key: 'value' },
-      usage: { total_tokens: 123, cost: 0.01 }
-    };
-  }
-
-  async listModels(): Promise<any[]> {
-    return [
-      { name: 'model-1', type: 'language', status: 'available', description: 'A powerful language model' },
-      { name: 'model-2', type: 'code', status: 'unavailable', description: 'A model for generating code' }
-    ];
-  }
-
-  async getRoutingRules(): Promise<any[]> {
-    return [{ pattern: '/code', model: 'model-2' }];
-  }
-}
-
-interface RouteOptions {
-  model?: string;
-  temperature?: string;
-}
+import { ModelRouterClient, RouteOptions } from '../clients/model-router';
 
 export async function route(prompt: string, options: RouteOptions) {
   console.log(chalk.blue.bold('🤖 Routing Model Request\n'));
@@ -46,7 +19,7 @@ export async function route(prompt: string, options: RouteOptions) {
     console.log(chalk.gray(`Temperature: ${options.temperature || '0.7'}`));
 
     console.log(chalk.green.bold('\n💬 Response:'));
-    console.log(chalk.white(result.response || result.content));
+    console.log(chalk.white(result.response));
 
     if (result.metadata) {
       console.log(chalk.yellow.bold('\n🔍 Metadata:'));
