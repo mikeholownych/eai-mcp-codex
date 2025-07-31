@@ -39,7 +39,7 @@ class DeveloperAgentService:
             logger.info(f"Specializations: {specializations}")
 
             # Create and start agent
-            self.agent = DeveloperAgent(
+            self.agent = await DeveloperAgent.create(
                 agent_id=agent_id, name=agent_name, specializations=specializations
             )
             self.running = True
