@@ -11,7 +11,6 @@ import os
 import signal
 import sys
 
-from src.agents.security_agent import SecurityAgent
 from src.common.logging import get_logger
 
 
@@ -36,10 +35,12 @@ class SecurityAgentService:
 
             # Create and start agent
             from src.agents.security_agent import SecurityAgent
+
             self.agent = SecurityAgent(agent_id=agent_id, name=agent_name)
-            
+
             # Initialize message broker BEFORE starting agent
             from src.a2a_communication.message_broker import A2AMessageBroker
+
             self.agent.message_broker = await A2AMessageBroker.create()
             self.running = True
 
