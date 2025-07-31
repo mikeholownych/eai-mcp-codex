@@ -28,7 +28,7 @@ COPY --chown=mcp:mcp scripts/health_check.py ./health_check.py
 RUN chmod +x ./health_check.py
 
 # Model router stage
-FROM llm-stack-base as test-build
+FROM mcp-base as test-build
 COPY --chown=mcp:mcp src/model_router/ ./
 COPY --chown=mcp:mcp scripts/start_model_router.py ./start.py
 
