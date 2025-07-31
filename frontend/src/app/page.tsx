@@ -94,7 +94,7 @@ const pricingPlans = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen" style={{backgroundColor: 'var(--background)'}}>
       {/* Navigation */}
       <nav className="border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -136,22 +136,21 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            The Future of{' '}
-            <span className="text-purple-400">
-              Ethical AI
-            </span>{' '}
-            Development
+          <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-8 leading-tight tracking-tight">
+            Transform Ideas Into{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600">
+              Production Code
+            </span>
           </h1>
-          <p className="text-xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-4xl mx-auto leading-relaxed">
             Secure, multi-tenant platform for code generation via agentic AI with real-time collaboration, 
             comprehensive video library, and enterprise-grade security features.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link href="/register">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto shadow-xl hover:shadow-purple-500/25">
                 Start Free Trial
                 <ArrowRightIcon className="ml-2 w-5 h-5" />
               </Button>
@@ -161,6 +160,22 @@ export default function HomePage() {
                 Watch Demo
               </Button>
             </Link>
+          </div>
+          
+          {/* Stats/Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-400 mb-2">50K+</div>
+              <div className="text-gray-400">Lines of Code Generated</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-400 mb-2">99.9%</div>
+              <div className="text-gray-400">Uptime SLA</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-400 mb-2">24/7</div>
+              <div className="text-gray-400">Expert Support</div>
+            </div>
           </div>
         </div>
       </section>

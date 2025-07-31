@@ -43,6 +43,16 @@ class ModelInfo(BaseModel):
     use_cases: list[str]
 
 
+class LLMResponse(BaseModel):
+    """Response model from an LLM."""
+
+    text: str
+    model_name: str
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+
 class RoutingStats(BaseModel):
     """Statistics about model routing."""
 
