@@ -4,6 +4,7 @@ from src.plan_management.plan_manager import (
     delete_plan,
     get_plan,
     list_plans,
+    update_plan,
 )
 from src.common.database import DatabaseManager
 from src.common.tenant import tenant_context, async_tenant_context
@@ -62,3 +63,21 @@ async def test_async_tenant_context() -> None:
     assert await get_plan(plan.id) is None
     async with async_tenant_context("tenant_async"):
         await delete_plan(plan.id)
+
+
+@pytest.mark.asyncio
+async def test_update_plan_multi_tenant() -> None:
+    with tenant_context("tenant_update_a"):
+        plan = await create_plan("update_me")
+        updated = await update_plan(plan.id, {"title": "updated"})
+        assert updated is not None
+        assert updated.title == "updated"
+
+    with tenant_context("tenant_update_b"):
+        # Attempt to update plan from another tenant should fail
+        result = await update_plan(plan.id, {"title": "fail"})
+        assert result is None
+
+    with tenant_context("tenant_update_a"):
+        await delete_plan(plan.id)
+        assert await get_plan(plan.id) is None
