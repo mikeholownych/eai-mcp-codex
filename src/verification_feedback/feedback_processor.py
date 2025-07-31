@@ -30,7 +30,9 @@ class FeedbackProcessor:
     """Core business logic for feedback processing."""
 
     def __init__(self, dsn: str = settings.database_url):
-        self.db_manager = DatabaseManager(dsn)
+        self.db_manager = DatabaseManager("verification_feedback")
+        # Override DSN computed from env vars with provided value
+        self.db_manager.dsn = dsn
         self.dsn = dsn
 
     async def initialize_database(self):
