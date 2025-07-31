@@ -2,11 +2,10 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from datetime import datetime
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+from src.staff.models import UserCreate, TicketCreate
 
 from src.staff.app import app
-from src.staff.models import User, Ticket, SystemStats
 
 
 @pytest.fixture
@@ -324,7 +323,6 @@ class TestStaffServiceIntegration:
     
     def test_models_validation(self):
         """Test model validation."""
-        from src.staff.models import UserCreate, TicketCreate
         
         # Test valid user creation
         user_data = {
