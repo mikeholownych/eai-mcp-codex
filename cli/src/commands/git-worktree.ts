@@ -1,60 +1,7 @@
 import chalk from 'chalk';
 import { table } from 'table';
 import ora from 'ora';
-
-// This is a placeholder for the actual client
-// In a real application, this would be in a separate file
-// and would make API calls to the git-worktree service.
-class GitWorktreeClient {
-  async createWorktree(worktreeData: any): Promise<any> {
-    console.log('Creating worktree with data:', worktreeData);
-    return {
-      id: '123',
-      repository_url: worktreeData.repo,
-      branch: worktreeData.branch,
-      path: worktreeData.path || `/tmp/worktrees/${worktreeData.branch}`,
-      status: 'active'
-    };
-  }
-
-  async listWorktrees(): Promise<any[]> {
-    return [
-      {
-        id: '123',
-        repository_url: 'https://github.com/example/repo1',
-        branch: 'main',
-        path: '/tmp/worktrees/main',
-        status: 'active'
-      },
-      {
-        id: '456',
-        repository_url: 'https://github.com/example/repo2',
-        branch: 'develop',
-        path: '/tmp/worktrees/develop',
-        status: 'syncing'
-      }
-    ];
-  }
-
-  async removeWorktree(worktreeId: string): Promise<void> {
-    console.log(`Removing worktree with id: ${worktreeId}`);
-  }
-
-  async getWorktreeStatus(worktreeId: string): Promise<any> {
-    return {
-      id: worktreeId,
-      repository_url: 'https://github.com/example/repo1',
-      branch: 'main',
-      path: '/tmp/worktrees/main',
-      status: 'clean',
-      git_status: {
-        modified: ['README.md'],
-        untracked: ['new_file.txt'],
-        staged: []
-      }
-    };
-  }
-}
+import { GitWorktreeClient, WorktreeData } from '../clients/git-worktree';
 
 interface WorktreeOptions {
   path?: string;
@@ -63,7 +10,7 @@ interface WorktreeOptions {
 export async function create(repo: string, branch: string, options: WorktreeOptions) {
   console.log(chalk.blue.bold('🌿 Creating Git Worktree\n'));
 
-  const worktreeData = {
+  const worktreeData: WorktreeData = {
     repo,
     branch,
     path: options.path

@@ -9,6 +9,7 @@ from uuid import UUID
 from src.common.redis_client import get_redis_connection
 from src.a2a_communication.models import A2AMessage, MessageType, MessagePriority
 from src.a2a_communication.message_broker import A2AMessageBroker
+from redis import Redis
 
 from .models import (
     CollaborationSession,
@@ -30,9 +31,13 @@ logger = logging.getLogger(__name__)
 class CollaborationOrchestrator:
     """Orchestrates multi-agent collaborations and consensus building."""
 
-    def __init__(self):
-        self.redis = get_redis_connection()
-        self.message_broker = A2AMessageBroker()
+    def __init__(
+        self,
+        redis: Optional[Redis] = None,
+        message_broker: Optional[A2AMessageBroker] = None,
+    ) -> None:
+        self.redis = redis or get_redis_connection()
+        self.message_broker = message_broker or A2AMessageBroker()
         self.active_sessions: Dict[UUID, CollaborationSession] = {}
         self.consensus_decisions: Dict[UUID, ConsensusDecision] = {}
 
