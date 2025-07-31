@@ -1,6 +1,8 @@
-import pytest
 import os
 import asyncio
+import pytest
+
+os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
 
 @pytest.fixture(scope="session", autouse=True)

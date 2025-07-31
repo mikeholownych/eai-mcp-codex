@@ -11,24 +11,10 @@ from collections import defaultdict, deque
 import psutil
 
 from ..common.logging import get_logger
+from .metrics_definitions import Metric, MetricType
 from .slo_manager import SLOManager, SLOResult
 
 logger = get_logger("quality_monitor")
-
-
-class MetricType(str, Enum):
-    """Types of metrics to monitor."""
-
-    PERFORMANCE = "performance"
-    RELIABILITY = "reliability"
-    ACCURACY = "accuracy"
-    RESOURCE_USAGE = "resource_usage"
-    ERROR_RATE = "error_rate"
-    LATENCY = "latency"
-    THROUGHPUT = "throughput"
-    USER_SATISFACTION = "user_satisfaction"
-    CODE_QUALITY = "code_quality"
-    SECURITY = "security"
 
 
 class AlertSeverity(str, Enum):
@@ -49,20 +35,6 @@ class QualityStatus(str, Enum):
     ACCEPTABLE = "acceptable"
     POOR = "poor"
     CRITICAL = "critical"
-
-
-@dataclass
-class Metric:
-    """Individual metric measurement."""
-
-    metric_id: str
-    metric_type: MetricType
-    name: str
-    value: float
-    unit: str
-    timestamp: datetime = field(default_factory=datetime.utcnow)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -106,7 +78,7 @@ class QualityReport:
     active_alerts: List[QualityAlert]
     trends: Dict[MetricType, str]  # "improving", "stable", "degrading"
     slo_results: List[SLOResult] = field(default_factory=list)
-    recommendations: List[str]
+    recommendations: List[str] = field(default_factory=list)
     generated_at: datetime = field(default_factory=datetime.utcnow)
 
 

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List
 
-from .quality_monitor import Metric, MetricType
+from .metrics_definitions import Metric, MetricType
 from ..common.logging import get_logger
 
 logger = get_logger("slo_manager")

@@ -7,6 +7,7 @@ from .prediction_engine import (
     AnomalyDetection,
     RiskLevel,
 )
+from .user_engagement import EngagementEvent, UserEngagementTracker
 
 __all__ = [
     "PerformancePredictionEngine",
@@ -14,4 +15,6 @@ __all__ = [
     "HistoricalDataPoint",
     "AnomalyDetection",
     "RiskLevel",
+    "EngagementEvent",
+    "UserEngagementTracker",
 ]
