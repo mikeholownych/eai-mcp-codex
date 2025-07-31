@@ -11,6 +11,11 @@ from .base_agent import BaseAgent, AgentConfig, TaskInput
 class SecurityAgent(BaseAgent):
     """Agent specialized in security analysis and vulnerability assessment."""
 
+    @classmethod
+    def create(cls, agent_id: str, name: str | None = None) -> "SecurityAgent":
+        """Factory compatible with legacy startup scripts."""
+        return cls(agent_id=agent_id, name=name)
+
     def __init__(self, agent_id: str, name: str = None):
         config = AgentConfig(
             agent_id=agent_id,

@@ -10,6 +10,16 @@ from .base_agent import BaseAgent, AgentConfig, TaskInput
 class DeveloperAgent(BaseAgent):
     """Agent specialized in software development tasks."""
 
+    @classmethod
+    def create(
+        cls,
+        agent_id: str,
+        name: str | None = None,
+        specializations: List[str] | None = None,
+    ) -> "DeveloperAgent":
+        """Factory compatible with legacy startup scripts."""
+        return cls(agent_id=agent_id, name=name, specializations=specializations)
+
     def __init__(
         self, agent_id: str, name: str = None, specializations: List[str] = None
     ):

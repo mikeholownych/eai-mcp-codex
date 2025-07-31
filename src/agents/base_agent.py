@@ -63,12 +63,14 @@ class BaseAgent(ABC):
 
     @classmethod
     def create(cls, *args, **kwargs):
-        """Instantiate an agent with the given arguments.
+        """Instantiate an agent with flexible parameters.
 
-        Some legacy orchestration scripts expect a ``create`` factory method
-        when launching agents. Providing this thin wrapper keeps backwards
-        compatibility while delegating to the class constructor.
+        Legacy startup scripts sometimes construct agents by calling
+        ``Class.create(agent_id="abc", name="Foo")`` instead of using the
+        constructor directly.  This wrapper simply forwards all provided
+        arguments to ``__init__`` so those scripts continue to work.
         """
+
         return cls(*args, **kwargs)
 
     def __init__(self, config: AgentConfig):

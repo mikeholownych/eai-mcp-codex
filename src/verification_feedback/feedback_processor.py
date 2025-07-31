@@ -1,9 +1,4 @@
 """Feedback Processing business logic implementation."""
-# ruff: noqa
-
-# ruff: noqa
-
-# ruff: noqa
 
 import uuid
 from datetime import datetime
