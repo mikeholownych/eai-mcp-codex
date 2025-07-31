@@ -2,7 +2,7 @@
 # VERIFICATION & FEEDBACK SERVICE
 # =====================================
 # docker/verification-feedback.Dockerfile
-FROM llm-stack-base as verification-feedback
+FROM mcp-base as verification-feedback
 
 # Install additional dependencies for verification
 RUN pip install --no-cache-dir \
