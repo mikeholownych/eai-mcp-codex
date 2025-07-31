@@ -7,6 +7,7 @@ import os
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
 
+
 @pytest.fixture(autouse=True)
 async def setup_and_teardown_db():
     os.environ["TESTING_MODE"] = "true"
@@ -22,6 +23,7 @@ async def setup_and_teardown_db():
     await DatabaseManager("workflow_orchestrator_db").disconnect()
     os.environ["TESTING_MODE"] = "false"
 
+
 @pytest.mark.asyncio
 async def test_basic_service_flow(tmp_path):
     plan = await create_plan("integration-test")
@@ -29,7 +31,6 @@ async def test_basic_service_flow(tmp_path):
 
     # For a true integration test, ensure llm-router and ollama are running
     # assert result.result.startswith("haiku:")
-
 
     # wt = await create(str(tmp_path / "repo"))
     # assert "repo" in wt
