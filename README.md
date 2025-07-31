@@ -542,7 +542,7 @@ make test-collaboration
 ### **Q3 2024: Enterprise Features**
 - [ ] SAML/SSO authentication
 - [ ] Advanced audit and compliance
-- [ ] Multi-tenant architecture
+ - [ ] Multi-tenant architecture [in progress]
 - [ ] Enterprise support portal
 
 ### **Q4 2024: Ecosystem Growth**
