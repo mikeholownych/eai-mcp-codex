@@ -7,7 +7,7 @@ Ensure progress tracking in this file: mark items "in progress" before starting 
 
 Missing OpenTelemetry integration across all services
 No distributed tracing for agent-to-agent communication
-Insufficient correlation IDs for cross-service request tracking
+Insufficient correlation IDs for cross-service request tracking [complete]
 Limited performance metrics for collaboration sessions [complete]
 No real-time dashboards for agent activity monitoring [complete]
 
@@ -31,7 +31,7 @@ Limited escalation pattern analysis
 
 No service-level objectives (SLOs) defined
 Missing latency percentile tracking
-Absent resource utilization monitoring
+Absent resource utilization monitoring [complete]
 No capacity planning metrics
 Limited error rate tracking [complete]
 
