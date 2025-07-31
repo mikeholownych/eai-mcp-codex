@@ -2,7 +2,7 @@
 # WORKFLOW ORCHESTRATOR SERVICE
 # =====================================
 # docker/workflow-orchestrator.Dockerfile
-FROM base as workflow-orchestrator
+FROM llm-stack-base as workflow-orchestrator
 
 # Install additional dependencies for workflow management
 RUN pip install --no-cache-dir \

@@ -136,7 +136,55 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.bg-dark-900': {
+          'background-color': '#0f172a',
+        },
+        '.bg-dark-800': {
+          'background-color': '#1e293b',
+        },
+        '.bg-dark-700': {
+          'background-color': '#334155',
+        },
+        '.border-dark-700': {
+          'border-color': '#475569',
+        },
+        '.border-dark-600': {
+          'border-color': '#334155',
+        },
+        '.text-dark-300': {
+          'color': '#94a3b8',
+        },
+        '.text-dark-400': {
+          'color': '#64748b',
+        },
+        '.shadow-glow': {
+          'box-shadow': '0 0 20px rgba(243, 122, 10, 0.3)',
+        },
+        '.shadow-glow-blue': {
+          'box-shadow': '0 0 20px rgba(36, 119, 235, 0.3)',
+        },
+        '.bg-gradient-primary': {
+          'background': 'linear-gradient(135deg, #f37a0a 0%, #e45e07 100%)',
+        },
+        '.bg-gradient-secondary': {
+          'background': 'linear-gradient(135deg, #2477eb 0%, #1d63d8 100%)',
+        },
+        '.bg-gradient-dark': {
+          'background': 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+        },
+        '.bg-gray-750': {
+          'background-color': '#374151',
+        },
+        '.hover\\:bg-gray-750:hover': {
+          'background-color': '#374151',
+        },
+      }
+      addUtilities(newUtilities)
+    },
+  ],
 }
 
 export default config

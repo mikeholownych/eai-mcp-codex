@@ -41,16 +41,7 @@
   --code-number: #2477eb;
 }
 
-/* Professional dark theme styling */
-.bg-dark-900 { background-color: var(--background) !important; }
-.bg-dark-800 { background-color: var(--surface) !important; }
-.bg-dark-700 { background-color: var(--surface-hover) !important; }
-.border-dark-700 { border-color: var(--border) !important; }
-.border-dark-600 { border-color: var(--card-border) !important; }
-.text-dark-300 { color: var(--muted-foreground) !important; }
-.text-dark-400 { color: var(--muted) !important; }
-.shadow-glow { box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), 0 0 20px rgba(243, 122, 10, 0.3) !important; }
-.shadow-glow-blue { box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), 0 0 20px rgba(36, 119, 235, 0.3) !important; }
+/* Professional dark theme variables - now handled by Tailwind config */
 
 * {
   box-sizing: border-box;
@@ -153,18 +144,7 @@ img {
   flex-shrink: 0;
 }
 
-/* Professional gradient backgrounds */
-.bg-gradient-primary {
-  background: linear-gradient(135deg, #f37a0a 0%, #e45e07 100%);
-}
-
-.bg-gradient-secondary {
-  background: linear-gradient(135deg, #2477eb 0%, #1d63d8 100%);
-}
-
-.bg-gradient-dark {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-}
+/* Gradient backgrounds now handled by Tailwind config */
 
 /* Code syntax highlighting */
 .hljs {

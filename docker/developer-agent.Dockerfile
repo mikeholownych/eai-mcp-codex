@@ -1,14 +1,8 @@
 # Developer Agent Service Dockerfile
-FROM python:3.11-slim
+FROM llm-stack-base as developer-agent
 
 # Set working directory
 WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .

@@ -1,9 +1,5 @@
 # Docker Compose v2 Configuration for MCP Server Microservices
 services:
-  # =====================================
-  # INFRASTRUCTURE SERVICES
-  # =====================================
-
   # Fluentd for Logging Requirements
   mcp-fluentd:
     image: fluent/fluentd:v1.16
@@ -124,6 +120,8 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      base:
+        condition: service_healthy
     volumes:
       - ./logs/model-router:/app/logs
       - ./config:/app/config:ro
@@ -164,6 +162,8 @@ services:
       postgres:
         condition: service_healthy
       consul:
+        condition: service_healthy
+      base:
         condition: service_healthy
     volumes:
       - ./logs/plan-management:/app/logs
@@ -206,6 +206,8 @@ services:
       postgres:
         condition: service_healthy
       consul:
+        condition: service_healthy
+      base:
         condition: service_healthy
     volumes:
       - ./logs/git-worktree:/app/logs
@@ -255,10 +257,6 @@ services:
       consul:
         condition: service_healthy
       model-router:
-        condition: service_healthy
-      plan-management:
-        condition: service_healthy
-      git-worktree-manager:
         condition: service_healthy
     volumes:
       - ./logs/workflow-orchestrator:/app/logs
@@ -347,6 +345,8 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      base:
+        condition: service_healthy
     volumes:
       - ./logs/staff-service:/app/logs
       - ./config:/app/config:ro
@@ -390,6 +390,8 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      base:
+        condition: service_healthy
     volumes:
       - ./logs/a2a-communication:/app/logs
       - ./config:/app/config:ro
@@ -432,6 +434,8 @@ services:
         condition: service_healthy
       a2a-communication:
         condition: service_healthy
+      base:
+        condition: service_healthy
     volumes:
       - ./logs/agent-pool:/app/logs
       - ./config:/app/config:ro
@@ -469,14 +473,11 @@ services:
     # ports:
     #   - "8012:8012"
     depends_on:
-      redis:
-        condition: service_healthy
-      consul:
-        condition: service_healthy
-      a2a-communication:
-        condition: service_healthy
-      agent-pool:
-        condition: service_healthy
+    depends_on:
+      - redis
+      - consul
+      - a2a-communication
+      - agent-pool
     volumes:
       - ./logs/collaboration-orchestrator:/app/logs
       - ./config:/app/config:ro
@@ -520,6 +521,8 @@ services:
         condition: service_healthy
       a2a-communication:
         condition: service_healthy
+      base:
+        condition: service_healthy
     volumes:
       - ./logs/planner-agent:/app/logs
       - ./config:/app/config:ro
@@ -561,6 +564,8 @@ services:
       consul:
         condition: service_healthy
       a2a-communication:
+        condition: service_healthy
+      base:
         condition: service_healthy
     volumes:
       - ./logs/security-agent:/app/logs
@@ -605,6 +610,8 @@ services:
         condition: service_healthy
       a2a-communication:
         condition: service_healthy
+      base:
+        condition: service_healthy
     volumes:
       - ./logs/developer-agent:/app/logs
       - ./config:/app/config:ro
@@ -642,16 +649,11 @@ services:
     # ports:
     #   - "8016:8016"
     depends_on:
-      redis:
-        condition: service_healthy
-      consul:
-        condition: service_healthy
-      a2a-communication:
-        condition: service_healthy
-      agent-pool:
-        condition: service_healthy
-      collaboration-orchestrator:
-        condition: service_healthy
+      - redis
+      - consul
+      - a2a-communication
+      - agent-pool
+      - collaboration-orchestrator
     volumes:
       - ./logs/agent-monitor:/app/logs
       - ./config:/app/config:ro
@@ -797,13 +799,13 @@ services:
     container_name: mcp-grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3005:3000"
     environment:
       - GF_DATABASE_TYPE=postgres
       - GF_DATABASE_HOST=postgres:5432
       - GF_DATABASE_NAME=grafana_db
       - GF_DATABASE_USER=mcp_user
-      - GF_DATABASE_PASSEORD=${POSTGRES_PASSWORD:-mcp_secure_password}
+      - GF_DATABASE_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
       - GF_USERS_ALLOW_SIGN_UP=false
@@ -872,6 +874,8 @@ services:
     build:
       context: .
       dockerfile: docker/dev-tools.Dockerfile
+      additional_contexts:
+        llm-stack-base: ./docker/base.Dockerfile
     container_name: mcp-dev-tools
     restart: "no"
     profiles:

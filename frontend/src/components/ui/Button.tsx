@@ -9,17 +9,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseClasses = 'inline-flex items-center justify-center font-medium focus-ring disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200'
     
     const variants = {
-      primary: 'bg-gradient-primary text-white hover:shadow-glow hover:scale-105 active:scale-95 shadow-lg',
-      secondary: 'bg-gradient-secondary text-white hover:shadow-glow-blue hover:scale-105 active:scale-95 shadow-lg',
-      outline: 'border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white hover:shadow-glow active:scale-95 backdrop-blur-sm',
-      ghost: 'text-dark-300 hover:text-white hover:bg-dark-700 active:scale-95 backdrop-blur-sm',
-      danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 hover:scale-105 active:scale-95 shadow-lg',
+      primary: 'bg-orange-500 text-white hover:bg-orange-600 active:scale-95 shadow-sm',
+      secondary: 'bg-purple-600 text-white hover:bg-purple-700 active:scale-95 shadow-sm',
+      outline: 'border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white active:scale-95',
+      ghost: 'text-gray-300 hover:text-white hover:bg-gray-800 active:scale-95',
+      danger: 'bg-red-500 text-white hover:bg-red-600 active:scale-95 shadow-sm',
     }
     
     const sizes = {
-      sm: 'px-3 py-1.5 text-sm rounded-lg',
-      md: 'px-4 py-2 text-base rounded-xl',
-      lg: 'px-6 py-3 text-lg rounded-xl',
+      sm: 'px-3 py-1.5 text-sm rounded-md',
+      md: 'px-4 py-2 text-base rounded-md',
+      lg: 'px-6 py-3 text-base rounded-md',
     }
 
     return (
