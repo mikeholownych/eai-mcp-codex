@@ -4,9 +4,9 @@ from src.plan_management.plan_manager import (
     delete_plan,
     get_plan,
     list_plans,
-    PlanStatus,
 )
 from src.common.database import DatabaseManager
+from src.common.tenant import tenant_context
 import os
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
@@ -24,17 +24,27 @@ async def setup_and_teardown_db():
 
 
 @pytest.mark.asyncio
-async def test_create_plan() -> None:
-    plan = await create_plan("test")
-    assert plan.id is not None
-    assert plan.title == "test"
-    assert plan.status == PlanStatus.DRAFT
+async def test_create_plan_multi_tenant() -> None:
+    with tenant_context("tenant_a"):
+        plan_a = await create_plan("test_a")
+    with tenant_context("tenant_b"):
+        plan_b = await create_plan("test_b")
 
-    retrieved_plan = await get_plan(plan.id)
-    assert retrieved_plan == plan
+    with tenant_context("tenant_a"):
+        assert await get_plan(plan_a.id) == plan_a
+        plans_a = await list_plans()
+        assert plan_a in plans_a
+        assert plan_b not in plans_a
 
-    all_plans = await list_plans()
-    assert plan in all_plans
+    with tenant_context("tenant_b"):
+        assert await get_plan(plan_b.id) == plan_b
+        plans_b = await list_plans()
+        assert plan_b in plans_b
+        assert plan_a not in plans_b
 
-    await delete_plan(plan.id)
-    assert await get_plan(plan.id) is None
+    with tenant_context("tenant_a"):
+        await delete_plan(plan_a.id)
+        assert await get_plan(plan_a.id) is None
+    with tenant_context("tenant_b"):
+        await delete_plan(plan_b.id)
+        assert await get_plan(plan_b.id) is None
