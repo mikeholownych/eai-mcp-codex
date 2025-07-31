@@ -1,5 +1,5 @@
 # Collaboration Orchestrator Service Dockerfile
-FROM llm-stack-base as collaboration-orchestrator
+FROM mcp-base as collaboration-orchestrator
 
 # Set working directory
 WORKDIR /app

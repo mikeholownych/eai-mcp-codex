@@ -1,5 +1,5 @@
 # Developer Agent Service Dockerfile
-FROM llm-stack-base as developer-agent
+FROM mcp-base as developer-agent
 
 # Set working directory
 WORKDIR /app

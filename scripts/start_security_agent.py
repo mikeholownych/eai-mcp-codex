@@ -35,7 +35,7 @@ class SecurityAgentService:
             logger.info(f"Starting Security Agent: {agent_id} ({agent_name})")
 
             # Create and start agent
-            self.agent = SecurityAgent(agent_id=agent_id, name=agent_name)
+            self.agent = await SecurityAgent.create(agent_id=agent_id, name=agent_name)
             self.running = True
 
             # Start agent in background
