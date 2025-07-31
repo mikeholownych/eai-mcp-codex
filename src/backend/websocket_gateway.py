@@ -10,7 +10,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from src.a2a_communication.message_broker import A2AMessageBroker
 from src.a2a_communication.models import A2AMessage
 from src.common.logging import get_logger
-from src.common.metrics import MetricsCollector, get_metrics_collector
+from src.backend.metrics_collector import get_backend_collector
+from src.common.metrics import MetricsCollector
 from src.common.health_check import detailed_health
 from src.common.service_registry import ServiceRegistry, ServiceInfo
 
@@ -26,7 +27,7 @@ class WebSocketGateway:
         metrics: Optional[MetricsCollector] = None,
     ) -> None:
         self.broker = broker or A2AMessageBroker()
-        self.metrics = metrics or get_metrics_collector("websocket-gateway")
+        self.metrics = metrics or get_backend_collector("websocket-gateway")
         self.connections: Dict[str, WebSocket] = {}
         self._tasks: Dict[str, asyncio.Task] = {}
 
@@ -53,6 +54,7 @@ class WebSocketGateway:
         """Handle an incoming message from an agent."""
         message = A2AMessage.model_validate_json(data)
         self.broker.send_message(message)
+        self.metrics.record_message_received()
         logger.debug("Message %s routed", message.id)
 
     async def _deliver(self, agent_id: str) -> None:
@@ -64,10 +66,12 @@ class WebSocketGateway:
             while True:
                 for msg in self.broker.get_messages(agent_id):
                     await websocket.send_text(msg.model_dump_json())
+                    self.metrics.record_message_sent()
 
                 message = pubsub.get_message(timeout=0.01)
                 if message and message.get("type") == "message":
                     await websocket.send_text(message["data"])
+                    self.metrics.record_message_sent()
 
                 await asyncio.sleep(0.5)
         except asyncio.CancelledError:

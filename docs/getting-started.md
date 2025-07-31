@@ -18,7 +18,8 @@ To set up the project, run the following command:
 make quick-start-a2a
 ```
 
-This will start all the services and run the database migrations.
+This will start all the services and run the database migrations using
+Alembic.
 
 ## Usage
 

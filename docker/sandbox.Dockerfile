@@ -10,10 +10,12 @@ RUN apt-get update && apt-get install -y \
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash sandbox
 WORKDIR /home/sandbox
-USER sandbox
 
-# Install Python dependencies
+# Install Python dependencies as root
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Drop privileges for runtime
+USER sandbox
 
 CMD ["python", "-c", "print('sandbox ready')"]

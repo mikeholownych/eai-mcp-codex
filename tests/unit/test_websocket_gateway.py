@@ -10,6 +10,12 @@ from src.a2a_communication.message_broker import A2AMessageBroker
 from fastapi.testclient import TestClient
 
 from src.backend.websocket_gateway import create_app
+from src.backend.metrics_collector import get_backend_collector
+from src.common.metrics import (
+    A2A_MESSAGES_SENT,
+    A2A_MESSAGES_RECEIVED,
+    reset_metrics,
+)
 from src.a2a_communication.models import A2AMessage, MessageType
 from src.common.service_registry import ServiceInfo
 
@@ -56,6 +62,7 @@ class DummyBroker(A2AMessageBroker):
 
 
 def test_websocket_send_and_receive() -> None:
+    reset_metrics()
     broker = DummyBroker()
     app = create_app(broker=broker)
 
@@ -81,6 +88,9 @@ def test_websocket_send_and_receive() -> None:
             assert received["payload"] == {"msg": "hello"}
 
     assert broker.sent[0].payload == {"foo": "bar"}
+    get_backend_collector("websocket-gateway")
+    assert A2A_MESSAGES_RECEIVED.labels(service="websocket-gateway")._value.get() == 1
+    assert A2A_MESSAGES_SENT.labels(service="websocket-gateway")._value.get() == 1
 
 
 @pytest.mark.asyncio
