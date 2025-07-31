@@ -48,7 +48,20 @@
       "Bash(git commit:*)",
       "Bash(test:*)",
       "Bash(cloudflared:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(cat:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git remote set-url:*)",
+      "*",
+      "Bash(nslookup:*)",
+      "WebFetch(domain:ethical-ai-insider.com)",
+      "WebFetch(domain:codex.ethical-ai-insider.com)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker system prune:*)",
+      "Bash(timeout 10 curl -s -D - http://localhost:3002 -o /dev/null)",
+      "Bash(true)",
+      "Bash(docker start:*)"
     ],
     "deny": []
   }
