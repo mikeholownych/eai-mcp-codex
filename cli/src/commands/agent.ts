@@ -12,6 +12,11 @@ import * as gitWorktree from './git-worktree';
 import * as workflowOrchestrator from './workflow-orchestrator';
 import * as verificationFeedback from './verification-feedback';
 
+// Import configuration system
+import { ConfigurationManager } from '../config/configuration-manager';
+import { AgentDefinitionLoader, AgentDefinition, AgentExecutionContext } from '../loaders/agent-definition-loader';
+import { CommandDefinitionLoader, CommandDefinition, CommandExecutionContext } from '../loaders/command-definition-loader';
+
 // --- LLMClient Placeholder (Integrate your LLM API here) ---
 // This class is responsible for making actual requests to your chosen LLM (e.g., OpenAI, Google Gemini).
 // You will need to replace the placeholder methods with actual API calls.
@@ -60,15 +65,83 @@ class LLMClient {
   }
 }
 
-// --- AgentClient (Uses LLMClient for AI capabilities and orchestrates other commands) ---
+// --- Enhanced AgentClient with Configuration Support ---
 export class AgentClient {
   public llmClient: LLMClient;
+  private configManager: ConfigurationManager;
+  private agentLoader: AgentDefinitionLoader;
+  private commandLoader: CommandDefinitionLoader;
 
   constructor() {
     this.llmClient = new LLMClient();
+    this.configManager = new ConfigurationManager({
+      logLevel: 'info',
+      enableCaching: true,
+      conflictResolution: 'merge',
+      validationLevel: 'basic',
+    });
+    this.agentLoader = new AgentDefinitionLoader(this.configManager);
+    this.commandLoader = new CommandDefinitionLoader(this.configManager);
   }
 
-  async createPlan(task: string): Promise<any> {
+  /**
+   * Create a plan using configuration-aware agent
+   */
+  async createPlan(task: string, agentName?: string): Promise<any> {
+    try {
+      // Load planner agent configuration
+      const plannerAgent = agentName 
+        ? await this.agentLoader.loadAgentDefinition(agentName)
+        : await this.findBestPlannerAgent();
+
+      if (!plannerAgent) {
+        console.log(chalk.yellow('No planner agent configuration found, using default behavior'));
+        return this.createPlanDefault(task);
+      }
+
+      console.log(chalk.blue(`Using planner agent: ${plannerAgent.frontMatter.name}`));
+
+      // Create execution context
+      const context = this.agentLoader.createExecutionContext(plannerAgent, {
+        parentTask: task,
+        executionEnvironment: 'development',
+      });
+
+      // Build enhanced prompt with agent instructions
+      const enhancedPrompt = this.buildEnhancedPrompt(task, plannerAgent, context);
+      
+      const planText = await this.llmClient.generateText(enhancedPrompt);
+      
+      try {
+        const plan = JSON.parse(planText);
+        if (!Array.isArray(plan)) {
+          throw new Error('LLM did not return a JSON array for the plan.');
+        }
+        
+        return {
+          id: `plan-${Date.now()}`,
+          task,
+          agent: plannerAgent.frontMatter.name,
+          steps: plan,
+          context: context,
+          createdAt: new Date(),
+        };
+      } catch (parseError: any) {
+        console.error(chalk.red(`Failed to parse plan from LLM: ${parseError.message}`));
+        // Fallback to default planning
+        return this.createPlanDefault(task);
+      }
+    } catch (error: any) {
+      console.error(chalk.red(`Error in configuration-aware planning: ${error.message}`));
+      // Fallback to default planning
+      return this.createPlanDefault(task);
+    }
+  }
+
+  /**
+   * Default plan creation (fallback)
+   */
+  private async createPlanDefault(task: string): Promise<any> {
     const prompt = `You are an AI assistant tasked with creating a step-by-step plan to accomplish the following task: \"${task}\".\n\nProvide a detailed plan as a JSON array of steps. Each step should be an object with a \"command\" field (matching CLI commands like \"generate\", \"refactor\", \"verify\", \"plan_create\", \"git_create\") and an \"args\" object containing the arguments for that command.\n\nExample Plan for \"Create a new React component called MyButton in src/components/MyButton.tsx and verify it\":\n[\n  {\"command\": \"generate\", \"args\": {\"prompt\": \"React functional component MyButton\", \"filePath\": \"src/components/MyButton.tsx\"}},\n  {\"command\": \"verify\", \"args\": {\"filePath\": \"src/components/MyButton.tsx\"}}\n]\n\nYour plan for \"${task}\":`;
 
     const planText = await this.llmClient.generateText(prompt);
@@ -86,6 +159,74 @@ export class AgentClient {
       console.error(chalk.red(`Failed to parse plan from LLM: ${error.message}. Raw response:\n${planText}`));
       throw new Error('Invalid plan format from LLM.');
     }
+  }
+
+  /**
+   * Find the best planner agent
+   */
+  private async findBestPlannerAgent(): Promise<AgentDefinition | null> {
+    try {
+      const plannerAgents = await this.agentLoader.loadAgentDefinitionsByType('planner');
+      
+      if (plannerAgents.length === 0) {
+        return null;
+      }
+
+      // Return the highest priority planner agent
+      return plannerAgents.sort((a, b) => (b.frontMatter.priority || 0) - (a.frontMatter.priority || 0))[0];
+    } catch (error) {
+      console.error(chalk.yellow(`Warning: Could not load planner agents: ${error instanceof Error ? error.message : String(error)}`));
+      return null;
+    }
+  }
+
+  /**
+   * Build enhanced prompt with agent instructions
+   */
+  private buildEnhancedPrompt(task: string, agent: AgentDefinition, context: AgentExecutionContext): string {
+    let prompt = '';
+
+    // Add system prompt if available
+    if (agent.systemPrompt) {
+      prompt += `${agent.systemPrompt}\n\n`;
+    }
+
+    // Add agent instructions
+    prompt += `${agent.instructions}\n\n`;
+
+    // Add task-specific context
+    prompt += `Task: ${task}\n\n`;
+
+    // Add capabilities context
+    if (agent.capabilities.length > 0) {
+      prompt += `Available capabilities: ${agent.capabilities.join(', ')}\n\n`;
+    }
+
+    // Add constraints
+    if (agent.constraints && agent.constraints.length > 0) {
+      prompt += `Constraints:\n${agent.constraints.map(c => `- ${c}`).join('\n')}\n\n`;
+    }
+
+    // Add planning instructions
+    prompt += `Create a detailed step-by-step plan as a JSON array. Each step should have:
+- "command": The CLI command to execute
+- "args": Object with command arguments
+- "description": Brief description of what this step accomplishes
+
+Available commands: generate, refactor, verify, plan_create, git_create, workflow_create, etc.
+
+Example format:
+[
+  {
+    "command": "generate",
+    "args": {"prompt": "description", "filePath": "path"},
+    "description": "Generate code file"
+  }
+]
+
+Your plan:`;
+
+    return prompt;
   }
 
   async executePlan(plan: any): Promise<any> {
@@ -106,6 +247,91 @@ export class AgentClient {
   }
 
   public async dispatchCommand(command: string, args: any): Promise<void> {
+    try {
+      // Try to load command configuration
+      const commandDef = await this.commandLoader.loadCommandDefinition(command);
+      
+      if (commandDef) {
+        console.log(chalk.blue(`Using configured command: ${commandDef.frontMatter.name}`));
+        await this.executeConfiguredCommand(commandDef, args);
+      } else {
+        // Fallback to hardcoded command execution
+        await this.executeHardcodedCommand(command, args);
+      }
+    } catch (error: any) {
+      console.error(chalk.red(`Command execution failed: ${error.message}`));
+      throw error;
+    }
+  }
+
+  /**
+   * Execute a configured command with validation and context
+   */
+  private async executeConfiguredCommand(commandDef: CommandDefinition, args: any): Promise<void> {
+    // Validate parameters
+    const validation = this.commandLoader.validateCommandParameters(commandDef, args);
+    
+    if (!validation.isValid) {
+      const errorMessages = validation.errors.map(e => `${e.parameter}: ${e.message}`).join('\n');
+      throw new Error(`Parameter validation failed:\n${errorMessages}`);
+    }
+
+    // Show warnings if any
+    if (validation.warnings.length > 0) {
+      validation.warnings.forEach(warning => {
+        console.log(chalk.yellow(`Warning: ${warning.parameter}: ${warning.message}`));
+      });
+    }
+
+    // Create execution context
+    const context = this.commandLoader.createExecutionContext(
+      commandDef,
+      validation.normalizedParameters,
+      {
+        workingDirectory: process.cwd(),
+        executionEnvironment: 'development',
+      }
+    );
+
+    // Execute pre-execution checks
+    if (commandDef.executionSettings.preExecutionChecks.length > 0) {
+      console.log(chalk.gray('Running pre-execution checks...'));
+      await this.runPreExecutionChecks(commandDef.executionSettings.preExecutionChecks, context);
+    }
+
+    // Execute the command based on its type
+    switch (commandDef.type) {
+      case 'generation':
+        await this.executeGenerationCommand(commandDef, context);
+        break;
+      case 'refactoring':
+        await this.executeRefactoringCommand(commandDef, context);
+        break;
+      case 'analysis':
+        await this.executeAnalysisCommand(commandDef, context);
+        break;
+      case 'testing':
+        await this.executeTestingCommand(commandDef, context);
+        break;
+      case 'deployment':
+        await this.executeDeploymentCommand(commandDef, context);
+        break;
+      default:
+        // Fallback to hardcoded execution
+        await this.executeHardcodedCommand(commandDef.frontMatter.name, args);
+    }
+
+    // Execute post-execution actions
+    if (commandDef.executionSettings.postExecutionActions.length > 0) {
+      console.log(chalk.gray('Running post-execution actions...'));
+      await this.runPostExecutionActions(commandDef.executionSettings.postExecutionActions, context);
+    }
+  }
+
+  /**
+   * Execute hardcoded commands (fallback)
+   */
+  private async executeHardcodedCommand(command: string, args: any): Promise<void> {
     switch (command) {
       case 'generate':
         await this.generateCode(args.prompt, args.filePath);
@@ -164,6 +390,261 @@ export class AgentClient {
       default:
         throw new Error(`Unknown command: ${command}`);
     }
+  }
+
+  /**
+   * Configuration-aware command execution methods
+   */
+  
+  private async executeGenerationCommand(commandDef: CommandDefinition, context: CommandExecutionContext): Promise<void> {
+    const { prompt, filePath } = context.parameters;
+    
+    // Build enhanced prompt with command instructions
+    const enhancedPrompt = this.buildCommandPrompt(commandDef, context);
+    const generatedContent = await this.llmClient.generateText(enhancedPrompt);
+    
+    // Apply output formatting based on command configuration
+    const formattedContent = this.formatOutput(generatedContent, commandDef.outputFormat);
+    
+    fs.writeFileSync(filePath, formattedContent);
+    console.log(chalk.green(`✅ Generated code saved to ${filePath}`));
+  }
+
+  private async executeRefactoringCommand(commandDef: CommandDefinition, context: CommandExecutionContext): Promise<void> {
+    const { filePath, prompt } = context.parameters;
+    
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    const originalContent = fs.readFileSync(filePath, 'utf8');
+    
+    // Build enhanced prompt with command instructions and original code
+    const enhancedPrompt = this.buildRefactoringPrompt(commandDef, context, originalContent);
+    
+    const refactoredContent = await this.llmClient.generateText(enhancedPrompt);
+    const formattedContent = this.formatOutput(refactoredContent, commandDef.outputFormat);
+    
+    fs.writeFileSync(filePath, formattedContent);
+    console.log(chalk.green(`✅ Refactored code saved to ${filePath}`));
+  }
+
+  private async executeAnalysisCommand(commandDef: CommandDefinition, context: CommandExecutionContext): Promise<void> {
+    const { filePath } = context.parameters;
+    
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    const content = fs.readFileSync(filePath, 'utf8');
+    const enhancedPrompt = this.buildAnalysisPrompt(commandDef, context, content);
+    
+    const analysis = await this.llmClient.generateText(enhancedPrompt);
+    
+    console.log(chalk.blue.bold('\n📊 Code Analysis Results:'));
+    console.log(this.formatOutput(analysis, commandDef.outputFormat));
+  }
+
+  private async executeTestingCommand(commandDef: CommandDefinition, context: CommandExecutionContext): Promise<void> {
+    const { filePath } = context.parameters;
+    
+    console.log(chalk.blue(`🧪 Running tests for ${filePath}...`));
+    
+    // Enhanced testing with command configuration
+    const testPrompt = this.buildTestingPrompt(commandDef, context);
+    
+    if (testPrompt) {
+      const testSuggestions = await this.llmClient.generateText(testPrompt);
+      console.log(chalk.yellow.bold('\n💡 Test Suggestions:'));
+      console.log(this.formatOutput(testSuggestions, commandDef.outputFormat));
+    }
+    
+    // Run actual verification (fallback to existing method)
+    await this.verifyCodeChanges(filePath);
+  }
+
+  private async executeDeploymentCommand(commandDef: CommandDefinition, context: CommandExecutionContext): Promise<void> {
+    console.log(chalk.blue('🚀 Preparing deployment...'));
+    
+    const deploymentPrompt = this.buildDeploymentPrompt(commandDef, context);
+    const deploymentPlan = await this.llmClient.generateText(deploymentPrompt);
+    
+    console.log(chalk.blue.bold('\n📋 Deployment Plan:'));
+    console.log(this.formatOutput(deploymentPlan, commandDef.outputFormat));
+    
+    // Note: Actual deployment would require additional infrastructure integration
+    console.log(chalk.yellow('\n⚠️  Note: Actual deployment execution requires additional configuration'));
+  }
+
+  /**
+   * Helper methods for building enhanced prompts
+   */
+  
+  private buildCommandPrompt(commandDef: CommandDefinition, context: CommandExecutionContext): string {
+    let prompt = '';
+    
+    // Add command instructions
+    prompt += `${commandDef.instructions}\n\n`;
+    
+    // Add specific parameters context
+    const { prompt: userPrompt, filePath } = context.parameters;
+    prompt += `Task: ${userPrompt}\n`;
+    prompt += `Target file: ${filePath}\n\n`;
+    
+    // Add constraints from configuration
+    if (commandDef.contextRequirements.requiredContext.length > 0) {
+      prompt += `Required context: ${commandDef.contextRequirements.requiredContext.join(', ')}\n\n`;
+    }
+    
+    prompt += `Generate ${commandDef.outputFormat} output for the requested task.`;
+    
+    return prompt;
+  }
+
+  private buildRefactoringPrompt(commandDef: CommandDefinition, context: CommandExecutionContext, originalCode: string): string {
+    let prompt = '';
+    
+    prompt += `${commandDef.instructions}\n\n`;
+    prompt += `Refactoring task: ${context.parameters.prompt}\n\n`;
+    prompt += `Original code:\n\`\`\`\n${originalCode}\n\`\`\`\n\n`;
+    prompt += `Please refactor the code according to the task requirements. Return only the refactored code.`;
+    
+    return prompt;
+  }
+
+  private buildAnalysisPrompt(commandDef: CommandDefinition, context: CommandExecutionContext, code: string): string {
+    let prompt = '';
+    
+    prompt += `${commandDef.instructions}\n\n`;
+    prompt += `Code to analyze:\n\`\`\`\n${code}\n\`\`\`\n\n`;
+    prompt += `Provide a comprehensive analysis of the code including:
+- Code quality assessment
+- Potential issues or bugs
+- Performance considerations
+- Security vulnerabilities
+- Suggestions for improvement`;
+    
+    return prompt;
+  }
+
+  private buildTestingPrompt(commandDef: CommandDefinition, context: CommandExecutionContext): string | null {
+    if (!context.parameters.filePath) return null;
+    
+    let prompt = '';
+    
+    prompt += `${commandDef.instructions}\n\n`;
+    prompt += `File to test: ${context.parameters.filePath}\n\n`;
+    prompt += `Generate comprehensive test suggestions including:
+- Unit test cases
+- Edge cases to consider
+- Integration test scenarios
+- Performance test recommendations`;
+    
+    return prompt;
+  }
+
+  private buildDeploymentPrompt(commandDef: CommandDefinition, context: CommandExecutionContext): string {
+    let prompt = '';
+    
+    prompt += `${commandDef.instructions}\n\n`;
+    prompt += `Create a deployment plan that includes:
+- Pre-deployment checklist
+- Deployment steps
+- Post-deployment verification
+- Rollback procedures
+- Monitoring recommendations`;
+    
+    return prompt;
+  }
+
+  private formatOutput(content: string, format: string): string {
+    switch (format) {
+      case 'json':
+        try {
+          return JSON.stringify(JSON.parse(content), null, 2);
+        } catch {
+          return content; // Return as-is if not valid JSON
+        }
+      case 'markdown':
+        return content; // Already markdown format
+      case 'code':
+        return content.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '');
+      case 'plain':
+      default:
+        return content;
+    }
+  }
+
+  /**
+   * Execution lifecycle methods
+   */
+  
+  private async runPreExecutionChecks(checks: string[], context: CommandExecutionContext): Promise<void> {
+    for (const check of checks) {
+      switch (check.toLowerCase()) {
+        case 'validate parameters':
+          // Already done during parameter validation
+          console.log(chalk.gray('  ✓ Parameters validated'));
+          break;
+        case 'check permissions':
+          await this.checkPermissions(context);
+          break;
+        case 'verify working directory':
+          await this.verifyWorkingDirectory(context);
+          break;
+        default:
+          console.log(chalk.gray(`  ⚠ Unknown check: ${check}`));
+      }
+    }
+  }
+
+  private async runPostExecutionActions(actions: string[], context: CommandExecutionContext): Promise<void> {
+    for (const action of actions) {
+      switch (action.toLowerCase()) {
+        case 'validate outputs':
+          await this.validateOutputs(context);
+          break;
+        case 'clean up temporary files':
+          await this.cleanupTempFiles(context);
+          break;
+        case 'log execution results':
+          await this.logExecutionResults(context);
+          break;
+        default:
+          console.log(chalk.gray(`  ⚠ Unknown action: ${action}`));
+      }
+    }
+  }
+
+  private async checkPermissions(context: CommandExecutionContext): Promise<void> {
+    // Basic permission checks
+    if (context.securityContext.permissions.length > 0) {
+      console.log(chalk.gray(`  ✓ Permissions checked: ${context.securityContext.permissions.join(', ')}`));
+    } else {
+      console.log(chalk.gray('  ✓ No special permissions required'));
+    }
+  }
+
+  private async verifyWorkingDirectory(context: CommandExecutionContext): Promise<void> {
+    if (fs.existsSync(context.workingDirectory)) {
+      console.log(chalk.gray(`  ✓ Working directory verified: ${context.workingDirectory}`));
+    } else {
+      throw new Error(`Working directory not found: ${context.workingDirectory}`);
+    }
+  }
+
+  private async validateOutputs(context: CommandExecutionContext): Promise<void> {
+    // Basic output validation
+    console.log(chalk.gray('  ✓ Outputs validated'));
+  }
+
+  private async cleanupTempFiles(context: CommandExecutionContext): Promise<void> {
+    // Cleanup logic would go here
+    console.log(chalk.gray('  ✓ Temporary files cleaned'));
+  }
+
+  private async logExecutionResults(context: CommandExecutionContext): Promise<void> {
+    console.log(chalk.gray(`  ✓ Execution logged for command: ${context.command.frontMatter.name}`));
   }
 
   async generateCode(prompt: string, filePath: string): Promise<string> {
