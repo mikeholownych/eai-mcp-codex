@@ -21,7 +21,11 @@ class DeveloperAgent(BaseAgent):
         return cls(agent_id=agent_id, name=name, specializations=specializations)
 
     def __init__(
-        self, config: AgentConfig = None, agent_id: str = None, name: str = None, specializations: List[str] = None
+        self,
+        config: AgentConfig = None,
+        agent_id: str = None,
+        name: str = None,
+        specializations: List[str] = None,
     ):
         # Handle both config-based and parameter-based initialization
         if config is not None:
@@ -30,7 +34,11 @@ class DeveloperAgent(BaseAgent):
             super().__init__(config)
         else:
             # Parameter-based initialization (legacy)
-            self.specializations = specializations or ["python", "javascript", "general"]
+            self.specializations = specializations or [
+                "python",
+                "javascript",
+                "general",
+            ]
             config = AgentConfig(
                 agent_id=agent_id,
                 agent_type="developer",
