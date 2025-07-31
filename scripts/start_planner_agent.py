@@ -35,7 +35,12 @@ class PlannerAgentService:
             logger.info(f"Starting Planner Agent: {agent_id} ({agent_name})")
 
             # Create and start agent
-            self.agent = await PlannerAgent.create(agent_id=agent_id, name=agent_name)
+            from src.agents.planner_agent import PlannerAgent
+            self.agent = PlannerAgent(agent_id=agent_id, name=agent_name)
+            
+            # Initialize message broker BEFORE starting agent
+            from src.a2a_communication.message_broker import A2AMessageBroker
+            self.agent.message_broker = await A2AMessageBroker.create()
             self.running = True
 
             # Start agent in background

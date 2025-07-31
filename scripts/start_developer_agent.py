@@ -39,10 +39,15 @@ class DeveloperAgentService:
             logger.info(f"Starting Developer Agent: {agent_id} ({agent_name})")
             logger.info(f"Specializations: {specializations}")
 
-            # Create and start agent
-            self.agent = await DeveloperAgent.create(
+            # Create and start agent using legacy method for now
+            from src.agents.developer_agent import DeveloperAgent
+            self.agent = DeveloperAgent(
                 agent_id=agent_id, name=agent_name, specializations=specializations
             )
+            
+            # Initialize message broker BEFORE starting agent
+            from src.a2a_communication.message_broker import A2AMessageBroker
+            self.agent.message_broker = await A2AMessageBroker.create()
             self.running = True
 
             # Start agent in background

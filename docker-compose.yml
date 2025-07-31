@@ -286,7 +286,15 @@ services:
       - CONSUL_URL=http://consul:8500
       - SERVICE_NAME=verification-feedback
       - SERVICE_PORT=8005
-      - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/verification_feedback_db
+      - POSTGRES_DB=verification_feedback_db
+      - POSTGRES_USER=mcp_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}
+      - VERIFICATION_FEEDBACK_DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD}@postgres:5432/verification_feedback_db
+      - VERIFICATION_FEEDBACK_DB_USER=mcp_user
+      - VERIFICATION_FEEDBACK_DB_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}
+      - VERIFICATION_FEEDBACK_DB_HOST=postgres
+      - VERIFICATION_FEEDBACK_DB_PORT=5432
+      - VERIFICATION_FEEDBACK_DB_NAME=verification_feedback_db
       - MODEL_ROUTER_URL=http://model-router:8001
     # ports:
     #   - "8005:8005"
@@ -754,6 +762,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - mcp-network
 
   # Metrics Collection
   prometheus:

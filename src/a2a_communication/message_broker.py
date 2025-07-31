@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 class A2AMessageBroker:
     """Handles A2A message routing, delivery, and persistence."""
 
+    @classmethod
     async def create(cls):
         self = cls()
         self.redis = await get_redis_connection()

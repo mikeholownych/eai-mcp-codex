@@ -35,7 +35,12 @@ class SecurityAgentService:
             logger.info(f"Starting Security Agent: {agent_id} ({agent_name})")
 
             # Create and start agent
-            self.agent = await SecurityAgent.create(agent_id=agent_id, name=agent_name)
+            from src.agents.security_agent import SecurityAgent
+            self.agent = SecurityAgent(agent_id=agent_id, name=agent_name)
+            
+            # Initialize message broker BEFORE starting agent
+            from src.a2a_communication.message_broker import A2AMessageBroker
+            self.agent.message_broker = await A2AMessageBroker.create()
             self.running = True
 
             # Start agent in background
