@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional, List
+import secrets
 import os
 
 
@@ -122,7 +123,7 @@ class GlobalSettings(BaseSettings):
     environment: str = "development"
     debug: bool = False
     log_level: str = "INFO"
-    jwt_secret: str = "super-secret-jwt-key"  # IMPORTANT: Change this in production!
+    jwt_secret: str = os.getenv("JWT_SECRET") or secrets.token_urlsafe(32)
     database_url: str = "sqlite:///data/mcp_global.db"  # For global data if any
     redis_url: str = "redis://localhost:6379"
     consul_url: str = "http://localhost:8500"
@@ -154,6 +155,10 @@ security_agent_settings = SecurityAgentSettings(_env_prefix="SECURITY_AGENT_")
 agent_monitor_settings = AgentMonitorSettings(_env_prefix="AGENT_MONITOR_")
 
 global_settings = GlobalSettings()
+
+# Enforce explicit secret in production
+if global_settings.environment == "production" and not os.getenv("JWT_SECRET"):
+    raise ValueError("JWT_SECRET environment variable must be set in production")
 
 # Set Anthropic API key globally if available
 if global_settings.anthropic_api_key:
