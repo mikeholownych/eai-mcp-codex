@@ -9,7 +9,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseClasses = 'inline-flex items-center justify-center font-medium focus-ring disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200'
     
     const variants = {
-      primary: 'bg-orange-500 text-white hover:bg-orange-600 active:scale-95 shadow-sm',
+      primary: 'bg-purple-600 text-white hover:bg-purple-700 active:scale-95 shadow-sm',
       secondary: 'bg-purple-600 text-white hover:bg-purple-700 active:scale-95 shadow-sm',
       outline: 'border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white active:scale-95',
       ghost: 'text-gray-300 hover:text-white hover:bg-gray-800 active:scale-95',

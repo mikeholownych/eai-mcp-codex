@@ -76,7 +76,6 @@ class BaseAgent(ABC):
     def __init__(self, config: AgentConfig):
         self.config = config
         self.logger = get_logger(f"agent.{config.agent_type}.{config.agent_id}")
-        self.message_broker = A2AMessageBroker()
 
         self.running = False
         self.current_tasks: Dict[UUID, TaskInput] = {}
@@ -91,6 +90,12 @@ class BaseAgent(ABC):
             "average_execution_time": 0.0,
             "uptime_start": datetime.utcnow(),
         }
+
+    @classmethod
+    async def create(cls, config: AgentConfig):
+        instance = cls(config)
+        instance.message_broker = await A2AMessageBroker.create()
+        return instance
 
     async def start(self) -> None:
         """Start the agent."""

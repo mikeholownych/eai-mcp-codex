@@ -1,5 +1,6 @@
 fastapi
 pydantic
+pydantic[email]
 pydantic-settings
 uvicorn
 requests
@@ -16,3 +17,4 @@ httpx
 numpy
 alembic
 pytest-asyncio
+abacusai

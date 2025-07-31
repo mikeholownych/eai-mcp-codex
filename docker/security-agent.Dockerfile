@@ -1,5 +1,5 @@
 # Security Agent Service Dockerfile
-FROM llm-stack-base as security-agent
+FROM mcp-base as security-agent
 
 # Set working directory
 WORKDIR /app

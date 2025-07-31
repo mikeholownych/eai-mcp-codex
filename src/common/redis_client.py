@@ -1,7 +1,7 @@
 """Redis client utilities."""
 
 import os
-from redis import Redis
+from redis.asyncio import Redis
 
 from .logging import get_logger
 
@@ -13,7 +13,7 @@ def get_redis(url: str) -> Redis:
     return Redis.from_url(url, decode_responses=True)
 
 
-def get_redis_connection(url: str = None) -> Redis:
+async def get_redis_connection(url: str = None) -> Redis:
     """Get Redis connection with default configuration."""
     if url is None:
         url = os.getenv("REDIS_URL", "redis://localhost:6379")
@@ -21,7 +21,7 @@ def get_redis_connection(url: str = None) -> Redis:
     try:
         client = Redis.from_url(url, decode_responses=True)
         # Test connection
-        client.ping()
+        await client.ping()
         logger.info(f"Connected to Redis at {url}")
         return client
     except Exception as e:
