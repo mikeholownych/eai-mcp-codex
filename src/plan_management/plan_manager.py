@@ -1,6 +1,7 @@
 """Plan Management business logic implementation."""
 
 import uuid
+import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
@@ -35,6 +36,9 @@ class PlanManager:
     def __init__(self, dsn: str = settings.database_url):
         self.db_manager = DatabaseManager(dsn)
         self.dsn = dsn  # Store DSN for potential re-initialization if needed
+        self._testing_mode = os.getenv("TESTING_MODE") == "true"
+        # Simple in-memory store used when running unit tests
+        self._plans: Dict[str, Plan] = {}
         # Initialize database connection pool on startup
         # This will be called by the FastAPI app's startup event
 
@@ -140,27 +144,30 @@ class PlanManager:
             tenant_id=tenant,
         )
 
-        query = """
-            INSERT INTO plans (
-                id, title, description, status, priority, created_at, updated_at,
-                start_date, estimated_hours, metadata, created_by, tenant_id
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-        """
-        values = (
-            plan.id,
-            plan.title,
-            plan.description,
-            plan.status.value,
-            plan.priority,
-            serialize_datetime(plan.created_at),
-            serialize_datetime(plan.updated_at),
-            serialize_datetime(plan.start_date),
-            plan.estimated_hours,
-            serialize_json_field(plan.metadata),
-            plan.created_by,
-            plan.tenant_id,
-        )
-        await self.db_manager.execute_update(query, values)
+        if self._testing_mode:
+            self._plans[plan.id] = plan
+        else:
+            query = """
+                INSERT INTO plans (
+                    id, title, description, status, priority, created_at, updated_at,
+                    start_date, estimated_hours, metadata, created_by, tenant_id
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            """
+            values = (
+                plan.id,
+                plan.title,
+                plan.description,
+                plan.status.value,
+                plan.priority,
+                serialize_datetime(plan.created_at),
+                serialize_datetime(plan.updated_at),
+                serialize_datetime(plan.start_date),
+                plan.estimated_hours,
+                serialize_json_field(plan.metadata),
+                plan.created_by,
+                plan.tenant_id,
+            )
+            await self.db_manager.execute_update(query, values)
 
         logger.info(f"Created plan: {plan.id} - {plan.title}")
         return plan
@@ -170,6 +177,12 @@ class PlanManager:
     ) -> Optional[Plan]:
         """Get a plan by ID scoped to the current tenant."""
         tenant = tenant_id or get_current_tenant()
+        if self._testing_mode:
+            plan = self._plans.get(plan_id)
+            if plan and plan.tenant_id == tenant:
+                return plan
+            return None
+
         query = "SELECT * FROM plans WHERE id = $1 AND tenant_id = $2"
         row = await self.db_manager.execute_query(query, (plan_id, tenant))
 
@@ -187,6 +200,16 @@ class PlanManager:
     ) -> List[Plan]:
         """List plans with optional filtering."""
         tenant = tenant_id or get_current_tenant()
+
+        if self._testing_mode:
+            plans = [p for p in self._plans.values() if p.tenant_id == tenant]
+            if status:
+                plans = [p for p in plans if p.status.value == status]
+            if created_by:
+                plans = [p for p in plans if p.created_by == created_by]
+            plans.sort(key=lambda p: p.updated_at, reverse=True)
+            return plans[:limit]
+
         query = "SELECT * FROM plans WHERE tenant_id = $1"
         params = [tenant]
         param_idx = 2
@@ -229,6 +252,16 @@ class PlanManager:
         set_clause = ", ".join(set_clauses)
 
         tenant = tenant_id or get_current_tenant()
+
+        if self._testing_mode:
+            plan = self._plans.get(plan_id)
+            if not plan or plan.tenant_id != tenant:
+                return None
+            for key, value in updates.items():
+                setattr(plan, key, value)
+            self._plans[plan_id] = plan
+            return plan
+
         query = f"UPDATE plans SET {set_clause} WHERE id = ${param_idx} AND tenant_id = ${param_idx + 1}"
         values.extend([plan_id, tenant])
 
@@ -244,6 +277,14 @@ class PlanManager:
         """Delete a plan and all associated tasks/milestones."""
         # ON DELETE CASCADE in table definition handles tasks and milestones
         tenant = tenant_id or get_current_tenant()
+
+        if self._testing_mode:
+            plan = self._plans.get(plan_id)
+            if plan and plan.tenant_id == tenant:
+                del self._plans[plan_id]
+                return True
+            return False
+
         query = "DELETE FROM plans WHERE id = $1 AND tenant_id = $2"
         rows_affected = await self.db_manager.execute_update(query, (plan_id, tenant))
 
