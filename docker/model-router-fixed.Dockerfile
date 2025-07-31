@@ -29,7 +29,7 @@ USER mcp
 COPY --chown=mcp:mcp scripts/health_check.py ./health_check.py
 RUN chmod +x ./health_check.py
 
-FROM llm-stack-base as model-router
+FROM mcp-base as model-router
 
 COPY --chown=mcp:mcp src/model_router/ ./
 COPY --chown=mcp:mcp scripts/start_model_router.py ./start.py
