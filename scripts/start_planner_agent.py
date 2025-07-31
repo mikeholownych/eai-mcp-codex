@@ -34,7 +34,7 @@ class PlannerAgentService:
             logger.info(f"Starting Planner Agent: {agent_id} ({agent_name})")
 
             # Create and start agent
-            self.agent = PlannerAgent(agent_id=agent_id, name=agent_name)
+            self.agent = await PlannerAgent.create(agent_id=agent_id, name=agent_name)
             self.running = True
 
             # Start agent in background
