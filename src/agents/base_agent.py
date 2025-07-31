@@ -61,6 +61,16 @@ class TaskOutput(BaseModel):
 class BaseAgent(ABC):
     """Base class for all specialized agents following AGENTS.md standards."""
 
+    @classmethod
+    def create(cls, *args, **kwargs):
+        """Instantiate an agent with the given arguments.
+
+        Some legacy orchestration scripts expect a ``create`` factory method
+        when launching agents. Providing this thin wrapper keeps backwards
+        compatibility while delegating to the class constructor.
+        """
+        return cls(*args, **kwargs)
+
     def __init__(self, config: AgentConfig):
         self.config = config
         self.logger = get_logger(f"agent.{config.agent_type}.{config.agent_id}")
