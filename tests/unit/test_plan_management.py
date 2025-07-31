@@ -12,8 +12,11 @@ import os
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
 
 
-@pytest.fixture(autouse=True)
-async def setup_and_teardown_db():
+import pytest_asyncio
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def setup_and_teardown_db() -> None:
     os.environ["TESTING_MODE"] = "true"
     db_manager = DatabaseManager("plan_management_db")
     await db_manager.connect()
