@@ -1,8 +1,6 @@
 import pytest
 from src.workflow_orchestrator.orchestrator import get_orchestrator
 from src.workflow_orchestrator.models import WorkflowRequest, WorkflowStatus
-import sys
-import os
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
 

@@ -1,6 +1,6 @@
 """API routes for the Staff Management service."""
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, Query
 from datetime import datetime
 
@@ -12,9 +12,8 @@ from .models import (
     User, UserCreate, UserUpdate, UserListResponse,
     Ticket, TicketCreate, TicketUpdate, TicketListResponse,
     SystemStats, SystemHealth, DashboardStats,
-    StaffResponse, ErrorResponse
+    StaffResponse
 )
-from .config import settings
 
 router = APIRouter(prefix="/staff", tags=["staff-management"])
 logger = get_logger("staff_routes")

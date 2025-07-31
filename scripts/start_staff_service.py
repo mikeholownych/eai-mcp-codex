@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Start the Staff Management service."""
 
-import sys
 import os
-import uvicorn
+import sys
 from pathlib import Path
+import uvicorn
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root))  # noqa: E402
 
-from src.staff.app import app
-from src.staff.config import settings
-from src.common.logging import get_logger
+from src.staff.app import app  # noqa: E402
+from src.staff.config import settings  # noqa: E402
+from src.common.logging import get_logger  # noqa: E402
 
 logger = get_logger("staff_service_start")
 
