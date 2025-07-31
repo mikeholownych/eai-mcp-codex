@@ -150,9 +150,9 @@ async def generate_tests_from_file(
             raise HTTPException(status_code=400, detail="No filename provided")
 
         # Read file content
-        content = await asyncio.gather(*file.read() if isinstance(file.read(, list) else (await file.read( if asyncio.iscoroutine(file.read() else file.read())
+        content_bytes = await file.read()
         try:
-            code_content = content.decode("utf-8")
+            code_content = content_bytes.decode("utf-8")
         except UnicodeDecodeError:
             raise HTTPException(status_code=400, detail="File must be UTF-8 encoded")
 

@@ -102,6 +102,20 @@ CACHE_HIT_RATIO = Gauge(
     registry=default_registry,
 )
 
+# Messaging metrics
+A2A_MESSAGES_SENT = Counter(
+    "mcp_a2a_messages_sent_total",
+    "Total A2A messages sent",
+    ["service"],
+    registry=default_registry,
+)
+A2A_MESSAGES_RECEIVED = Counter(
+    "mcp_a2a_messages_received_total",
+    "Total A2A messages received",
+    ["service"],
+    registry=default_registry,
+)
+
 
 class MetricsCollector:
     """Enhanced metrics collector with context managers and utilities."""
@@ -226,6 +240,14 @@ class MetricsCollector:
                 CACHE_HIT_RATIO.labels(
                     service=self.service_name, cache_type="default"
                 ).set(hit_ratio)
+
+    def record_message_sent(self) -> None:
+        """Increment count of messages sent."""
+        A2A_MESSAGES_SENT.labels(service=self.service_name).inc()
+
+    def record_message_received(self) -> None:
+        """Increment count of messages received."""
+        A2A_MESSAGES_RECEIVED.labels(service=self.service_name).inc()
 
     def get_service_stats(self) -> Dict[str, Any]:
         """Get service-specific statistics."""
