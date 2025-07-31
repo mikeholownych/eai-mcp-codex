@@ -3,6 +3,7 @@ import logging
 import json
 from datetime import datetime, timezone
 from typing import Optional, Any, Dict, List
+from contextlib import asynccontextmanager
 
 logger = logging.getLogger(__name__)
 
@@ -201,11 +202,10 @@ class DatabaseManager:
                     r["table_name"]: int(r["row_count"]) for r in table_records
                 }
 
-        if self._pool is None:
-            logger.error("Database pool not initialized. Call connect() first.")
-            raise Exception("Database pool not initialized. Call connect() first.")
-        async with self._pool.acquire() as connection:
-            return await connection.execute(query, *args)
+                return stats
+        except Exception as e:
+            logger.error(f"Error getting database stats: {e}")
+            return {}
 
     async def fetchrow(self, query: str, *args):
         if os.getenv("TESTING_MODE") == "true":
@@ -277,11 +277,6 @@ class MockAsyncpgConnection:
         return "MOCK_COMMAND_OK"
 
     async def fetchrow(self, query: str, *args):
-        return None
-    try:
-        return datetime.fromisoformat(dt_str)
-    except (ValueError, TypeError):
-        logger.warning(f"Failed to deserialize datetime: {dt_str}")
         return None
 
 
@@ -442,6 +437,9 @@ class DatabaseMigration:
 
             logger.info(f"Applied migration {version}: {description}")
             return True
+        except Exception as e:
+            logger.error(f"Failed to apply migration {version}: {e}")
+            return False
 
     async def __aenter__(self):
         return self
