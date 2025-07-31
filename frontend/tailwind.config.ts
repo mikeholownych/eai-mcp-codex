@@ -10,19 +10,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Ethical AI Insider Brand Colors
+        // MCP Codex Brand Colors - Purple Theme
         primary: {
-          50: '#fef7ec',
-          100: '#fdecd3',
-          200: '#fbd4a5',
-          300: '#f8b76d',
-          400: '#f59432',
-          500: '#f37a0a', // Main orange
-          600: '#e45e07',
-          700: '#bd4409',
-          800: '#963610',
-          900: '#7a2e10',
-          950: '#421508',
+          50: '#faf5ff',
+          100: '#f3e8ff',
+          200: '#e9d5ff',
+          300: '#d8b4fe',
+          400: '#c084fc',
+          500: '#a855f7', // Main purple
+          600: '#9333ea',
+          700: '#7c3aed',
+          800: '#6b21a8',
+          900: '#581c87',
+          950: '#3b0764',
         },
         secondary: {
           50: '#eff8ff',

@@ -16,3 +16,4 @@ httpx
 numpy
 alembic
 pytest-asyncio
+abacusai
