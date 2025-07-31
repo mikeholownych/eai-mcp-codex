@@ -6,7 +6,7 @@ from src.plan_management.plan_manager import (
     list_plans,
 )
 from src.common.database import DatabaseManager
-from src.common.tenant import tenant_context
+from src.common.tenant import tenant_context, async_tenant_context
 import os
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
@@ -51,3 +51,14 @@ async def test_create_plan_multi_tenant() -> None:
     with tenant_context("tenant_b"):
         await delete_plan(plan_b.id)
         assert await get_plan(plan_b.id) is None
+
+
+@pytest.mark.asyncio
+async def test_async_tenant_context() -> None:
+    async with async_tenant_context("tenant_async"):
+        plan = await create_plan("async_plan")
+        assert plan.tenant_id == "tenant_async"
+        assert await get_plan(plan.id) == plan
+    assert await get_plan(plan.id) is None
+    async with async_tenant_context("tenant_async"):
+        await delete_plan(plan.id)
