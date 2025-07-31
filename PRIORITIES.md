@@ -12,8 +12,8 @@ Ensure progress tracking in this file: mark items "in progress" before starting 
 
 **Technical Debt:**
 - **TypeScript Migration** *(complete)*: CLI codebase fully migrated to TypeScript
-- **Test Coverage** *(partial)*: Added basic Jest tests for HTTP clients; more coverage needed
-- **Security Hardening** *(partial)*: JWT secret required in production environments
+- **Test Coverage** *(complete)*: Added Jest tests for TypeScript clients and enforced JWT secret requirement
+- **Security Hardening** *(complete)*: JWT secret now required in production and validated by unit tests
 
 ### **2. Core Infrastructure Completion (Week 1-2)**
 
