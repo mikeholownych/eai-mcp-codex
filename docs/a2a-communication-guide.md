@@ -33,3 +33,9 @@ The consensus engine is a key component of the A2A communication system. It allo
 ## Agent Factory
 
 The agent factory is responsible for creating and managing agents. It can be used to dynamically create new agents as needed, and to scale the number of agents up or down based on the workload.
+
+## Monitoring
+
+The WebSocket gateway exposes Prometheus metrics for active connections and A2A
+message throughput. Counters track messages sent and received per service so
+that dashboards can display real-time communication rates.
