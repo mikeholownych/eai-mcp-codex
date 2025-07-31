@@ -11,7 +11,6 @@ import os
 import signal
 import sys
 
-from src.agents.planner_agent import PlannerAgent
 from src.common.logging import get_logger
 
 
