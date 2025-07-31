@@ -1,11 +1,10 @@
 """Staff Management FastAPI application."""
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.common.logging import get_logger
 from src.common.health_check import health
-from src.common.fastapi_auth import verify_staff_access
 
 from .routes import router
 

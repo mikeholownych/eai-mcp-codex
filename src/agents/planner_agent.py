@@ -10,6 +10,11 @@ from .base_agent import BaseAgent, AgentConfig, TaskInput
 class PlannerAgent(BaseAgent):
     """Agent specialized in project planning and task breakdown."""
 
+    @classmethod
+    def create(cls, agent_id: str, name: str | None = None) -> "PlannerAgent":
+        """Factory compatible with legacy startup scripts."""
+        return cls(agent_id=agent_id, name=name)
+
     def __init__(self, agent_id: str, name: str = None):
         config = AgentConfig(
             agent_id=agent_id,

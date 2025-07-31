@@ -1,8 +1,10 @@
 import os
 import logging
 import json
+import asyncio
 from datetime import datetime, timezone
 from typing import Optional, Any, Dict, List
+from contextlib import asynccontextmanager
 
 logger = logging.getLogger(__name__)
 
@@ -179,40 +181,50 @@ class DatabaseManager:
         return False
 
     async def get_database_stats(self) -> Dict[str, Any]:
-        """Get database statistics."""
-        stats = {}
+        """Get basic statistics about the connected database."""
+        if os.getenv("TESTING_MODE") == "true":
+            logger.info("Mocking DB stats in testing mode.")
+            return {"size_bytes": 0, "table_count": 0, "tables": {}}
+
+        stats: Dict[str, Any] = {}
         try:
             async with self.get_connection() as conn:
-                # Get database size
                 db_size = await conn.fetchval(
                     "SELECT pg_database_size(current_database());"
                 )
                 stats["size_bytes"] = db_size
 
-                # Get table information
                 tables_query = """
                     SELECT relname AS table_name, reltuples AS row_count
                     FROM pg_class
-                    WHERE relkind = 'r' AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public');
+                    WHERE relkind = 'r'
+                      AND relnamespace = (
+                        SELECT oid FROM pg_namespace WHERE nspname = 'public'
+                    );
                 """
                 table_records = await conn.fetch(tables_query)
                 stats["table_count"] = len(table_records)
                 stats["tables"] = {
                     r["table_name"]: int(r["row_count"]) for r in table_records
                 }
+        except Exception as exc:  # pragma: no cover - unexpected DB errors
+            logger.error("Failed to get database stats: %s", exc)
+        return stats
 
+    async def fetchrow(self, query: str, *args) -> Optional[Dict[str, Any]]:
+        """Fetch a single row from the database as a dictionary."""
+        if os.getenv("TESTING_MODE") == "true":
+            logger.info("Mock DB fetchrow: %s", query)
+            return None
         if self._pool is None:
             logger.error("Database pool not initialized. Call connect() first.")
             raise Exception("Database pool not initialized. Call connect() first.")
         async with self._pool.acquire() as connection:
-            return await connection.execute(query, *args)
+            row = await connection.fetchrow(query, *args)
+            return dict(row) if row else None
 
-    async def fetchrow(self, query: str, *args):
-        if os.getenv("TESTING_MODE") == "true":
-            logger.info(f"Mock DB fetchrow: {query}")
-            return None
-
-def get_connection(dsn: str):  # This function is now deprecated, use DatabaseManager
+def get_connection(dsn: str) -> None:
+    """Deprecated synchronous connection helper."""
     logger.warning(
         "get_connection is deprecated. Use DatabaseManager.get_connection() instead."
     )
@@ -220,54 +232,14 @@ def get_connection(dsn: str):  # This function is now deprecated, use DatabaseMa
         "Synchronous get_connection is not supported for asyncpg."
     )
 
-    async def execute_update(self, query: str, *args):
-        if os.getenv("TESTING_MODE") == "true":
-            logger.info(f"Mock DB execute_update: {query}")
-            return 1 # Simulate one row affected
-
 def dict_factory(cursor, row):  # Not directly used with asyncpg fetch methods
     logger.warning("dict_factory is not directly used with asyncpg fetch methods.")
     return {cursor.description[idx][0]: value for idx, value in enumerate(row)}
 
-    async def execute_script(self, script: str):
-        if os.getenv("TESTING_MODE") == "true":
-            logger.info(f"Mock DB execute_script: {script[:50]}...")
-            return "MOCK_SCRIPT_OK"
+async def close(self) -> None:
+    """Close the database connection pool (mock implementation)."""
+    pass
 
-        if self._pool is None:
-            logger.error("Database pool not initialized. Call connect() first.")
-            raise Exception("Database pool not initialized. Call connect() first.")
-        async with self._pool.acquire() as connection:
-            return await connection.execute(script)
-
-    async def execute_query(self, query: str, *args) -> List[Dict[str, Any]]:
-        if os.getenv("TESTING_MODE") == "true":
-            logger.info(f"Mock DB execute_query: {query}")
-            # Return mock data for specific queries if needed
-            if "SELECT * FROM plans" in query:
-                return []
-            return []
-
-        if self._pool is None:
-            logger.error("Database pool not initialized. Call connect() first.")
-            raise Exception("Database pool not initialized. Call connect() first.")
-        async with self._pool.acquire() as connection:
-            return await connection.fetch(query, *args)
-
-def deserialize_json_field(value: str) -> Any:
-    """Deserialize a JSON field from database."""
-    if value is None:  # asyncpg might return None for NULL JSONB
-        return {}
-    if isinstance(value, (dict, list)):  # If asyncpg already deserialized JSONB
-        return value
-    try:
-        return json.loads(value)
-    except (json.JSONDecodeError, TypeError):
-        logger.warning(f"Failed to deserialize JSON field: {value}")
-        return {}
-
-    async def close(self):
-        pass
 
 class MockAsyncpgConnection:
     async def fetch(self, query: str, *args):
@@ -278,11 +250,29 @@ class MockAsyncpgConnection:
 
     async def fetchrow(self, query: str, *args):
         return None
+
+
+class MockAsyncpgPool:
+    async def acquire(self) -> MockAsyncpgConnection:
+        return MockAsyncpgConnection()
+
+    async def release(self, conn: MockAsyncpgConnection) -> None:
+        return None
+
+    async def close(self) -> None:
+        return None
+
+
+def deserialize_datetime_str(dt_str: str | None) -> Optional[datetime]:
+    """Deserialize a datetime from ISO format string."""
+    if not dt_str:
+        return None
     try:
         return datetime.fromisoformat(dt_str)
     except (ValueError, TypeError):
-        logger.warning(f"Failed to deserialize datetime: {dt_str}")
+        logger.warning("Failed to deserialize datetime: %s", dt_str)
         return None
+
 
 
 def build_where_clause(conditions: Dict[str, Any]) -> tuple[str, tuple]:
@@ -442,6 +432,9 @@ class DatabaseMigration:
 
             logger.info(f"Applied migration {version}: {description}")
             return True
+        except Exception as exc:  # pragma: no cover - unexpected DB errors
+            logger.error("Migration %s failed: %s", version, exc)
+            return False
 
     async def __aenter__(self):
         return self
