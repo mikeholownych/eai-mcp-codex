@@ -2,7 +2,6 @@ import pytest
 from src.verification_feedback.verification_engine import verify, get_verification_engine
 from src.common.database import DatabaseManager
 import os
-import sys
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
 
@@ -18,7 +17,7 @@ async def setup_and_teardown_db():
 
 @pytest.mark.asyncio
 async def test_verify() -> None:
-    engine = await get_verification_engine()
+    await get_verification_engine()
     # Mock the actual verification logic if it involves external calls
     # For now, just test the basic flow
     feedback_id = "test_feedback_id"
