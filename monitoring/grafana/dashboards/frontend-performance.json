@@ -1,0 +1,284 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "MCP Frontend Performance Dashboard",
+    "tags": ["frontend", "performance", "web-vitals"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Core Web Vitals Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(web_vital_lcp)",
+            "legendFormat": "LCP (ms)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg(web_vital_fid)",
+            "legendFormat": "FID (ms)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg(web_vital_cls * 1000)",
+            "legendFormat": "CLS (×1000)",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 2500 },
+                { "color": "red", "value": 4000 }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "Largest Contentful Paint (LCP)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "web_vital_lcp",
+            "legendFormat": "LCP - {{url}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["last", "mean", "max"]
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+      },
+      {
+        "id": 3,
+        "title": "First Input Delay (FID)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "web_vital_fid",
+            "legendFormat": "FID - {{url}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+      },
+      {
+        "id": 4,
+        "title": "Cumulative Layout Shift (CLS)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "web_vital_cls",
+            "legendFormat": "CLS - {{url}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+      },
+      {
+        "id": 5,
+        "title": "Time to First Byte (TTFB)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "web_vital_ttfb",
+            "legendFormat": "TTFB - {{url}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 }
+      },
+      {
+        "id": 6,
+        "title": "Nginx Performance Metrics",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(nginx_http_requests_total[5m])",
+            "legendFormat": "Requests/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "nginx_http_request_duration_seconds_avg",
+            "legendFormat": "Avg Response Time",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth"
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 }
+      },
+      {
+        "id": 7,
+        "title": "Cache Hit Ratio",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(nginx_cache_hit_total[5m]) / (rate(nginx_cache_hit_total[5m]) + rate(nginx_cache_miss_total[5m])) * 100",
+            "legendFormat": "Cache Hit %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 85 }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 }
+      },
+      {
+        "id": 8,
+        "title": "Bundle Size Monitoring",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "bundle_size_bytes",
+            "legendFormat": "{{bundle_name}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "custom": {
+              "displayMode": "basic"
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 }
+      },
+      {
+        "id": 9,
+        "title": "Error Rate",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(nginx_http_requests_total{status=~\"4..|5..\"}[5m])",
+            "legendFormat": "4xx/5xx Errors/sec",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "fillOpacity": 20
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 }
+      },
+      {
+        "id": 10,
+        "title": "Real User Monitoring - Page Load Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "increase(web_vital_lcp_bucket[5m])",
+            "legendFormat": "LCP Distribution",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 40 }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "custom",
+          "options": [
+            { "text": "Production", "value": "prod" },
+            { "text": "Development", "value": "dev" }
+          ],
+          "current": { "text": "Production", "value": "prod" }
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "prometheus",
+          "expr": "changes(build_info[1h])",
+          "iconColor": "blue",
+          "titleFormat": "Deployment"
+        }
+      ]
+    }
+  }
+}
