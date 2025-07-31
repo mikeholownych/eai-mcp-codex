@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from src.monitoring.slo_manager import SLOManager, SLO
-from src.monitoring.quality_monitor import Metric, MetricType
+from src.monitoring.metrics_definitions import Metric, MetricType
 
 
 def test_slo_evaluation() -> None:
