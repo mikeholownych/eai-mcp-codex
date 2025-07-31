@@ -6,7 +6,6 @@ import path from 'path';
 import fetch from 'node-fetch';
 
 // Import other command modules for inter-agent communication
-import * as system from './system';
 import * as modelRouter from './model-router';
 import * as planManagement from './plan-management';
 import * as gitWorktree from './git-worktree';
@@ -70,7 +69,7 @@ export class AgentClient {
   }
 
   async createPlan(task: string): Promise<any> {
-    const prompt = `You are an AI assistant tasked with creating a step-by-step plan to accomplish the following task: \"${task}\".\n\nProvide a detailed plan as a JSON array of steps. Each step should be an object with a \"command\" field (matching one of the CLI commands like \"generate\", \"refactor\", \"verify\", \"plan_create\", \"git_create\", \"system_status\") and an \"args\" object containing the arguments for that command.\n\nExample Plan for \"Create a new React component called MyButton in src/components/MyButton.tsx and verify it\":\n[\n  {\"command\": \"generate\", \"args\": {\"prompt\": \"React functional component MyButton\", \"filePath\": \"src/components/MyButton.tsx\"}},\n  {\"command\": \"verify\", \"args\": {\"filePath\": \"src/components/MyButton.tsx\"}}\n]\n\nYour plan for \"${task}\":`;
+    const prompt = `You are an AI assistant tasked with creating a step-by-step plan to accomplish the following task: \"${task}\".\n\nProvide a detailed plan as a JSON array of steps. Each step should be an object with a \"command\" field (matching CLI commands like \"generate\", \"refactor\", \"verify\", \"plan_create\", \"git_create\") and an \"args\" object containing the arguments for that command.\n\nExample Plan for \"Create a new React component called MyButton in src/components/MyButton.tsx and verify it\":\n[\n  {\"command\": \"generate\", \"args\": {\"prompt\": \"React functional component MyButton\", \"filePath\": \"src/components/MyButton.tsx\"}},\n  {\"command\": \"verify\", \"args\": {\"filePath\": \"src/components/MyButton.tsx\"}}\n]\n\nYour plan for \"${task}\":`;
 
     const planText = await this.llmClient.generateText(prompt);
     try {
@@ -116,12 +115,6 @@ export class AgentClient {
         break;
       case 'verify':
         await this.verifyCodeChanges(args.filePath);
-        break;
-      case 'system_status':
-        await system.status();
-        break;
-      case 'system_health':
-        await system.health();
         break;
       case 'model_route':
         await modelRouter.route(args.prompt, args.options || {});
