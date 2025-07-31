@@ -54,6 +54,7 @@ class Plan(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
     created_by: str = "system"
     assigned_to: Optional[str] = None
+    tenant_id: Optional[str] = None
 
 
 class Task(BaseModel):
@@ -102,6 +103,7 @@ class PlanRequest(BaseModel):
     start_date: Optional[datetime] = None
     estimated_hours: Optional[float] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    tenant_id: Optional[str] = None
 
 
 class TaskRequest(BaseModel):
