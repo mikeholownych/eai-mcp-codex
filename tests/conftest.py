@@ -1,12 +1,16 @@
-import pytest
 import os
 import asyncio
+import pytest
+
+os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
+
 
 @pytest.fixture(scope="session", autouse=True)
 def set_testing_mode():
     os.environ["TESTING_MODE"] = "true"
     yield
     os.environ["TESTING_MODE"] = "false"
+
 
 @pytest.fixture(scope="session")
 def event_loop():
