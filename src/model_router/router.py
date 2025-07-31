@@ -332,7 +332,6 @@ async def route_async(req: ModelRequest) -> ModelResponse:
                     "selection_reason": "local_fallback",
                     "provider": "local",
                 },
-                "provider": "local",
             },
         )
 
