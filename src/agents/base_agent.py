@@ -92,7 +92,7 @@ class BaseAgent(ABC):
         }
 
     @classmethod
-    async def create(cls, config: AgentConfig):
+    async def async_create(cls, config: AgentConfig):
         instance = cls(config)
         instance.message_broker = await A2AMessageBroker.create()
         return instance
