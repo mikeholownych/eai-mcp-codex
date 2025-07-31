@@ -94,9 +94,9 @@ const pricingPlans = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen" style={{backgroundColor: 'var(--background)'}}>
+    <div className="min-h-screen bg-slate-900">
       {/* Navigation */}
-      <nav className="border-b border-gray-800">
+      <nav className="border-b border-slate-700 bg-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
@@ -270,7 +270,7 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-slate-800 border-slate-700">
             <Card.Content className="py-16">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                 Ready to Transform Your Development Process?
@@ -304,7 +304,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="border-t border-slate-700 bg-slate-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -350,7 +350,7 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+          <div className="mt-12 pt-8 border-t border-slate-700 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-500">
               © 2024 Ethical AI Insider. All rights reserved.
             </p>
