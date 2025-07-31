@@ -7,9 +7,8 @@ import sys
 sys.path.insert(0, os.getcwd())
 
 import asyncio
-import os
 import signal
-import sys
+from src.agents.base_agent import AgentConfig
 
 from src.common.logging import get_logger
 
@@ -33,15 +32,17 @@ class PlannerAgentService:
 
             logger.info(f"Starting Planner Agent: {agent_id} ({agent_name})")
 
-            # Create and start agent
+            # Create and start agent using async factory
             from src.agents.planner_agent import PlannerAgent
 
-            self.agent = PlannerAgent(agent_id=agent_id, name=agent_name)
-
-            # Initialize message broker BEFORE starting agent
-            from src.a2a_communication.message_broker import A2AMessageBroker
-
-            self.agent.message_broker = await A2AMessageBroker.create()
+            self.agent = await PlannerAgent.async_create(
+                AgentConfig(
+                    agent_id=agent_id,
+                    agent_type="planner",
+                    name=agent_name,
+                    capabilities=["planning"],
+                )
+            )
             self.running = True
 
             # Start agent in background
