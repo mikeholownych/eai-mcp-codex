@@ -549,6 +549,34 @@ class AlertManager:
 
         return new_alerts
 
+    async def check_trends(self, trends: Dict[MetricType, str]) -> List[QualityAlert]:
+        """Generate alerts for degrading metric trends."""
+        new_alerts: List[QualityAlert] = []
+        for metric_type, trend in trends.items():
+            if trend != "degrading":
+                continue
+
+            existing_alert = self._find_existing_alert(
+                metric_type, AlertSeverity.MEDIUM
+            )
+            if existing_alert:
+                continue
+
+            alert = QualityAlert(
+                alert_id=f"trend_{metric_type.value}_{time.time()}",
+                severity=AlertSeverity.MEDIUM,
+                metric_type=metric_type,
+                message=f"{metric_type.value} trend degrading",
+                current_value=0.0,
+                threshold_value=0.0,
+                metadata={"trend": trend},
+            )
+            new_alerts.append(alert)
+            self.active_alerts.append(alert)
+            await self._send_notifications(alert)
+
+        return new_alerts
+
     def _exceeds_threshold(self, value: float, threshold: float, operator: str) -> bool:
         """Check if value exceeds threshold based on operator."""
         if operator == "greater_than":
@@ -684,13 +712,20 @@ class ContinuousQualityMonitor:
         # Analyze metrics
         metric_summaries = await self.quality_analyzer.analyze_metrics(recent_metrics)
 
+        # Detect metric trends
+        trends = await self.quality_analyzer.analyze_trends(recent_metrics)
+
+        # Generate trend alerts
+        trend_alerts = await self.alert_manager.check_trends(trends)
+
         # Check thresholds and generate alerts
         new_alerts = await self.alert_manager.check_thresholds(
             metric_summaries, self.quality_analyzer.thresholds
         )
 
-        if new_alerts:
-            logger.warning(f"Generated {len(new_alerts)} new quality alerts")
+        total_new = len(new_alerts) + len(trend_alerts)
+        if total_new:
+            logger.warning(f"Generated {total_new} new quality alerts")
 
         logger.debug(f"Quality check completed. Analyzed {len(recent_metrics)} metrics")
 
