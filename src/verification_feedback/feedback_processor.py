@@ -1,6 +1,8 @@
 """Feedback Processing business logic implementation."""
 # ruff: noqa
 
+# ruff: noqa
+
 import uuid
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -63,7 +65,7 @@ class FeedbackProcessor:
         CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status);
         CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at);
         """
-        
+
         await self.db_manager.execute_script(script)
         logger.info("Database tables ensured.")
 
@@ -78,7 +80,7 @@ class FeedbackProcessor:
         SELECT id, feedback_type, severity, title, description, metadata, status, created_at, updated_at
         FROM feedback WHERE id = $1
         """
-        
+
         try:
             # Determine processing actions based on feedback type and severity
             actions_taken = []
@@ -635,21 +637,21 @@ class FeedbackProcessor:
         INSERT INTO feedback (id, feedback_type, severity, title, description, metadata, status, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         """
-        
+
         values = (
             feedback_id,
-            feedback_data.get('feedback_type', 'general'),
-            feedback_data.get('severity', 'medium'),
-            feedback_data.get('title', ''),
-            feedback_data.get('description', ''),
-            feedback_data.get('metadata', {}),
-            'pending',
+            feedback_data.get("feedback_type", "general"),
+            feedback_data.get("severity", "medium"),
+            feedback_data.get("title", ""),
+            feedback_data.get("description", ""),
+            feedback_data.get("metadata", {}),
+            "pending",
             now,
-            now
+            now,
         )
-        
+
         await self.db_manager.execute_update(query, values)
-        
+
         return Feedback(
             id=feedback_id,
             feedback_type=FeedbackType(values[1]),
@@ -659,7 +661,7 @@ class FeedbackProcessor:
             metadata=values[5],
             status=values[6],
             created_at=values[7],
-            updated_at=values[8]
+            updated_at=values[8],
         )
 
     async def list_feedback(self, limit: int = 100, offset: int = 0) -> List[Feedback]:
@@ -670,7 +672,7 @@ class FeedbackProcessor:
         ORDER BY created_at DESC 
         LIMIT $1 OFFSET $2
         """
-        
+
         try:
             rows = await self.db_manager.execute_query(query, (limit, offset))
             return [
@@ -683,7 +685,7 @@ class FeedbackProcessor:
                     metadata=row[5] or {},
                     status=row[6],
                     created_at=row[7],
-                    updated_at=row[8]
+                    updated_at=row[8],
                 )
                 for row in rows
             ]
@@ -703,8 +705,15 @@ async def initialize_feedback_processor():
 def get_feedback_processor() -> FeedbackProcessor:
     """Get the feedback processor instance."""
     if _feedback_processor is None:
-        raise RuntimeError("Feedback processor not initialized. Call initialize_feedback_processor() first.")
+        raise RuntimeError(
+            "Feedback processor not initialized. Call initialize_feedback_processor() first."
+        )
     return _feedback_processor
 
 
-    return True
+async def shutdown_feedback_processor() -> None:
+    """Shutdown and clear the global feedback processor."""
+    global _feedback_processor
+    if _feedback_processor is not None:
+        await _feedback_processor.shutdown_database()
+        _feedback_processor = None
