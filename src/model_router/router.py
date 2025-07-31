@@ -241,7 +241,8 @@ async def route_async(req: ModelRequest) -> ModelResponse:
                         "rule_based" if selected_model else "intelligent_routing"
                     ),
                 },
-            )
+            },
+        )
 
     except Exception as e:
         logger.error(f"Error routing request: {e}")

@@ -1,9 +1,10 @@
-import sys
-import os
-sys.path.insert(0, os.getcwd())
-
 #!/usr/bin/env python3
 """Start the Developer Agent service."""
+
+import os
+import sys
+
+sys.path.insert(0, os.getcwd())
 
 import asyncio
 import os
