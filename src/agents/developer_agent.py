@@ -21,32 +21,38 @@ class DeveloperAgent(BaseAgent):
         return cls(agent_id=agent_id, name=name, specializations=specializations)
 
     def __init__(
-        self, agent_id: str, name: str = None, specializations: List[str] = None
+        self, config: AgentConfig = None, agent_id: str = None, name: str = None, specializations: List[str] = None
     ):
-        self.specializations = specializations or ["python", "javascript", "general"]
-
-        config = AgentConfig(
-            agent_id=agent_id,
-            agent_type="developer",
-            name=name or f"Developer-{agent_id}",
-            capabilities=[
-                "coding",
-                "debugging",
-                "code_review",
-                "refactoring",
-                "testing",
-                "documentation",
-                "performance_optimization",
-                "api_development",
-                "database_design",
-                "frontend_development",
-                "backend_development",
-            ]
-            + [f"{lang}_development" for lang in self.specializations],
-            max_concurrent_tasks=3,
-            heartbeat_interval=30,
-        )
-        super().__init__(config)
+        # Handle both config-based and parameter-based initialization
+        if config is not None:
+            # Config-based initialization
+            self.specializations = config.capabilities  # Extract from capabilities
+            super().__init__(config)
+        else:
+            # Parameter-based initialization (legacy)
+            self.specializations = specializations or ["python", "javascript", "general"]
+            config = AgentConfig(
+                agent_id=agent_id,
+                agent_type="developer",
+                name=name or f"Developer-{agent_id}",
+                capabilities=[
+                    "coding",
+                    "debugging",
+                    "code_review",
+                    "refactoring",
+                    "testing",
+                    "documentation",
+                    "performance_optimization",
+                    "api_development",
+                    "database_design",
+                    "frontend_development",
+                    "backend_development",
+                ]
+                + [f"{lang}_development" for lang in self.specializations],
+                max_concurrent_tasks=3,
+                heartbeat_interval=30,
+            )
+            super().__init__(config)
 
         # Developer-specific knowledge
         self.coding_patterns = self._load_coding_patterns()
