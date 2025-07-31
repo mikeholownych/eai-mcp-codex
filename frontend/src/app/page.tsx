@@ -3,12 +3,6 @@
 import React from 'react'
 import Link from 'next/link'
 import { 
-  CodeBracketIcon, 
-  ChatBubbleLeftRightIcon,
-  UserGroupIcon,
-  ShieldCheckIcon,
-  ChartBarIcon,
-  PlayIcon,
   CheckIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
@@ -17,32 +11,32 @@ import Card from '@/components/ui/Card'
 
 const features = [
   {
-    icon: CodeBracketIcon,
+    emoji: '🤖',
     title: 'AI Code Generation',
     description: 'Generate high-quality code with advanced AI models including Claude O3, Sonnet 4, and specialized coding models.',
   },
   {
-    icon: ChatBubbleLeftRightIcon,
+    emoji: '💬',
     title: 'Intelligent Assistant',
     description: 'AI-powered chatbot trained on all Ethical AI Insider content with RAG architecture for contextual responses.',
   },
   {
-    icon: UserGroupIcon,
+    emoji: '👥',
     title: 'Real-time Collaboration',
     description: 'Multi-agent collaboration with staff-led escalations and seamless team workflows.',
   },
   {
-    icon: ShieldCheckIcon,
+    emoji: '🔒',
     title: 'Enterprise Security',
     description: 'SOC 2 ready with JWT tenant isolation, row-level security, and comprehensive audit logging.',
   },
   {
-    icon: ChartBarIcon,
+    emoji: '📊',
     title: 'Advanced Analytics',
     description: 'Detailed insights, usage metrics, and performance analytics with custom dashboards.',
   },
   {
-    icon: PlayIcon,
+    emoji: '🎥',
     title: 'Video Library',
     description: 'Comprehensive video tutorials and walkthroughs with plan-based access control.',
   },
@@ -100,28 +94,28 @@ const pricingPlans = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-dark-900">
+    <div className="min-h-screen bg-gray-900">
       {/* Navigation */}
-      <nav className="border-b border-dark-700">
+      <nav className="border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">AI</span>
               </div>
               <span className="text-xl font-bold text-white">Ethical AI Insider</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="#features" className="text-dark-300 hover:text-white transition-colors">
+              <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
                 Features
               </Link>
-              <Link href="#pricing" className="text-dark-300 hover:text-white transition-colors">
+              <Link href="#pricing" className="text-gray-300 hover:text-white transition-colors">
                 Pricing
               </Link>
-              <Link href="/docs" className="text-dark-300 hover:text-white transition-colors">
+              <Link href="/docs" className="text-gray-300 hover:text-white transition-colors">
                 Docs
               </Link>
-              <Link href="/blog" className="text-dark-300 hover:text-white transition-colors">
+              <Link href="/blog" className="text-gray-300 hover:text-white transition-colors">
                 Blog
               </Link>
             </div>
@@ -132,7 +126,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/register">
-                <Button variant="primary" size="sm">
+                <Button variant="secondary" size="sm">
                   Get Started
                 </Button>
               </Link>
@@ -146,24 +140,24 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
             The Future of{' '}
-            <span className="bg-gradient-primary bg-clip-text text-transparent animate-pulse-glow">
+            <span className="text-purple-400">
               Ethical AI
             </span>{' '}
             Development
           </h1>
-          <p className="text-xl text-dark-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
             Secure, multi-tenant platform for code generation via agentic AI with real-time collaboration, 
             comprehensive video library, and enterprise-grade security features.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register">
-              <Button size="lg" className="w-full sm:w-auto">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto">
                 Start Free Trial
                 <ArrowRightIcon className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             <Link href="/demo">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800">
                 Watch Demo
               </Button>
             </Link>
@@ -178,7 +172,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Powerful Features for Modern Development
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
               Everything you need to build, collaborate, and scale with AI-powered development tools.
             </p>
           </div>
@@ -187,13 +181,13 @@ export default function HomePage() {
             {features.map((feature, index) => (
               <Card key={index} hover className="h-full">
                 <Card.Header>
-                  <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center mb-4 shadow-glow">
-                    <feature.icon className="w-6 h-6 text-white feature-icon" />
+                  <div className="text-4xl mb-4">
+                    {feature.emoji}
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
                 </Card.Header>
                 <Card.Content>
-                  <p className="text-dark-300">{feature.description}</p>
+                  <p className="text-gray-400 leading-relaxed">{feature.description}</p>
                 </Card.Content>
               </Card>
             ))}
@@ -208,7 +202,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Choose Your Plan
             </h2>
-            <p className="text-xl text-dark-300 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
               Flexible pricing for teams of all sizes. Start free and upgrade as you grow.
             </p>
           </div>
@@ -217,7 +211,7 @@ export default function HomePage() {
             {pricingPlans.map((plan, index) => (
               <Card 
                 key={index} 
-                className={`h-full ${plan.highlighted ? 'ring-2 ring-primary-500 shadow-glow' : ''}`}
+                className={`h-full ${plan.highlighted ? 'ring-2 ring-purple-500' : ''}`}
               >
                 <Card.Header>
                   <div className="text-center">
@@ -225,10 +219,10 @@ export default function HomePage() {
                     <div className="mb-4">
                       <span className="text-4xl font-bold text-white">{plan.price}</span>
                       {plan.price !== 'Custom' && (
-                        <span className="text-dark-400 ml-2">{plan.period}</span>
+                        <span className="text-gray-500 ml-2">{plan.period}</span>
                       )}
                     </div>
-                    <p className="text-dark-300">{plan.description}</p>
+                    <p className="text-gray-400">{plan.description}</p>
                   </div>
                 </Card.Header>
                 
@@ -237,7 +231,7 @@ export default function HomePage() {
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center">
                         <CheckIcon className="w-5 h-5 text-primary-400 mr-3 flex-shrink-0" />
-                        <span className="text-dark-300">{feature}</span>
+                        <span className="text-gray-400">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -245,9 +239,9 @@ export default function HomePage() {
                 
                 <Card.Footer>
                   <Button 
-                    variant={plan.highlighted ? 'primary' : 'outline'} 
+                    variant={plan.highlighted ? 'secondary' : 'outline'} 
                     size="lg" 
-                    className="w-full"
+                    className={`w-full ${!plan.highlighted ? 'border-gray-600 text-gray-300 hover:bg-gray-800' : ''}`}
                   >
                     {plan.price === 'Custom' ? 'Contact Sales' : 'Get Started'}
                   </Button>
@@ -261,12 +255,12 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <Card className="bg-gradient-primary text-white shadow-glow border-0 overflow-hidden">
+          <Card className="bg-gray-800 border-gray-700">
             <Card.Content className="py-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                 Ready to Transform Your Development Process?
               </h2>
-              <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+              <p className="text-xl mb-8 text-gray-400 max-w-2xl mx-auto">
                 Join thousands of developers who trust Ethical AI Insider for their AI-powered development needs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -274,7 +268,7 @@ export default function HomePage() {
                   <Button 
                     variant="secondary" 
                     size="lg" 
-                    className="w-full sm:w-auto bg-white text-primary-600 hover:bg-gray-100 hover:text-primary-700 shadow-lg"
+                    className="w-full sm:w-auto"
                   >
                     Start Free Trial
                   </Button>
@@ -283,7 +277,7 @@ export default function HomePage() {
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="w-full sm:w-auto border-2 border-white text-white hover:bg-white hover:text-primary-600 backdrop-blur-sm"
+                    className="w-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-700"
                   >
                     Contact Sales
                   </Button>
@@ -295,17 +289,17 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-dark-700 py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="border-t border-gray-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">AI</span>
                 </div>
                 <span className="text-xl font-bold text-white">Ethical AI Insider</span>
               </div>
-              <p className="text-dark-400">
+              <p className="text-gray-500">
                 Building the future of ethical AI development with secure, collaborative tools.
               </p>
             </div>
@@ -313,42 +307,42 @@ export default function HomePage() {
             <div>
               <h3 className="text-white font-semibold mb-4">Product</h3>
               <ul className="space-y-2">
-                <li><Link href="/features" className="text-dark-400 hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/pricing" className="text-dark-400 hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="/docs" className="text-dark-400 hover:text-white transition-colors">Documentation</Link></li>
-                <li><Link href="/api" className="text-dark-400 hover:text-white transition-colors">API</Link></li>
+                <li><Link href="/features" className="text-gray-500 hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/pricing" className="text-gray-500 hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/docs" className="text-gray-500 hover:text-white transition-colors">Documentation</Link></li>
+                <li><Link href="/api" className="text-gray-500 hover:text-white transition-colors">API</Link></li>
               </ul>
             </div>
             
             <div>
               <h3 className="text-white font-semibold mb-4">Company</h3>
               <ul className="space-y-2">
-                <li><Link href="/about" className="text-dark-400 hover:text-white transition-colors">About</Link></li>
-                <li><Link href="/blog" className="text-dark-400 hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="/careers" className="text-dark-400 hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="/contact" className="text-dark-400 hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="/about" className="text-gray-500 hover:text-white transition-colors">About</Link></li>
+                <li><Link href="/blog" className="text-gray-500 hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="/careers" className="text-gray-500 hover:text-white transition-colors">Careers</Link></li>
+                <li><Link href="/contact" className="text-gray-500 hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
             
             <div>
               <h3 className="text-white font-semibold mb-4">Support</h3>
               <ul className="space-y-2">
-                <li><Link href="/help" className="text-dark-400 hover:text-white transition-colors">Help Center</Link></li>
-                <li><Link href="/community" className="text-dark-400 hover:text-white transition-colors">Community</Link></li>
-                <li><Link href="/status" className="text-dark-400 hover:text-white transition-colors">Status</Link></li>
-                <li><Link href="/security" className="text-dark-400 hover:text-white transition-colors">Security</Link></li>
+                <li><Link href="/help" className="text-gray-500 hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link href="/community" className="text-gray-500 hover:text-white transition-colors">Community</Link></li>
+                <li><Link href="/status" className="text-gray-500 hover:text-white transition-colors">Status</Link></li>
+                <li><Link href="/security" className="text-gray-500 hover:text-white transition-colors">Security</Link></li>
               </ul>
             </div>
           </div>
           
-          <div className="mt-12 pt-8 border-t border-dark-700 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-dark-400">
+          <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-500">
               © 2024 Ethical AI Insider. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/privacy" className="text-dark-400 hover:text-white transition-colors">Privacy</Link>
-              <Link href="/terms" className="text-dark-400 hover:text-white transition-colors">Terms</Link>
-              <Link href="/cookies" className="text-dark-400 hover:text-white transition-colors">Cookies</Link>
+              <Link href="/privacy" className="text-gray-500 hover:text-white transition-colors">Privacy</Link>
+              <Link href="/terms" className="text-gray-500 hover:text-white transition-colors">Terms</Link>
+              <Link href="/cookies" className="text-gray-500 hover:text-white transition-colors">Cookies</Link>
             </div>
           </div>
         </div>

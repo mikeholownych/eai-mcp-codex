@@ -1,15 +1,9 @@
 # =====================================
 # GIT WORKTREE MANAGER SERVICE
 # =====================================
-FROM base as git-worktree
+FROM llm-stack-base as git-worktree
 
-USER root
 
-# Install Git + SSH
-RUN apt-get update && apt-get install -y \
-    git \
-    openssh-client && \
-    rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .

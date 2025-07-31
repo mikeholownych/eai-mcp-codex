@@ -6,6 +6,19 @@ credentials-file: /opt/llm-stack/rag-agent/cloudflare-tunnel/credentials.json
 
 # Ingress rules - order matters, most specific first
 ingress:
+  # Grafana Monitoring Dashboard (port 3005)
+  - hostname: grafana.ethical-ai-insider.com
+    service: http://localhost:3005
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: grafana.ethical-ai-insider.com
+      originServerName: grafana.ethical-ai-insider.com
+
   # Staff Frontend domain - Staff portal application (port 3001)
   - hostname: staff.ethical-ai-insider.com
     service: http://localhost:3001

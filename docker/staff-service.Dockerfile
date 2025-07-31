@@ -2,7 +2,7 @@
 # STAFF SERVICE
 # =====================================
 # docker/staff-service.Dockerfile
-FROM base as staff-service
+FROM llm-stack-base as staff-service
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .

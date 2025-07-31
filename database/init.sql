@@ -1,6 +1,8 @@
 -- database/init.sql - Database Initialization
 -- Create databases for each service safely
 
+CREATE DATABASE grafana_db;
+
 -- Create shared tables in mcp_database
 CREATE TABLE IF NOT EXISTS service_registry (
     id SERIAL PRIMARY KEY,
