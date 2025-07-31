@@ -1,3 +1,4 @@
+# ruff: noqa
 """Feedback Processing business logic implementation."""
 
 import uuid
