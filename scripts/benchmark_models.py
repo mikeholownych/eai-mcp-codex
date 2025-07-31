@@ -60,6 +60,7 @@ class ModelBenchmark:
         self.vector_client = VectorClient()
         
         # Test scenarios for different types of tasks
+        user_input_example = "42"
         self.test_scenarios = {
             "code_generation": [
                 "Write a Python function to calculate fibonacci numbers",
@@ -70,7 +71,7 @@ class ModelBenchmark:
             ],
             "code_review": [
                 "Review this code for potential bugs: def divide(a, b): return a / b",
-                "Analyze this SQL query for security issues: SELECT * FROM users WHERE id = '" + user_input + "'",
+                f"Analyze this SQL query for security issues: SELECT * FROM users WHERE id = '{user_input_example}'",
                 "Check this JavaScript function for performance issues: function findMax(arr) { let max = 0; for(let i = 0; i < arr.length; i++) { for(let j = 0; j < arr.length; j++) { if(arr[j] > max) max = arr[j]; } } return max; }",
                 "Evaluate this Python code for memory leaks: class DataProcessor: def __init__(self): self.cache = {} def process(self, data): self.cache[data] = expensive_operation(data) return self.cache[data]",
                 "Review this error handling: try: risky_operation() except: pass"
