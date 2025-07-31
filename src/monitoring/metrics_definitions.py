@@ -17,6 +17,7 @@ class MetricType(str, Enum):
     USER_SATISFACTION = "user_satisfaction"
     CODE_QUALITY = "code_quality"
     SECURITY = "security"
+    COST = "cost"
 
 
 @dataclass
