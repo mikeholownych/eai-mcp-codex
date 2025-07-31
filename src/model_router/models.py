@@ -32,6 +32,17 @@ class ModelResponse(BaseModel):
     error_message: Optional[str] = None
 
 
+class LLMResponse(BaseModel):
+    """Raw LLM response structure."""
+
+    id: str
+    content: str
+    model: str
+    usage: Dict[str, int] = Field(default_factory=dict)
+    stop_reason: Optional[str] = None
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
 class ModelInfo(BaseModel):
     """Information about available models."""
 
