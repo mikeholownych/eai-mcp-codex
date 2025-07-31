@@ -11,7 +11,6 @@ import os
 import signal
 import sys
 
-from src.agents.developer_agent import DeveloperAgent
 from src.common.logging import get_logger
 
 
