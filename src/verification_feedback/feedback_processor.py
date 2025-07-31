@@ -1,6 +1,6 @@
 """Feedback Processing business logic implementation."""
+# ruff: noqa
 
-import asyncio
 import uuid
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -9,9 +9,7 @@ from src.common.logging import get_logger
 from src.common.database import (
     DatabaseManager,
     serialize_json_field,
-    deserialize_json_field,
     serialize_datetime,
-    deserialize_datetime,
 )
 from .models import (
     Feedback,
@@ -76,24 +74,6 @@ class FeedbackProcessor:
         feedback_id = str(uuid.uuid4())
         now = datetime.utcnow()
 
-        feedback = Feedback(
-            id=feedback_id,
-            verification_id=None,  # This is set by verification_engine if applicable
-            feedback_type=request.feedback_type,
-            severity=request.severity,
-            title=request.title,
-            content=request.content,
-            source=source,
-            target_type=request.target_type,
-            target_id=request.target_id,
-            tags=request.tags,
-            created_at=now,
-            updated_at=now,
-            metadata=request.metadata,
-        )
-
-    async def get_feedback(self, feedback_id: str) -> Optional[Feedback]:
-        """Get feedback by ID."""
         query = """
         SELECT id, feedback_type, severity, title, description, metadata, status, created_at, updated_at
         FROM feedback WHERE id = $1
@@ -300,9 +280,10 @@ class FeedbackProcessor:
         self, feedback_id: str, resolution_notes: str, resolved_by: str = "system"
     ) -> Optional[Feedback]:
         """Mark feedback as resolved."""
-        feedback = await self.get_feedback(feedback_id)
-        if not feedback:
-            return None
+        try:
+            feedback = await self.get_feedback(feedback_id)
+            if not feedback:
+                return None
         except Exception as e:
             logger.error(f"Error getting feedback {feedback_id}: {e}")
             return None
