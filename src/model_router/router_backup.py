@@ -1,4 +1,4 @@
-"""Model selection and routing logic with Abacus.ai -> Claude -> Local LLM fallback."""
+"""Model selection and routing logic with Claude API integration."""
 
 from __future__ import annotations
 
@@ -167,9 +167,9 @@ def _load_rules(file_path: str) -> RoutingTable:
         logger.warning(f"Rules file not found: {file_path}, using default rules")
         return RoutingTable(
             [
-                (r"(?i)(complex|architecture|design|security)", "o3"),
-                (r"(?i)(code|debug|implement|refactor)", "deepseek-r1"),
-                (r".*", "gpt-4o-mini"),
+                (r"(?i)(complex|architecture|design|security)", "opus"),
+                (r"(?i)(code|debug|implement|refactor)", "sonnet"),
+                (r".*", "haiku"),
             ]
         )
 
@@ -184,14 +184,14 @@ def _load_rules(file_path: str) -> RoutingTable:
         return RoutingTable(rules)
     except Exception as e:
         logger.error(f"Error loading rules from {file_path}: {e}")
-        return RoutingTable([(r".*", "gpt-4o-mini")])
+        return RoutingTable([(r".*", "haiku")])
 
 
 _table = _load_rules(settings.rules_file)
 
 
 async def route_async(req: ModelRequest) -> ModelResponse:
-    """Asynchronously route request with Abacus.ai -> Claude -> Local LLM fallback."""
+    """Asynchronously route request to appropriate LLM (Claude or local) and return response."""
     try:
         # Select model
         selected_model = _table.select(req.text, req.context)
@@ -205,136 +205,77 @@ async def route_async(req: ModelRequest) -> ModelResponse:
             elif req.context.get("task_type"):
                 system_prompt = _get_system_prompt_for_task(req.context["task_type"])
 
-        # Determine provider hierarchy: Abacus.ai -> Claude -> Local
+        # Determine if we should use local or Claude API
         is_local_model = selected_model in ["mistral", "local-llm"]
-        is_claude_model = selected_model.startswith("claude-")
-        is_abacus_model = not is_local_model and not is_claude_model
         
-        # Try Abacus.ai first (if available and selected)
-        if is_abacus_model:
-            try:
-                abacus_client = get_abacus_client()
-                if abacus_client.is_available():
-                    logger.info(f"Using Abacus.ai model: {selected_model}")
-                    response = await abacus_client.route_and_send(
-                        text=req.text, context=req.context, system_prompt=system_prompt,
-                        model_override=selected_model
-                    )
-                    
-                    usage_info = {
-                        "input_tokens": response.usage.get("input_tokens", 0),
-                        "output_tokens": response.usage.get("output_tokens", 0),
-                        "model_used": response.model,
-                        "response_time_ms": (
-                            datetime.utcnow() - response.timestamp
-                        ).total_seconds() * 1000,
-                        "provider": "abacus.ai",
-                    }
+        if is_local_model:
+            # Use local LLM client
+            local_client = get_local_client()
+            response = await local_client.route_and_send(
+                text=req.text, context=req.context, system_prompt=system_prompt
+            )
+            
+            # Calculate usage metrics
+            usage_info = {
+                "input_tokens": len(req.text.split()),  # Approximate
+                "output_tokens": response.usage.get("output_tokens", 0),
+                "model_used": response.model,
+                "response_time_ms": (
+                    datetime.utcnow() - response.timestamp
+                ).total_seconds() * 1000,
+                "cost": 0.0,  # Local models are free
+                "provider": "local",
+            }
 
-                    return ModelResponse(
-                        result=response.content,
-                        model_used=response.model,
-                        usage=usage_info,
-                        request_id=response.id,
-                        metadata={
-                            "stop_reason": response.stop_reason,
-                            "timestamp": response.timestamp.isoformat(),
-                            "routing_decision": {
-                                "selected_model": selected_model,
-                                "selection_reason": "abacus_primary",
-                                "provider": "abacus.ai",
-                            },
-                            "provider": "abacus.ai",
-                        },
-                    )
-                else:
-                    logger.warning("Abacus.ai not available, falling back to Claude")
-                    # Fallback to Claude equivalent
-                    if selected_model == "o3":
-                        selected_model = "claude-3-opus-20240229"
-                    elif selected_model in ["gpt-4o", "sonnet-4", "deepseek-r1"]:
-                        selected_model = "claude-3-5-sonnet-20241022"
-                    else:
-                        selected_model = "claude-3-5-haiku-20241022"
-                        
-            except Exception as e:
-                logger.error(f"Abacus.ai API error: {e}, falling back to Claude")
-                # Continue to Claude fallback
-                pass
-        
-        # Try Claude (if selected or fallback from Abacus.ai)
-        if selected_model.startswith("claude-") or is_abacus_model:
-            try:
-                claude_client = get_claude_client()
-                claude_response = await claude_client.route_and_send(
-                    text=req.text, context=req.context, system_prompt=system_prompt
-                )
-
-                usage_info = {
-                    "input_tokens": claude_response.usage.get("input_tokens", 0),
-                    "output_tokens": claude_response.usage.get("output_tokens", 0),
-                    "model_used": claude_response.model,
-                    "response_time_ms": (
-                        datetime.utcnow() - claude_response.timestamp
-                    ).total_seconds() * 1000,
-                    "provider": "claude",
-                }
-
-                return ModelResponse(
-                    result=claude_response.content,
-                    model_used=claude_response.model,
-                    usage=usage_info,
-                    request_id=claude_response.id,
-                    metadata={
-                        "stop_reason": claude_response.stop_reason,
-                        "timestamp": claude_response.timestamp.isoformat(),
-                        "routing_decision": {
-                            "selected_model": selected_model,
-                            "selection_reason": "claude_fallback" if is_abacus_model else "claude_primary",
-                            "provider": "claude",
-                        },
-                        "provider": "claude",
+            return ModelResponse(
+                result=response.content,
+                model_used=response.model,
+                usage=usage_info,
+                request_id=response.id,
+                metadata={
+                    "stop_reason": response.stop_reason,
+                    "timestamp": response.timestamp.isoformat(),
+                    "routing_decision": {
+                        "selected_model": selected_model,
+                        "selection_reason": "local_preferred",
                     },
-                )
-            except Exception as e:
-                logger.error(f"Claude API error: {e}, falling back to local LLM")
-                # Continue to local fallback
-                selected_model = "mistral"
-        
-        # Final fallback: Local LLM
-        logger.info(f"Using local LLM fallback: {selected_model}")
-        local_client = get_local_client()
-        response = await local_client.route_and_send(
-            text=req.text, context=req.context, system_prompt=system_prompt
-        )
-        
-        usage_info = {
-            "input_tokens": len(req.text.split()),  # Approximate
-            "output_tokens": response.usage.get("output_tokens", 0),
-            "model_used": response.model,
-            "response_time_ms": (
-                datetime.utcnow() - response.timestamp
-            ).total_seconds() * 1000,
-            "cost": 0.0,  # Local models are free
-            "provider": "local",
-        }
-
-        return ModelResponse(
-            result=response.content,
-            model_used=response.model,
-            usage=usage_info,
-            request_id=response.id,
-            metadata={
-                "stop_reason": response.stop_reason,
-                "timestamp": response.timestamp.isoformat(),
-                "routing_decision": {
-                    "selected_model": selected_model,
-                    "selection_reason": "local_fallback",
                     "provider": "local",
                 },
-                "provider": "local",
-            },
-        )
+            )
+        else:
+            # Use Claude API client
+            claude_client = get_claude_client()
+            claude_response = await claude_client.route_and_send(
+                text=req.text, context=req.context, system_prompt=system_prompt
+            )
+
+            # Calculate usage metrics
+            usage_info = {
+                "input_tokens": claude_response.usage.get("input_tokens", 0),
+                "output_tokens": claude_response.usage.get("output_tokens", 0),
+                "model_used": claude_response.model,
+                "response_time_ms": (
+                    datetime.utcnow() - claude_response.timestamp
+                ).total_seconds()
+                * 1000,
+                "provider": "claude",
+            }
+
+        return ModelResponse(
+            result=claude_response.content,
+            model_used=claude_response.model,
+            usage=usage_info,
+            request_id=claude_response.id,
+            metadata={
+                "stop_reason": claude_response.stop_reason,
+                "timestamp": claude_response.timestamp.isoformat(),
+                "routing_decision": {
+                    "selected_model": selected_model,
+                    "selection_reason": (
+                        "rule_based" if selected_model else "intelligent_routing"
+                    ),
+                },
+            )
 
     except Exception as e:
         logger.error(f"Error routing request: {e}")
@@ -392,21 +333,15 @@ def _get_system_prompt_for_task(task_type: str) -> str:
 
 def get_routing_stats() -> Dict[str, Any]:
     """Get routing statistics and model usage information."""
-    abacus_client = get_abacus_client()
     claude_client = get_claude_client()
 
     return {
-        "available_models": {
-            "abacus": abacus_client.list_available_models(),
-            "claude": claude_client.list_available_models(),
-            "local": ["mistral", "local-llm"],
-        },
+        "available_models": claude_client.list_available_models(),
         "routing_rules_count": len(_table.rules),
-        "default_model": "gpt-4o-mini",
-        "fallback_hierarchy": ["abacus.ai", "claude", "local"],
+        "default_model": "claude-3-5-haiku-20241022",
         "model_info": {
-            **{model: abacus_client.get_model_info(model) for model in abacus_client.list_available_models()},
-            **{model: claude_client.get_model_info(model) for model in claude_client.list_available_models()},
+            model: claude_client.get_model_info(model)
+            for model in claude_client.list_available_models()
         },
     }
 
@@ -414,18 +349,18 @@ def get_routing_stats() -> Dict[str, Any]:
 async def test_routing() -> Dict[str, Any]:
     """Test routing functionality with sample requests."""
     test_cases = [
-        {"text": "Hello, world!", "expected_model": "gpt-4o-mini"},
+        {"text": "Hello, world!", "expected_model": "claude-3-5-haiku-20241022"},
         {
             "text": "Design a microservices architecture for a large e-commerce platform",
-            "expected_model": "o3",
+            "expected_model": "claude-3-opus-20240229",
         },
         {
             "text": "Review this Python code for bugs",
-            "expected_model": "deepseek-r1",
+            "expected_model": "claude-3-5-sonnet-20241022",
         },
         {
             "text": "Simple question about Python syntax",
-            "expected_model": "gpt-4o-mini",
+            "expected_model": "claude-3-5-haiku-20241022",
         },
     ]
 

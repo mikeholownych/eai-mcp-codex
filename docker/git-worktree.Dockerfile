@@ -1,7 +1,7 @@
 # =====================================
 # GIT WORKTREE MANAGER SERVICE
 # =====================================
-FROM llm-stack-base as git-worktree
+FROM mcp-base as git-worktree
 
 
 
