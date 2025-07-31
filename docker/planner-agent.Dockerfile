@@ -1,5 +1,5 @@
 # Planner Agent Service Dockerfile
-FROM llm-stack-base as planner-agent
+FROM mcp-base as planner-agent
 
 # Set working directory
 WORKDIR /app

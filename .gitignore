@@ -64,3 +64,4 @@ logs/**
 *.pid
 
 cloudflare-tunnel/credentials.json
+o/**
