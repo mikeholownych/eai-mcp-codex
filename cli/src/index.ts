@@ -9,6 +9,7 @@ import * as planManagement from './commands/plan-management';
 import * as gitWorktree from './commands/git-worktree';
 import * as workflowOrchestrator from './commands/workflow-orchestrator';
 import * as verificationFeedback from './commands/verification-feedback';
+import * as configuration from './commands/configuration';
 import { interactive } from './commands/interactive';
 import { chat } from './commands/chat';
 
@@ -143,6 +144,70 @@ program
   .command('chat')
   .description('Start chat mode with AI assistant')
   .action(chat);
+
+// Configuration commands
+const listCmd = program
+  .command('list')
+  .description('List MCP configurations');
+
+listCmd
+  .command('agents')
+  .description('List available agent configurations')
+  .option('--scope <scope>', 'Configuration scope (default|global|project|all)', 'all')
+  .option('--format <format>', 'Output format (table|json|yaml)', 'table')
+  .option('--detailed', 'Show detailed information')
+  .option('--filter-tags <tags>', 'Filter by tags (comma-separated)')
+  .option('--sort-by <field>', 'Sort by field (name|type|priority|lastModified)')
+  .option('--sort-order <order>', 'Sort order (asc|desc)', 'asc')
+  .action(configuration.listAgents);
+
+listCmd
+  .command('commands')
+  .description('List available command configurations')
+  .option('--scope <scope>', 'Configuration scope (default|global|project|all)', 'all')
+  .option('--format <format>', 'Output format (table|json|yaml)', 'table')
+  .option('--detailed', 'Show detailed information')
+  .option('--filter-tags <tags>', 'Filter by tags (comma-separated)')
+  .option('--sort-by <field>', 'Sort by field (name|type|priority|lastModified)')
+  .option('--sort-order <order>', 'Sort order (asc|desc)', 'asc')
+  .action(configuration.listCommands);
+
+listCmd
+  .command('all')
+  .description('List all configurations (agents and commands)')
+  .option('--scope <scope>', 'Configuration scope (default|global|project|all)', 'all')
+  .option('--format <format>', 'Output format (table|json|yaml)', 'table')
+  .option('--detailed', 'Show detailed information')
+  .option('--filter-tags <tags>', 'Filter by tags (comma-separated)')
+  .option('--sort-by <field>', 'Sort by field (name|type|priority|lastModified)')
+  .option('--sort-order <order>', 'Sort order (asc|desc)', 'asc')
+  .action(configuration.listAll);
+
+// Make 'list' without subcommand show all configurations
+listCmd.action(() => {
+  configuration.listAll();
+});
+
+// Doctor command
+program
+  .command('doctor')
+  .description('Run configuration diagnostics and validation')
+  .option('--check-all', 'Check all aspects of configuration')
+  .option('--fix-issues', 'Attempt to fix found issues')
+  .option('--verbose', 'Show detailed diagnostic information')
+  .option('--output-format <format>', 'Output format (text|json)', 'text')
+  .option('--include-warnings', 'Include warnings in output')
+  .action(configuration.doctor);
+
+// Init command
+program
+  .command('init [scope]')
+  .description('Initialize MCP configuration directories and example files')
+  .option('--scope <scope>', 'Configuration scope (global|project)', 'project')
+  .action((scope, options) => {
+    const targetScope = scope || options.scope || 'project';
+    configuration.initializeConfiguration(targetScope as 'global' | 'project');
+  });
 
 // Error handling
 program.on('command:*', () => {
