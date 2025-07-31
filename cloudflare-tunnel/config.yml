@@ -45,7 +45,85 @@ ingress:
       httpHostHeader: new.ethical-ai-insider.com
       originServerName: new.ethical-ai-insider.com
 
-  # API domain - Nginx gateway for MCP services (same as frontend, different routing)
+  # Model Router API - Direct access to model routing service
+  - hostname: model-router.ethical-ai-insider.com
+    service: http://localhost:8001
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: model-router.ethical-ai-insider.com
+      originServerName: model-router.ethical-ai-insider.com
+
+  # Plan Management API
+  - hostname: plan-management.ethical-ai-insider.com
+    service: http://localhost:8002
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: plan-management.ethical-ai-insider.com
+      originServerName: plan-management.ethical-ai-insider.com
+
+  # Git Worktree Manager API
+  - hostname: git-worktree.ethical-ai-insider.com
+    service: http://localhost:8003
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: git-worktree.ethical-ai-insider.com
+      originServerName: git-worktree.ethical-ai-insider.com
+
+  # Workflow Orchestrator API
+  - hostname: workflow-orchestrator.ethical-ai-insider.com
+    service: http://localhost:8004
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: workflow-orchestrator.ethical-ai-insider.com
+      originServerName: workflow-orchestrator.ethical-ai-insider.com
+
+  # Verification Feedback API
+  - hostname: verification-feedback.ethical-ai-insider.com
+    service: http://localhost:8005
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: verification-feedback.ethical-ai-insider.com
+      originServerName: verification-feedback.ethical-ai-insider.com
+
+  # Staff Service API
+  - hostname: staff-api.ethical-ai-insider.com
+    service: http://localhost:8006
+    originRequest:
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      noHappyEyeballs: false
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+      httpHostHeader: staff-api.ethical-ai-insider.com
+      originServerName: staff-api.ethical-ai-insider.com
+
+  # API domain - Nginx gateway for MCP services (main API gateway)
   - hostname: newapi.ethical-ai-insider.com
     service: http://localhost:80
     originRequest:
