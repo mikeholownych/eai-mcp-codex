@@ -61,6 +61,18 @@ class TaskOutput(BaseModel):
 class BaseAgent(ABC):
     """Base class for all specialized agents following AGENTS.md standards."""
 
+    @classmethod
+    def create(cls, *args, **kwargs):
+        """Instantiate an agent with flexible parameters.
+
+        Legacy startup scripts sometimes construct agents by calling
+        ``Class.create(agent_id="abc", name="Foo")`` instead of using the
+        constructor directly.  This wrapper simply forwards all provided
+        arguments to ``__init__`` so those scripts continue to work.
+        """
+
+        return cls(*args, **kwargs)
+
     def __init__(self, config: AgentConfig):
         self.config = config
         self.logger = get_logger(f"agent.{config.agent_type}.{config.agent_id}")
