@@ -9,8 +9,7 @@ from uuid import UUID, uuid4
 import asyncpg
 from redis import Redis
 
-from src.common.database import get_postgres_connection
-from src.common.redis_client import get_redis_connection
+from src.common.database import DatabaseManager
 from src.a2a_communication.models import A2AMessage, MessageType, MessagePriority
 from src.a2a_communication.message_broker import A2AMessageBroker
 
@@ -213,7 +212,9 @@ class MultiDeveloperOrchestrator(CollaborationOrchestrator):
         message_broker: Optional[A2AMessageBroker] = None,
         postgres_pool: Optional[asyncpg.Pool] = None
     ) -> None:
-        super().__init__(redis, message_broker)
+        super().__init__()
+        self.redis = redis
+        self.message_broker = message_broker
         self.postgres_pool = postgres_pool
         
         # Initialize specialized managers
@@ -225,12 +226,29 @@ class MultiDeveloperOrchestrator(CollaborationOrchestrator):
         
         # Track active coordination plans
         self.active_plans: Dict[UUID, TeamCoordinationPlan] = {}
+
+    @classmethod
+    async def create(
+        cls,
+        redis: Optional[Redis] = None,
+        message_broker: Optional[A2AMessageBroker] = None,
+        postgres_pool: Optional[asyncpg.Pool] = None
+    ) -> "MultiDeveloperOrchestrator":
+        instance = cls(redis=redis, message_broker=message_broker, postgres_pool=postgres_pool)
+        instance.redis = redis or await get_redis_connection()
+        instance.message_broker = message_broker or await A2AMessageBroker.create()
+        # The postgres_pool is passed directly, no default creation here
+        return instance
     
     async def _get_db_connection(self) -> asyncpg.Connection:
         """Get database connection from pool or create new one."""
         if self.postgres_pool:
             return await self.postgres_pool.acquire()
-        return await get_postgres_connection()
+        
+        # If no pool, create a new connection using DatabaseManager
+        db_manager = DatabaseManager('collaboration_orchestrator')
+        await db_manager.connect()
+        return await db_manager.get_connection().__aenter__()
     
     async def create_team_coordination_plan(
         self,

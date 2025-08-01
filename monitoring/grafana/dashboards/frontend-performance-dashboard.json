@@ -1,0 +1,471 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Frontend Performance & Asset Serving Monitoring",
+    "tags": ["frontend", "nextjs", "performance", "assets", "user-experience"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Frontend Application Status",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "up{job=\"frontend\"}",
+            "legendFormat": "Frontend Status",
+            "refId": "A"
+          },
+          {
+            "expr": "time() - process_start_time_seconds{job=\"frontend\"}",
+            "legendFormat": "Uptime (s)",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "green", "value": 1 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Frontend Status" },
+              "properties": [
+                { "id": "mappings", "value": [
+                  { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                  { "options": { "1": { "text": "UP", "color": "green" } } }
+                ]}
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Uptime (s)" },
+              "properties": [
+                { "id": "unit", "value": "s" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Response Time Distribution",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 16, "x": 8, "y": 0 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"frontend\"}[5m]))",
+            "legendFormat": "P50 Response Time",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"frontend\"}[5m]))",
+            "legendFormat": "P95 Response Time",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"frontend\"}[5m]))",
+            "legendFormat": "P99 Response Time",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0,
+            "max": 5
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 2,
+            "colorMode": "critical",
+            "op": "gt"
+          },
+          {
+            "value": 30,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "HTTP Status Code Distribution",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",status=~\"2..\"}[5m])",
+            "legendFormat": "2xx Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",status=~\"3..\"}[5m])",
+            "legendFormat": "3xx Redirect",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",status=~\"4..\"}[5m])",
+            "legendFormat": "4xx Client Error",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",status=~\"5..\"}[5m])",
+            "legendFormat": "5xx Server Error",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Static Asset Serving Status",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",path=~\".*\\.css\",status=\"200\"}[5m])",
+            "legendFormat": "CSS Success Rate/s",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",path=~\".*\\.js\",status=\"200\"}[5m])",
+            "legendFormat": "JS Success Rate/s",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",path=~\"/_next/static/.*\",status=\"200\"}[5m])",
+            "legendFormat": "Next.js Assets/s",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",status=\"404\"}[5m])",
+            "legendFormat": "404 Errors/s",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 0.1 },
+                { "color": "red", "value": 1 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "404 Errors/s" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "orange", "value": 0.01 },
+                      { "color": "red", "value": 0.1 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Container Resource Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{name=\"mcp-frontend\"} / 1024 / 1024",
+            "legendFormat": "Memory Usage (MB)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{name=\"mcp-frontend\"}[5m]) * 100",
+            "legendFormat": "CPU Usage (%)",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB / Percentage",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Next.js Specific Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(nextjs_pages_rendered_total[5m])",
+            "legendFormat": "Pages Rendered/s",
+            "refId": "A"
+          },
+          {
+            "expr": "nextjs_active_connections",
+            "legendFormat": "Active Connections",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(nextjs_build_errors_total[5m])",
+            "legendFormat": "Build Errors/s",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Count / Rate",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Web Vitals & User Experience",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "frontend_web_vitals_lcp",
+            "legendFormat": "LCP (ms)",
+            "refId": "A"
+          },
+          {
+            "expr": "frontend_web_vitals_fid",
+            "legendFormat": "FID (ms)",
+            "refId": "B"
+          },
+          {
+            "expr": "frontend_web_vitals_cls",
+            "legendFormat": "CLS",
+            "refId": "C"
+          },
+          {
+            "expr": "frontend_web_vitals_ttfb",
+            "legendFormat": "TTFB (ms)",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 50 },
+                { "color": "red", "value": 100 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "LCP (ms)" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 2500 },
+                      { "color": "red", "value": 4000 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "FID (ms)" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 100 },
+                      { "color": "red", "value": 300 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "CLS" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 0.1 },
+                      { "color": "red", "value": 0.25 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 8,
+        "title": "Critical Frontend Alerts Status",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "ALERTS{alertname=~\"Frontend.*|StaticAsset.*|CSS.*|JavaScript.*\",alertstate=\"firing\"}",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "job": true
+              },
+              "indexByName": {
+                "alertname": 0,
+                "severity": 1,
+                "alertstate": 2,
+                "description": 3
+              },
+              "renameByName": {
+                "alertname": "Alert Name",
+                "severity": "Severity",
+                "alertstate": "State",
+                "description": "Description"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Severity" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": null },
+                      { "color": "yellow", "value": "warning" },
+                      { "color": "red", "value": "critical" }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Request Volume & Patterns",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\"}[5m])",
+            "legendFormat": "Total Requests/s",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",path=\"/\"}[5m])",
+            "legendFormat": "Homepage Requests/s",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",path=~\"/api/.*\"}[5m])",
+            "legendFormat": "API Requests/s",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"frontend\",path=~\"/_next/.*\"}[5m])",
+            "legendFormat": "Next.js Assets/s",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(up{job=\"frontend\"}, instance)",
+          "refresh": 1,
+          "includeAll": false,
+          "multi": false
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Critical Frontend Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\"Frontend.*\",alertstate=\"firing\",severity=\"critical\"}",
+          "iconColor": "red",
+          "titleFormat": "CRITICAL: {{alertname}}"
+        },
+        {
+          "name": "Asset Serving Issues",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Asset.*|CSS.*|JavaScript.*\",alertstate=\"firing\"}",
+          "iconColor": "orange",
+          "titleFormat": "Asset Issue: {{alertname}}"
+        },
+        {
+          "name": "Container Restarts",
+          "datasource": "Prometheus",
+          "expr": "changes(container_start_time_seconds{name=\"mcp-frontend\"}[1h]) > 0",
+          "iconColor": "blue",
+          "titleFormat": "Frontend Container Restart"
+        }
+      ]
+    }
+  }
+}

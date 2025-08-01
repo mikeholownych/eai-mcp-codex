@@ -14,8 +14,11 @@ import * as verificationFeedback from './verification-feedback';
 
 // Import configuration system
 import { ConfigurationManager } from '../config/configuration-manager';
-import { AgentDefinitionLoader, AgentDefinition, AgentExecutionContext } from '../loaders/agent-definition-loader';
-import { CommandDefinitionLoader, CommandDefinition, CommandExecutionContext } from '../loaders/command-definition-loader';
+import { AgentDefinitionLoader } from '../loaders/agent-definition-loader';
+import { CommandDefinitionLoader } from '../loaders/command-definition-loader';
+import { AgentDefinitionLoader, AgentExecutionContext } from '../loaders/agent-definition-loader';
+import { CommandDefinitionLoader, CommandExecutionContext } from '../loaders/command-definition-loader';
+import { AgentDefinition, CommandDefinition } from '../types/configuration';
 
 // --- LLMClient Placeholder (Integrate your LLM API here) ---
 // This class is responsible for making actual requests to your chosen LLM (e.g., OpenAI, Google Gemini).

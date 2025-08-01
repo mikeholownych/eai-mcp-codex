@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 import asyncpg
 from redis import Redis
 
-from src.common.database import get_postgres_connection
+from src.common.database import DatabaseManager
 from src.common.redis_client import get_redis_connection
 from src.a2a_communication.models import A2AMessage, MessageType, MessagePriority
 from src.a2a_communication.message_broker import A2AMessageBroker
@@ -223,7 +223,10 @@ class IntelligentConflictResolver:
         """Get database connection from pool or create new one."""
         if self.postgres_pool:
             return await self.postgres_pool.acquire()
-        return await get_postgres_connection()
+        else:
+            db_manager = DatabaseManager("collaboration_db")
+            await db_manager.connect()
+            return await db_manager.get_connection().__aenter__()
     
     async def detect_conflict(
         self,

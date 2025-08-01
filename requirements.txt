@@ -18,3 +18,5 @@ numpy
 alembic
 pytest-asyncio
 abacusai
+pika
+PyJWT>=2.0.0

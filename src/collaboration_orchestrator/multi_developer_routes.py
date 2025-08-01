@@ -4,7 +4,8 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, Body
+from fastapi import APIRouter, HTTPException, Query, Body, Depends, Request
+
 from pydantic import BaseModel
 
 from src.common.logging import get_logger
@@ -30,12 +31,19 @@ from .intelligent_conflict_resolver import IntelligentConflictResolver
 
 logger = get_logger("multi_developer_orchestrator")
 
-# Initialize global components
-orchestrator = MultiDeveloperOrchestrator()
-profile_manager = DeveloperProfileManager()
-conflict_resolver = IntelligentConflictResolver(profile_manager)
 
-router = APIRouter(prefix="/multi-dev", tags=["Multi-Developer Coordination"])
+
+
+async def get_multi_developer_orchestrator(request: Request) -> MultiDeveloperOrchestrator:
+    return request.app.state.multi_developer_orchestrator
+
+
+async def get_developer_profile_manager(request: Request) -> DeveloperProfileManager:
+    return request.app.state.developer_profile_manager
+
+
+async def get_intelligent_conflict_resolver(request: Request) -> IntelligentConflictResolver:
+    return request.app.state.intelligent_conflict_resolver
 
 
 # Pydantic models for API requests
@@ -79,7 +87,10 @@ class ConflictDetectionRequest(BaseModel):
 # Developer Profile Management Endpoints
 
 @router.post("/profiles", response_model=DeveloperProfile)
-async def create_developer_profile(request: CreateDeveloperProfileRequest) -> DeveloperProfile:
+async def create_developer_profile(
+    request: CreateDeveloperProfileRequest,
+    profile_manager: DeveloperProfileManager = Depends(get_developer_profile_manager),
+) -> DeveloperProfile:
     """Create a new developer profile."""
     try:
         profile = await profile_manager.create_developer_profile(
@@ -100,7 +111,10 @@ async def create_developer_profile(request: CreateDeveloperProfileRequest) -> De
 
 
 @router.get("/profiles/{agent_id}", response_model=DeveloperProfile)
-async def get_developer_profile(agent_id: str) -> DeveloperProfile:
+async def get_developer_profile(
+    agent_id: str,
+    profile_manager: DeveloperProfileManager = Depends(get_developer_profile_manager),
+) -> DeveloperProfile:
     """Get developer profile by agent ID."""
     profile = await profile_manager.get_developer_profile(agent_id)
     if not profile:
@@ -109,7 +123,11 @@ async def get_developer_profile(agent_id: str) -> DeveloperProfile:
 
 
 @router.put("/profiles/{agent_id}")
-async def update_developer_profile(agent_id: str, updates: Dict[str, Any] = Body(...)) -> dict:
+async def update_developer_profile(
+    agent_id: str,
+    updates: Dict[str, Any] = Body(...),
+    profile_manager: DeveloperProfileManager = Depends(get_developer_profile_manager),
+) -> dict:
     """Update developer profile."""
     success = await profile_manager.update_developer_profile(agent_id, updates)
     if not success:
@@ -118,7 +136,10 @@ async def update_developer_profile(agent_id: str, updates: Dict[str, Any] = Body
 
 
 @router.get("/profiles/{agent_id}/workload", response_model=DeveloperWorkload)
-async def get_agent_workload(agent_id: str) -> DeveloperWorkload:
+async def get_agent_workload(
+    agent_id: str,
+    profile_manager: DeveloperProfileManager = Depends(get_developer_profile_manager),
+) -> DeveloperWorkload:
     """Get current workload for an agent."""
     workload = await profile_manager.get_agent_workload(agent_id)
     if not workload:
@@ -128,9 +149,10 @@ async def get_agent_workload(agent_id: str) -> DeveloperWorkload:
 
 @router.get("/profiles/available")
 async def get_available_agents(
+    profile_manager: DeveloperProfileManager = Depends(get_developer_profile_manager),
     specialization: Optional[DeveloperSpecialization] = None,
     min_experience: Optional[ExperienceLevel] = None,
-    required_skills: List[str] = Query([])
+    required_skills: List[str] = Query([]),
 ) -> List[DeveloperProfile]:
     """Get list of available agents matching criteria."""
     try:
@@ -148,10 +170,11 @@ async def get_available_agents(
 @router.post("/profiles/{agent_id}/performance")
 async def update_performance_metrics(
     agent_id: str,
+    profile_manager: DeveloperProfileManager = Depends(get_developer_profile_manager),
     task_completed: bool = True,
     completion_time: Optional[float] = None,
     quality_score: Optional[float] = None,
-    peer_rating: Optional[float] = None
+    peer_rating: Optional[float] = None,
 ) -> dict:
     """Update performance metrics for a developer."""
     success = await profile_manager.update_performance_metrics(
@@ -169,9 +192,10 @@ async def update_performance_metrics(
 @router.get("/profiles/find-for-task")
 async def find_best_agents_for_task(
     task_type: TaskType,
+    profile_manager: DeveloperProfileManager = Depends(get_developer_profile_manager),
     required_skills: List[str] = Query([]),
     max_agents: int = 3,
-    exclude_agents: List[str] = Query([])
+    exclude_agents: List[str] = Query([]),
 ) -> List[Dict[str, Any]]:
     """Find best agents for a specific task."""
     try:
@@ -190,7 +214,10 @@ async def find_best_agents_for_task(
 # Team Coordination Plan Endpoints
 
 @router.post("/plans", response_model=TeamCoordinationPlan)
-async def create_team_coordination_plan(request: CreateTeamPlanRequest) -> TeamCoordinationPlan:
+async def create_team_coordination_plan(
+    request: CreateTeamPlanRequest,
+    orchestrator: MultiDeveloperOrchestrator = Depends(get_multi_developer_orchestrator),
+) -> TeamCoordinationPlan:
     """Create a comprehensive team coordination plan."""
     try:
         plan = await orchestrator.create_team_coordination_plan(
@@ -210,7 +237,10 @@ async def create_team_coordination_plan(request: CreateTeamPlanRequest) -> TeamC
 
 
 @router.get("/plans/{plan_id}", response_model=TeamCoordinationPlan)
-async def get_coordination_plan(plan_id: UUID) -> TeamCoordinationPlan:
+async def get_coordination_plan(
+    plan_id: UUID,
+    orchestrator: MultiDeveloperOrchestrator = Depends(get_multi_developer_orchestrator),
+) -> TeamCoordinationPlan:
     """Get coordination plan by ID."""
     plan = await orchestrator.get_coordination_plan(plan_id)
     if not plan:
@@ -219,7 +249,10 @@ async def get_coordination_plan(plan_id: UUID) -> TeamCoordinationPlan:
 
 
 @router.get("/plans/{plan_id}/performance-report")
-async def get_team_performance_report(plan_id: UUID) -> Dict[str, Any]:
+async def get_team_performance_report(
+    plan_id: UUID,
+    orchestrator: MultiDeveloperOrchestrator = Depends(get_multi_developer_orchestrator),
+) -> Dict[str, Any]:
     """Generate comprehensive team performance report."""
     try:
         report = await orchestrator.generate_team_performance_report(plan_id)
@@ -232,7 +265,11 @@ async def get_team_performance_report(plan_id: UUID) -> Dict[str, Any]:
 
 
 @router.post("/plans/{plan_id}/optimize")
-async def optimize_task_assignments(plan_id: UUID) -> Dict[str, Any]:
+async def optimize_task_assignments(
+    plan_id: UUID,
+    orchestrator: MultiDeveloperOrchestrator = Depends(get_multi_developer_orchestrator),
+    profile_manager: DeveloperProfileManager = Depends(get_developer_profile_manager),
+) -> Dict[str, Any]:
     """Optimize task assignments in a coordination plan."""
     try:
         plan = await orchestrator.get_coordination_plan(plan_id)
@@ -267,6 +304,7 @@ async def assign_task_to_agent(
     plan_id: UUID,
     assignment_id: UUID,
     agent_id: str,
+    orchestrator: MultiDeveloperOrchestrator = Depends(get_multi_developer_orchestrator),
     reviewer_agents: List[str] = Query([])
 ) -> dict:
     """Assign a specific task to an agent."""
@@ -291,7 +329,8 @@ async def assign_task_to_agent(
 async def update_task_progress(
     assignment_id: UUID,
     agent_id: str,
-    request: TaskProgressUpdateRequest
+    request: TaskProgressUpdateRequest,
+    orchestrator: MultiDeveloperOrchestrator = Depends(get_multi_developer_orchestrator),
 ) -> dict:
     """Update task progress."""
     success = await orchestrator.handle_task_progress_update(
@@ -313,7 +352,10 @@ async def update_task_progress(
 
 
 @router.get("/tasks/{assignment_id}")
-async def get_task_assignment(assignment_id: UUID) -> TaskAssignment:
+async def get_task_assignment(
+    assignment_id: UUID,
+    orchestrator: MultiDeveloperOrchestrator = Depends(get_multi_developer_orchestrator),
+) -> TaskAssignment:
     """Get task assignment by ID."""
     assignment = await orchestrator._get_task_assignment(assignment_id)
     if not assignment:
@@ -326,7 +368,9 @@ async def get_task_assignment(assignment_id: UUID) -> TaskAssignment:
 @router.post("/plans/{plan_id}/conflicts/detect", response_model=ConflictResolutionLog)
 async def detect_conflict(
     plan_id: UUID,
-    request: ConflictDetectionRequest
+    request: ConflictDetectionRequest,
+    orchestrator: MultiDeveloperOrchestrator = Depends(get_multi_developer_orchestrator),
+    conflict_resolver: IntelligentConflictResolver = Depends(get_intelligent_conflict_resolver),
 ) -> ConflictResolutionLog:
     """Detect and analyze a conflict."""
     try:
@@ -350,7 +394,10 @@ async def detect_conflict(
 
 
 @router.post("/conflicts/{conflict_id}/resolve")
-async def resolve_conflict(conflict_id: UUID) -> dict:
+async def resolve_conflict(
+    conflict_id: UUID,
+    conflict_resolver: IntelligentConflictResolver = Depends(get_intelligent_conflict_resolver),
+) -> dict:
     """Attempt to resolve a conflict."""
     try:
         resolved = await conflict_resolver.resolve_conflict(conflict_id)
@@ -364,7 +411,10 @@ async def resolve_conflict(conflict_id: UUID) -> dict:
 
 
 @router.get("/conflicts/{conflict_id}", response_model=ConflictResolutionLog)
-async def get_conflict(conflict_id: UUID) -> ConflictResolutionLog:
+async def get_conflict(
+    conflict_id: UUID,
+    conflict_resolver: IntelligentConflictResolver = Depends(get_intelligent_conflict_resolver),
+) -> ConflictResolutionLog:
     """Get conflict by ID."""
     conflict = await conflict_resolver.get_conflict(conflict_id)
     if not conflict:

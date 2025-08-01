@@ -239,6 +239,9 @@ def get_connection(dsn: str) -> None:
     )
 
 
+
+
+
 def dict_factory(cursor, row):  # Not directly used with asyncpg fetch methods
     logger.warning("dict_factory is not directly used with asyncpg fetch methods.")
     return {cursor.description[idx][0]: value for idx, value in enumerate(row)}

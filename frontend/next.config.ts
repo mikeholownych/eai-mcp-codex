@@ -158,12 +158,12 @@ const nextConfig: NextConfig = {
   
   async redirects() {
     return [
-      // Redirect trailing slashes for better SEO
-      {
-        source: '/:path*/',
-        destination: '/:path*',
-        permanent: true,
-      },
+      // Temporarily disabled to fix production issue
+      // {
+      //   source: '/:path+/',
+      //   destination: '/:path+',
+      //   permanent: true,
+      // },
     ];
   },
 };
