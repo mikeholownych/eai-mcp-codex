@@ -38,4 +38,17 @@ describe('batch command', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith('plan', { task: 'test' });
   });
+
+  it('supports dry-run mode', async () => {
+    const mockDispatch = jest.fn();
+    (AgentClient as unknown as jest.Mock).mockImplementation(() => ({
+      dispatchCommand: mockDispatch,
+    }));
+
+    fs.writeFileSync(tempFile, JSON.stringify([{ command: 'plan' }]));
+
+    await run(tempFile, { dryRun: true });
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
 });
