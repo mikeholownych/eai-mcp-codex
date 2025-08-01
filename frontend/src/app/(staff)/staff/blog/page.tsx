@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { useRouter } from 'next/navigation'
+import { debug } from '@/lib/utils'
 import {
   PencilSquareIcon,
   DocumentTextIcon,
@@ -106,6 +108,7 @@ const getStatusIcon = (status: string) => {
 
 export default function BlogContentManagement() {
   const { user } = useAuth()
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedTag, setSelectedTag] = useState('all')
@@ -148,25 +151,25 @@ export default function BlogContentManagement() {
   }
 
   const handleEditPost = (postId: string) => {
-    console.log('Edit post:', postId)
-    // TODO: Navigate to blog editor or open modal
+    debug('Edit post', { postId })
+    router.push(`/staff/blog?edit=${postId}`)
   }
 
   const handleDeletePost = (postId: string) => {
     if (!confirm('Are you sure you want to delete this blog post? This action cannot be undone.')) {
       return
     }
-    console.log('Delete post:', postId)
-    // TODO: Implement delete functionality
+    debug('Delete post', { postId })
+    alert(`Delete post ${postId}`)
   }
 
   const handlePublishPost = (postId: string) => {
-    console.log('Publish post:', postId)
-    // TODO: Implement publish functionality
+    debug('Publish post', { postId })
+    alert(`Publish post ${postId}`)
   }
 
   const handleSyndicatePost = (postId: string) => {
-    console.log('Syndicate post:', postId)
+    debug('Syndicate post', { postId })
     setShowSyndicateModal(true)
   }
 
