@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import SessionProvider from '@/components/providers/SessionProvider'
+import WebVitalsReporter from '@/components/performance/WebVitalsReporter'
 
 export const metadata: Metadata = {
   title: 'Ethical AI Insider - MCP Agent Network',
@@ -71,6 +73,18 @@ export default function RootLayout({
         {/* DNS prefetch for API endpoints */}
         <link rel="dns-prefetch" href="//newapi.ethical-ai-insider.com" />
         
+        {/* PWA Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="EAI Codex" />
+        
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+        
         {/* Optimize resource loading */}
         <link rel="preload" href="/globals.css" as="style" />
         
@@ -114,7 +128,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased min-h-screen">
-        {children}
+        <SessionProvider>
+          <WebVitalsReporter />
+          {children}
+        </SessionProvider>
         
         {/* Service Worker Registration */}
         <script

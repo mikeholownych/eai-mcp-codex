@@ -1,0 +1,56 @@
+[
+  {
+    "content": "Review existing rag-agent/frontend/ codebase structure",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Analyze current staff frontend implementation",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Continue staff frontend development based on requirements",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Review RBAC requirements from CLAUDE.md and implement missing staff features",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Set up Cloudflare tunnel endpoint for staff frontend (staff.ethical-ai-insider.com)",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Configure staff frontend deployment and routing",
+    "status": "completed",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Resolve frontend port conflicts and start containers successfully",
+    "status": "completed",
+    "priority": "high",
+    "id": "7"
+  },
+  {
+    "content": "Start Cloudflare tunnel for external access",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "8"
+  },
+  {
+    "content": "Verify production deployment is fully functional",
+    "status": "pending",
+    "priority": "high",
+    "id": "9"
+  }
+]

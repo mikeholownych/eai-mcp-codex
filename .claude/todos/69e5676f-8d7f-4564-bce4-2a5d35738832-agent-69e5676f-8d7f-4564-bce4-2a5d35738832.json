@@ -1,0 +1,44 @@
+[
+  {
+    "content": "Research Abacus.ai API and integration requirements",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create Abacus.ai client for model router",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Update model router to use Abacus.ai as primary with local LLM fallback",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Configure environment variables for Abacus.ai integration",
+    "status": "completed",
+    "priority": "medium",
+    "id": "4"
+  },
+  {
+    "content": "Update Cloudflare tunnel configuration for all endpoints",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Bring up full production environment (local LLM + rag-agent)",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Verify all endpoints are accessible through Cloudflare tunnel",
+    "status": "pending",
+    "priority": "high",
+    "id": "7"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "content": "Review current rag-agent application structure and frontend configuration",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Build and start production frontend service via Docker Compose",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Verify production frontend is running and accessible",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  }
+]

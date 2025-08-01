@@ -1,0 +1,122 @@
+[
+  {
+    "content": "Create authentication pages (login/register)",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Implement authentication context and hooks",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create customer dashboard pages",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Build code editor with Monaco integration",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Create AI chatbot interface",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Implement billing and subscription pages",
+    "status": "completed",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Add support ticket system",
+    "status": "completed",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Create staff backend interface",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "8"
+  },
+  {
+    "content": "Create projects page for dashboard",
+    "status": "completed",
+    "priority": "medium",
+    "id": "9"
+  },
+  {
+    "content": "Create settings page for dashboard",
+    "status": "completed",
+    "priority": "medium",
+    "id": "10"
+  },
+  {
+    "content": "Fix build errors and authentication context",
+    "status": "completed",
+    "priority": "high",
+    "id": "11"
+  },
+  {
+    "content": "Configure Docker and nginx for production deployment",
+    "status": "completed",
+    "priority": "high",
+    "id": "12"
+  },
+  {
+    "content": "Set up Cloudflare tunnel for domain access",
+    "status": "completed",
+    "priority": "high",
+    "id": "13"
+  },
+  {
+    "content": "Start frontend production server",
+    "status": "completed",
+    "priority": "high",
+    "id": "14"
+  },
+  {
+    "content": "Set up systemd services for production stability",
+    "status": "completed",
+    "priority": "medium",
+    "id": "15"
+  },
+  {
+    "content": "Design staff backend dashboard layout",
+    "status": "completed",
+    "priority": "high",
+    "id": "16"
+  },
+  {
+    "content": "Implement user management with RBAC",
+    "status": "in_progress",
+    "priority": "high",
+    "id": "17"
+  },
+  {
+    "content": "Create customer support ticket management",
+    "status": "pending",
+    "priority": "high",
+    "id": "18"
+  },
+  {
+    "content": "Build system analytics and monitoring",
+    "status": "pending",
+    "priority": "medium",
+    "id": "19"
+  },
+  {
+    "content": "Add billing and subscription management for staff",
+    "status": "pending",
+    "priority": "medium",
+    "id": "20"
+  }
+]
