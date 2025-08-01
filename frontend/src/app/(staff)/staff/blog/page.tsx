@@ -6,6 +6,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { useRouter } from 'next/navigation'
 import { debug } from '@/lib/utils'
+import { BLOG_STATUS_COLORS, BLOG_STATUS_ICONS } from '@/lib/statusHelpers'
 import {
   PencilSquareIcon,
   DocumentTextIcon,
@@ -14,7 +15,6 @@ import {
   PlusIcon,
   MagnifyingGlassIcon,
   TagIcon,
-  CalendarDaysIcon,
   ShareIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
@@ -86,22 +86,11 @@ const mockBlogPosts = [
   }
 ]
 
-const statusColors: Record<string, string> = {
-  published: 'bg-green-500/10 text-green-400',
-  draft: 'bg-gray-500/10 text-gray-400',
-  review: 'bg-yellow-500/10 text-yellow-400',
-  scheduled: 'bg-blue-500/10 text-blue-400',
-}
-
 const getStatusColor = (status: string) =>
-  statusColors[status] ?? 'bg-gray-500/10 text-gray-400'
+  BLOG_STATUS_COLORS[status] ?? BLOG_STATUS_COLORS.draft
 
-const statusIcons: Record<string, JSX.Element> = {
-  published: <CheckCircleIcon className="h-4 w-4" />,
-  draft: <DocumentTextIcon className="h-4 w-4" />,
-  review: <ClockIcon className="h-4 w-4" />,
-  scheduled: <CalendarDaysIcon className="h-4 w-4" />,
-}
+const getStatusIcon = (status: string) =>
+  BLOG_STATUS_ICONS[status] ?? BLOG_STATUS_ICONS.draft
 
 const getStatusIcon = (status: string) =>
   statusIcons[status] ?? <DocumentTextIcon className="h-4 w-4" />

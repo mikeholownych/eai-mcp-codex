@@ -18,33 +18,34 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline'
 
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'high': return 'bg-red-500/10 text-red-400'
-    case 'medium': return 'bg-yellow-500/10 text-yellow-400'
-    case 'low': return 'bg-green-500/10 text-green-400'
-    default: return 'bg-gray-500/10 text-gray-400'
-  }
+const PRIORITY_COLORS: Record<string, string> = {
+  high: 'bg-red-500/10 text-red-400',
+  medium: 'bg-yellow-500/10 text-yellow-400',
+  low: 'bg-green-500/10 text-green-400',
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'open': return 'bg-blue-500/10 text-blue-400'
-    case 'in-progress': return 'bg-yellow-500/10 text-yellow-400'
-    case 'pending': return 'bg-orange-500/10 text-orange-400'
-    case 'resolved': return 'bg-green-500/10 text-green-400'
-    default: return 'bg-gray-500/10 text-gray-400'
-  }
+const STATUS_COLORS: Record<string, string> = {
+  open: 'bg-blue-500/10 text-blue-400',
+  'in-progress': 'bg-yellow-500/10 text-yellow-400',
+  pending: 'bg-orange-500/10 text-orange-400',
+  resolved: 'bg-green-500/10 text-green-400',
 }
 
-const getAlertIcon = (type: string) => {
-  switch (type) {
-    case 'warning': return <ExclamationTriangleIcon className="h-4 w-4 text-yellow-400" />
-    case 'error': return <ExclamationTriangleIcon className="h-4 w-4 text-red-400" />
-    case 'success': return <CheckCircleIcon className="h-4 w-4 text-green-400" />
-    default: return <CheckCircleIcon className="h-4 w-4 text-blue-400" />
-  }
+const ALERT_ICONS: Record<string, JSX.Element> = {
+  warning: <ExclamationTriangleIcon className="h-4 w-4 text-yellow-400" />,
+  error: <ExclamationTriangleIcon className="h-4 w-4 text-red-400" />,
+  success: <CheckCircleIcon className="h-4 w-4 text-green-400" />,
+  default: <CheckCircleIcon className="h-4 w-4 text-blue-400" />,
 }
+
+const getPriorityColor = (priority: string) =>
+  PRIORITY_COLORS[priority] ?? 'bg-gray-500/10 text-gray-400'
+
+const getStatusColor = (status: string) =>
+  STATUS_COLORS[status] ?? 'bg-gray-500/10 text-gray-400'
+
+const getAlertIcon = (type: string) =>
+  ALERT_ICONS[type] ?? ALERT_ICONS.default
 
 export default function StaffDashboard() {
   const { user } = useAuth()

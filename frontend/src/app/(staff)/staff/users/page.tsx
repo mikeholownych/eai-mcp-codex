@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { useRouter } from 'next/navigation'
 import { debug } from '@/lib/utils'
+import { USER_STATUS_COLORS, USER_STATUS_ICONS } from '@/lib/statusHelpers'
 import {
   UserGroupIcon,
   PlusIcon,
@@ -34,19 +35,11 @@ const roleColors: Record<string, string> = {
 
 const getRoleColor = (role: string) => roleColors[role] ?? 'bg-gray-500/10 text-gray-400'
 
-const statusColors: Record<string, string> = {
-  active: 'bg-green-500/10 text-green-400',
-  inactive: 'bg-yellow-500/10 text-yellow-400',
-  suspended: 'bg-red-500/10 text-red-400',
-}
+const getStatusColor = (status: string) =>
+  USER_STATUS_COLORS[status] ?? USER_STATUS_COLORS.active
 
-const getStatusColor = (status: string) => statusColors[status] ?? 'bg-gray-500/10 text-gray-400'
-
-const statusIcons: Record<string, JSX.Element> = {
-  active: <CheckCircleIcon className="h-4 w-4" />,
-  inactive: <ClockIcon className="h-4 w-4" />,
-  suspended: <ExclamationTriangleIcon className="h-4 w-4" />,
-}
+const getStatusIcon = (status: string) =>
+  USER_STATUS_ICONS[status] ?? USER_STATUS_ICONS.active
 
 const getStatusIcon = (status: string) => statusIcons[status] ?? <ClockIcon className="h-4 w-4" />
 
