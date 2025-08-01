@@ -105,6 +105,14 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
     setCurrentStep(index)
   }
 
+  const handleBulletClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement
+    if (target.matches('button[data-index]')) {
+      const index = Number(target.getAttribute('data-index'))
+      goToStep(index)
+    }
+  }
+
   const startDemo = () => {
     setIsPlaying(true)
     // Auto-advance through steps
@@ -189,11 +197,11 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
 
                   {/* Controls */}
                   <div className="flex items-center justify-between pt-6 border-t border-slate-700">
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2" onClick={handleBulletClick}>
                       {tourSteps.map((_, index) => (
                         <button
                           key={index}
-                          onClick={() => goToStep(index)}
+                          data-index={index}
                           className={`w-3 h-3 rounded-full transition-all ${
                             index === currentStep
                               ? 'bg-purple-500 scale-125'

@@ -103,37 +103,35 @@ const mockVideos = [
   }
 ]
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'published': return 'bg-green-500/10 text-green-400'
-    case 'draft': return 'bg-gray-500/10 text-gray-400'
-    case 'processing': return 'bg-blue-500/10 text-blue-400'
-    case 'scheduled': return 'bg-yellow-500/10 text-yellow-400'
-    case 'error': return 'bg-red-500/10 text-red-400'
-    default: return 'bg-gray-500/10 text-gray-400'
-  }
+const statusColors: Record<string, string> = {
+  published: 'bg-green-500/10 text-green-400',
+  draft: 'bg-gray-500/10 text-gray-400',
+  processing: 'bg-blue-500/10 text-blue-400',
+  scheduled: 'bg-yellow-500/10 text-yellow-400',
+  error: 'bg-red-500/10 text-red-400',
 }
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'published': return <CheckCircleIcon className="h-4 w-4" />
-    case 'draft': return <DocumentTextIcon className="h-4 w-4" />
-    case 'processing': return <CogIcon className="h-4 w-4 animate-spin" />
-    case 'scheduled': return <CalendarDaysIcon className="h-4 w-4" />
-    case 'error': return <ExclamationTriangleIcon className="h-4 w-4" />
-    default: return <DocumentTextIcon className="h-4 w-4" />
-  }
+const getStatusColor = (status: string) => statusColors[status] ?? 'bg-gray-500/10 text-gray-400'
+
+const statusIcons: Record<string, JSX.Element> = {
+  published: <CheckCircleIcon className="h-4 w-4" />,
+  draft: <DocumentTextIcon className="h-4 w-4" />,
+  processing: <CogIcon className="h-4 w-4 animate-spin" />,
+  scheduled: <CalendarDaysIcon className="h-4 w-4" />,
+  error: <ExclamationTriangleIcon className="h-4 w-4" />,
 }
 
-const getVisibilityColor = (visibility: string) => {
-  switch (visibility) {
-    case 'enterprise': return 'bg-purple-500/10 text-purple-400'
-    case 'professional': return 'bg-blue-500/10 text-blue-400'
-    case 'standard': return 'bg-green-500/10 text-green-400'
-    case 'free': return 'bg-gray-500/10 text-gray-400'
-    default: return 'bg-gray-500/10 text-gray-400'
-  }
+const getStatusIcon = (status: string) => statusIcons[status] ?? <DocumentTextIcon className="h-4 w-4" />
+
+const visibilityColors: Record<string, string> = {
+  enterprise: 'bg-purple-500/10 text-purple-400',
+  professional: 'bg-blue-500/10 text-blue-400',
+  standard: 'bg-green-500/10 text-green-400',
+  free: 'bg-gray-500/10 text-gray-400',
 }
+
+const getVisibilityColor = (visibility: string) =>
+  visibilityColors[visibility] ?? 'bg-gray-500/10 text-gray-400'
 
 const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
