@@ -24,7 +24,7 @@ class A2AMessageBroker:
         return self
 
     def __init__(self):
-        
+
         self.message_ttl = 3600  # 1 hour default TTL
 
     async def send_message(self, message: A2AMessage) -> bool:
@@ -119,7 +119,9 @@ class A2AMessageBroker:
         """Get all registered agents of a specific type."""
         try:
             type_key = f"agents:type:{agent_type}"
-            return [agent_id.decode() for agent_id in await self.redis.smembers(type_key)]
+            return [
+                agent_id.decode() for agent_id in await self.redis.smembers(type_key)
+            ]
         except Exception as e:
             logger.error(f"Failed to get agents by type {agent_type}: {e}")
             return []
