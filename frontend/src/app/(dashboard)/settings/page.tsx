@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { debug } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -64,7 +65,7 @@ export default function SettingsPage() {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false)
-      console.log('Profile saved:', profileData)
+      debug('Profile saved', profileData)
     }, 1000)
   }
 
@@ -79,7 +80,7 @@ export default function SettingsPage() {
     setTimeout(() => {
       setIsLoading(false)
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-      console.log('Password changed')
+      debug('Password changed', {})
     }, 1000)
   }
 
@@ -88,7 +89,7 @@ export default function SettingsPage() {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false)
-      console.log('Notifications saved:', notificationSettings)
+      debug('Notifications saved', notificationSettings)
     }, 1000)
   }
 
@@ -97,7 +98,7 @@ export default function SettingsPage() {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false)
-      console.log('Preferences saved:', preferences)
+      debug('Preferences saved', preferences)
     }, 1000)
   }
 
@@ -439,16 +440,17 @@ export default function SettingsPage() {
     </div>
   )
 
+  const tabContentMap: Record<string, () => JSX.Element> = {
+    profile: renderProfileTab,
+    security: renderSecurityTab,
+    notifications: renderNotificationsTab,
+    preferences: renderPreferencesTab,
+    api: renderAPITab,
+    danger: renderDangerTab,
+  }
+
   const renderTabContent = () => {
-    switch (activeTab) {
-      case 'profile': return renderProfileTab()
-      case 'security': return renderSecurityTab()
-      case 'notifications': return renderNotificationsTab()
-      case 'preferences': return renderPreferencesTab()
-      case 'api': return renderAPITab()
-      case 'danger': return renderDangerTab()
-      default: return renderProfileTab()
-    }
+    return tabContentMap[activeTab]?.() ?? renderProfileTab()
   }
 
   return (

@@ -4,6 +4,9 @@ import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { useRouter } from 'next/navigation'
+import { debug } from '@/lib/utils'
+import { BLOG_STATUS_COLORS, BLOG_STATUS_ICONS } from '@/lib/statusHelpers'
 import {
   PencilSquareIcon,
   DocumentTextIcon,
@@ -12,7 +15,6 @@ import {
   PlusIcon,
   MagnifyingGlassIcon,
   TagIcon,
-  CalendarDaysIcon,
   ShareIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
@@ -84,28 +86,15 @@ const mockBlogPosts = [
   }
 ]
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'published': return 'bg-green-500/10 text-green-400'
-    case 'draft': return 'bg-gray-500/10 text-gray-400'
-    case 'review': return 'bg-yellow-500/10 text-yellow-400'
-    case 'scheduled': return 'bg-blue-500/10 text-blue-400'
-    default: return 'bg-gray-500/10 text-gray-400'
-  }
-}
+const getStatusColor = (status: string) =>
+  BLOG_STATUS_COLORS[status] ?? BLOG_STATUS_COLORS.draft
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'published': return <CheckCircleIcon className="h-4 w-4" />
-    case 'draft': return <DocumentTextIcon className="h-4 w-4" />
-    case 'review': return <ClockIcon className="h-4 w-4" />
-    case 'scheduled': return <CalendarDaysIcon className="h-4 w-4" />
-    default: return <DocumentTextIcon className="h-4 w-4" />
-  }
-}
+const getStatusIcon = (status: string) =>
+  BLOG_STATUS_ICONS[status] ?? BLOG_STATUS_ICONS.draft
 
 export default function BlogContentManagement() {
   const { user } = useAuth()
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedTag, setSelectedTag] = useState('all')
@@ -148,25 +137,25 @@ export default function BlogContentManagement() {
   }
 
   const handleEditPost = (postId: string) => {
-    console.log('Edit post:', postId)
-    // TODO: Navigate to blog editor or open modal
+    debug('Edit post', { postId })
+    router.push(`/staff/blog?edit=${postId}`)
   }
 
   const handleDeletePost = (postId: string) => {
     if (!confirm('Are you sure you want to delete this blog post? This action cannot be undone.')) {
       return
     }
-    console.log('Delete post:', postId)
-    // TODO: Implement delete functionality
+    debug('Delete post', { postId })
+    alert(`Delete post ${postId}`)
   }
 
   const handlePublishPost = (postId: string) => {
-    console.log('Publish post:', postId)
-    // TODO: Implement publish functionality
+    debug('Publish post', { postId })
+    alert(`Publish post ${postId}`)
   }
 
   const handleSyndicatePost = (postId: string) => {
-    console.log('Syndicate post:', postId)
+    debug('Syndicate post', { postId })
     setShowSyndicateModal(true)
   }
 
