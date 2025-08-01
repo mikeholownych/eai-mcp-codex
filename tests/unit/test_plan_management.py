@@ -81,3 +81,19 @@ async def test_update_plan_multi_tenant() -> None:
     with tenant_context("tenant_update_a"):
         await delete_plan(plan.id)
         assert await get_plan(plan.id) is None
+
+
+@pytest.mark.asyncio
+async def test_delete_plan_wrong_tenant() -> None:
+    with tenant_context("tenant_del_a"):
+        plan = await create_plan("to_delete")
+
+    with tenant_context("tenant_del_b"):
+        # Delete attempt from non-owner tenant should fail
+        result = await delete_plan(plan.id)
+        assert result is False
+
+    with tenant_context("tenant_del_a"):
+        assert await get_plan(plan.id) is not None
+        await delete_plan(plan.id)
+        assert await get_plan(plan.id) is None
