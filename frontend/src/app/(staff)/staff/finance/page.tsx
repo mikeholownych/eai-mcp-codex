@@ -80,23 +80,25 @@ const mockRecentTransactions = [
   }
 ]
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'paid': case 'processed': return 'bg-green-500/10 text-green-400'
-    case 'pending': return 'bg-yellow-500/10 text-yellow-400'
-    case 'overdue': return 'bg-red-500/10 text-red-400'
-    default: return 'bg-gray-500/10 text-gray-400'
-  }
+const STATUS_COLORS: Record<string, string> = {
+  paid: 'bg-green-500/10 text-green-400',
+  processed: 'bg-green-500/10 text-green-400',
+  pending: 'bg-yellow-500/10 text-yellow-400',
+  overdue: 'bg-red-500/10 text-red-400',
 }
 
-const getTypeIcon = (type: string) => {
-  switch (type) {
-    case 'invoice': return <DocumentTextIcon className="h-4 w-4" />
-    case 'refund': return <ArrowTrendingDownIcon className="h-4 w-4" />
-    case 'payment': return <CreditCardIcon className="h-4 w-4" />
-    default: return <CurrencyDollarIcon className="h-4 w-4" />
-  }
+const TYPE_ICONS: Record<string, JSX.Element> = {
+  invoice: <DocumentTextIcon className="h-4 w-4" />,
+  refund: <ArrowTrendingDownIcon className="h-4 w-4" />,
+  payment: <CreditCardIcon className="h-4 w-4" />,
+  default: <CurrencyDollarIcon className="h-4 w-4" />,
 }
+
+const getStatusColor = (status: string) =>
+  STATUS_COLORS[status] ?? 'bg-gray-500/10 text-gray-400'
+
+const getTypeIcon = (type: string) =>
+  TYPE_ICONS[type] ?? TYPE_ICONS.default
 
 export default function FinancialSuite() {
   const { user } = useAuth()
