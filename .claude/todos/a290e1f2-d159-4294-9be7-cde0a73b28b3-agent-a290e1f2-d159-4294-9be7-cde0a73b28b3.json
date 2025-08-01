@@ -1,0 +1,50 @@
+[
+  {
+    "content": "Implement user management frontend with RBAC integration",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Create customer support ticket management frontend",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Build system analytics and monitoring dashboard",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Add billing and subscription management for staff",
+    "status": "in_progress",
+    "priority": "medium",
+    "id": "4"
+  },
+  {
+    "content": "Connect frontend to staff backend API endpoints",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Implement real-time data updates and error handling",
+    "status": "pending",
+    "priority": "medium",
+    "id": "6"
+  },
+  {
+    "content": "Add form validation and user feedback components",
+    "status": "pending",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Create responsive design for mobile staff access",
+    "status": "pending",
+    "priority": "low",
+    "id": "8"
+  }
+]

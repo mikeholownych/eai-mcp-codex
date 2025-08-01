@@ -1,0 +1,74 @@
+[
+  {
+    "content": "Design comprehensive configuration system architecture with file hierarchy resolution (project > home > default)",
+    "status": "completed",
+    "priority": "high",
+    "id": "1"
+  },
+  {
+    "content": "Implement ConfigurationManager class for detecting and loading .mcp directories and files",
+    "status": "completed",
+    "priority": "high",
+    "id": "2"
+  },
+  {
+    "content": "Create MarkdownParser utility to parse .md files with YAML front matter support",
+    "status": "completed",
+    "priority": "high",
+    "id": "3"
+  },
+  {
+    "content": "Implement AgentDefinitionLoader for loading agent instructions and behaviors from Markdown files",
+    "status": "completed",
+    "priority": "high",
+    "id": "4"
+  },
+  {
+    "content": "Implement CommandDefinitionLoader for loading command-specific instructions from commands/ subdirectory",
+    "status": "completed",
+    "priority": "high",
+    "id": "5"
+  },
+  {
+    "content": "Create HierarchyResolver to handle configuration conflicts and apply proper overrides",
+    "status": "completed",
+    "priority": "high",
+    "id": "6"
+  },
+  {
+    "content": "Add new CLI commands: 'mcp list agents', 'mcp list commands', 'mcp doctor' with configuration support",
+    "status": "completed",
+    "priority": "medium",
+    "id": "7"
+  },
+  {
+    "content": "Integrate configuration system into existing agent execution flows in agent.ts",
+    "status": "completed",
+    "priority": "medium",
+    "id": "8"
+  },
+  {
+    "content": "Add comprehensive TypeScript type definitions for all configuration structures",
+    "status": "completed",
+    "priority": "medium",
+    "id": "9"
+  },
+  {
+    "content": "Implement comprehensive error handling and validation for configuration files",
+    "status": "completed",
+    "priority": "medium",
+    "id": "10"
+  },
+  {
+    "content": "Add verbose logging support for configuration sources and resolution paths",
+    "status": "completed",
+    "priority": "medium",
+    "id": "11"
+  },
+  {
+    "content": "Create comprehensive test suite and example configuration files",
+    "status": "completed",
+    "priority": "low",
+    "id": "12"
+  }
+]

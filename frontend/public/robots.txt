@@ -1,0 +1,54 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /staff/
+Disallow: /_next/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /register
+
+# Allow access to static assets
+Allow: /_next/static/
+Allow: /icons/
+Allow: /fonts/
+Allow: /manifest.json
+Allow: /sw.js
+
+# Sitemap
+Sitemap: https://new.ethical-ai-insider.com/sitemap.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Specific bot configurations
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /staff/
+Disallow: /dashboard/
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Disallow: /staff/
+Disallow: /dashboard/
+Crawl-delay: 1
+
+# Block AI training bots (optional)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
