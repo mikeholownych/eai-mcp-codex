@@ -23,6 +23,7 @@ from .productivity_benchmark import (
     ProductivityRecord,
     AgentProductivityBenchmark,
 )
+from .workload_optimizer import AgentWorkloadOptimizer, ScalingRecommendation
 
 __all__ = [
     "PerformancePredictionEngine",
@@ -49,4 +50,6 @@ __all__ = [
     "ConsensusSession",
     "ProductivityRecord",
     "AgentProductivityBenchmark",
+    "AgentWorkloadOptimizer",
+    "ScalingRecommendation",
 ]
