@@ -2,13 +2,13 @@
 # This configuration sets up tunnels for both frontend and API access
 
 tunnel: 657508b0-1901-4e6d-b33f-3273cc8f5ab2
-credentials-file: /opt/llm-stack/rag-agent/cloudflare-tunnel/credentials.json
+credentials-file: /etc/cloudflared/credentials.json
 
 # Ingress rules - order matters, most specific first
 ingress:
   # Grafana Monitoring Dashboard (port 3005)
   - hostname: grafana.ethical-ai-insider.com
-    service: http://localhost:3005
+    service: http://grafana:3000
     originRequest:
       connectTimeout: 30s
       tlsTimeout: 30s
@@ -21,7 +21,7 @@ ingress:
 
   # Staff Frontend domain - Staff portal application (port 3001)
   - hostname: staff.ethical-ai-insider.com
-    service: http://localhost:3001
+    service: http://staff-frontend:3001
     originRequest:
       connectTimeout: 30s
       tlsTimeout: 30s
@@ -34,7 +34,7 @@ ingress:
 
   # Frontend domain - Next.js application (direct connection)  
   - hostname: new.ethical-ai-insider.com
-    service: http://localhost:3000
+    service: http://frontend:3000
     originRequest:
       connectTimeout: 30s
       tlsTimeout: 30s
@@ -47,7 +47,7 @@ ingress:
 
   # API domain - Nginx gateway for MCP services (main API gateway)
   - hostname: newapi.ethical-ai-insider.com
-    service: http://localhost:80
+    service: http://nginx:80
     originRequest:
       connectTimeout: 30s
       tlsTimeout: 30s
