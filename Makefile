@@ -456,11 +456,11 @@ full-stack-restart: full-stack-stop full-stack ## Restart complete stack
 ##@ Documentation
 docs: ## Generate documentation
 	@echo "📚 Generating documentation..."
-	docker compose -f docker-compose.yml -f docker-compose.override.yml run --rm dev-tools sphinx-build -b html docs/ docs/_build/
-	@echo "✅ Documentation generated in docs/_build/"
+	mkdocs build --config-file mkdocs.yml
+	@echo "✅ Documentation generated in site/"
 
 docs-serve: ## Serve documentation locally
-	docker compose -f docker-compose.yml -f docker-compose.override.yml run --rm -p 8080:8080 dev-tools python -m http.server 8080 --directory docs/_build/
+	mkdocs serve --config-file mkdocs.yml -a 0.0.0.0:8080
 
 ##@ Environment Variables
 # Load environment variables from .env file
