@@ -313,11 +313,9 @@ class TestDeveloperProfileManager:
 
     async def test_create_developer_profile(self):
         """Test creating a developer profile."""
-        with patch(
-            "src.collaboration_orchestrator.developer_profile_manager.get_postgres_connection"
-        ) as mock_conn:
-            mock_conn.return_value = AsyncMock()
-
+        with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = AsyncMock()
+            
             profile = await self.profile_manager.create_developer_profile(
                 agent_id="test_agent",
                 specializations=[DeveloperSpecialization.BACKEND],
@@ -333,16 +331,11 @@ class TestDeveloperProfileManager:
 
     async def test_find_best_agents_for_task(self):
         """Test finding best agents for a task."""
-        with patch(
-            "src.collaboration_orchestrator.developer_profile_manager.get_postgres_connection"
-        ) as mock_conn:
+        with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
             # Mock database response
-            mock_conn.return_value = AsyncMock()
-            mock_conn.return_value.fetch.return_value = [
-                {"agent_id": "dev_001"},
-                {"agent_id": "dev_002"},
-            ]
-
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = AsyncMock()
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value.fetch.return_value = [{"agent_id": "dev_001"}, {"agent_id": "dev_002"}]
+            
             # Mock profile retrieval
             self.profile_manager.get_developer_profile = AsyncMock()
             self.profile_manager.get_developer_profile.side_effect = [
@@ -388,12 +381,10 @@ class TestIntelligentConflictResolver:
         """Test conflict detection and analysis."""
         session_id = uuid4()
         plan_id = uuid4()
-
-        with patch(
-            "src.collaboration_orchestrator.intelligent_conflict_resolver.get_postgres_connection"
-        ) as mock_conn:
-            mock_conn.return_value = AsyncMock()
-
+        
+        with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = AsyncMock()
+            
             conflict = await self.conflict_resolver.detect_conflict(
                 session_id=session_id,
                 plan_id=plan_id,
@@ -408,8 +399,8 @@ class TestIntelligentConflictResolver:
             assert len(conflict.involved_agents) == 2
 
             # Verify database storage
-            mock_conn.return_value.execute.assert_called_once()
-
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value.execute.assert_called_once()
+    
     async def test_automated_resolution_feasibility(self):
         """Test automated resolution feasibility check."""
         conflict = ConflictResolutionLog(
@@ -482,12 +473,10 @@ class TestMultiDeveloperOrchestrator:
         self.orchestrator.assignment_engine.optimize_task_assignments = AsyncMock(
             return_value={}
         )
-
-        with patch(
-            "src.collaboration_orchestrator.multi_developer_orchestrator.get_postgres_connection"
-        ) as mock_conn:
-            mock_conn.return_value = AsyncMock()
-
+        
+        with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = AsyncMock()
+            
             tasks = [
                 {
                     "name": "User Authentication",

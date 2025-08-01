@@ -499,5 +499,148 @@
       "command": "curl -s http://localhost:3002/api/health | jq . 2>/dev/null || curl -s http://localhost:3002/api/health || echo \"Frontend health check failed\"",
       "description": "Check frontend API health endpoint"
     }
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "curl -s http://localhost:3001/api/health | jq . 2>/dev/null || curl -s http://localhost:3001/api/health || echo \"Staff frontend health check failed\"",
+      "description": "Check staff frontend API health endpoint"
+    }
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "curl -s http://localhost:8000/health",
+      "description": "Check backend API health status"
+    }
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "docker logs mcp-frontend --tail 20",
+      "description": "Check recent logs from frontend container"
+    }
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "docker logs mcp-staff-frontend --tail 20",
+      "description": "Check recent logs from staff frontend container"
+    }
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "Verify all critical services are healthy and operational",
+          "status": "completed",
+          "priority": "high",
+          "id": "system-health-check"
+        },
+        {
+          "content": "Check for any active monitoring alerts or warnings",
+          "status": "completed",
+          "priority": "high",
+          "id": "monitoring-alerts-check"
+        },
+        {
+          "content": "Confirm system stability for safe development resumption",
+          "status": "completed",
+          "priority": "medium",
+          "id": "development-readiness"
+        },
+        {
+          "content": "Assess EAI MCP Codex frontend project current state",
+          "status": "completed",
+          "priority": "medium",
+          "id": "frontend-project-status"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Task",
+    "tool_input": {
+      "description": "Critical CSS loading failure - immediate resolution",
+      "prompt": "\ud83d\udea8 CRITICAL PRODUCTION INCIDENT - CSS Not Loading\n\nUSER REPORTS:\n- CSS not loading on direct access: http://192.168.2.185:3000\n- CSS not loading through domain: https://new.ethical-ai-insider.com\n\nThis is a critical frontend failure affecting the launch-ready redesign. Users cannot see the completed conversion-optimized design.\n\nIMMEDIATE ACTIONS REQUIRED:\n1. Check frontend container status and logs\n2. Verify Next.js build process and static asset generation\n3. Examine CSS file paths and serving\n4. Test nginx proxy configuration for static assets\n5. Identify root cause of CSS loading failure\n6. Implement immediate fix to restore proper frontend display\n\nThis is blocking all user access to the completed frontend work. Treat as P0 incident requiring immediate resolution.\n\nCurrent working directory: /opt/Tmux-Orchestrator/llm-stack/rag-agent\n\nPlease investigate and fix the CSS loading issue immediately.",
+      "subagent_type": "incident-responder"
+    }
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "TodoWrite",
+    "tool_input": {
+      "todos": [
+        {
+          "content": "Check frontend container status and logs for errors",
+          "status": "in_progress",
+          "priority": "high",
+          "id": "1"
+        },
+        {
+          "content": "Verify Next.js build process and static asset generation",
+          "status": "pending",
+          "priority": "high",
+          "id": "2"
+        },
+        {
+          "content": "Examine CSS file paths and serving configuration",
+          "status": "pending",
+          "priority": "high",
+          "id": "3"
+        },
+        {
+          "content": "Test nginx proxy configuration for static assets",
+          "status": "pending",
+          "priority": "high",
+          "id": "4"
+        },
+        {
+          "content": "Implement immediate fix to restore CSS loading",
+          "status": "pending",
+          "priority": "high",
+          "id": "5"
+        }
+      ]
+    }
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "cd /opt/Tmux-Orchestrator/llm-stack/rag-agent && docker ps | grep -E \"(frontend|nginx)\"",
+      "description": "Check running frontend and nginx containers"
+    }
   }
 ]

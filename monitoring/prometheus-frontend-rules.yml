@@ -1,0 +1,157 @@
+# Frontend-Specific Prometheus Alert Rules
+# Critical monitoring for Next.js application and static asset serving
+
+groups:
+  - name: frontend_critical_alerts
+    rules:
+      - alert: FrontendCompletelyUnresponsive
+        expr: http_request_duration_seconds{job="frontend"} > 30 or absent(up{job="frontend"})
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Frontend application completely unresponsive"
+          description: "Frontend is not responding to requests for over 30 seconds - emergency restart may be required"
+      
+      - alert: FrontendHealthCheckFailing
+        expr: up{job="frontend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Frontend health check failing"
+          description: "Frontend health endpoint not responding - application may be hung"
+      
+      - alert: FrontendHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="frontend"}[5m])) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Frontend response time degraded"
+          description: "95th percentile response time is {{ $value }}s - investigating application performance"
+
+  - name: static_asset_alerts
+    rules:
+      - alert: StaticAssetServingFailures
+        expr: rate(http_requests_total{job="frontend",status="404"}[5m]) > 0.1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High rate of 404 errors for static assets"
+          description: "{{ $value }} 404 errors per second - CSS/JS assets may not be loading"
+      
+      - alert: CSSAssetsNotLoading
+        expr: rate(http_requests_total{job="frontend",path=~".*\\.css",status!="200"}[5m]) > 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "CSS assets failing to load"
+          description: "CSS files returning non-200 status - user interface will be broken"
+      
+      - alert: JavaScriptAssetsNotLoading
+        expr: rate(http_requests_total{job="frontend",path=~".*\\.js",status!="200"}[5m]) > 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "JavaScript assets failing to load"
+          description: "JS files returning non-200 status - application functionality will be broken"
+      
+      - alert: NextJSStaticAssetFailures
+        expr: rate(http_requests_total{job="frontend",path=~"/_next/static/.*",status!="200"}[5m]) > 0.01
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Next.js static assets failing"
+          description: "Next.js built assets not serving correctly - application performance degraded"
+
+  - name: frontend_performance_alerts
+    rules:
+      - alert: FrontendMemoryUsageHigh
+        expr: container_memory_usage_bytes{name="mcp-frontend"} / container_spec_memory_limit_bytes{name="mcp-frontend"} > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Frontend container memory usage high"
+          description: "Memory usage is {{ $value | humanizePercentage }} - may lead to application hang"
+      
+      - alert: FrontendCPUUsageHigh
+        expr: rate(container_cpu_usage_seconds_total{name="mcp-frontend"}[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Frontend container CPU usage high"
+          description: "CPU usage is {{ $value | humanizePercentage }} - application performance may degrade"
+      
+      - alert: NextJSBuildProcessFailure
+        expr: increase(container_oom_kills_total{name="mcp-frontend"}[5m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Frontend container killed due to OOM"
+          description: "Container was killed due to out of memory - application will be unavailable"
+
+  - name: nginx_frontend_proxy_alerts
+    rules:
+      - alert: NginxFrontendProxyDown
+        expr: up{job="nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nginx frontend proxy is down"
+          description: "Nginx load balancer not responding - frontend will be inaccessible"
+      
+      - alert: NginxFrontendProxyErrors
+        expr: rate(nginx_http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High 5xx error rate from Nginx"
+          description: "Nginx returning {{ $value }} 5xx errors per second - frontend proxy issues"
+      
+      - alert: NginxUpstreamConnectionFailures
+        expr: rate(nginx_upstream_responses_total{status="upstream_error"}[5m]) > 0.01
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nginx cannot connect to frontend upstream"
+          description: "{{ $value }} upstream connection failures per second - frontend may be down"
+
+  - name: user_experience_alerts
+    rules:
+      - alert: PageLoadTimeExcessive
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="frontend",path="/"}[5m])) > 3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Page load times are excessive"
+          description: "95th percentile page load time is {{ $value }}s - user experience degraded"
+      
+      - alert: APIEndpointFailures
+        expr: rate(http_requests_total{job="frontend",path=~"/api/.*",status!="200"}[5m]) > 0.05
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API endpoint failure rate"
+          description: "{{ $value }} API failures per second - application functionality may be impaired"
+      
+      - alert: WebVitalsScoreDegraded
+        expr: frontend_web_vitals_lcp > 2.5 or frontend_web_vitals_fid > 100 or frontend_web_vitals_cls > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Web Vitals scores degraded"
+          description: "Core Web Vitals indicate poor user experience - LCP: {{ $labels.lcp }}ms, FID: {{ $labels.fid }}ms, CLS: {{ $labels.cls }}"

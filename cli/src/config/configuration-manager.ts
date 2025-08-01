@@ -8,10 +8,11 @@ import * as path from 'path';
 import * as os from 'os';
 import { EventEmitter } from 'events';
 import { MarkdownParser } from '../utils/markdown-parser';
+import { MemoryLoader } from '../loaders/memory-loader';
 import {
   MCPConfiguration,
-  AgentConfiguration,
-  CommandConfiguration,
+  AgentDefinition,
+  CommandDefinition,
   ConfigurationHierarchy,
   ConfigurationSource,
   ConfigurationResolutionContext,
@@ -36,6 +37,7 @@ export class ConfigurationManager extends EventEmitter {
   private watcher: ConfigurationWatcher;
   private metrics: ConfigurationMetrics;
   private resolutionContext: ConfigurationResolutionContext;
+  private memoryLoader: MemoryLoader;
   
   constructor(options: ConfigurationManagerOptions = {}) {
     super();
@@ -84,6 +86,7 @@ export class ConfigurationManager extends EventEmitter {
     };
     
     this.resolutionContext = this.createResolutionContext();
+    this.memoryLoader = new MemoryLoader(this.options.configDirectoryName);
     
     // Initialize default configurations if they don't exist
     this.initializeDefaults().catch(error => {
@@ -151,6 +154,7 @@ export class ConfigurationManager extends EventEmitter {
         global: [],
         project: [],
         resolved: [],
+        settings: {},
       };
 
       // Load configurations from each source
@@ -184,6 +188,12 @@ export class ConfigurationManager extends EventEmitter {
 
       // Resolve configuration hierarchy
       hierarchy.resolved = this.resolveConfigurationHierarchy(hierarchy, loadOptions);
+
+      // Load and resolve settings
+      hierarchy.settings = await this.loadSettings(loadOptions);
+
+      // Load and resolve memory
+      hierarchy.memory = await this.memoryLoader.loadMemory();
 
       // Validate resolved configurations
       if (loadOptions.validateOnLoad) {
@@ -634,24 +644,6 @@ export class ConfigurationManager extends EventEmitter {
   }
 
   /**
-   * Get agent configurations
-   */
-  getAgentConfigurations(configs: MCPConfiguration[]): AgentConfiguration[] {
-    return configs
-      .filter(config => config.frontMatter.agent_type || this.isAgentConfiguration(config))
-      .map(config => this.transformToAgentConfiguration(config));
-  }
-
-  /**
-   * Get command configurations
-   */
-  getCommandConfigurations(configs: MCPConfiguration[]): CommandConfiguration[] {
-    return configs
-      .filter(config => config.frontMatter.command_type || this.isCommandConfiguration(config))
-      .map(config => this.transformToCommandConfiguration(config));
-  }
-
-  /**
    * Helper methods
    */
   private shouldLoadSource(
@@ -680,16 +672,44 @@ export class ConfigurationManager extends EventEmitter {
     return this.options.supportedFileExtensions.includes(ext);
   }
 
-  private isAgentConfiguration(config: MCPConfiguration): boolean {
-    // Check if configuration is in commands subdirectory
-    const isInCommands = config.filePath.includes(this.options.commandsSubdirectory);
-    return !isInCommands || !!config.frontMatter.agent_type;
-  }
+  
 
-  private isCommandConfiguration(config: MCPConfiguration): boolean {
-    // Check if configuration is in commands subdirectory
-    const isInCommands = config.filePath.includes(this.options.commandsSubdirectory);
-    return isInCommands || !!config.frontMatter.command_type;
+  /**
+   * Load settings from JSON files
+   */
+  private async loadSettings(options: ConfigurationLoadOptions): Promise<{ [key: string]: any }> {
+    let settings = {};
+
+    for (const source of this.resolutionContext.sources) {
+      if (!this.shouldLoadSource(source.type, options)) {
+        continue;
+      }
+
+      const settingsPath = path.join(source.path, 'settings.json');
+      if (fs.existsSync(settingsPath)) {
+        try {
+          const content = await fs.promises.readFile(settingsPath, 'utf-8');
+          const parsedSettings = JSON.parse(content);
+          settings = { ...settings, ...parsedSettings };
+        } catch (error) {
+          this.log('warn', `Failed to load settings from ${settingsPath}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+    }
+
+    // Load project-local settings
+    const projectLocalSettingsPath = path.join(this.resolutionContext.workingDirectory, this.options.configDirectoryName, 'settings.local.json');
+    if (fs.existsSync(projectLocalSettingsPath)) {
+      try {
+        const content = await fs.promises.readFile(projectLocalSettingsPath, 'utf-8');
+        const parsedSettings = JSON.parse(content);
+        settings = { ...settings, ...parsedSettings };
+      } catch (error) {
+        this.log('warn', `Failed to load local settings from ${projectLocalSettingsPath}: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+
+    return settings;
   }
 
   private transformToAgentConfiguration(config: MCPConfiguration): AgentConfiguration {
