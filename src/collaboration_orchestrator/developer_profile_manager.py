@@ -11,6 +11,7 @@ from redis import Redis
 
 from src.common.database import get_postgres_connection
 from src.common.redis_client import get_redis_connection
+from src.common.caching import get_cache_manager
 from .multi_developer_models import (
     DeveloperProfile,
     DeveloperSpecialization,
@@ -35,6 +36,7 @@ class DeveloperProfileManager:
         self.postgres_pool = postgres_pool
         self.redis = redis or get_redis_connection()
         self.profile_cache: Dict[str, DeveloperProfile] = {}
+        self.cache_manager = get_cache_manager("orchestrator")
 
     async def _get_db_connection(self) -> asyncpg.Connection:
         """Get database connection from pool or create new one."""
@@ -330,6 +332,14 @@ class DeveloperProfileManager:
         """Find the best agents for a specific task based on capabilities and availability."""
         exclude_agents = exclude_agents or []
 
+        # Build cache key
+        skills_key = ",".join(sorted(required_skills)) if required_skills else "none"
+        cache_key = f"best_agents:{task_type.value}:{skills_key}:{max_agents}:{','.join(sorted(exclude_agents))}"
+
+        cached_result = self.cache_manager.get(cache_key)
+        if cached_result is not None:
+            return cached_result
+
         # Get all developer profiles
         conn = await self._get_db_connection()
         try:
@@ -364,7 +374,10 @@ class DeveloperProfileManager:
 
         # Sort by score and return top candidates
         candidates.sort(key=lambda x: x[1], reverse=True)
-        return candidates[:max_agents]
+        top_candidates = candidates[:max_agents]
+        # Cache result for 5 minutes
+        self.cache_manager.set(cache_key, top_candidates, ttl=300)
+        return top_candidates
 
     async def get_agent_workload(self, agent_id: str) -> Optional[DeveloperWorkload]:
         """Get current workload for an agent."""
