@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { debug } from '@/lib/utils'
 import {
   VideoCameraIcon,
   ArrowUpTrayIcon as CloudUploadIcon,
@@ -188,20 +189,19 @@ export default function VideoContentManagement() {
   }
 
   const handleEditVideo = (videoId: string) => {
-    console.log('Edit video:', videoId)
-    // TODO: Navigate to video editor or open modal
+    debug('Edit video', { videoId })
+    alert(`Edit video ${videoId}`)
   }
 
   const handleDeleteVideo = (videoId: string) => {
     if (!confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
       return
     }
-    console.log('Delete video:', videoId)
-    // TODO: Implement delete functionality
+    debug('Delete video', { videoId })
   }
 
   const handlePublishVideo = (videoId: string) => {
-    console.log('Publish video:', videoId)
+    debug('Publish video', { videoId })
     setShowPublishModal(true)
   }
 

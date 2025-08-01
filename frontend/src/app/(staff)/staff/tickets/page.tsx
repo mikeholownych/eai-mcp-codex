@@ -6,6 +6,7 @@ import { useTickets, useTicketActions, useTicketStats } from '@/hooks/useStaff'
 import { Ticket } from '@/lib/staffApi'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { debug } from '@/lib/utils'
 import {
   LifebuoyIcon,
   MagnifyingGlassIcon,
@@ -124,8 +125,8 @@ export default function StaffTicketManagement() {
       await assignTicket(ticketId, assignTo)
       refetch() // Refresh the tickets list
     } catch (error) {
-      console.error('Failed to assign ticket:', error)
-      // TODO: Show error toast notification
+      debug('Failed to assign ticket', error)
+      alert('Failed to assign ticket')
     }
   }
 
@@ -138,8 +139,8 @@ export default function StaffTicketManagement() {
         setSelectedTicket({ ...selectedTicket, status: newStatus as any })
       }
     } catch (error) {
-      console.error('Failed to update ticket status:', error)
-      // TODO: Show error toast notification
+      debug('Failed to update ticket status', error)
+      alert('Failed to update ticket status')
     }
   }
 
@@ -152,8 +153,8 @@ export default function StaffTicketManagement() {
         setSelectedTicket({ ...selectedTicket, priority: newPriority as any })
       }
     } catch (error) {
-      console.error('Failed to update ticket priority:', error)
-      // TODO: Show error toast notification
+      debug('Failed to update ticket priority', error)
+      alert('Failed to update ticket priority')
     }
   }
 

@@ -7,6 +7,8 @@ import { User } from '@/lib/staffApi'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import { useRouter } from 'next/navigation'
+import { debug } from '@/lib/utils'
 import {
   UserGroupIcon,
   PlusIcon,
@@ -50,6 +52,7 @@ const getStatusIcon = (status: string) => statusIcons[status] ?? <ClockIcon clas
 
 export default function UserManagement() {
   const { user: currentUser } = useAuth()
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedRole, setSelectedRole] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
@@ -125,8 +128,8 @@ export default function UserManagement() {
   }
 
   const handleEditUser = (userId: string) => {
-    console.log('Edit user:', userId)
-    // TODO: Navigate to edit user page or open modal
+    debug('Edit user', { userId })
+    router.push(`/staff/users?edit=${userId}`)
   }
 
   const handleDeleteUser = async (userId: string) => {
@@ -138,8 +141,8 @@ export default function UserManagement() {
       await deleteUser(userId)
       refetch() // Refresh the users list
     } catch (error) {
-      console.error('Failed to delete user:', error)
-      // TODO: Show error toast notification
+      debug('Failed to delete user', error)
+      alert('Failed to delete user')
     }
   }
 
@@ -155,8 +158,8 @@ export default function UserManagement() {
       }
       refetch() // Refresh the users list
     } catch (error) {
-      console.error('Failed to update user status:', error)
-      // TODO: Show error toast notification
+      debug('Failed to update user status', error)
+      alert('Failed to update user status')
     }
   }
 
