@@ -11,23 +11,13 @@ from collections import defaultdict, deque
 import psutil
 
 from ..common.logging import get_logger
+from .metrics_definitions import Metric, MetricType
+from .slo_manager import SLOManager, SLOResult
+from ..analytics.cost_tracker import CostTracker
+from ..analytics.roi_tracker import ROITracker
+from ..analytics.cost_optimizer import CostOptimizer
 
 logger = get_logger("quality_monitor")
-
-
-class MetricType(str, Enum):
-    """Types of metrics to monitor."""
-
-    PERFORMANCE = "performance"
-    RELIABILITY = "reliability"
-    ACCURACY = "accuracy"
-    RESOURCE_USAGE = "resource_usage"
-    ERROR_RATE = "error_rate"
-    LATENCY = "latency"
-    THROUGHPUT = "throughput"
-    USER_SATISFACTION = "user_satisfaction"
-    CODE_QUALITY = "code_quality"
-    SECURITY = "security"
 
 
 class AlertSeverity(str, Enum):
@@ -48,20 +38,6 @@ class QualityStatus(str, Enum):
     ACCEPTABLE = "acceptable"
     POOR = "poor"
     CRITICAL = "critical"
-
-
-@dataclass
-class Metric:
-    """Individual metric measurement."""
-
-    metric_id: str
-    metric_type: MetricType
-    name: str
-    value: float
-    unit: str
-    timestamp: datetime = field(default_factory=datetime.utcnow)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -104,7 +80,8 @@ class QualityReport:
     metric_summaries: Dict[MetricType, Dict[str, float]]
     active_alerts: List[QualityAlert]
     trends: Dict[MetricType, str]  # "improving", "stable", "degrading"
-    recommendations: List[str]
+    slo_results: List[SLOResult] = field(default_factory=list)
+    recommendations: List[str] = field(default_factory=list)
     generated_at: datetime = field(default_factory=datetime.utcnow)
 
 
@@ -575,6 +552,34 @@ class AlertManager:
 
         return new_alerts
 
+    async def check_trends(self, trends: Dict[MetricType, str]) -> List[QualityAlert]:
+        """Generate alerts for degrading metric trends."""
+        new_alerts: List[QualityAlert] = []
+        for metric_type, trend in trends.items():
+            if trend != "degrading":
+                continue
+
+            existing_alert = self._find_existing_alert(
+                metric_type, AlertSeverity.MEDIUM
+            )
+            if existing_alert:
+                continue
+
+            alert = QualityAlert(
+                alert_id=f"trend_{metric_type.value}_{time.time()}",
+                severity=AlertSeverity.MEDIUM,
+                metric_type=metric_type,
+                message=f"{metric_type.value} trend degrading",
+                current_value=0.0,
+                threshold_value=0.0,
+                metadata={"trend": trend},
+            )
+            new_alerts.append(alert)
+            self.active_alerts.append(alert)
+            await self._send_notifications(alert)
+
+        return new_alerts
+
     def _exceeds_threshold(self, value: float, threshold: float, operator: str) -> bool:
         """Check if value exceeds threshold based on operator."""
         if operator == "greater_than":
@@ -642,6 +647,10 @@ class ContinuousQualityMonitor:
         self.metric_collector = MetricCollector()
         self.quality_analyzer = QualityAnalyzer()
         self.alert_manager = AlertManager()
+        self.slo_manager = SLOManager()
+        self.cost_tracker = CostTracker()
+        self.roi_tracker = ROITracker(self.cost_tracker)
+        self.cost_optimizer = CostOptimizer(self.cost_tracker, self.roi_tracker)
 
         self.monitoring_enabled = False
         self.monitoring_interval = 60.0  # seconds
@@ -677,6 +686,16 @@ class ContinuousQualityMonitor:
         self.metric_collector.stop_collection()
         logger.info("Stopped continuous quality monitoring")
 
+    def record_cost_event(
+        self, item_id: str, cost: float, category: str = "general"
+    ) -> None:
+        """Record a cost event for ROI analysis."""
+        self.cost_tracker.record_cost(item_id, cost, category)
+
+    def record_value_event(self, item_id: str, value: float) -> None:
+        """Record a value event for ROI analysis."""
+        self.roi_tracker.record_value(item_id, value)
+
     async def _monitoring_loop(self):
         """Main monitoring loop."""
         while self.monitoring_enabled:
@@ -709,13 +728,20 @@ class ContinuousQualityMonitor:
         # Analyze metrics
         metric_summaries = await self.quality_analyzer.analyze_metrics(recent_metrics)
 
+        # Detect metric trends
+        trends = await self.quality_analyzer.analyze_trends(recent_metrics)
+
+        # Generate trend alerts
+        trend_alerts = await self.alert_manager.check_trends(trends)
+
         # Check thresholds and generate alerts
         new_alerts = await self.alert_manager.check_thresholds(
             metric_summaries, self.quality_analyzer.thresholds
         )
 
-        if new_alerts:
-            logger.warning(f"Generated {len(new_alerts)} new quality alerts")
+        total_new = len(new_alerts) + len(trend_alerts)
+        if total_new:
+            logger.warning(f"Generated {total_new} new quality alerts")
 
         logger.debug(f"Quality check completed. Analyzed {len(recent_metrics)} metrics")
 
@@ -745,6 +771,9 @@ class ContinuousQualityMonitor:
         # Analyze trends
         trends = await self.quality_analyzer.analyze_trends(metrics)
 
+        # Evaluate SLOs
+        slo_results = self.slo_manager.evaluate_slos(metrics)
+
         # Generate recommendations
         recommendations = self._generate_recommendations(
             metric_summaries, trends, quality_score
@@ -760,6 +789,7 @@ class ContinuousQualityMonitor:
             metric_summaries=metric_summaries,
             active_alerts=self.alert_manager.get_active_alerts(),
             trends=trends,
+            slo_results=slo_results,
             recommendations=recommendations,
         )
 
@@ -833,6 +863,9 @@ class ContinuousQualityMonitor:
                 f"Review and resolve {len(high_alerts)} high-priority alerts"
             )
 
+        # Cost and ROI-based recommendations
+        recommendations.extend(self.cost_optimizer.generate_recommendations())
+
         return recommendations
 
     async def get_current_status(self) -> Dict[str, Any]:
@@ -843,6 +876,7 @@ class ContinuousQualityMonitor:
             metric_summaries
         )
         status = self.quality_analyzer.determine_quality_status(quality_score)
+        slo_results = self.slo_manager.evaluate_slos(recent_metrics)
 
         return {
             "monitoring_enabled": self.monitoring_enabled,
@@ -853,6 +887,7 @@ class ContinuousQualityMonitor:
                 self.alert_manager.get_active_alerts(AlertSeverity.CRITICAL)
             ),
             "metrics_collected": len(recent_metrics),
+            "slo_compliance": {res.slo.name: res.met for res in slo_results},
             "last_report": self.reports[-1].report_id if self.reports else None,
             "uptime_hours": "continuous" if self.monitoring_enabled else "stopped",
         }
@@ -865,6 +900,8 @@ class ContinuousQualityMonitor:
             metric_summaries
         )
         trends = await self.quality_analyzer.analyze_trends(recent_metrics)
+
+        slo_results = self.slo_manager.evaluate_slos(recent_metrics)
 
         # Get metric trends for charts
         metric_trends = {}
@@ -896,6 +933,14 @@ class ContinuousQualityMonitor:
                 metric_type.value: trend for metric_type, trend in trends.items()
             },
             "metric_trends": metric_trends,
+            "slo_results": [
+                {
+                    "name": res.slo.name,
+                    "met": res.met,
+                    "percentage": res.percentage,
+                }
+                for res in slo_results
+            ],
             "alerts": [
                 {
                     "alert_id": alert.alert_id,
