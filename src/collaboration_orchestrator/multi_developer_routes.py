@@ -16,12 +16,8 @@ from .multi_developer_models import (
     TaskStatus,
     TaskAssignment,
     TeamCoordinationPlan,
-    ConflictType,
-    ConflictSeverity,
     ResolutionStrategy,
     ConflictResolutionLog,
-    TeamPerformanceMetrics,
-    TaskOptimizationSuggestion,
     DeveloperWorkload,
 )
 from .multi_developer_orchestrator import MultiDeveloperOrchestrator
@@ -78,8 +74,11 @@ class ConflictDetectionRequest(BaseModel):
 
 # Developer Profile Management Endpoints
 
+
 @router.post("/profiles", response_model=DeveloperProfile)
-async def create_developer_profile(request: CreateDeveloperProfileRequest) -> DeveloperProfile:
+async def create_developer_profile(
+    request: CreateDeveloperProfileRequest,
+) -> DeveloperProfile:
     """Create a new developer profile."""
     try:
         profile = await profile_manager.create_developer_profile(
@@ -91,12 +90,14 @@ async def create_developer_profile(request: CreateDeveloperProfileRequest) -> De
             experience_level=request.experience_level,
             preferred_tasks=request.preferred_tasks,
             max_concurrent_tasks=request.max_concurrent_tasks,
-            metadata=request.metadata
+            metadata=request.metadata,
         )
         return profile
     except Exception as e:
         logger.error(f"Failed to create developer profile: {e}")
-        raise HTTPException(status_code=500, detail="Failed to create developer profile")
+        raise HTTPException(
+            status_code=500, detail="Failed to create developer profile"
+        )
 
 
 @router.get("/profiles/{agent_id}", response_model=DeveloperProfile)
@@ -109,7 +110,9 @@ async def get_developer_profile(agent_id: str) -> DeveloperProfile:
 
 
 @router.put("/profiles/{agent_id}")
-async def update_developer_profile(agent_id: str, updates: Dict[str, Any] = Body(...)) -> dict:
+async def update_developer_profile(
+    agent_id: str, updates: Dict[str, Any] = Body(...)
+) -> dict:
     """Update developer profile."""
     success = await profile_manager.update_developer_profile(agent_id, updates)
     if not success:
@@ -130,14 +133,14 @@ async def get_agent_workload(agent_id: str) -> DeveloperWorkload:
 async def get_available_agents(
     specialization: Optional[DeveloperSpecialization] = None,
     min_experience: Optional[ExperienceLevel] = None,
-    required_skills: List[str] = Query([])
+    required_skills: List[str] = Query([]),
 ) -> List[DeveloperProfile]:
     """Get list of available agents matching criteria."""
     try:
         agents = await profile_manager.get_available_agents(
             specialization=specialization,
             min_experience=min_experience,
-            required_skills=required_skills
+            required_skills=required_skills,
         )
         return agents
     except Exception as e:
@@ -151,7 +154,7 @@ async def update_performance_metrics(
     task_completed: bool = True,
     completion_time: Optional[float] = None,
     quality_score: Optional[float] = None,
-    peer_rating: Optional[float] = None
+    peer_rating: Optional[float] = None,
 ) -> dict:
     """Update performance metrics for a developer."""
     success = await profile_manager.update_performance_metrics(
@@ -159,7 +162,7 @@ async def update_performance_metrics(
         task_completed=task_completed,
         completion_time=completion_time,
         quality_score=quality_score,
-        peer_rating=peer_rating
+        peer_rating=peer_rating,
     )
     if not success:
         raise HTTPException(status_code=404, detail="Developer profile not found")
@@ -171,7 +174,7 @@ async def find_best_agents_for_task(
     task_type: TaskType,
     required_skills: List[str] = Query([]),
     max_agents: int = 3,
-    exclude_agents: List[str] = Query([])
+    exclude_agents: List[str] = Query([]),
 ) -> List[Dict[str, Any]]:
     """Find best agents for a specific task."""
     try:
@@ -179,9 +182,11 @@ async def find_best_agents_for_task(
             task_type=task_type,
             required_skills=required_skills,
             max_agents=max_agents,
-            exclude_agents=exclude_agents
+            exclude_agents=exclude_agents,
         )
-        return [{"agent_id": agent_id, "score": score} for agent_id, score in candidates]
+        return [
+            {"agent_id": agent_id, "score": score} for agent_id, score in candidates
+        ]
     except Exception as e:
         logger.error(f"Failed to find agents for task: {e}")
         raise HTTPException(status_code=500, detail="Failed to find agents for task")
@@ -189,8 +194,11 @@ async def find_best_agents_for_task(
 
 # Team Coordination Plan Endpoints
 
+
 @router.post("/plans", response_model=TeamCoordinationPlan)
-async def create_team_coordination_plan(request: CreateTeamPlanRequest) -> TeamCoordinationPlan:
+async def create_team_coordination_plan(
+    request: CreateTeamPlanRequest,
+) -> TeamCoordinationPlan:
     """Create a comprehensive team coordination plan."""
     try:
         plan = await orchestrator.create_team_coordination_plan(
@@ -201,12 +209,14 @@ async def create_team_coordination_plan(request: CreateTeamPlanRequest) -> TeamC
             team_members=request.team_members,
             tasks=request.tasks,
             deadline=request.deadline,
-            conflict_resolution_strategy=request.conflict_resolution_strategy
+            conflict_resolution_strategy=request.conflict_resolution_strategy,
         )
         return plan
     except Exception as e:
         logger.error(f"Failed to create team coordination plan: {e}")
-        raise HTTPException(status_code=500, detail="Failed to create team coordination plan")
+        raise HTTPException(
+            status_code=500, detail="Failed to create team coordination plan"
+        )
 
 
 @router.get("/plans/{plan_id}", response_model=TeamCoordinationPlan)
@@ -228,7 +238,9 @@ async def get_team_performance_report(plan_id: UUID) -> Dict[str, Any]:
         return report
     except Exception as e:
         logger.error(f"Failed to generate performance report: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate performance report")
+        raise HTTPException(
+            status_code=500, detail="Failed to generate performance report"
+        )
 
 
 @router.post("/plans/{plan_id}/optimize")
@@ -238,60 +250,63 @@ async def optimize_task_assignments(plan_id: UUID) -> Dict[str, Any]:
         plan = await orchestrator.get_coordination_plan(plan_id)
         if not plan:
             raise HTTPException(status_code=404, detail="Plan not found")
-        
+
         # Get available agents
         available_agents = []
         for agent_id in plan.team_members:
             profile = await profile_manager.get_developer_profile(agent_id)
             if profile:
                 available_agents.append(profile)
-        
+
         # Generate optimization suggestions
         agent_profiles = {agent.agent_id: agent for agent in available_agents}
-        suggestions = orchestrator.assignment_engine.suggest_task_optimizations(plan, agent_profiles)
-        
+        suggestions = orchestrator.assignment_engine.suggest_task_optimizations(
+            plan, agent_profiles
+        )
+
         return {
             "plan_id": str(plan_id),
             "optimization_suggestions": [s.model_dump() for s in suggestions],
-            "generated_at": datetime.utcnow().isoformat()
+            "generated_at": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Failed to optimize task assignments: {e}")
-        raise HTTPException(status_code=500, detail="Failed to optimize task assignments")
+        raise HTTPException(
+            status_code=500, detail="Failed to optimize task assignments"
+        )
 
 
 # Task Assignment Endpoints
+
 
 @router.post("/plans/{plan_id}/tasks/{assignment_id}/assign")
 async def assign_task_to_agent(
     plan_id: UUID,
     assignment_id: UUID,
     agent_id: str,
-    reviewer_agents: List[str] = Query([])
+    reviewer_agents: List[str] = Query([]),
 ) -> dict:
     """Assign a specific task to an agent."""
     success = await orchestrator.assign_task_to_agent(
         plan_id=plan_id,
         assignment_id=assignment_id,
         agent_id=agent_id,
-        reviewer_agents=reviewer_agents
+        reviewer_agents=reviewer_agents,
     )
     if not success:
         raise HTTPException(status_code=400, detail="Failed to assign task")
-    
+
     return {
         "status": "assigned",
         "plan_id": str(plan_id),
         "assignment_id": str(assignment_id),
-        "agent_id": agent_id
+        "agent_id": agent_id,
     }
 
 
 @router.put("/tasks/{assignment_id}/progress")
 async def update_task_progress(
-    assignment_id: UUID,
-    agent_id: str,
-    request: TaskProgressUpdateRequest
+    assignment_id: UUID, agent_id: str, request: TaskProgressUpdateRequest
 ) -> dict:
     """Update task progress."""
     success = await orchestrator.handle_task_progress_update(
@@ -300,15 +315,15 @@ async def update_task_progress(
         progress_percentage=request.progress_percentage,
         status=request.status,
         blockers=request.blockers,
-        feedback=request.feedback
+        feedback=request.feedback,
     )
     if not success:
         raise HTTPException(status_code=400, detail="Failed to update task progress")
-    
+
     return {
         "status": "updated",
         "assignment_id": str(assignment_id),
-        "progress": request.progress_percentage
+        "progress": request.progress_percentage,
     }
 
 
@@ -323,10 +338,10 @@ async def get_task_assignment(assignment_id: UUID) -> TaskAssignment:
 
 # Conflict Resolution Endpoints
 
+
 @router.post("/plans/{plan_id}/conflicts/detect", response_model=ConflictResolutionLog)
 async def detect_conflict(
-    plan_id: UUID,
-    request: ConflictDetectionRequest
+    plan_id: UUID, request: ConflictDetectionRequest
 ) -> ConflictResolutionLog:
     """Detect and analyze a conflict."""
     try:
@@ -334,14 +349,14 @@ async def detect_conflict(
         plan = await orchestrator.get_coordination_plan(plan_id)
         if not plan:
             raise HTTPException(status_code=404, detail="Plan not found")
-        
+
         conflict = await conflict_resolver.detect_conflict(
             session_id=plan.session_id,
             plan_id=plan_id,
             conflict_description=request.conflict_description,
             involved_agents=request.involved_agents,
             context=request.context,
-            detected_by=request.detected_by
+            detected_by=request.detected_by,
         )
         return conflict
     except Exception as e:
@@ -356,7 +371,7 @@ async def resolve_conflict(conflict_id: UUID) -> dict:
         resolved = await conflict_resolver.resolve_conflict(conflict_id)
         return {
             "status": "resolved" if resolved else "resolution_in_progress",
-            "conflict_id": str(conflict_id)
+            "conflict_id": str(conflict_id),
         }
     except Exception as e:
         logger.error(f"Failed to resolve conflict: {e}")
@@ -407,44 +422,63 @@ async def auto_detect_conflicts(plan_id: UUID) -> List[Dict[str, Any]]:
 
 # Analytics and Reporting Endpoints
 
+
 @router.get("/analytics/team-compatibility")
-async def calculate_team_compatibility(agent_ids: List[str] = Query(...)) -> Dict[str, Any]:
+async def calculate_team_compatibility(
+    agent_ids: List[str] = Query(...),
+) -> Dict[str, Any]:
     """Calculate compatibility score for a team of agents."""
     try:
         if len(agent_ids) < 2:
             raise HTTPException(status_code=400, detail="At least 2 agents required")
-        
-        compatibility_score = await profile_manager.get_team_compatibility_score(agent_ids)
+
+        compatibility_score = await profile_manager.get_team_compatibility_score(
+            agent_ids
+        )
         return {
             "team_agents": agent_ids,
             "compatibility_score": compatibility_score,
-            "recommendation": "high" if compatibility_score > 0.8 else "medium" if compatibility_score > 0.6 else "low"
+            "recommendation": (
+                "high"
+                if compatibility_score > 0.8
+                else "medium" if compatibility_score > 0.6 else "low"
+            ),
         }
     except Exception as e:
         logger.error(f"Failed to calculate team compatibility: {e}")
-        raise HTTPException(status_code=500, detail="Failed to calculate team compatibility")
+        raise HTTPException(
+            status_code=500, detail="Failed to calculate team compatibility"
+        )
 
 
 @router.get("/analytics/agent-collaboration/{agent_1}/{agent_2}")
-async def get_collaboration_history(agent_1: str, agent_2: str, session_id: Optional[UUID] = None):
+async def get_collaboration_history(
+    agent_1: str, agent_2: str, session_id: Optional[UUID] = None
+):
     """Get collaboration history between two agents."""
     try:
-        history = await profile_manager.get_collaboration_history(agent_1, agent_2, session_id)
+        history = await profile_manager.get_collaboration_history(
+            agent_1, agent_2, session_id
+        )
         if not history:
             return {"message": "No collaboration history found"}
         return history
     except Exception as e:
         logger.error(f"Failed to get collaboration history: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get collaboration history")
+        raise HTTPException(
+            status_code=500, detail="Failed to get collaboration history"
+        )
 
 
 @router.get("/analytics/workload-distribution")
-async def get_workload_distribution(agent_ids: List[str] = Query(...)) -> Dict[str, Any]:
+async def get_workload_distribution(
+    agent_ids: List[str] = Query(...),
+) -> Dict[str, Any]:
     """Get workload distribution across multiple agents."""
     try:
         workload_data = {}
         total_workload = 0
-        
+
         for agent_id in agent_ids:
             workload = await profile_manager.get_agent_workload(agent_id)
             if workload:
@@ -453,10 +487,10 @@ async def get_workload_distribution(agent_ids: List[str] = Query(...)) -> Dict[s
                     "total_hours": workload.total_estimated_hours,
                     "utilization": workload.utilization_percentage,
                     "stress_indicators": workload.stress_indicators,
-                    "recommendations": workload.recommendations
+                    "recommendations": workload.recommendations,
                 }
                 total_workload += workload.total_estimated_hours
-        
+
         # Calculate balance metrics
         if workload_data:
             utilizations = [data["utilization"] for data in workload_data.values()]
@@ -467,22 +501,29 @@ async def get_workload_distribution(agent_ids: List[str] = Query(...)) -> Dict[s
         else:
             avg_utilization = 0
             balance_score = 1.0
-        
+
         return {
             "agents": workload_data,
             "total_workload_hours": total_workload,
             "average_utilization": avg_utilization,
             "workload_balance_score": max(0.0, balance_score),
             "recommendations": [
-                "Consider redistributing tasks" if balance_score < 0.7 else "Workload is well balanced"
-            ]
+                (
+                    "Consider redistributing tasks"
+                    if balance_score < 0.7
+                    else "Workload is well balanced"
+                )
+            ],
         }
     except Exception as e:
         logger.error(f"Failed to get workload distribution: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get workload distribution")
+        raise HTTPException(
+            status_code=500, detail="Failed to get workload distribution"
+        )
 
 
 # System Health and Monitoring
+
 
 @router.get("/system/health")
 async def get_system_health() -> Dict[str, Any]:
@@ -491,7 +532,7 @@ async def get_system_health() -> Dict[str, Any]:
         # Get basic counts from the orchestrator
         active_plans = len(orchestrator.active_plans)
         active_conflicts = len(conflict_resolver.active_conflicts)
-        
+
         # Get database connection status
         try:
             conn = await orchestrator._get_db_connection()
@@ -502,36 +543,40 @@ async def get_system_health() -> Dict[str, Any]:
                 await orchestrator.postgres_pool.release(conn)
         except Exception:
             db_status = "unhealthy"
-        
+
         # Get Redis status
         try:
             orchestrator.redis.ping()
             redis_status = "healthy"
         except Exception:
             redis_status = "unhealthy"
-        
-        overall_status = "healthy" if db_status == "healthy" and redis_status == "healthy" else "degraded"
-        
+
+        overall_status = (
+            "healthy"
+            if db_status == "healthy" and redis_status == "healthy"
+            else "degraded"
+        )
+
         return {
             "status": overall_status,
             "components": {
                 "database": db_status,
                 "redis": redis_status,
                 "orchestrator": "healthy",
-                "conflict_resolver": "healthy"
+                "conflict_resolver": "healthy",
             },
             "metrics": {
                 "active_coordination_plans": active_plans,
-                "active_conflicts": active_conflicts
+                "active_conflicts": active_conflicts,
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Failed to get system health: {e}")
         return {
             "status": "unhealthy",
             "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
 
@@ -543,19 +588,19 @@ async def get_system_metrics() -> Dict[str, Any]:
         return {
             "coordination_plans": {
                 "total": len(orchestrator.active_plans),
-                "by_status": {}  # Would be populated with real data
+                "by_status": {},  # Would be populated with real data
             },
             "conflicts": {
                 "total_detected": len(conflict_resolver.active_conflicts),
                 "resolved_today": 0,  # Would be calculated from database
-                "average_resolution_time": 0.0  # Would be calculated from database
+                "average_resolution_time": 0.0,  # Would be calculated from database
             },
             "agents": {
                 "registered": 0,  # Would be counted from database
                 "active": 0,  # Would be calculated based on recent activity
-                "average_performance": 0.0  # Would be calculated from performance metrics
+                "average_performance": 0.0,  # Would be calculated from performance metrics
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         logger.error(f"Failed to get system metrics: {e}")
