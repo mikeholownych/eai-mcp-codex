@@ -61,7 +61,16 @@
       "Bash(docker system prune:*)",
       "Bash(timeout 10 curl -s -D - http://localhost:3002 -o /dev/null)",
       "Bash(true)",
-      "Bash(docker start:*)"
+      "Bash(docker start:*)",
+      "Bash(docker:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(npm whoami:*)",
+      "Bash(npm publish:*)",
+      "Bash(npm pkg:*)",
+      "Bash(npm view:*)",
+      "Bash(npm init:*)",
+      "Bash(npx mcp:*)"
     ],
     "deny": []
   }
