@@ -5,6 +5,7 @@ global:
 
 rule_files:
   - "alerts/rules.yml"
+  - "alerts/frontend-slo-rules.yml"
 
 alerting:
   alertmanagers:
@@ -30,8 +31,15 @@ scrape_configs:
 
   - job_name: 'nginx'
     static_configs:
-      - targets: ['nginx:80']
-    metrics_path: '/metrics'
+      - targets: ['nginx:8080']
+    metrics_path: '/nginx-status'
+    scrape_interval: 10s
+    
+  - job_name: 'frontend'
+    static_configs:
+      - targets: ['192.168.2.185:4000']
+    metrics_path: '/api/analytics/vitals'
+    scrape_interval: 30s
 
   - job_name: 'redis'
     static_configs:

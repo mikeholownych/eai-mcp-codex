@@ -1,6 +1,9 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import ora from 'ora';
+import React, {useState} from 'react';
+import {render, Box, Text} from 'ink';
+import SelectInput from 'ink-select-input';
 
 // Placeholder clients
 class ModelRouterClient {
@@ -70,8 +73,16 @@ class AgentClient {
 }
 
 export async function interactive() {
-  console.log(chalk.blue.bold('🚀 MCP Agent Network - Interactive Mode\n'));
-  console.log(chalk.gray('Type "exit" or press Ctrl+C to quit\n'));
+  render(<InteractiveApp />);
+}
+
+interface MenuItem {
+  label: string;
+  value: string;
+}
+
+function InteractiveApp() {
+  const [key, setKey] = useState(0);
 
   const clients = {
     modelRouter: new ModelRouterClient(),
@@ -79,70 +90,57 @@ export async function interactive() {
     gitWorktree: new GitWorktreeClient(),
     workflowOrchestrator: new WorkflowOrchestratorClient(),
     verificationFeedback: new VerificationFeedbackClient(),
-    agent: new AgentClient() // Add agent client
+    agent: new AgentClient(),
   };
 
-  while (true) {
-    try {
-      const { action } = await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'action',
-          message: 'What would you like to do?',
-          choices: [
-            { name: '🤖 Ask AI Model', value: 'model_query' },
-            { name: '📝 Create Development Plan', value: 'create_plan' },
-            { name: '🌿 Manage Git Worktree', value: 'git_worktree' },
-            { name: '⚡ Run Workflow', value: 'run_workflow' },
-            { name: '🔍 Submit Feedback', value: 'submit_feedback' },
-            new inquirer.Separator(),
-            { name: '🧠 AI Coding Assistant', value: 'ai_coding_assistant' }, // New AI coding option
-            new inquirer.Separator(),
-            { name: '📊 Check System Status', value: 'system_status' },
-            { name: '🚪 Exit', value: 'exit' }
-          ]
-        }
-      ]);
+  const items: MenuItem[] = [
+    { label: '🤖 Ask AI Model', value: 'model_query' },
+    { label: '📝 Create Development Plan', value: 'create_plan' },
+    { label: '🌿 Manage Git Worktree', value: 'git_worktree' },
+    { label: '⚡ Run Workflow', value: 'run_workflow' },
+    { label: '🔍 Submit Feedback', value: 'submit_feedback' },
+    { label: '🧠 AI Coding Assistant', value: 'ai_coding_assistant' },
+    { label: '📊 Check System Status', value: 'system_status' },
+    { label: '🚪 Exit', value: 'exit' },
+  ];
 
-      if (action === 'exit') {
-        console.log(chalk.blue('👋 Goodbye!'));
+  const handleSelect = async (item: MenuItem) => {
+    switch (item.value) {
+      case 'model_query':
+        await handleModelQuery(clients.modelRouter);
         break;
-      }
-
-      switch (action) {
-        case 'model_query':
-          await handleModelQuery(clients.modelRouter);
-          break;
-        case 'create_plan':
-          await handleCreatePlan(clients.planManagement);
-          break;
-        case 'git_worktree':
-          await handleGitWorktree(clients.gitWorktree);
-          break;
-        case 'run_workflow':
-          await handleRunWorkflow(clients.workflowOrchestrator);
-          break;
-        case 'submit_feedback':
-          await handleSubmitFeedback(clients.verificationFeedback);
-          break;
-        case 'system_status':
-          await handleSystemStatus(clients);
-          break;
-        case 'ai_coding_assistant':
-          await handleAICodingAssistant(clients.agent);
-          break;
-      }
-
-      console.log(); // Add spacing
-
-    } catch (error: any) {
-      if (error.isTtyError || error.name === 'ExitPromptError') {
-        console.log(chalk.blue('\n👋 Goodbye!'));
+      case 'create_plan':
+        await handleCreatePlan(clients.planManagement);
         break;
-      }
-      console.error(chalk.red(`Error: ${error.message}`));
+      case 'git_worktree':
+        await handleGitWorktree(clients.gitWorktree);
+        break;
+      case 'run_workflow':
+        await handleRunWorkflow(clients.workflowOrchestrator);
+        break;
+      case 'submit_feedback':
+        await handleSubmitFeedback(clients.verificationFeedback);
+        break;
+      case 'system_status':
+        await handleSystemStatus(clients);
+        break;
+      case 'ai_coding_assistant':
+        await handleAICodingAssistant(clients.agent);
+        break;
+      case 'exit':
+        process.exit(0);
     }
-  }
+
+    setKey((k) => k + 1);
+  };
+
+  return (
+    <Box flexDirection="column">
+      <Text color="blueBright">🚀 MCP Agent Network - Interactive Mode</Text>
+      <Text color="gray">Use arrow keys to choose an action</Text>
+      <SelectInput key={key} items={items} onSelect={handleSelect} />
+    </Box>
+  );
 }
 
 async function handleModelQuery(client: ModelRouterClient) {
