@@ -17,7 +17,18 @@ module.exports = {
   plugins: [
     '@typescript-eslint',
   ],
-  ignorePatterns: ['dist/', 'node_modules/', 'lib/', 'config/', 'demo.js', '.eslintrc.js'], // Ignore dist, node_modules, and unconverted JS files
+  // Ignore build output, dependencies and non-source files
+  ignorePatterns: [
+    'dist/',
+    'node_modules/',
+    'lib/',
+    'config/',
+    'demo.js',
+    '.eslintrc.js',
+    '__tests__/**',
+    'examples/',
+    'jest.config.js',
+  ],
   rules: {
     '@typescript-eslint/no-require-imports': 'off', // Allow require() for now
     '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^' }], // Warn on unused vars, ignore args starting with _

@@ -1,0 +1,14 @@
+[tool.black]
+line-length = 88
+exclude = "(cli|database|hooks|tests|frontend/node_modules|src/collaboration_orchestrator)"
+
+[tool.ruff]
+line-length = 88
+exclude = [
+    "cli",
+    "database",
+    "hooks",
+    "tests",
+    "frontend/node_modules",
+    "src/collaboration_orchestrator",
+]

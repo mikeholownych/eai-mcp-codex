@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import ora from 'ora';
 import inquirer from 'inquirer';
 import fs from 'fs';
-import path from 'path';
 import fetch from 'node-fetch';
 
 // Import other command modules for inter-agent communication
@@ -397,7 +396,7 @@ Your plan:`;
    */
   
   private async executeGenerationCommand(commandDef: CommandDefinition, context: CommandExecutionContext): Promise<void> {
-    const { prompt, filePath } = context.parameters;
+    const { filePath } = context.parameters;
     
     // Build enhanced prompt with command instructions
     const enhancedPrompt = this.buildCommandPrompt(commandDef, context);
@@ -411,7 +410,7 @@ Your plan:`;
   }
 
   private async executeRefactoringCommand(commandDef: CommandDefinition, context: CommandExecutionContext): Promise<void> {
-    const { filePath, prompt } = context.parameters;
+    const { filePath } = context.parameters;
     
     if (!fs.existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);

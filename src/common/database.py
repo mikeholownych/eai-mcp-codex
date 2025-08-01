@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from typing import Optional, Any, Dict, List
 from contextlib import asynccontextmanager
 
+__all__ = ["DatabaseManager", "DatabaseMigration", "get_postgres_connection"]
+
 logger = logging.getLogger(__name__)
 
 # Conditionally import asyncpg
@@ -269,6 +271,18 @@ class MockAsyncpgPool:
 
     async def close(self) -> None:
         return None
+
+
+async def get_postgres_connection(db_name: str = "mcp") -> "asyncpg.Connection":
+    """Create a single Postgres connection for ad-hoc operations."""
+    if os.getenv("TESTING_MODE") == "true":
+        logger.info("Providing mock Postgres connection in testing mode")
+        return MockAsyncpgConnection()
+
+    manager = DatabaseManager(db_name)
+    await manager.connect()
+    assert manager.dsn is not None  # for mypy
+    return await asyncpg.connect(manager.dsn)
 
 
 def deserialize_datetime_str(dt_str: str | None) -> Optional[datetime]:
