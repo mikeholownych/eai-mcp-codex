@@ -197,6 +197,12 @@ DEBUG=true
   - `--severity <severity>`: Severity level (low|medium|high|critical)
 - `mcp verify list`: List feedback entries
 
+### Batch Execution Command
+
+- `mcp batch <file>`: Run a sequence of commands from a JSON or YAML file
+  - `--format <format>`: Specify `json` or `yaml` explicitly
+  - `--dry-run`: Print commands without executing them
+
 ## Development  
 
 ### Project Structure

@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This frontend is built with **React**, **Next.js**, and **TypeScript**. Next.js uses **Webpack** under the hood for bundling. The application is deployed through **Cloudflare** using the configuration in the `cloudflare-tunnel` directory.
+
+This project was originally bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 

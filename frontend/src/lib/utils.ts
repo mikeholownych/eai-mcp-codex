@@ -1,3 +1,4 @@
+import { API_CONFIG } from "./config"
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -6,6 +7,16 @@ import { twMerge } from 'tailwind-merge'
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/**
+ * Structured debug logging
+ */
+export function debug(label: string, data: unknown): void {
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.log(`[DEBUG] ${label}:`, JSON.stringify(data, null, 2))
+  }
 }
 
 /**
@@ -66,12 +77,19 @@ export function generateId(): string {
 /**
  * Check if user has permission based on role and plan
  */
-export function hasPermission(
-  userRole: string,
-  userPlan: string,
-  requiredRole: string[],
-  requiredPlan: string[] = []
-): boolean {
+export interface PermissionOptions {
+  userRole: string
+  userPlan: string
+  requiredRole: string[]
+  requiredPlan?: string[]
+}
+
+export function hasPermission({
+  userRole,
+  userPlan,
+  requiredRole,
+  requiredPlan = [],
+}: PermissionOptions): boolean {
   const roleHierarchy = {
     'superadmin': 10,
     'admin': 9,
@@ -199,4 +217,21 @@ export function buildQueryString(params: Record<string, string>): string {
     if (value) urlParams.append(key, value)
   })
   return urlParams.toString()
+}
+
+/**
+ * Fetch wrapper with timeout
+ */
+export async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeout = API_CONFIG.timeoutMs
+): Promise<Response> {
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), timeout)
+  try {
+    return await fetch(url, { ...options, signal: controller.signal })
+  } finally {
+    clearTimeout(id)
+  }
 }

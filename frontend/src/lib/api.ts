@@ -1,16 +1,17 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 import { ApiResponse, User, CodeRequest, ChatSession, SupportTicket, Subscription } from '@/types'
+import { API_CONFIG } from './config'
 
 class ApiClient {
   private client: AxiosInstance
   private baseURL: string
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost'
-    
+    this.baseURL = API_CONFIG.baseUrl
+
     this.client = axios.create({
       baseURL: this.baseURL,
-      timeout: 30000,
+      timeout: API_CONFIG.timeoutMs,
       headers: {
         'Content-Type': 'application/json',
       },

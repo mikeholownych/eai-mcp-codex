@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { table } from 'table';
 import ora from 'ora';
 import inquirer from 'inquirer';
 
@@ -58,6 +57,7 @@ export async function create(name: string, options: CreateOptions) {
       steps = JSON.parse(options.steps);
     } catch (error) {
       console.error(chalk.red('Invalid JSON format for steps'));
+      console.debug(error);
       process.exit(1);
     }
   } else {

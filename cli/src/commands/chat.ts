@@ -73,6 +73,7 @@ JSON Response:`;
         parsedCommand = JSON.parse(llmResponse);
       } catch (parseError) {
         console.log(chalk.red('Agent: I received an unparseable response from the AI. Please try rephrasing.'));
+        console.debug(parseError);
         continue;
       }
 

@@ -4,6 +4,12 @@ import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { debug } from '@/lib/utils'
+import {
+  VIDEO_STATUS_COLORS,
+  VIDEO_STATUS_ICONS,
+  VISIBILITY_COLORS,
+} from '@/lib/statusHelpers'
 import {
   VideoCameraIcon,
   ArrowUpTrayIcon as CloudUploadIcon,
@@ -103,37 +109,17 @@ const mockVideos = [
   }
 ]
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'published': return 'bg-green-500/10 text-green-400'
-    case 'draft': return 'bg-gray-500/10 text-gray-400'
-    case 'processing': return 'bg-blue-500/10 text-blue-400'
-    case 'scheduled': return 'bg-yellow-500/10 text-yellow-400'
-    case 'error': return 'bg-red-500/10 text-red-400'
-    default: return 'bg-gray-500/10 text-gray-400'
-  }
-}
+const getStatusColor = (status: string) =>
+  VIDEO_STATUS_COLORS[status] ?? VIDEO_STATUS_COLORS.draft
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'published': return <CheckCircleIcon className="h-4 w-4" />
-    case 'draft': return <DocumentTextIcon className="h-4 w-4" />
-    case 'processing': return <CogIcon className="h-4 w-4 animate-spin" />
-    case 'scheduled': return <CalendarDaysIcon className="h-4 w-4" />
-    case 'error': return <ExclamationTriangleIcon className="h-4 w-4" />
-    default: return <DocumentTextIcon className="h-4 w-4" />
-  }
-}
+const getStatusIcon = (status: string) =>
+  VIDEO_STATUS_ICONS[status] ?? VIDEO_STATUS_ICONS.draft
 
-const getVisibilityColor = (visibility: string) => {
-  switch (visibility) {
-    case 'enterprise': return 'bg-purple-500/10 text-purple-400'
-    case 'professional': return 'bg-blue-500/10 text-blue-400'
-    case 'standard': return 'bg-green-500/10 text-green-400'
-    case 'free': return 'bg-gray-500/10 text-gray-400'
-    default: return 'bg-gray-500/10 text-gray-400'
-  }
-}
+const getVisibilityColor = (visibility: string) =>
+  VISIBILITY_COLORS[visibility] ?? VISIBILITY_COLORS.free
+
+const getVisibilityColor = (visibility: string) =>
+  visibilityColors[visibility] ?? 'bg-gray-500/10 text-gray-400'
 
 const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
@@ -190,20 +176,19 @@ export default function VideoContentManagement() {
   }
 
   const handleEditVideo = (videoId: string) => {
-    console.log('Edit video:', videoId)
-    // TODO: Navigate to video editor or open modal
+    debug('Edit video', { videoId })
+    alert(`Edit video ${videoId}`)
   }
 
   const handleDeleteVideo = (videoId: string) => {
     if (!confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
       return
     }
-    console.log('Delete video:', videoId)
-    // TODO: Implement delete functionality
+    debug('Delete video', { videoId })
   }
 
   const handlePublishVideo = (videoId: string) => {
-    console.log('Publish video:', videoId)
+    debug('Publish video', { videoId })
     setShowPublishModal(true)
   }
 
