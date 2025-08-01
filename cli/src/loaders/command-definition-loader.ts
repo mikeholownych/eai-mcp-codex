@@ -501,7 +501,7 @@ export class CommandDefinitionLoader {
     value: any,
     expectedType: string
   ): { isValid: boolean; message: string; normalizedValue: any } {
-    let normalizedValue = value;
+    const normalizedValue = value;
     
     switch (expectedType.toLowerCase()) {
       case 'string':
@@ -600,7 +600,7 @@ export class CommandDefinitionLoader {
   } {
     const errors: Array<{ parameter: string; message: string; value?: any }> = [];
     const warnings: Array<{ parameter: string; message: string; suggestion?: string }> = [];
-    let normalizedValue = value;
+    const normalizedValue = value;
 
     // Pattern validation for strings
     if (validation.pattern && typeof value === 'string') {
