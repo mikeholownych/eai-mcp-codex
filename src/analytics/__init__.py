@@ -14,6 +14,16 @@ from .roi_tracker import ROITracker, ValueEvent
 from .capacity_planner import CapacityPlanner, CapacityEstimate
 from .cost_optimizer import CostOptimizer
 from .escalation_tracker import EscalationAbuseTracker, EscalationEvent
+from .consensus_monitor import (
+    ConsensusManipulationDetector,
+    VoteEvent,
+)
+from .consensus_insights import ConsensusInsightGenerator, ConsensusSession
+from .productivity_benchmark import (
+    ProductivityRecord,
+    AgentProductivityBenchmark,
+)
+from .workload_optimizer import AgentWorkloadOptimizer, ScalingRecommendation
 
 __all__ = [
     "PerformancePredictionEngine",
@@ -34,4 +44,12 @@ __all__ = [
     "CostOptimizer",
     "EscalationAbuseTracker",
     "EscalationEvent",
+    "ConsensusManipulationDetector",
+    "VoteEvent",
+    "ConsensusInsightGenerator",
+    "ConsensusSession",
+    "ProductivityRecord",
+    "AgentProductivityBenchmark",
+    "AgentWorkloadOptimizer",
+    "ScalingRecommendation",
 ]
