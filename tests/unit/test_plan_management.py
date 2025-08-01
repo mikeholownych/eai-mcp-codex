@@ -10,9 +10,6 @@ from src.common.database import DatabaseManager
 from src.common.tenant import tenant_context, async_tenant_context
 import os
 
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
-
-
 import pytest_asyncio
 
 
