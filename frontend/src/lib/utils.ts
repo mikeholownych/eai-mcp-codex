@@ -77,12 +77,19 @@ export function generateId(): string {
 /**
  * Check if user has permission based on role and plan
  */
-export function hasPermission(
-  userRole: string,
-  userPlan: string,
-  requiredRole: string[],
-  requiredPlan: string[] = []
-): boolean {
+export interface PermissionOptions {
+  userRole: string
+  userPlan: string
+  requiredRole: string[]
+  requiredPlan?: string[]
+}
+
+export function hasPermission({
+  userRole,
+  userPlan,
+  requiredRole,
+  requiredPlan = [],
+}: PermissionOptions): boolean {
   const roleHierarchy = {
     'superadmin': 10,
     'admin': 9,
