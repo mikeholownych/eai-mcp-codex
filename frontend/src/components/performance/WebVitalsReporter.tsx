@@ -15,7 +15,8 @@ export default function WebVitalsReporter() {
     if (typeof window === 'undefined') return
 
     // Import web-vitals dynamically
-    import('web-vitals').then(({ onFCP, onLCP, onCLS, onFID, onTTFB, onINP }) => {
+    const loadVitals = async () => {
+      const { onFCP, onLCP, onCLS, onFID, onTTFB, onINP } = await import('web-vitals')
       const vitalsHandler = (metric: WebVital) => {
         // Send to analytics endpoint
         if (typeof fetch !== 'undefined') {
@@ -57,12 +58,14 @@ export default function WebVitalsReporter() {
 
       // Track all Core Web Vitals
       onFCP(vitalsHandler)  // First Contentful Paint
-      onLCP(vitalsHandler)  // Largest Contentful Paint  
+      onLCP(vitalsHandler)  // Largest Contentful Paint
       onCLS(vitalsHandler)  // Cumulative Layout Shift
       onFID(vitalsHandler)  // First Input Delay
       onTTFB(vitalsHandler) // Time to First Byte
       onINP(vitalsHandler)  // Interaction to Next Paint
-    }).catch((error) => {
+    }
+
+    loadVitals().catch((error) => {
       console.warn('Failed to load web-vitals library:', error)
     })
   }, [])

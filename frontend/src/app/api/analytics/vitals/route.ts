@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { debug, fetchWithTimeout } from '@/lib/utils'
 
 interface WebVital {
   name: string;
@@ -16,12 +17,12 @@ export async function POST(request: NextRequest) {
     vital.timestamp = Date.now();
     
     // Log the vital for debugging
-    console.log(`Web Vital - ${vital.name}:`, {
+    debug(`Web Vital - ${vital.name}`, {
       value: vital.value,
       id: vital.id,
       url: vital.url,
-      timestamp: new Date(vital.timestamp).toISOString()
-    });
+      timestamp: new Date(vital.timestamp).toISOString(),
+    })
     
     // In production, you would send this to your analytics service
     // Examples:
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error processing web vital:', error);
+    debug('Error processing web vital', error)
     return NextResponse.json(
       { error: 'Failed to process web vital' },
       { status: 500 }
@@ -50,16 +51,17 @@ async function sendToMonitoring(vital: WebVital) {
     // Send to Prometheus Pushgateway (if available)
     const pushgatewayUrl = process.env.PROMETHEUS_PUSHGATEWAY_URL;
     if (pushgatewayUrl) {
-      await fetch(`${pushgatewayUrl}/metrics/job/frontend/instance/web-vitals`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain',
+      await fetchWithTimeout(
+        `${pushgatewayUrl}/metrics/job/frontend/instance/web-vitals`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: prometheusMetric,
         },
-        body: prometheusMetric,
-      });
+      )
     }
   } catch (error) {
-    console.error('Failed to send metrics to Prometheus:', error);
+    debug('Failed to send metrics to Prometheus', error)
   }
 }
 
