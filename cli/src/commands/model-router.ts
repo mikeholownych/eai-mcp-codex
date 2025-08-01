@@ -84,9 +84,10 @@ export async function listModels() {
           console.log(`${index + 1}. ${chalk.cyan(rule.pattern)} → ${chalk.green(rule.model)}`);
         });
       }
-    } catch (ruleError) {
-      console.log(chalk.gray('(Routing rules not available)'));
-    }
+      } catch (ruleError) {
+        console.log(chalk.gray('(Routing rules not available)'));
+        console.debug(ruleError);
+      }
 
   } catch (error: any) {
     spinner.fail(`Failed to fetch models: ${error.message}`);

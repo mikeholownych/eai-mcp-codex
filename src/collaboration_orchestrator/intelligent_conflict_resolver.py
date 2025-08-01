@@ -159,8 +159,14 @@ class AutomatedResolutionEngine:
             context = conflict.conflict_context
             if context.get("conflict_files"):
                 files = context["conflict_files"]
-                # List potential resolution steps for future use
-
+                steps = [
+                    f"Analyzing conflicts in {len(files)} files",
+                    "Attempting automatic merge resolution",
+                    "Running code quality checks",
+                    "Validating merge result",
+                ]
+                logger.debug("Resolution steps: %s", steps)
+                
                 # Simulate success rate based on complexity
                 complexity = len(files) + len(conflict.involved_agents)
                 success_rate = max(0.3, 0.9 - (complexity * 0.1))
@@ -183,7 +189,9 @@ class AutomatedResolutionEngine:
         try:
             context = conflict.conflict_context
             if context.get("conflicting_dependencies"):
-
+                deps = context["conflicting_dependencies"]
+                logger.debug("Conflicting dependencies: %s", deps)
+                
                 # Simple heuristic: if there's a clear priority order, resolve automatically
                 if context.get("priority_order"):
                     priority_order = context["priority_order"]
