@@ -6,6 +6,11 @@ import { useTickets, useTicketActions, useTicketStats } from '@/hooks/useStaff'
 import { Ticket } from '@/lib/staffApi'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { debug } from '@/lib/utils'
+import {
+  TICKET_STATUS_COLORS,
+  TICKET_STATUS_ICONS,
+} from '@/lib/statusHelpers'
 import {
   LifebuoyIcon,
   MagnifyingGlassIcon,
@@ -30,23 +35,11 @@ const priorityColors: Record<string, string> = {
 const getPriorityColor = (priority: string) =>
   priorityColors[priority] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
 
-const statusColors: Record<string, string> = {
-  open: 'bg-blue-500/10 text-blue-400',
-  'in-progress': 'bg-yellow-500/10 text-yellow-400',
-  'waiting-customer': 'bg-purple-500/10 text-purple-400',
-  resolved: 'bg-green-500/10 text-green-400',
-  closed: 'bg-gray-500/10 text-gray-400',
-}
+const getStatusColor = (status: string) =>
+  TICKET_STATUS_COLORS[status] ?? TICKET_STATUS_COLORS.open
 
-const getStatusColor = (status: string) => statusColors[status] ?? 'bg-gray-500/10 text-gray-400'
-
-const statusIcons: Record<string, JSX.Element> = {
-  open: <ClockIcon className="h-4 w-4" />,
-  'in-progress': <ExclamationTriangleIcon className="h-4 w-4" />,
-  'waiting-customer': <ClockIcon className="h-4 w-4" />,
-  resolved: <CheckCircleIcon className="h-4 w-4" />,
-  closed: <CheckCircleIcon className="h-4 w-4" />,
-}
+const getStatusIcon = (status: string) =>
+  TICKET_STATUS_ICONS[status] ?? TICKET_STATUS_ICONS.open
 
 const getStatusIcon = (status: string) => statusIcons[status] ?? <ClockIcon className="h-4 w-4" />
 
@@ -124,8 +117,8 @@ export default function StaffTicketManagement() {
       await assignTicket(ticketId, assignTo)
       refetch() // Refresh the tickets list
     } catch (error) {
-      console.error('Failed to assign ticket:', error)
-      // TODO: Show error toast notification
+      debug('Failed to assign ticket', error)
+      alert('Failed to assign ticket')
     }
   }
 
@@ -138,8 +131,8 @@ export default function StaffTicketManagement() {
         setSelectedTicket({ ...selectedTicket, status: newStatus as any })
       }
     } catch (error) {
-      console.error('Failed to update ticket status:', error)
-      // TODO: Show error toast notification
+      debug('Failed to update ticket status', error)
+      alert('Failed to update ticket status')
     }
   }
 
@@ -152,8 +145,8 @@ export default function StaffTicketManagement() {
         setSelectedTicket({ ...selectedTicket, priority: newPriority as any })
       }
     } catch (error) {
-      console.error('Failed to update ticket priority:', error)
-      // TODO: Show error toast notification
+      debug('Failed to update ticket priority', error)
+      alert('Failed to update ticket priority')
     }
   }
 
