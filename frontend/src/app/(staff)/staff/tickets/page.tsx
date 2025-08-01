@@ -6,6 +6,11 @@ import { useTickets, useTicketActions, useTicketStats } from '@/hooks/useStaff'
 import { Ticket } from '@/lib/staffApi'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { debug } from '@/lib/utils'
+import {
+  TICKET_STATUS_COLORS,
+  TICKET_STATUS_ICONS,
+} from '@/lib/statusHelpers'
 import {
   LifebuoyIcon,
   MagnifyingGlassIcon,
@@ -20,37 +25,23 @@ import {
 } from '@heroicons/react/24/outline'
 
 
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'urgent': return 'bg-red-500/10 text-red-400 border-red-500/20'
-    case 'high': return 'bg-orange-500/10 text-orange-400 border-orange-500/20'
-    case 'medium': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-    case 'low': return 'bg-green-500/10 text-green-400 border-green-500/20'
-    default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20'
-  }
+const priorityColors: Record<string, string> = {
+  urgent: 'bg-red-500/10 text-red-400 border-red-500/20',
+  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  medium: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  low: 'bg-green-500/10 text-green-400 border-green-500/20',
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'open': return 'bg-blue-500/10 text-blue-400'
-    case 'in-progress': return 'bg-yellow-500/10 text-yellow-400'
-    case 'waiting-customer': return 'bg-purple-500/10 text-purple-400'
-    case 'resolved': return 'bg-green-500/10 text-green-400'
-    case 'closed': return 'bg-gray-500/10 text-gray-400'
-    default: return 'bg-gray-500/10 text-gray-400'
-  }
-}
+const getPriorityColor = (priority: string) =>
+  priorityColors[priority] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'open': return <ClockIcon className="h-4 w-4" />
-    case 'in-progress': return <ExclamationTriangleIcon className="h-4 w-4" />
-    case 'waiting-customer': return <ClockIcon className="h-4 w-4" />
-    case 'resolved': return <CheckCircleIcon className="h-4 w-4" />
-    case 'closed': return <CheckCircleIcon className="h-4 w-4" />
-    default: return <ClockIcon className="h-4 w-4" />
-  }
-}
+const getStatusColor = (status: string) =>
+  TICKET_STATUS_COLORS[status] ?? TICKET_STATUS_COLORS.open
+
+const getStatusIcon = (status: string) =>
+  TICKET_STATUS_ICONS[status] ?? TICKET_STATUS_ICONS.open
+
+const getStatusIcon = (status: string) => statusIcons[status] ?? <ClockIcon className="h-4 w-4" />
 
 const categories = [
   'All Categories',
@@ -126,8 +117,8 @@ export default function StaffTicketManagement() {
       await assignTicket(ticketId, assignTo)
       refetch() // Refresh the tickets list
     } catch (error) {
-      console.error('Failed to assign ticket:', error)
-      // TODO: Show error toast notification
+      debug('Failed to assign ticket', error)
+      alert('Failed to assign ticket')
     }
   }
 
@@ -140,8 +131,8 @@ export default function StaffTicketManagement() {
         setSelectedTicket({ ...selectedTicket, status: newStatus as any })
       }
     } catch (error) {
-      console.error('Failed to update ticket status:', error)
-      // TODO: Show error toast notification
+      debug('Failed to update ticket status', error)
+      alert('Failed to update ticket status')
     }
   }
 
@@ -154,8 +145,8 @@ export default function StaffTicketManagement() {
         setSelectedTicket({ ...selectedTicket, priority: newPriority as any })
       }
     } catch (error) {
-      console.error('Failed to update ticket priority:', error)
-      // TODO: Show error toast notification
+      debug('Failed to update ticket priority', error)
+      alert('Failed to update ticket priority')
     }
   }
 

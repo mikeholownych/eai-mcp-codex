@@ -1,21 +1,12 @@
 """Integration tests for Multi-Developer Coordination API endpoints."""
 
-import asyncio
-import json
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime
 from uuid import uuid4
 from unittest.mock import Mock, AsyncMock, patch
 
 from fastapi.testclient import TestClient
 from src.collaboration_orchestrator.app import app
-from src.collaboration_orchestrator.multi_developer_models import (
-    DeveloperSpecialization,
-    ExperienceLevel,
-    TaskType,
-    TaskStatus,
-    ResolutionStrategy,
-)
 
 
 @pytest.fixture
@@ -47,12 +38,12 @@ class TestDeveloperProfileEndpoints:
             "performance_metrics": {
                 "tasks_completed": 0,
                 "tasks_failed": 0,
-                "overall_score": 0.8
+                "overall_score": 0.8,
             },
             "collaboration_preferences": {},
             "trust_scores": {},
             "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
+            "updated_at": datetime.utcnow().isoformat(),
         }
         
         with patch('src.collaboration_orchestrator.multi_developer_orchestrator.DeveloperProfileManager.create', new_callable=AsyncMock) as mock_create_manager:
@@ -87,7 +78,7 @@ class TestDeveloperProfileEndpoints:
             "programming_languages": ["Python"],
             "experience_level": "senior",
             "current_workload": 10,
-            "max_concurrent_tasks": 3
+            "max_concurrent_tasks": 3,
         }
         
         with patch('src.collaboration_orchestrator.multi_developer_orchestrator.DeveloperProfileManager.create', new_callable=AsyncMock) as mock_create_manager:
@@ -142,15 +133,15 @@ class TestDeveloperProfileEndpoints:
                 "specializations": ["backend"],
                 "programming_languages": ["Python"],
                 "experience_level": "senior",
-                "current_workload": 5
+                "current_workload": 5,
             },
             {
                 "agent_id": "frontend_dev",
                 "specializations": ["frontend"],
                 "programming_languages": ["JavaScript"],
                 "experience_level": "intermediate",
-                "current_workload": 8
-            }
+                "current_workload": 8,
+            },
         ]
         
         with patch('src.collaboration_orchestrator.multi_developer_orchestrator.DeveloperProfileManager.create', new_callable=AsyncMock) as mock_create_manager:
@@ -199,7 +190,7 @@ class TestTeamCoordinationPlanEndpoints:
         """Test creating a team coordination plan."""
         session_id = str(uuid4())
         plan_id = str(uuid4())
-        
+
         mock_plan = {
             "plan_id": plan_id,
             "session_id": session_id,
@@ -212,7 +203,7 @@ class TestTeamCoordinationPlanEndpoints:
             "priority": "high",
             "conflict_resolution_strategy": "consensus",
             "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
+            "updated_at": datetime.utcnow().isoformat(),
         }
         
         with patch('src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create', new_callable=AsyncMock) as mock_create_orchestrator:
@@ -254,7 +245,7 @@ class TestTeamCoordinationPlanEndpoints:
             "team_lead": "lead_001",
             "team_members": ["lead_001", "dev_001"],
             "task_assignments": {},
-            "status": "active"
+            "status": "active",
         }
         
         with patch('src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create', new_callable=AsyncMock) as mock_create_orchestrator:
@@ -281,21 +272,18 @@ class TestTeamCoordinationPlanEndpoints:
                 "total": 4,
                 "completed": 3,
                 "in_progress": 1,
-                "blocked": 0
+                "blocked": 0,
             },
-            "workload_distribution": {
-                "dev_001": 16,
-                "dev_002": 12
-            },
+            "workload_distribution": {"dev_001": 16, "dev_002": 12},
             "agent_performance": {
                 "dev_001": {
                     "total_tasks": 2,
                     "completed_tasks": 2,
-                    "completion_rate": 1.0
+                    "completion_rate": 1.0,
                 }
             },
             "optimization_suggestions": [],
-            "generated_at": datetime.utcnow().isoformat()
+            "generated_at": datetime.utcnow().isoformat(),
         }
         
         with patch('src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create', new_callable=AsyncMock) as mock_create_orchestrator:
@@ -315,20 +303,20 @@ class TestTeamCoordinationPlanEndpoints:
     async def test_optimize_task_assignments(self, client):
         """Test task assignment optimization."""
         plan_id = str(uuid4())
-        
+
         mock_plan = {
             "plan_id": plan_id,
             "team_members": ["dev_001", "dev_002"],
-            "task_assignments": {}
+            "task_assignments": {},
         }
-        
+
         mock_suggestions = [
             {
                 "suggestion_type": "reassignment",
                 "current_assignment": "task_001",
                 "expected_improvement": {"efficiency": 0.2},
                 "rationale": "Better skill match available",
-                "confidence_score": 0.8
+                "confidence_score": 0.8,
             }
         ]
         
@@ -346,12 +334,14 @@ class TestTeamCoordinationPlanEndpoints:
             mock_orchestrator_instance.assignment_engine.suggest_task_optimizations.return_value = [Mock(model_dump=Mock(return_value=s)) for s in mock_suggestions]
             
             response = client.post(f"/multi-dev/plans/{plan_id}/optimize")
-            
+
             assert response.status_code == 200
             data = response.json()
             assert data["plan_id"] == plan_id
             assert len(data["optimization_suggestions"]) == 1
-            assert data["optimization_suggestions"][0]["suggestion_type"] == "reassignment"
+            assert (
+                data["optimization_suggestions"][0]["suggestion_type"] == "reassignment"
+            )
 
 
 class TestTaskAssignmentEndpoints:
@@ -409,7 +399,7 @@ class TestConflictResolutionEndpoints:
         """Test conflict detection."""
         plan_id = str(uuid4())
         conflict_id = str(uuid4())
-        
+
         mock_plan = {"session_id": str(uuid4())}
         mock_conflict = {
             "conflict_id": conflict_id,
@@ -418,7 +408,7 @@ class TestConflictResolutionEndpoints:
             "involved_agents": ["dev_001", "dev_002"],
             "conflict_severity": "medium",
             "status": "open",
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.utcnow().isoformat(),
         }
         
         with patch('src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create', new_callable=AsyncMock) as mock_create_orchestrator,
@@ -470,15 +460,11 @@ class TestConflictResolutionEndpoints:
             "by_type": {
                 "merge_conflict": 8,
                 "design_conflict": 4,
-                "resource_conflict": 3
+                "resource_conflict": 3,
             },
-            "by_severity": {
-                "low": 6,
-                "medium": 7,
-                "high": 2
-            },
+            "by_severity": {"low": 6, "medium": 7, "high": 2},
             "average_resolution_time_hours": 2.5,
-            "resolution_success_rate": 0.8
+            "resolution_success_rate": 0.8,
         }
         
         with patch('src.collaboration_orchestrator.intelligent_conflict_resolver.IntelligentConflictResolver.create', new_callable=AsyncMock) as mock_create_conflict_resolver:
@@ -498,14 +484,14 @@ class TestConflictResolutionEndpoints:
     async def test_auto_detect_conflicts(self, client):
         """Test automatic conflict detection."""
         plan_id = str(uuid4())
-        
+
         mock_conflicts = [
             {
                 "conflict_id": str(uuid4()),
                 "type": "resource_conflict",
                 "description": "Database connection conflict",
                 "resolved": False,
-                "strategy": "consensus"
+                "strategy": "consensus",
             }
         ]
         
@@ -550,7 +536,7 @@ class TestAnalyticsEndpoints:
             "interaction_count": 15,
             "successful_collaborations": 13,
             "mutual_trust_score": 0.87,
-            "collaboration_notes": "Great communication and code quality"
+            "collaboration_notes": "Great communication and code quality",
         }
         
         with patch('src.collaboration_orchestrator.developer_profile_manager.DeveloperProfileManager.create', new_callable=AsyncMock) as mock_create_manager:
@@ -568,6 +554,7 @@ class TestAnalyticsEndpoints:
     @pytest.mark.asyncio
     async def test_get_workload_distribution(self, client):
         """Test workload distribution analysis."""
+
         def mock_get_workload(agent_id):
             workloads = {
                 "dev_001": {
@@ -575,15 +562,15 @@ class TestAnalyticsEndpoints:
                     "total_estimated_hours": 20,
                     "utilization_percentage": 85,
                     "stress_indicators": ["high_utilization"],
-                    "recommendations": ["Consider redistributing tasks"]
+                    "recommendations": ["Consider redistributing tasks"],
                 },
                 "dev_002": {
                     "current_tasks": ["task_3"],
                     "total_estimated_hours": 8,
                     "utilization_percentage": 35,
                     "stress_indicators": [],
-                    "recommendations": []
-                }
+                    "recommendations": [],
+                },
             }
             return Mock(**workloads.get(agent_id, {}))
         
@@ -622,7 +609,7 @@ class TestSystemHealthEndpoints:
             mock_conflict_resolver_instance.active_conflicts = {}
             
             response = client.get("/multi-dev/system/health")
-            
+
             assert response.status_code == 200
             data = response.json()
             assert data["status"] == "healthy"
@@ -644,7 +631,7 @@ class TestSystemHealthEndpoints:
             mock_conflict_resolver_instance.active_conflicts = {"conflict_1": {}}
             
             response = client.get("/multi-dev/system/metrics")
-            
+
             assert response.status_code == 200
             data = response.json()
             assert data["coordination_plans"]["total"] == 2
@@ -654,18 +641,21 @@ class TestSystemHealthEndpoints:
 
 class TestErrorHandling:
     """Test error handling in API endpoints."""
-    
+
     def test_invalid_uuid_format(self, client):
         """Test handling of invalid UUID formats."""
         response = client.get("/multi-dev/plans/invalid-uuid")
         assert response.status_code == 422  # Validation error
-    
+
     def test_missing_required_fields(self, client):
         """Test handling of missing required fields."""
-        response = client.post("/multi-dev/profiles", json={
-            "agent_type": "developer"
-            # Missing required agent_id field
-        })
+        response = client.post(
+            "/multi-dev/profiles",
+            json={
+                "agent_type": "developer"
+                # Missing required agent_id field
+            },
+        )
         assert response.status_code == 422
     
     @pytest.mark.asyncio
@@ -684,7 +674,7 @@ class TestErrorHandling:
 @pytest.mark.asyncio
 class TestAsyncEndpoints:
     """Test async functionality in endpoints."""
-    
+
     async def test_concurrent_profile_creation(self):
         """Test handling of concurrent profile creation requests."""
         client = TestClient(app)
@@ -702,12 +692,15 @@ class TestAsyncEndpoints:
             tasks = []
             for i in range(5):
                 tasks.append(
-                    client.post("/multi-dev/profiles", json={
-                        "agent_id": f"concurrent_test_{i}",
-                        "agent_type": "developer"
-                    })
+                    client.post(
+                        "/multi-dev/profiles",
+                        json={
+                            "agent_id": f"concurrent_test_{i}",
+                            "agent_type": "developer",
+                        },
+                    )
                 )
-            
+
             # All requests should succeed
             for response in tasks:
                 assert response.status_code == 200

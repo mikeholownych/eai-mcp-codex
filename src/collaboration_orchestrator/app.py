@@ -18,7 +18,7 @@ from src.common.database import DatabaseManager
 app = FastAPI(
     title="Collaboration Orchestrator",
     description="Advanced multi-agent collaboration and multi-developer coordination system",
-    version="2.0.0"
+    version="2.0.0",
 )
 
 # Include both the original collaboration routes and new multi-developer routes
