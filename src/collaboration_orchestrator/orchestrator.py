@@ -488,6 +488,29 @@ class CollaborationOrchestrator:
                 session.completed_at - session.started_at
             ).total_seconds() / 60  # minutes
 
+        # Calculate average response time between messages
+        average_response = 0.0
+        if len(messages) > 1:
+            diffs = [
+                (messages[i].timestamp - messages[i - 1].timestamp).total_seconds()
+                for i in range(1, len(messages))
+            ]
+            average_response = sum(diffs) / len(diffs) / 60.0
+
+        consensus_rate = consensus_achieved / max(1, decisions_made)
+
+        # Efficiency score considers consensus rate, message efficiency, and responsiveness
+        message_efficiency = decisions_made / max(len(messages), 1)
+        responsiveness_factor = 1.0 / (1.0 + average_response)
+        efficiency_score = (
+            consensus_rate * 0.6
+            + message_efficiency * 0.2
+            + responsiveness_factor * 0.2
+        )
+        efficiency_score = max(0.0, min(efficiency_score, 1.0))
+
+        quality_score = consensus_rate
+
         return CollaborationMetrics(
             session_id=session.session_id,
             total_participants=len(session.participants),
@@ -495,9 +518,9 @@ class CollaborationOrchestrator:
             messages_exchanged=len(messages),
             decisions_made=decisions_made,
             consensus_achieved=consensus_achieved,
-            consensus_rate=consensus_achieved / max(1, decisions_made),
-            average_response_time=15.0,  # Simplified - would calculate from message timestamps
+            consensus_rate=consensus_rate,
+            average_response_time=average_response,
             total_duration=duration,
-            efficiency_score=0.8,  # Simplified scoring
-            quality_score=0.9,  # Simplified scoring
+            efficiency_score=efficiency_score,
+            quality_score=quality_score,
         )
