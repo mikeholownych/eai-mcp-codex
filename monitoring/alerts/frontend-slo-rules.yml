@@ -1,0 +1,235 @@
+# Frontend Performance SLO and Alerting Rules
+# Service Level Objectives for MCP Agent Network Frontend
+
+groups:
+  - name: frontend_slo_rules
+    interval: 30s
+    rules:
+      
+      # SLI: Page Load Time (95th percentile < 2.5s)
+      - record: sli:frontend_page_load_time_p95
+        expr: histogram_quantile(0.95, rate(web_vital_lcp_bucket[5m]))
+        labels:
+          slo: "page_load_time"
+          
+      # SLI: API Response Time (95th percentile < 500ms)
+      - record: sli:api_response_time_p95
+        expr: histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket{location=~"/api/.*"}[5m]))
+        labels:
+          slo: "api_response_time"
+          
+      # SLI: Error Rate (< 1%)
+      - record: sli:frontend_error_rate
+        expr: rate(nginx_http_requests_total{status=~"4..|5.."}[5m]) / rate(nginx_http_requests_total[5m]) * 100
+        labels:
+          slo: "error_rate"
+          
+      # SLI: Availability (> 99.9%)
+      - record: sli:frontend_availability
+        expr: (1 - (rate(nginx_http_requests_total{status=~"5.."}[5m]) / rate(nginx_http_requests_total[5m]))) * 100
+        labels:
+          slo: "availability"
+          
+      # SLI: Cache Hit Rate (> 85%)
+      - record: sli:cache_hit_rate
+        expr: rate(nginx_cache_hit_total[5m]) / (rate(nginx_cache_hit_total[5m]) + rate(nginx_cache_miss_total[5m])) * 100
+        labels:
+          slo: "cache_performance"
+          
+      # SLI: Core Web Vitals Compliance (> 75% of pages should be "Good")
+      - record: sli:web_vitals_good_ratio
+        expr: |
+          (
+            count(web_vital_lcp <= 2500) +
+            count(web_vital_fid <= 100) +
+            count(web_vital_cls <= 0.1)
+          ) / (
+            count(web_vital_lcp) +
+            count(web_vital_fid) +
+            count(web_vital_cls)
+          ) * 100
+        labels:
+          slo: "web_vitals_compliance"
+
+  - name: frontend_slo_alerts
+    rules:
+      
+      # Critical: Page Load Time SLO Violation
+      - alert: PageLoadTimeSLOViolation
+        expr: sli:frontend_page_load_time_p95 > 2500
+        for: 2m
+        labels:
+          severity: critical
+          service: frontend
+          slo: page_load_time
+        annotations:
+          summary: "Page load time SLO violation"
+          description: "95th percentile page load time is {{ $value }}ms, exceeding 2.5s SLO for {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/frontend-performance"
+          
+      # Warning: Page Load Time Approaching SLO
+      - alert: PageLoadTimeApproachingSLO
+        expr: sli:frontend_page_load_time_p95 > 2000
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: page_load_time
+        annotations:
+          summary: "Page load time approaching SLO limit"
+          description: "95th percentile page load time is {{ $value }}ms, approaching 2.5s SLO limit"
+          
+      # Critical: API Response Time SLO Violation
+      - alert: APIResponseTimeSLOViolation
+        expr: sli:api_response_time_p95 > 0.5
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+          slo: api_response_time
+        annotations:
+          summary: "API response time SLO violation"
+          description: "95th percentile API response time is {{ $value }}s, exceeding 500ms SLO"
+          
+      # Critical: High Error Rate
+      - alert: HighErrorRate
+        expr: sli:frontend_error_rate > 1
+        for: 2m
+        labels:
+          severity: critical
+          service: frontend
+          slo: error_rate
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}%, exceeding 1% SLO threshold"
+          
+      # Critical: Low Availability
+      - alert: LowAvailability
+        expr: sli:frontend_availability < 99.9
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+          slo: availability
+        annotations:
+          summary: "Service availability below SLO"
+          description: "Service availability is {{ $value }}%, below 99.9% SLO"
+          
+      # Warning: Low Cache Hit Rate
+      - alert: LowCacheHitRate
+        expr: sli:cache_hit_rate < 85
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: cache_performance
+        annotations:
+          summary: "Cache hit rate below target"
+          description: "Cache hit rate is {{ $value }}%, below 85% target"
+          
+      # Warning: Poor Web Vitals Compliance
+      - alert: PoorWebVitalsCompliance
+        expr: sli:web_vitals_good_ratio < 75
+        for: 10m
+        labels:
+          severity: warning
+          service: frontend
+          slo: web_vitals_compliance
+        annotations:
+          summary: "Web Vitals compliance below target"
+          description: "Only {{ $value }}% of Core Web Vitals measurements are 'Good', below 75% target"
+          
+      # Info: SLO Budget Burn Rate (Fast burn)
+      - alert: SLOBudgetFastBurn
+        expr: |
+          (
+            sli:frontend_error_rate > 0.5 and
+            sli:frontend_page_load_time_p95 > 2000
+          )
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: budget_burn
+        annotations:
+          summary: "SLO error budget burning quickly"
+          description: "Multiple SLOs are degrading simultaneously, indicating potential systemic issues"
+          
+      # Critical: Bundle Size Too Large
+      - alert: BundleSizeTooLarge
+        expr: bundle_size_bytes > 1048576  # 1MB
+        for: 0m
+        labels:
+          severity: warning
+          service: frontend
+          slo: performance
+        annotations:
+          summary: "Frontend bundle size exceeds recommended limit"
+          description: "Bundle size is {{ $value | humanize1024 }}B, exceeding 1MB recommendation"
+          
+      # Warning: Memory Usage High
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: resource_utilization
+        annotations:
+          summary: "High memory usage on frontend server"
+          description: "Memory usage is {{ $value }}%, exceeding 80% threshold"
+
+  - name: frontend_performance_trends
+    rules:
+      
+      # Trend: Page Load Time (7-day moving average)
+      - record: trend:page_load_time_7d
+        expr: avg_over_time(sli:frontend_page_load_time_p95[7d])
+        labels:
+          metric_type: "trend"
+          
+      # Trend: Error Rate (24-hour moving average)
+      - record: trend:error_rate_24h
+        expr: avg_over_time(sli:frontend_error_rate[24h])
+        labels:
+          metric_type: "trend"
+          
+      # Trend: Cache Hit Rate (7-day moving average)
+      - record: trend:cache_hit_rate_7d
+        expr: avg_over_time(sli:cache_hit_rate[7d])
+        labels:
+          metric_type: "trend"
+
+  - name: frontend_business_metrics
+    rules:
+      
+      # Business Metric: User Engagement Score
+      - record: business:user_engagement_score
+        expr: |
+          (
+            rate(nginx_http_requests_total{location="/dashboard"}[5m]) * 0.4 +
+            rate(nginx_http_requests_total{location="/chat"}[5m]) * 0.3 +
+            rate(nginx_http_requests_total{location="/code-editor"}[5m]) * 0.3
+          ) / rate(nginx_http_requests_total{location="/"}[5m]) * 100
+        labels:
+          metric_type: "business"
+          
+      # Business Metric: Conversion Rate (demo to dashboard)
+      - record: business:demo_conversion_rate
+        expr: |
+          rate(nginx_http_requests_total{location="/dashboard"}[1h]) /
+          rate(nginx_http_requests_total{location="/demo"}[1h]) * 100
+        labels:
+          metric_type: "business"
+          
+      # Composite Performance Score (0-100)
+      - record: composite:performance_score
+        expr: |
+          (
+            (2500 - clamp_max(sli:frontend_page_load_time_p95, 5000)) / 2500 * 25 +
+            (100 - clamp_max(sli:frontend_error_rate, 100)) / 100 * 25 +
+            sli:frontend_availability / 100 * 25 +
+            sli:cache_hit_rate / 100 * 25
+          )
+        labels:
+          metric_type: "composite"
