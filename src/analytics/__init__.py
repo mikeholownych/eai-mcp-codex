@@ -14,6 +14,10 @@ from .roi_tracker import ROITracker, ValueEvent
 from .capacity_planner import CapacityPlanner, CapacityEstimate
 from .cost_optimizer import CostOptimizer
 from .escalation_tracker import EscalationAbuseTracker, EscalationEvent
+from .consensus_monitor import (
+    ConsensusManipulationDetector,
+    VoteEvent,
+)
 
 __all__ = [
     "PerformancePredictionEngine",
@@ -34,4 +38,6 @@ __all__ = [
     "CostOptimizer",
     "EscalationAbuseTracker",
     "EscalationEvent",
+    "ConsensusManipulationDetector",
+    "VoteEvent",
 ]
