@@ -238,7 +238,7 @@ Predictive Analytics
 
 Collaboration success prediction [partial]
 Resource demand forecasting [complete]
-Agent workload optimization [partial]
+Agent workload optimization [complete]
 
 Overall Instrumentation Readiness: 47%
 
