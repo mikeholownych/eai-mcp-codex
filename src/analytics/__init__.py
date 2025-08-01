@@ -18,6 +18,10 @@ from .consensus_monitor import (
     ConsensusManipulationDetector,
     VoteEvent,
 )
+from .productivity_benchmark import (
+    ProductivityRecord,
+    AgentProductivityBenchmark,
+)
 
 __all__ = [
     "PerformancePredictionEngine",
@@ -40,4 +44,6 @@ __all__ = [
     "EscalationEvent",
     "ConsensusManipulationDetector",
     "VoteEvent",
+    "ProductivityRecord",
+    "AgentProductivityBenchmark",
 ]

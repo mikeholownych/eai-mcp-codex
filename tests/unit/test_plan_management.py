@@ -14,6 +14,7 @@ import pytest_asyncio
 
 
 
+
 @pytest.fixture(autouse=True)
 async def setup_and_teardown_db():
     os.environ["TESTING_MODE"] = "true"
