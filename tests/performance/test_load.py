@@ -5,6 +5,7 @@ from src.model_router.models import ModelRequest
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
 
+
 @pytest.mark.asyncio
 async def test_router_under_load():
     start = time.time()

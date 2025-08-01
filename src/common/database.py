@@ -12,42 +12,47 @@ logger = logging.getLogger(__name__)
 if os.getenv("TESTING_MODE") != "true":
     import asyncpg
 
+
 # Utility functions for serialization/deserialization
 def serialize_json_field(data: Any) -> str:
     return json.dumps(data) if data is not None else "{}"
+
 
 def deserialize_json_field(data: Any) -> Dict[str, Any]:
     if isinstance(data, dict):
         return data
     return json.loads(data) if data else {}
 
+
 def serialize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
     if dt is None:
         return None
     # Ensure datetime is timezone-aware and in UTC
     if dt.tzinfo is None:
-        return dt.replace(tzinfo=timezone.utc) # Assume UTC if no tzinfo
+        return dt.replace(tzinfo=timezone.utc)  # Assume UTC if no tzinfo
     return dt.astimezone(timezone.utc)
+
 
 def deserialize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
     if dt is None:
         return None
     # Ensure datetime is timezone-aware and in UTC
     if dt.tzinfo is None:
-        return dt.replace(tzinfo=timezone.utc) # Assume UTC if no tzinfo
+        return dt.replace(tzinfo=timezone.utc)  # Assume UTC if no tzinfo
     return dt.astimezone(timezone.utc)
+
 
 class DatabaseManager:
     def __init__(self, db_name: str):
         self.db_name = db_name
         self.dsn = self._get_dsn()
-        self._pool: Optional[Any] = None # Use Any for _pool type hint
+        self._pool: Optional[Any] = None  # Use Any for _pool type hint
 
     def _get_dsn(self) -> str:
         if os.getenv("TESTING_MODE") == "true":
             logger.info(f"Using dummy DSN for in-memory testing for {self.db_name}")
-            return "sqlite:///:memory:" # Dummy DSN
-        
+            return "sqlite:///:memory:"  # Dummy DSN
+
         user = os.getenv(f"{self.db_name.upper()}_DB_USER", "mcp_user")
         password = os.getenv(f"{self.db_name.upper()}_DB_PASSWORD", "mcp_password")
         host = os.getenv(f"{self.db_name.upper()}_DB_HOST", "localhost")
@@ -58,7 +63,7 @@ class DatabaseManager:
     async def connect(self):
         if os.getenv("TESTING_MODE") == "true":
             logger.info("Mocking DB connection in testing mode.")
-            self._pool = MockAsyncpgPool() # Assign a mock object
+            self._pool = MockAsyncpgPool()  # Assign a mock object
             return
 
         if self._pool is None:
@@ -223,6 +228,7 @@ class DatabaseManager:
             row = await connection.fetchrow(query, *args)
             return dict(row) if row else None
 
+
 def get_connection(dsn: str) -> None:
     """Deprecated synchronous connection helper."""
     logger.warning(
@@ -232,9 +238,11 @@ def get_connection(dsn: str) -> None:
         "Synchronous get_connection is not supported for asyncpg."
     )
 
+
 def dict_factory(cursor, row):  # Not directly used with asyncpg fetch methods
     logger.warning("dict_factory is not directly used with asyncpg fetch methods.")
     return {cursor.description[idx][0]: value for idx, value in enumerate(row)}
+
 
 async def close(self) -> None:
     """Close the database connection pool (mock implementation)."""
@@ -272,7 +280,6 @@ def deserialize_datetime_str(dt_str: str | None) -> Optional[datetime]:
     except (ValueError, TypeError):
         logger.warning("Failed to deserialize datetime: %s", dt_str)
         return None
-
 
 
 def build_where_clause(conditions: Dict[str, Any]) -> tuple[str, tuple]:

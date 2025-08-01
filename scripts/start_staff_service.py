@@ -20,10 +20,10 @@ logger = get_logger("staff_service_start")
 def main():
     """Start the Staff Management service."""
     logger.info(f"Starting Staff Management service on port {settings.service_port}")
-    
+
     # Set environment variables if not already set
     os.environ.setdefault("STAFF_SERVICE_PORT", str(settings.service_port))
-    
+
     try:
         uvicorn.run(
             app,
@@ -31,7 +31,7 @@ def main():
             port=settings.service_port,
             log_level="info",
             access_log=True,
-            reload=False  # Set to True for development
+            reload=False,  # Set to True for development
         )
     except Exception as e:
         logger.error(f"Failed to start Staff Management service: {e}")
