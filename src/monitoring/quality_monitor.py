@@ -13,6 +13,9 @@ import psutil
 from ..common.logging import get_logger
 from .metrics_definitions import Metric, MetricType
 from .slo_manager import SLOManager, SLOResult
+from ..analytics.cost_tracker import CostTracker
+from ..analytics.roi_tracker import ROITracker
+from ..analytics.cost_optimizer import CostOptimizer
 
 logger = get_logger("quality_monitor")
 
@@ -645,6 +648,9 @@ class ContinuousQualityMonitor:
         self.quality_analyzer = QualityAnalyzer()
         self.alert_manager = AlertManager()
         self.slo_manager = SLOManager()
+        self.cost_tracker = CostTracker()
+        self.roi_tracker = ROITracker(self.cost_tracker)
+        self.cost_optimizer = CostOptimizer(self.cost_tracker, self.roi_tracker)
 
         self.monitoring_enabled = False
         self.monitoring_interval = 60.0  # seconds
@@ -679,6 +685,16 @@ class ContinuousQualityMonitor:
         self.monitoring_enabled = False
         self.metric_collector.stop_collection()
         logger.info("Stopped continuous quality monitoring")
+
+    def record_cost_event(
+        self, item_id: str, cost: float, category: str = "general"
+    ) -> None:
+        """Record a cost event for ROI analysis."""
+        self.cost_tracker.record_cost(item_id, cost, category)
+
+    def record_value_event(self, item_id: str, value: float) -> None:
+        """Record a value event for ROI analysis."""
+        self.roi_tracker.record_value(item_id, value)
 
     async def _monitoring_loop(self):
         """Main monitoring loop."""
@@ -846,6 +862,9 @@ class ContinuousQualityMonitor:
             recommendations.append(
                 f"Review and resolve {len(high_alerts)} high-priority alerts"
             )
+
+        # Cost and ROI-based recommendations
+        recommendations.extend(self.cost_optimizer.generate_recommendations())
 
         return recommendations
 

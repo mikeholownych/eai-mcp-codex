@@ -12,6 +12,8 @@ from .usage_analyzer import UsageEvent, UsagePatternAnalyzer
 from .cost_tracker import CostTracker, CostEvent
 from .roi_tracker import ROITracker, ValueEvent
 from .capacity_planner import CapacityPlanner, CapacityEstimate
+from .cost_optimizer import CostOptimizer
+from .escalation_tracker import EscalationAbuseTracker, EscalationEvent
 
 __all__ = [
     "PerformancePredictionEngine",
@@ -29,4 +31,7 @@ __all__ = [
     "ValueEvent",
     "CapacityPlanner",
     "CapacityEstimate",
+    "CostOptimizer",
+    "EscalationAbuseTracker",
+    "EscalationEvent",
 ]
