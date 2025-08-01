@@ -4,12 +4,13 @@ from src.plan_management.plan_manager import (
     delete_plan,
     get_plan,
     list_plans,
-    PlanStatus
+    PlanStatus,
 )
 from src.common.database import DatabaseManager
 import os
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
+
 
 @pytest.fixture(autouse=True)
 async def setup_and_teardown_db():
@@ -20,6 +21,7 @@ async def setup_and_teardown_db():
     yield
     await db_manager.disconnect()
     os.environ["TESTING_MODE"] = "false"
+
 
 @pytest.mark.asyncio
 async def test_create_plan() -> None:
