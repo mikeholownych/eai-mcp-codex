@@ -1,7 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+/* Self-hosted fonts for better performance - replace external import */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   /* MCP Codex Brand Colors - Purple Theme */
@@ -13,14 +61,14 @@
   --secondary-500: #6366f1;
   --secondary-600: #4f46e5;
   
-  /* Dark theme - deep charcoal for modern professional look */
-  --background: #0a0a0b;
-  --foreground: #fafafa;
-  --surface: #18181b;
-  --surface-hover: #27272a;
-  --border: #3f3f46;
-  --muted: #71717a;
-  --muted-foreground: #a1a1aa;
+  /* Dark theme - matches Codex deep navy/charcoal background */
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --surface: #1e293b;
+  --surface-hover: #334155;
+  --border: #475569;
+  --muted: #64748b;
+  --muted-foreground: #94a3b8;
   
   /* Semantic colors */
   --success: #22c55e;
@@ -28,11 +76,11 @@
   --error: #ef4444;
   --info: #3b82f6;
   
-  /* Card and component styling - updated for deeper theme */
-  --card-background: #18181b;
-  --card-border: #27272a;
-  --input-background: #27272a;
-  --input-border: #3f3f46;
+  /* Card and component styling - matches Codex theme */
+  --card-background: #1e293b;
+  --card-border: #334155;
+  --input-background: #334155;
+  --input-border: #475569;
   
   /* Code editor theme */
   --code-background: #0f172a;
