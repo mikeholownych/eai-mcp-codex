@@ -12,6 +12,7 @@ import * as verificationFeedback from './commands/verification-feedback';
 import * as configuration from './commands/configuration';
 import { interactive } from './commands/interactive';
 import { chat } from './commands/chat';
+import * as batch from './commands/batch';
 
 const packageJson = require('../package.json');
 
@@ -144,6 +145,12 @@ program
   .command('chat')
   .description('Start chat mode with AI assistant')
   .action(chat);
+
+program
+  .command('batch <file>')
+  .description('Run multiple commands from a JSON or YAML file')
+  .option('-f, --format <format>', 'Input format (json|yaml)')
+  .action(batch.run);
 
 // Configuration commands
 const listCmd = program

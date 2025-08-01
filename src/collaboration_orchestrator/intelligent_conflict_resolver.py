@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple, Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import asyncpg
 from redis import Redis
@@ -20,8 +20,6 @@ from .multi_developer_models import (
     ResolutionStrategy,
     ConflictResolutionLog,
     DeveloperProfile,
-    TaskAssignment,
-    TeamCoordinationPlan,
 )
 from .developer_profile_manager import DeveloperProfileManager
 
@@ -148,12 +146,13 @@ class AutomatedResolutionEngine:
             context = conflict.conflict_context
             if context.get("conflict_files"):
                 files = context["conflict_files"]
-                resolution_steps = [
+                steps = [
                     f"Analyzing conflicts in {len(files)} files",
                     "Attempting automatic merge resolution",
                     "Running code quality checks",
-                    "Validating merge result"
+                    "Validating merge result",
                 ]
+                logger.debug("Resolution steps: %s", steps)
                 
                 # Simulate success rate based on complexity
                 complexity = len(files) + len(conflict.involved_agents)
@@ -176,6 +175,7 @@ class AutomatedResolutionEngine:
             context = conflict.conflict_context
             if context.get("conflicting_dependencies"):
                 deps = context["conflicting_dependencies"]
+                logger.debug("Conflicting dependencies: %s", deps)
                 
                 # Simple heuristic: if there's a clear priority order, resolve automatically
                 if context.get("priority_order"):
