@@ -24,39 +24,32 @@ import {
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline'
 
-const getHealthColor = (status: string) => {
-  switch (status.toLowerCase()) {
-    case 'healthy':
-    case 'optimal':
-    case 'good': 
-      return 'text-green-400'
-    case 'moderate':
-    case 'warning':
-      return 'text-yellow-400'
-    case 'critical':
-    case 'error':
-      return 'text-red-400'
-    default: 
-      return 'text-gray-400'
-  }
+const HEALTH_COLORS: Record<string, string> = {
+  healthy: 'text-green-400',
+  optimal: 'text-green-400',
+  good: 'text-green-400',
+  moderate: 'text-yellow-400',
+  warning: 'text-yellow-400',
+  critical: 'text-red-400',
+  error: 'text-red-400',
 }
 
-const getHealthIcon = (status: string) => {
-  switch (status.toLowerCase()) {
-    case 'healthy':
-    case 'optimal':
-    case 'good':
-      return <CheckCircleIcon className="h-5 w-5 text-green-400" />
-    case 'moderate':
-    case 'warning':
-      return <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
-    case 'critical':
-    case 'error':
-      return <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
-    default:
-      return <ClockIcon className="h-5 w-5 text-gray-400" />
-  }
+const HEALTH_ICONS: Record<string, JSX.Element> = {
+  healthy: <CheckCircleIcon className="h-5 w-5 text-green-400" />,
+  optimal: <CheckCircleIcon className="h-5 w-5 text-green-400" />,
+  good: <CheckCircleIcon className="h-5 w-5 text-green-400" />,
+  moderate: <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />,
+  warning: <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />,
+  critical: <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />,
+  error: <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />,
+  loading: <ClockIcon className="h-5 w-5 text-gray-400" />,
 }
+
+const getHealthColor = (status: string) =>
+  HEALTH_COLORS[status.toLowerCase()] ?? 'text-gray-400'
+
+const getHealthIcon = (status: string) =>
+  HEALTH_ICONS[status.toLowerCase()] ?? HEALTH_ICONS.loading
 
 const mockSystemHealth = {
   api_performance: {
