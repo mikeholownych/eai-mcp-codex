@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code',
+    google: 'google-site-verification=example123',
   },
 }
 
@@ -115,13 +115,14 @@ export default function RootLayout({
               
               // Load Web Vitals library and track metrics
               if ('loading' in HTMLImageElement.prototype) {
-                import('https://unpkg.com/web-vitals@3/dist/web-vitals.js').then(({ onFCP, onLCP, onCLS, onFID, onTTFB }) => {
+                (async () => {
+                  const { onFCP, onLCP, onCLS, onFID, onTTFB } = await import('https://unpkg.com/web-vitals@3/dist/web-vitals.js');
                   onFCP(vitals);
                   onLCP(vitals);
                   onCLS(vitals);
                   onFID(vitals);
                   onTTFB(vitals);
-                });
+                })();
               }
             `,
           }}
@@ -132,7 +133,13 @@ export default function RootLayout({
           <WebVitalsReporter />
           {children}
         </SessionProvider>
-        
+
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.debug = (label, data) => { console.log('[DEBUG] ' + label + ':', data); };`,
+          }}
+        />
+
         {/* Service Worker Registration */}
         <script
           dangerouslySetInnerHTML={{
@@ -140,12 +147,17 @@ export default function RootLayout({
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', async () => {
                   try {
-                    const registration = await navigator.serviceWorker.register('/sw.js');
-                    console.log('SW registered:', registration);
+                    const registration = await Promise.race([
+                      navigator.serviceWorker.register('/sw.js'),
+                      new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('timeout')), 10000)
+                      ),
+                    ])
+                    window.debug && window.debug('Service worker registered', registration)
                   } catch (err) {
-                    console.log('SW registration failed:', err);
+                    window.debug && window.debug('Service worker registration failed', err)
                   }
-                });
+                })
               }
             `,
           }}
