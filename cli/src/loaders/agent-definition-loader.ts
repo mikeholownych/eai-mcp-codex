@@ -3,11 +3,9 @@
  * Handles loading and processing of agent-specific Markdown files
  */
 
-import * as path from 'path';
 import { ConfigurationManager } from '../config/configuration-manager';
 import { MarkdownParser } from '../utils/markdown-parser';
 import {
-  MCPConfiguration,
   AgentConfiguration,
   ConfigurationLoadOptions,
   ConfigurationError,
