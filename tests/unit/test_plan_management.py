@@ -10,9 +10,6 @@ from src.common.database import DatabaseManager
 from src.common.tenant import tenant_context, async_tenant_context
 import os
 
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
-
-
 import pytest_asyncio
 
 
@@ -21,7 +18,6 @@ async def setup_and_teardown_db() -> None:
     os.environ["TESTING_MODE"] = "true"
     db_manager = DatabaseManager("plan_management_db")
     await db_manager.connect()
-    # In a real test, you might create tables here if not using in-memory
     yield
     await db_manager.disconnect()
     os.environ["TESTING_MODE"] = "false"
@@ -97,3 +93,13 @@ async def test_delete_plan_wrong_tenant() -> None:
         assert await get_plan(plan.id) is not None
         await delete_plan(plan.id)
         assert await get_plan(plan.id) is None
+
+
+def test_tenant_context_resets() -> None:
+    """Ensure tenant_context restores previous tenant."""
+    from src.common.tenant import get_current_tenant
+
+    assert get_current_tenant() == "public"
+    with tenant_context("tenant_reset"):
+        assert get_current_tenant() == "tenant_reset"
+    assert get_current_tenant() == "public"
