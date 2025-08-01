@@ -62,17 +62,17 @@ function StaffContent({ children }: { children: React.ReactNode }) {
     item.roles.includes(user.role)
   )
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'admin': return 'bg-red-500/10 text-red-400'
-      case 'cfo': return 'bg-yellow-500/10 text-yellow-400'
-      case 'finance': return 'bg-yellow-500/10 text-yellow-400'
-      case 'manager': return 'bg-blue-500/10 text-blue-400'
-      case 'support': return 'bg-green-500/10 text-green-400'
-      case 'content': return 'bg-purple-500/10 text-purple-400'
-      default: return 'bg-gray-500/10 text-gray-400'
-    }
+  const ROLE_BADGE_COLORS: Record<string, string> = {
+    admin: 'bg-red-500/10 text-red-400',
+    cfo: 'bg-yellow-500/10 text-yellow-400',
+    finance: 'bg-yellow-500/10 text-yellow-400',
+    manager: 'bg-blue-500/10 text-blue-400',
+    support: 'bg-green-500/10 text-green-400',
+    content: 'bg-purple-500/10 text-purple-400',
   }
+
+  const getRoleBadgeColor = (role: string) =>
+    ROLE_BADGE_COLORS[role] ?? 'bg-gray-500/10 text-gray-400'
 
   return (
     <div className="min-h-screen bg-slate-900 flex">

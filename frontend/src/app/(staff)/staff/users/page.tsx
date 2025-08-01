@@ -7,6 +7,9 @@ import { User } from '@/lib/staffApi'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import { useRouter } from 'next/navigation'
+import { debug } from '@/lib/utils'
+import { USER_STATUS_COLORS, USER_STATUS_ICONS } from '@/lib/statusHelpers'
 import {
   UserGroupIcon,
   PlusIcon,
@@ -32,24 +35,17 @@ const roleColors: Record<string, string> = {
 
 const getRoleColor = (role: string) => roleColors[role] ?? 'bg-gray-500/10 text-gray-400'
 
-const statusColors: Record<string, string> = {
-  active: 'bg-green-500/10 text-green-400',
-  inactive: 'bg-yellow-500/10 text-yellow-400',
-  suspended: 'bg-red-500/10 text-red-400',
-}
+const getStatusColor = (status: string) =>
+  USER_STATUS_COLORS[status] ?? USER_STATUS_COLORS.active
 
-const getStatusColor = (status: string) => statusColors[status] ?? 'bg-gray-500/10 text-gray-400'
-
-const statusIcons: Record<string, JSX.Element> = {
-  active: <CheckCircleIcon className="h-4 w-4" />,
-  inactive: <ClockIcon className="h-4 w-4" />,
-  suspended: <ExclamationTriangleIcon className="h-4 w-4" />,
-}
+const getStatusIcon = (status: string) =>
+  USER_STATUS_ICONS[status] ?? USER_STATUS_ICONS.active
 
 const getStatusIcon = (status: string) => statusIcons[status] ?? <ClockIcon className="h-4 w-4" />
 
 export default function UserManagement() {
   const { user: currentUser } = useAuth()
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedRole, setSelectedRole] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
@@ -125,8 +121,8 @@ export default function UserManagement() {
   }
 
   const handleEditUser = (userId: string) => {
-    console.log('Edit user:', userId)
-    // TODO: Navigate to edit user page or open modal
+    debug('Edit user', { userId })
+    router.push(`/staff/users?edit=${userId}`)
   }
 
   const handleDeleteUser = async (userId: string) => {
@@ -138,8 +134,8 @@ export default function UserManagement() {
       await deleteUser(userId)
       refetch() // Refresh the users list
     } catch (error) {
-      console.error('Failed to delete user:', error)
-      // TODO: Show error toast notification
+      debug('Failed to delete user', error)
+      alert('Failed to delete user')
     }
   }
 
@@ -155,8 +151,8 @@ export default function UserManagement() {
       }
       refetch() // Refresh the users list
     } catch (error) {
-      console.error('Failed to update user status:', error)
-      // TODO: Show error toast notification
+      debug('Failed to update user status', error)
+      alert('Failed to update user status')
     }
   }
 

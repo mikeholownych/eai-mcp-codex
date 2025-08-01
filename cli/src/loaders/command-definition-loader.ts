@@ -3,11 +3,9 @@
  * Handles loading and processing of command-specific Markdown files from commands/ subdirectory
  */
 
-import * as path from 'path';
 import { ConfigurationManager } from '../config/configuration-manager';
 import { MarkdownParser } from '../utils/markdown-parser';
 import {
-  MCPConfiguration,
   CommandConfiguration,
   ConfigurationLoadOptions,
   ConfigurationError,
@@ -501,7 +499,7 @@ export class CommandDefinitionLoader {
     value: any,
     expectedType: string
   ): { isValid: boolean; message: string; normalizedValue: any } {
-    let normalizedValue = value;
+    const normalizedValue = value;
     
     switch (expectedType.toLowerCase()) {
       case 'string':
@@ -600,7 +598,7 @@ export class CommandDefinitionLoader {
   } {
     const errors: Array<{ parameter: string; message: string; value?: any }> = [];
     const warnings: Array<{ parameter: string; message: string; suggestion?: string }> = [];
-    let normalizedValue = value;
+    const normalizedValue = value;
 
     // Pattern validation for strings
     if (validation.pattern && typeof value === 'string') {
