@@ -99,7 +99,8 @@ async def test_delete_plan_wrong_tenant() -> None:
         assert await get_plan(plan.id) is None
 
 
-def test_tenant_context_resets() -> None:
+@pytest.mark.asyncio
+async def test_tenant_context_resets() -> None:
     """Ensure tenant_context restores previous tenant."""
     from src.common.tenant import get_current_tenant
 

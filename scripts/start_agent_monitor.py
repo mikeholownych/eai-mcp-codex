@@ -15,6 +15,8 @@ from src.common.logging import get_logger
 from src.common.health_check import health
 
 
+import uvicorn
+
 logger = get_logger("agent_monitor_startup")
 
 
@@ -105,8 +107,18 @@ class AgentMonitorService:
             logger.info("Starting Agent Monitor Service")
             self.running = True
 
-            # In a real implementation, we would start uvicorn here
-            # For now, we'll just keep the service running
+            # Configure uvicorn server
+            config = uvicorn.Config(
+                app=self.app,
+                host="0.0.0.0",
+                port=8016,
+                log_level="info"
+            )
+            server = uvicorn.Server(config)
+            
+            # Start server
+            await server.serve()
+
             logger.info("Agent Monitor Service started on port 8016")
 
         except Exception as e:

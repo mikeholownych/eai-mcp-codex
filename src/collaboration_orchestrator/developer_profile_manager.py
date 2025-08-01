@@ -9,7 +9,7 @@ from uuid import UUID
 import asyncpg
 from redis import Redis
 
-from src.common.database import get_postgres_connection
+from src.common.database import DatabaseManager
 from src.common.redis_client import get_redis_connection
 from src.common.caching import get_cache_manager
 from .multi_developer_models import (
@@ -29,21 +29,19 @@ class DeveloperProfileManager:
     """Manages developer agent profiles, capabilities, and performance tracking."""
 
     def __init__(
-        self,
-        postgres_pool: Optional[asyncpg.Pool] = None,
-        redis: Optional[Redis] = None,
+        self, 
+        db_manager: Optional[DatabaseManager] = None,
+        redis: Optional[Redis] = None
     ) -> None:
-        self.postgres_pool = postgres_pool
+        self.db_manager = db_manager or DatabaseManager(db_name="mcp_database")
         self.redis = redis or get_redis_connection()
         self.profile_cache: Dict[str, DeveloperProfile] = {}
         self.cache_manager = get_cache_manager("orchestrator")
 
     async def _get_db_connection(self) -> asyncpg.Connection:
         """Get database connection from pool or create new one."""
-        if self.postgres_pool:
-            return await self.postgres_pool.acquire()
-        return await get_postgres_connection()
-
+        return await self.db_manager.get_connection().__aenter__()
+    
     async def create_developer_profile(
         self,
         agent_id: str,
@@ -70,10 +68,8 @@ class DeveloperProfileManager:
         )
 
         # Store in database
-        conn = await self._get_db_connection()
-        try:
-            await conn.execute(
-                """
+        async with self.db_manager.get_connection() as conn:
+            await conn.execute("""
                 INSERT INTO developer_profiles (
                     agent_id, agent_type, specializations, programming_languages, 
                     frameworks, experience_level, preferred_tasks, availability_schedule,
@@ -98,12 +94,7 @@ class DeveloperProfileManager:
                 profile.created_at,
                 profile.updated_at,
             )
-        finally:
-            if not self.postgres_pool:
-                await conn.close()
-            else:
-                await self.postgres_pool.release(conn)
-
+        
         # Cache the profile
         self.profile_cache[agent_id] = profile
 
@@ -130,8 +121,7 @@ class DeveloperProfileManager:
             return profile
 
         # Load from database
-        conn = await self._get_db_connection()
-        try:
+        async with self.db_manager.get_connection() as conn:
             row = await conn.fetchrow(
                 "SELECT * FROM developer_profiles WHERE agent_id = $1", agent_id
             )
@@ -154,20 +144,14 @@ class DeveloperProfileManager:
             profile_data["preferred_tasks"] = [
                 TaskType(t) for t in json.loads(profile_data["preferred_tasks"] or "[]")
             ]
-            profile_data["availability_schedule"] = json.loads(
-                profile_data["availability_schedule"] or "{}"
-            )
-            profile_data["performance_metrics"] = PerformanceMetrics(
-                **json.loads(profile_data["performance_metrics"] or "{}")
-            )
-            profile_data["collaboration_preferences"] = json.loads(
-                profile_data["collaboration_preferences"] or "{}"
-            )
-            profile_data["trust_scores"] = json.loads(
-                profile_data["trust_scores"] or "{}"
-            )
-            profile_data["metadata"] = json.loads(profile_data["metadata"] or "{}")
-
+            profile_data['availability_schedule'] = json.loads(profile_data['availability_schedule'] or '{}')
+            profile_data['current_workload'] = profile_data['current_workload']
+            profile_data['max_concurrent_tasks'] = profile_data['max_concurrent_tasks']
+            profile_data['performance_metrics'] = PerformanceMetrics(**json.loads(profile_data['performance_metrics'] or '{}'))
+            profile_data['collaboration_preferences'] = json.loads(profile_data['collaboration_preferences'] or '{}')
+            profile_data['trust_scores'] = json.loads(profile_data['trust_scores'] or '{}')
+            profile_data['metadata'] = json.loads(profile_data['metadata'] or '{}')
+            
             profile = DeveloperProfile(**profile_data)
 
             # Cache the profile
@@ -175,13 +159,7 @@ class DeveloperProfileManager:
             self.redis.setex(profile_key, 3600, profile.model_dump_json())
 
             return profile
-
-        finally:
-            if not self.postgres_pool:
-                await conn.close()
-            else:
-                await self.postgres_pool.release(conn)
-
+    
     async def update_developer_profile(self, agent_id: str, updates: Dict) -> bool:
         """Update developer profile with new data."""
         profile = await self.get_developer_profile(agent_id)
@@ -196,10 +174,8 @@ class DeveloperProfileManager:
         profile.updated_at = datetime.utcnow()
 
         # Update in database
-        conn = await self._get_db_connection()
-        try:
-            await conn.execute(
-                """
+        async with self.db_manager.get_connection() as conn:
+            await conn.execute("""
                 UPDATE developer_profiles SET
                     specializations = $2, programming_languages = $3, frameworks = $4,
                     experience_level = $5, preferred_tasks = $6, availability_schedule = $7,
@@ -223,12 +199,7 @@ class DeveloperProfileManager:
                 json.dumps(profile.metadata),
                 profile.updated_at,
             )
-        finally:
-            if not self.postgres_pool:
-                await conn.close()
-            else:
-                await self.postgres_pool.release(conn)
-
+        
         # Update cache
         self.profile_cache[agent_id] = profile
         profile_key = f"developer_profile:{agent_id}"
@@ -341,18 +312,10 @@ class DeveloperProfileManager:
             return cached_result
 
         # Get all developer profiles
-        conn = await self._get_db_connection()
-        try:
+        async with self.db_manager.get_connection() as conn:
             rows = await conn.fetch("SELECT agent_id FROM developer_profiles")
-            agent_ids = [
-                row["agent_id"] for row in rows if row["agent_id"] not in exclude_agents
-            ]
-        finally:
-            if not self.postgres_pool:
-                await conn.close()
-            else:
-                await self.postgres_pool.release(conn)
-
+            agent_ids = [row['agent_id'] for row in rows if row['agent_id'] not in exclude_agents]
+        
         candidates = []
         for agent_id in agent_ids:
             profile = await self.get_developer_profile(agent_id)
@@ -386,10 +349,8 @@ class DeveloperProfileManager:
             return None
 
         # Get current tasks from task assignments
-        conn = await self._get_db_connection()
-        try:
-            rows = await conn.fetch(
-                """
+        async with self.db_manager.get_connection() as conn:
+            rows = await conn.fetch("""
                 SELECT assignment_id, estimated_effort, actual_effort, deadline, status
                 FROM task_assignments 
                 WHERE assigned_agent = $1 AND status NOT IN ('completed', 'cancelled', 'failed')
@@ -446,19 +407,12 @@ class DeveloperProfileManager:
                 stress_indicators=stress_indicators,
                 recommendations=recommendations,
             )
-
-        finally:
-            if not self.postgres_pool:
-                await conn.close()
-            else:
-                await self.postgres_pool.release(conn)
-
+    
     async def get_collaboration_history(
         self, agent_1: str, agent_2: str, session_id: Optional[UUID] = None
     ) -> Optional[AgentCollaborationHistory]:
         """Get collaboration history between two agents."""
-        conn = await self._get_db_connection()
-        try:
+        async with self.db_manager.get_connection() as conn:
             query = """
                 SELECT * FROM agent_collaboration_history 
                 WHERE (agent_1 = $1 AND agent_2 = $2) OR (agent_1 = $2 AND agent_2 = $1)
@@ -489,13 +443,7 @@ class DeveloperProfileManager:
             history_data["metadata"] = json.loads(history_data["metadata"] or "{}")
 
             return AgentCollaborationHistory(**history_data)
-
-        finally:
-            if not self.postgres_pool:
-                await conn.close()
-            else:
-                await self.postgres_pool.release(conn)
-
+    
     async def update_collaboration_history(
         self,
         session_id: UUID,
@@ -524,10 +472,8 @@ class DeveloperProfileManager:
             history.collaboration_notes = notes
 
         # Store in database
-        conn = await self._get_db_connection()
-        try:
-            await conn.execute(
-                """
+        async with self.db_manager.get_connection() as conn:
+            await conn.execute("""
                 INSERT INTO agent_collaboration_history (
                     collaboration_id, session_id, agent_1, agent_2, collaboration_type,
                     interaction_count, successful_collaborations, conflict_count,
@@ -570,12 +516,7 @@ class DeveloperProfileManager:
                 history.first_collaboration,
                 history.last_collaboration,
             )
-        finally:
-            if not self.postgres_pool:
-                await conn.close()
-            else:
-                await self.postgres_pool.release(conn)
-
+        
         logger.info(f"Updated collaboration history between {agent_1} and {agent_2}")
 
     async def get_team_compatibility_score(self, agent_ids: List[str]) -> float:
@@ -606,16 +547,10 @@ class DeveloperProfileManager:
     ) -> List[DeveloperProfile]:
         """Get list of available agents matching criteria."""
         # Get all developer profiles
-        conn = await self._get_db_connection()
-        try:
+        async with self.db_manager.get_connection() as conn:
             rows = await conn.fetch("SELECT agent_id FROM developer_profiles")
-            agent_ids = [row["agent_id"] for row in rows]
-        finally:
-            if not self.postgres_pool:
-                await conn.close()
-            else:
-                await self.postgres_pool.release(conn)
-
+            agent_ids = [row['agent_id'] for row in rows]
+        
         available_agents = []
         required_skills = required_skills or []
 

@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends, Request
 from src.common.logging import get_logger
 
 from .models import (
@@ -24,8 +24,9 @@ from .orchestrator import CollaborationOrchestrator
 router = APIRouter()
 logger = get_logger("collaboration_orchestrator")
 
-# Initialize global orchestrator
-orchestrator = CollaborationOrchestrator()
+
+async def get_orchestrator(request: Request) -> CollaborationOrchestrator:
+    return request.app.state.orchestrator
 
 
 @router.post("/sessions/create")
@@ -33,6 +34,7 @@ async def create_collaboration_session(
     title: str,
     description: str,
     lead_agent: str,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
     deadline: Optional[datetime] = None,
     context: Optional[Dict] = None,
 ) -> CollaborationSession:
@@ -58,6 +60,7 @@ async def invite_agent_to_collaboration(
     session_id: UUID,
     agent_id: str,
     inviting_agent: str,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
     role: ParticipantRole = ParticipantRole.CONTRIBUTOR,
     capabilities_required: Optional[List[str]] = None,
     expected_contribution: str = "",
@@ -85,6 +88,7 @@ async def respond_to_invitation(
     invitation_id: UUID,
     agent_id: str,
     accepted: bool,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
     message: Optional[str] = None,
     conditions: Optional[List[str]] = None,
 ) -> dict:
@@ -114,7 +118,10 @@ async def respond_to_invitation(
 
 
 @router.post("/sessions/{session_id}/start")
-async def start_collaboration(session_id: UUID) -> dict:
+async def start_collaboration(
+    session_id: UUID,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
+) -> dict:
     """Start an active collaboration session."""
     success = await orchestrator.start_collaboration(session_id)
     if not success:
@@ -124,7 +131,10 @@ async def start_collaboration(session_id: UUID) -> dict:
 
 
 @router.get("/sessions/{session_id}")
-async def get_collaboration_session(session_id: UUID) -> CollaborationSession:
+async def get_collaboration_session(
+    session_id: UUID,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
+) -> CollaborationSession:
     """Get details of a collaboration session."""
     session = orchestrator.active_sessions.get(session_id)
     if not session:
@@ -135,6 +145,7 @@ async def get_collaboration_session(session_id: UUID) -> CollaborationSession:
 
 @router.get("/sessions")
 async def list_collaboration_sessions(
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
     status: Optional[str] = None,
     lead_agent: Optional[str] = None,
     limit: int = Query(50, ge=1, le=200),
@@ -162,6 +173,7 @@ async def create_consensus_decision(
     description: str,
     options: List[str],
     created_by: str,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
     required_consensus: float = 0.75,
     voting_deadline: Optional[datetime] = None,
 ) -> ConsensusDecision:
@@ -187,7 +199,11 @@ async def create_consensus_decision(
 
 @router.post("/decisions/{decision_id}/vote")
 async def submit_vote(
-    decision_id: UUID, agent_id: str, vote: VoteChoice, comment: Optional[str] = None
+    decision_id: UUID,
+    agent_id: str,
+    vote: VoteChoice,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
+    comment: Optional[str] = None,
 ) -> dict:
     """Submit a vote for a consensus decision."""
     success = await orchestrator.submit_vote(
@@ -205,7 +221,10 @@ async def submit_vote(
 
 
 @router.get("/decisions/{decision_id}")
-async def get_consensus_decision(decision_id: UUID) -> ConsensusDecision:
+async def get_consensus_decision(
+    decision_id: UUID,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
+) -> ConsensusDecision:
     """Get details of a consensus decision."""
     decision = orchestrator.consensus_decisions.get(decision_id)
     if not decision:
@@ -215,7 +234,10 @@ async def get_consensus_decision(decision_id: UUID) -> ConsensusDecision:
 
 
 @router.get("/sessions/{session_id}/decisions")
-async def get_session_decisions(session_id: UUID) -> List[ConsensusDecision]:
+async def get_session_decisions(
+    session_id: UUID,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
+) -> List[ConsensusDecision]:
     """Get all consensus decisions for a session."""
     decisions = [
         d
@@ -235,6 +257,7 @@ async def escalate_issue(
     issue_type: str,
     description: str,
     escalated_by: str,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
     affected_participants: Optional[List[str]] = None,
     priority: str = "medium",
 ) -> EscalationRequest:
@@ -256,7 +279,9 @@ async def escalate_issue(
 
 @router.post("/sessions/{session_id}/complete")
 async def complete_collaboration(
-    session_id: UUID, outputs: Optional[Dict] = None
+    session_id: UUID,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
+    outputs: Optional[Dict] = None,
 ) -> dict:
     """Complete a collaboration session."""
     success = await orchestrator.complete_collaboration(
@@ -270,7 +295,10 @@ async def complete_collaboration(
 
 
 @router.get("/sessions/{session_id}/metrics")
-async def get_session_metrics(session_id: UUID) -> CollaborationMetrics:
+async def get_session_metrics(
+    session_id: UUID,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
+) -> CollaborationMetrics:
     """Get metrics for a collaboration session."""
     session = orchestrator.active_sessions.get(session_id)
     if not session:
@@ -291,7 +319,9 @@ async def get_session_metrics(session_id: UUID) -> CollaborationMetrics:
 
 
 @router.get("/system/stats")
-async def get_system_stats() -> dict:
+async def get_system_stats(
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
+) -> dict:
     """Get collaboration system statistics."""
     try:
         total_sessions = len(orchestrator.active_sessions)
@@ -377,6 +407,7 @@ async def add_workflow_step(
     title: str,
     description: str,
     step_number: int,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
     assigned_agent: Optional[str] = None,
     required_capabilities: Optional[List[str]] = None,
     dependencies: Optional[List[UUID]] = None,
@@ -404,7 +435,10 @@ async def add_workflow_step(
 
 
 @router.get("/sessions/{session_id}/workflow")
-async def get_workflow_steps(session_id: UUID) -> List[WorkflowStep]:
+async def get_workflow_steps(
+    session_id: UUID,
+    orchestrator: CollaborationOrchestrator = Depends(get_orchestrator),
+) -> List[WorkflowStep]:
     """Get workflow steps for a collaboration session."""
     # Search for workflow steps in Redis
     pattern = "collaboration:step:*"

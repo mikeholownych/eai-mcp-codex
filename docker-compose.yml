@@ -50,30 +50,26 @@ services:
     logging:
       driver: "json-file"
 
-  # Database for Shared Data
-  postgres:
-    image: postgres:15-alpine
-    container_name: mcp-postgres
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: mcp-rabbitmq
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: mcp_database # Default database, specific ones created by init.sql
-      POSTGRES_USER: mcp_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mcp_secure_password}
     ports:
-      - "5432:5432"
+      - "5672:5672"
+      - "15672:15672"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=mcp_user
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-mcp_secure_password}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mcp_user -d mcp_database"]
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 10
+      start_period: 30s
     networks:
       - mcp-network
-    depends_on:
-      mcp-fluentd:
-        condition: service_healthy
     logging:
       driver: "json-file"
 
@@ -382,6 +378,7 @@ services:
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://mcp_user:${RABBITMQ_PASSWORD:-mcp_secure_password}@rabbitmq:5672/%2F
       - CONSUL_URL=http://consul:8500
       - SERVICE_NAME=a2a-communication
       - SERVICE_PORT=8010
@@ -504,6 +501,7 @@ services:
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://mcp_user:${RABBITMQ_PASSWORD:-mcp_secure_password}@rabbitmq:5672/%2F
       - CONSUL_URL=http://consul:8500
       - SERVICE_NAME=planner-agent
       - SERVICE_PORT=8013
@@ -546,6 +544,7 @@ services:
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://mcp_user:${RABBITMQ_PASSWORD:-mcp_secure_password}@rabbitmq:5672/%2F
       - CONSUL_URL=http://consul:8500
       - SERVICE_NAME=security-agent
       - SERVICE_PORT=8014
@@ -588,6 +587,7 @@ services:
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://mcp_user:${RABBITMQ_PASSWORD:-mcp_secure_password}@rabbitmq:5672/%2F
       - CONSUL_URL=http://consul:8500
       - SERVICE_NAME=developer-agent
       - SERVICE_PORT=8015
@@ -689,6 +689,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
     networks:
       - mcp-network
     deploy:
@@ -720,6 +721,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
     networks:
       - mcp-network
     deploy:
@@ -757,10 +759,11 @@ services:
       - verification-feedback
       - staff-service
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
     networks:
       - mcp-network
 
@@ -873,10 +876,11 @@ services:
     depends_on:
       - nginx
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9080/ready"]
+      test: ["CMD-SHELL", "nc -z localhost 9080 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s
     deploy:
       resources:
         limits:
@@ -902,6 +906,9 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - POSTGRES_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/mcp_database # Default DB for dev-tools
+      - PYTHONPATH=/workspace:/home/mcp/.local/lib/python3.11/site-packages
+      - PATH=/home/mcp/.local/bin:$PATH
+      - RABBITMQ_URL=amqp://mcp_user:${RABBITMQ_PASSWORD:-mcp_secure_password}@rabbitmq:5672/%2F
     volumes:
       - .:/workspace
       - ./logs:/workspace/logs
@@ -909,10 +916,12 @@ services:
     depends_on:
       - redis
       - postgres
+      - rabbitmq
     networks:
       - mcp-network
     tty: true
     stdin_open: true
+    command: bash -c "pip list && python -c "import os; print(os.environ.get('RABBITMQ_URL'))" && env && pytest tests/ -v"
 
 # =====================================
 # NETWORKS
@@ -929,6 +938,8 @@ networks:
 # =====================================
 volumes:
   redis_data:
+    driver: local
+  rabbitmq_data:
     driver: local
   postgres_data:
     driver: local

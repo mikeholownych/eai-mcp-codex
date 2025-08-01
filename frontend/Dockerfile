@@ -36,8 +36,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install dumb-init and curl for proper signal handling and health checks
+RUN apk update && apk add --no-cache dumb-init curl
 
 # Create nextjs user
 RUN addgroup --system --gid 1001 nodejs

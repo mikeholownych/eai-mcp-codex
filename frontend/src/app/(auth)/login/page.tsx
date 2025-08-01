@@ -246,7 +246,6 @@ export default function LoginPage() {
                 </Button>
               </motion.div>
             </div>
-            </div>
           </div>
         </Card>
         </motion.div>

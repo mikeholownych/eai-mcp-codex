@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { motion, useAnimation, useInView } from 'framer-motion'
-import { useIntersectionObserver } from 'react-intersection-observer'
+import { motion, useAnimation } from 'framer-motion'
+import { useInView } from 'react-intersection-observer'
 import { 
   CheckIcon,
   ArrowRightIcon,
@@ -170,10 +170,8 @@ const itemVariants = {
 
 const AnimatedCounter = ({ value, suffix = '', duration = 2000 }) => {
   const [count, setCount] = useState(0)
-  const [ref, inView] = useIntersectionObserver({
-    threshold: 0.1,
-    triggerOnce: true
-  })
+  const ref = React.useRef(null);
+  const inView = useInView(ref, { once: true });
 
   useEffect(() => {
     if (inView) {

@@ -671,36 +671,26 @@ export class CommandDefinitionLoader {
   /**
    * Generate command definition template
    */
-  static generateCommandTemplate(
-    name: string,
-    type: 'generation' | 'analysis' | 'refactoring' | 'testing' | 'deployment',
-    options: {
-      description?: string;
-      parameters?: Array<{ name: string; type: string; required: boolean; description: string }>;
-      outputFormat?: 'json' | 'markdown' | 'plain' | 'code';
-      author?: string;
-      securityLevel?: 'low' | 'medium' | 'high' | 'critical';
-    } = {}
-  ): string {
+  public static generateCommandTemplate(name: string, type: string, options: any): string {
     const frontMatter: MCPYamlFrontMatter = {
-      name,
-      scope: 'project',
-      tags: [type, 'command'],
-      version: '1.0.0',
-      command_type: type,
-      output_format: options.outputFormat || 'markdown',
-      security_level: options.securityLevel || 'medium',
-      required_context: [],
-      author: options.author,
-      description: options.description,
-      created_at: new Date().toISOString(),
-    };
+    name,
+    scope: 'project',
+    tags: [type, 'command'],
+    version: '1.0.0',
+    command_type: type,
+    output_format: options.outputFormat || 'markdown',
+    security_level: options.securityLevel || 'medium',
+    required_context: [],
+    author: options.author,
+    description: options.description,
+    created_at: new Date().toISOString(),
+  };
 
-    const parametersList = (options.parameters || [])
-      .map(p => `- ${p.name}: ${p.description} (${p.type}${p.required ? ', required' : ', optional'})`)
-      .join('\n');
+  const parametersList = (options.parameters || [])
+    .map(p => `- ${p.name}: ${p.description} (${p.type}${p.required ? ', required' : ', optional'})`)
+    .join('\n');
 
-    const content = `# ${name.charAt(0).toUpperCase() + name.slice(1)} Command
+  const content = `# ${name.charAt(0).toUpperCase() + name.slice(1)} Command
 
 ${options.description || `Command for ${type} operations.`}
 

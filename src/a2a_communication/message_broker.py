@@ -2,16 +2,30 @@
 
 import json
 import logging
+import os
 from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import UUID
 
+import pika
 from src.common.redis_client import get_redis_connection
 
 from .models import A2AMessage, AgentRegistration, AgentStatus
 
 
 logger = logging.getLogger(__name__)
+
+
+class RabbitMQConnection:
+    def __init__(self, host=os.environ.get("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/%2F")):
+        self.connection = pika.BlockingConnection(pika.URLParameters(host))
+        self.channel = self.connection.channel()
+
+    def __enter__(self):
+        return self.channel
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.connection.close()
 
 
 class A2AMessageBroker:
@@ -24,24 +38,43 @@ class A2AMessageBroker:
         return self
 
     def __init__(self):
-
         self.message_ttl = 3600  # 1 hour default TTL
+        self._setup_rabbitmq()
+
+    def _setup_rabbitmq(self):
+        with RabbitMQConnection() as channel:
+            channel.exchange_declare(exchange="agent_exchange", exchange_type="topic")
+            channel.exchange_declare(exchange="broadcast_exchange", exchange_type="fanout")
 
     async def send_message(self, message: A2AMessage) -> bool:
         """Send a message to an agent or broadcast."""
         try:
             message_data = message.model_dump_json()
 
-            if message.recipient_agent_id:
-                # Direct message
-                queue_key = f"agent:{message.recipient_agent_id}:messages"
-                await self.redis.lpush(queue_key, message_data)
-                await self.redis.expire(queue_key, self.message_ttl)
-            else:
-                # Broadcast message
-                await self.redis.publish("agent:broadcast", message_data)
+            with RabbitMQConnection() as channel:
+                if message.recipient_agent_id:
+                    # Direct message
+                    routing_key = f"agent.{message.recipient_agent_id}"
+                    channel.basic_publish(
+                        exchange="agent_exchange",
+                        routing_key=routing_key,
+                        body=message_data,
+                        properties=pika.BasicProperties(
+                            delivery_mode=2,  # make message persistent
+                        ),
+                    )
+                else:
+                    # Broadcast message
+                    channel.basic_publish(
+                        exchange="broadcast_exchange",
+                        routing_key="",
+                        body=message_data,
+                        properties=pika.BasicProperties(
+                            delivery_mode=2,  # make message persistent
+                        ),
+                    )
 
-            # Store message history
+            # Store message history in Redis
             history_key = f"conversation:{message.conversation_id}:messages"
             await self.redis.lpush(history_key, message_data)
             await self.redis.expire(history_key, 86400)  # 24 hours
@@ -57,24 +90,29 @@ class A2AMessageBroker:
 
     async def get_messages(self, agent_id: str, limit: int = 10) -> List[A2AMessage]:
         """Retrieve messages for an agent."""
+        messages = []
         try:
-            queue_key = f"agent:{agent_id}:messages"
-            raw_messages = await self.redis.lrange(queue_key, 0, limit - 1)
+            with RabbitMQConnection() as channel:
+                queue_name = f"agent_{agent_id}_queue"
+                channel.queue_declare(queue=queue_name, durable=True)
+                binding_key = f"agent.{agent_id}"
+                channel.queue_bind(
+                    exchange="agent_exchange", queue=queue_name, routing_key=binding_key
+                )
 
-            messages = []
-            for raw_msg in raw_messages:
-                message_data = json.loads(raw_msg)
-                messages.append(A2AMessage(**message_data))
-
-            # Remove retrieved messages
-            if raw_messages:
-                await self.redis.ltrim(queue_key, len(raw_messages), -1)
-
-            return messages
+                for _ in range(limit):
+                    method_frame, header_frame, body = channel.basic_get(
+                        queue=queue_name, auto_ack=True
+                    )
+                    if body is None:
+                        break
+                    message_data = json.loads(body)
+                    messages.append(A2AMessage(**message_data))
 
         except Exception as e:
             logger.error(f"Failed to get messages for {agent_id}: {e}")
-            return []
+
+        return messages
 
     async def register_agent(self, registration: AgentRegistration) -> bool:
         """Register an agent in the system."""

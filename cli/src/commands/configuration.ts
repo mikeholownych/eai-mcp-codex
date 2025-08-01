@@ -60,12 +60,7 @@ export async function listAgents(options: MCPListOptions = {}) {
   try {
     const { agentLoader } = initializeConfigSystem();
     
-    const agents = await agentLoader.loadAgentDefinitions({
-      verbose: options.detailed,
-      includeDefault: options.scope !== 'project' && options.scope !== 'global',
-      includeGlobal: options.scope !== 'project' && options.scope !== 'default',
-      includeProject: options.scope !== 'global' && options.scope !== 'default',
-    });
+    const agents = await agentLoader.loadAgentDefinitions();
 
     spinner.succeed(`Found ${agents.length} agent configuration${agents.length !== 1 ? 's' : ''}`);
 
@@ -128,12 +123,7 @@ export async function listCommands(options: MCPListOptions = {}) {
   try {
     const { commandLoader } = initializeConfigSystem();
     
-    const commands = await commandLoader.loadCommandDefinitions({
-      verbose: options.detailed,
-      includeDefault: options.scope !== 'project' && options.scope !== 'global',
-      includeGlobal: options.scope !== 'project' && options.scope !== 'default',
-      includeProject: options.scope !== 'global' && options.scope !== 'default',
-    });
+    const commands = await commandLoader.loadCommandDefinitions();
 
     spinner.succeed(`Found ${commands.length} command configuration${commands.length !== 1 ? 's' : ''}`);
 
@@ -260,6 +250,12 @@ export async function initializeConfiguration(scope: 'global' | 'project' = 'pro
     // Create directories
     await fs.promises.mkdir(configDir, { recursive: true });
     await fs.promises.mkdir(commandsDir, { recursive: true });
+    
+    // Create empty MEMORY.md file
+    const memoryPath = path.join(configDir, 'MEMORY.md');
+    if (!fs.existsSync(memoryPath)) {
+      await fs.promises.writeFile(memoryPath, '# MCP Memory\n\n');
+    }
     
     // Create example agent configuration
     const exampleAgent = AgentDefinitionLoader.generateAgentTemplate(

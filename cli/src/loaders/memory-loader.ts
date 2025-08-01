@@ -1,0 +1,1 @@
+export class MemoryLoader { constructor() {} async loadMemory(): Promise<string> { return ""; } }
