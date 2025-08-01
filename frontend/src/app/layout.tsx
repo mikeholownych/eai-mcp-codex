@@ -115,13 +115,14 @@ export default function RootLayout({
               
               // Load Web Vitals library and track metrics
               if ('loading' in HTMLImageElement.prototype) {
-                import('https://unpkg.com/web-vitals@3/dist/web-vitals.js').then(({ onFCP, onLCP, onCLS, onFID, onTTFB }) => {
+                (async () => {
+                  const { onFCP, onLCP, onCLS, onFID, onTTFB } = await import('https://unpkg.com/web-vitals@3/dist/web-vitals.js');
                   onFCP(vitals);
                   onLCP(vitals);
                   onCLS(vitals);
                   onFID(vitals);
                   onTTFB(vitals);
-                });
+                })();
               }
             `,
           }}
