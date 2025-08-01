@@ -53,6 +53,24 @@ scrape_configs:
     static_configs:
       - targets: ['consul:8500']
 
+  # RabbitMQ Message Broker Monitoring
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15692']  # Prometheus metrics port
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    
+  - job_name: 'rabbitmq-management'
+    static_configs:
+      - targets: ['rabbitmq:15672']  # Management API
+    metrics_path: '/api/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 15s
+    basic_auth:
+      username: 'mcp_user'
+      password: 'mcp_secure_password'
+
   # LLM Stack Services (external to RAG-agent network)
   - job_name: 'llm-ollama'
     static_configs:
@@ -73,4 +91,26 @@ scrape_configs:
       - targets: ['host.docker.internal:8000']
     metrics_path: '/metrics'
     scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Agent Framework Services (A2A Communication)
+  - job_name: 'agent-framework'
+    static_configs:
+      - targets:
+        - 'a2a-communication:8010'
+        - 'agent-pool:8011'
+        - 'collaboration-orchestrator:8012'
+        - 'agent-monitor:8016'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    
+  - job_name: 'specialized-agents'
+    static_configs:
+      - targets:
+        - 'planner-agent:8013'
+        - 'security-agent:8014'
+        - 'developer-agent:8015'
+    metrics_path: '/metrics'
+    scrape_interval: 20s
     scrape_timeout: 10s

@@ -5,7 +5,6 @@ from datetime import datetime
 from dataclasses import dataclass
 
 from .logging import get_logger
-from .database import DatabaseManager  # Import DatabaseManager
 
 logger = get_logger("health")
 
@@ -148,18 +147,7 @@ def check_disk_usage(
     }
 
 
-async def check_database_connection(db_manager: DatabaseManager) -> Dict[str, Any]:
-    """Check database connectivity."""
-    try:
-        # Attempt to execute a simple query to check connection
-        await db_manager.execute("SELECT 1")
 
-        return {"status": "healthy", "message": "Database connection OK"}
-    except Exception as e:
-        return {
-            "status": "unhealthy",
-            "message": f"Database connection failed: {str(e)}",
-        }
 
 
 def check_redis_connection(redis_client) -> Dict[str, Any]:

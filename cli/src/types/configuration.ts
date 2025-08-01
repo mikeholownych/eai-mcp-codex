@@ -60,7 +60,7 @@ export interface MCPConfiguration {
   checksum?: string;
 }
 
-export interface AgentConfiguration extends MCPConfiguration {
+export interface AgentDefinition extends MCPConfiguration {
   instructions: string;
   systemPrompt?: string;
   examples?: Array<{
@@ -76,9 +76,14 @@ export interface AgentConfiguration extends MCPConfiguration {
     presence_penalty?: number;
     frequency_penalty?: number;
   };
+  type: string; // e.g., 'planner', 'developer'
+  capabilities: string[];
+  securitySettings: { securityLevel: string };
+  collaborationSettings: { multiAgent: boolean };
+  metadata: { version: string; usageCount?: number; };
 }
 
-export interface CommandConfiguration extends MCPConfiguration {
+export interface CommandDefinition extends MCPConfiguration {
   instructions: string;
   parameters?: {
     [key: string]: {
@@ -96,6 +101,84 @@ export interface CommandConfiguration extends MCPConfiguration {
     fallbackStrategy?: string;
     escalationRules?: string[];
   };
+  type: string; // e.g., 'generation', 'analysis'
+  outputFormat: string;
+  parameterSchema: { [key: string]: any }; // Detailed schema for parameters
+  executionSettings: { preExecutionChecks: string[]; postExecutionActions: string[] };
+  securitySettings: { securityLevel: string };
+  contextRequirements: { requiredContext: string[] };
+  metadata: { version: string; usageCount?: number; };
+}
+
+export interface AgentDefinition extends MCPConfiguration {
+  instructions: string;
+  systemPrompt?: string;
+  examples?: Array<{
+    input: string;
+    output: string;
+    explanation?: string;
+  }>;
+  constraints?: string[];
+  behaviorModifiers?: {
+    temperature?: number;
+    max_tokens?: number;
+    top_p?: number;
+    presence_penalty?: number;
+    frequency_penalty?: number;
+  };
+  type: string; // e.g., 'planner', 'developer'
+  capabilities: string[];
+  securitySettings: { securityLevel: string };
+  collaborationSettings: { multiAgent: boolean };
+  metadata: { version: string; usageCount?: number; };
+}
+
+export interface CommandDefinition extends MCPConfiguration {
+  instructions: string;
+  parameters?: {
+    [key: string]: {
+      type: string;
+      required: boolean;
+      description: string;
+      default?: any;
+      validation?: string;
+    };
+  };
+  preExecutionChecks?: string[];
+  postExecutionActions?: string[];
+  errorHandling?: {
+    retryCount?: number;
+    fallbackStrategy?: string;
+    escalationRules?: string[];
+  };
+  type: string; // e.g., 'generation', 'analysis'
+  outputFormat: string;
+  parameterSchema: { [key: string]: any }; // Detailed schema for parameters
+  executionSettings: { preExecutionChecks: string[]; postExecutionActions: string[] };
+  securitySettings: { securityLevel: string };
+  contextRequirements: { requiredContext: string[] };
+  metadata: { version: string; usageCount?: number; };
+}
+
+export interface AgentExecutionContext {
+  agent: AgentDefinition;
+  parameters: any;
+  securityContext: {
+    permissions: string[];
+  };
+  workingDirectory: string;
+  executionEnvironment: string;
+}
+
+export interface CommandExecutionContext {
+  command: CommandDefinition;
+  parameters: any;
+  securityContext: {
+    permissions: string[];
+  };
+  workingDirectory: string;
+  executionEnvironment: string;
+  [key: string]: any; // Allow for additional properties
 }
 
 export interface ConfigurationHierarchy {
@@ -103,6 +186,8 @@ export interface ConfigurationHierarchy {
   global: MCPConfiguration[];
   project: MCPConfiguration[];
   resolved: MCPConfiguration[];
+  settings: { [key: string]: any };
+  memory: string;
 }
 
 export interface ConfigurationSource {
@@ -287,5 +372,5 @@ export interface ConfigurationEvent {
 export type ConfigurationEventListener = (event: ConfigurationEvent) => void;
 
 // Re-export specialized types from loaders
-export type { AgentDefinition } from '../loaders/agent-definition-loader';
-export type { CommandDefinition } from '../loaders/command-definition-loader';
+export type { AgentDefinition, AgentExecutionContext } from '../loaders/agent-definition-loader';
+export type { CommandDefinition, CommandExecutionContext } from '../loaders/command-definition-loader';

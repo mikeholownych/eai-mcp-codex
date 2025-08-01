@@ -1,0 +1,556 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "EAI-MCP Platform SLIs/SLOs",
+    "tags": ["sre", "sli", "slo", "reliability"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Availability SLIs (99.9% Target)",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "avg_over_time(up{job=~\"mcp-services|frontend|llm-.*\"}[24h]) * 100",
+            "legendFormat": "{{job}} - 24h Availability",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 90,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 99.5 },
+                { "color": "green", "value": 99.9 }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Response Time SLIs (P95 < 2s Target)",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~\"mcp-services|frontend\"}[5m]))",
+            "legendFormat": "{{job}} - P95 Latency",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0,
+            "max": 5,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 2 }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 3,
+        "title": "Error Rate SLIs (< 1% Target)",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[1h]) / rate(http_requests_total[1h]) * 100",
+            "legendFormat": "{{job}} - Error Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 5,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 0.5 },
+                { "color": "red", "value": 1 }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 4,
+        "title": "LLM-Specific SLIs",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(llm_response_time_seconds_bucket[5m]))",
+            "legendFormat": "LLM P95 Response Time",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(llm_tokens_per_second[5m])",
+            "legendFormat": "Token Throughput",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.90, rate(llm_context_usage_ratio_bucket[5m])) * 100",
+            "legendFormat": "P90 Context Usage",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 50 },
+                { "color": "red", "value": 80 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "LLM P95 Response Time" },
+              "properties": [
+                { "id": "unit", "value": "s" },
+                { "id": "max", "value": 30 }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Token Throughput" },
+              "properties": [
+                { "id": "unit", "value": "tps" },
+                { "id": "min", "value": 0 }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "P90 Context Usage" },
+              "properties": [
+                { "id": "unit", "value": "percent" },
+                { "id": "max", "value": 100 }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Error Budget Burn Rate (24h)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "(1 - avg_over_time(up[1h])) * 100 / 0.1",
+            "legendFormat": "Availability Budget Burn",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[1h]) / rate(http_requests_total[1h]) * 100 / 1",
+            "legendFormat": "Error Rate Budget Burn",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Budget Burn Rate",
+            "min": 0,
+            "max": 10
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": { "params": [2], "type": "gt" },
+              "operator": { "type": "and" },
+              "query": { "params": ["A", "5m", "now"] },
+              "reducer": { "params": [], "type": "avg" },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "2m",
+          "frequency": "10s",
+          "handler": 1,
+          "name": "High Error Budget Burn Rate",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 6,
+        "title": "Service Level Objectives Status",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "avg_over_time(up[24h]) * 100",
+            "legendFormat": "{{job}}",
+            "refId": "Availability",
+            "format": "table"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[1h]))",
+            "legendFormat": "{{job}}",
+            "refId": "Latency",
+            "format": "table"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[1h]) / rate(http_requests_total[1h]) * 100",
+            "legendFormat": "{{job}}",
+            "refId": "ErrorRate",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "job": 0,
+                "Value #Availability": 1,
+                "Value #Latency": 2,
+                "Value #ErrorRate": 3
+              },
+              "renameByName": {
+                "job": "Service",
+                "Value #Availability": "Availability (%)",
+                "Value #Latency": "P95 Latency (s)",
+                "Value #ErrorRate": "Error Rate (%)"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Availability (%)" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 99.5 },
+                      { "color": "green", "value": 99.9 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "P95 Latency (s)" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 1 },
+                      { "color": "red", "value": 2 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Error Rate (%)" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 0.5 },
+                      { "color": "red", "value": 1 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "title": "Agent Collaboration SLIs",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 34 },
+        "targets": [
+          {
+            "expr": "agent_collaboration_success_rate * 100",
+            "legendFormat": "{{collaboration_type}} Success Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.90, rate(agent_consensus_time_seconds_bucket[10m]))",
+            "legendFormat": "{{consensus_type}} P90 Consensus Time",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 85 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*Success Rate" },
+              "properties": [
+                { "id": "unit", "value": "percent" },
+                { "id": "max", "value": 100 }
+              ]
+            },
+            {
+              "matcher": { "id": "byRegexp", "options": ".*Consensus Time" },
+              "properties": [
+                { "id": "unit", "value": "s" },
+                { "id": "max", "value": 300 }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 8,
+        "title": "Resource Utilization SLIs",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 },
+        "targets": [
+          {
+            "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU Usage - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "Memory Usage - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes)) * 100",
+            "legendFormat": "Disk Usage - {{instance}}:{{mountpoint}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Usage (%)",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "critical",
+            "op": "gt"
+          },
+          {
+            "value": 95,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Database Performance SLIs",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "pg_up * 100",
+            "legendFormat": "PostgreSQL Availability",
+            "refId": "A"
+          },
+          {
+            "expr": "(pg_stat_database_numbackends / pg_settings_max_connections) * 100",
+            "legendFormat": "Connection Pool Usage",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(pg_stat_database_tup_returned[5m]) / rate(pg_stat_database_tup_fetched[5m]) * 100",
+            "legendFormat": "Query Efficiency",
+            "refId": "C"
+          },
+          {
+            "expr": "redis_up * 100",
+            "legendFormat": "Redis Availability",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 80 },
+                { "color": "green", "value": 95 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Security & Compliance SLIs",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=\"401\"}[1h]) / rate(http_requests_total[1h]) * 100",
+            "legendFormat": "Authentication Failure Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{status=\"403\"}[1h]) / rate(http_requests_total[1h]) * 100",
+            "legendFormat": "Authorization Failure Rate",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(security_events_total[1h]))",
+            "legendFormat": "Security Events/Hour",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*Failure Rate" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Security Events/Hour" },
+              "properties": [
+                { "id": "unit", "value": "short" }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "service",
+          "type": "query",
+          "query": "label_values(up, job)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "time_range",
+          "type": "custom",
+          "options": [
+            { "text": "1h", "value": "1h" },
+            { "text": "6h", "value": "6h" },
+            { "text": "24h", "value": "24h" },
+            { "text": "7d", "value": "7d" },
+            { "text": "30d", "value": "30d" }
+          ],
+          "current": {
+            "text": "24h",
+            "value": "24h"
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "expr": "changes(up[5m]) > 0",
+          "iconColor": "blue",
+          "titleFormat": "Service Restart: {{job}}"
+        },
+        {
+          "name": "Alerts",
+          "datasource": "Prometheus", 
+          "expr": "ALERTS{alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Alert: {{alertname}}"
+        }
+      ]
+    }
+  }
+}

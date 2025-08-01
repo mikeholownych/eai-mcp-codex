@@ -1,0 +1,381 @@
+# Distributed Tracing Configuration for EAI-MCP Platform
+# OpenTelemetry-based tracing for complete request flow visibility
+
+tracing:
+  enabled: true
+  service_name: "${SERVICE_NAME:-eai-mcp-platform}"
+  service_version: "${SERVICE_VERSION:-1.0.0}"
+  environment: "${ENVIRONMENT:-development}"
+  
+  # OpenTelemetry Configuration
+  otel:
+    # Trace collection and export
+    collector:
+      endpoint: "http://jaeger-collector:14268/api/traces"
+      timeout: 10s
+      compression: gzip
+      headers:
+        api-key: "${TRACING_API_KEY:-}"
+    
+    # Alternative exporters
+    exporters:
+      jaeger:
+        enabled: true
+        endpoint: "http://jaeger:14268/api/traces"
+        agent_host: "jaeger-agent"
+        agent_port: 6831
+      
+      zipkin:
+        enabled: false
+        endpoint: "http://zipkin:9411/api/v2/spans"
+      
+      otlp:
+        enabled: false
+        endpoint: "http://otel-collector:4317"
+        insecure: true
+    
+    # Sampling configuration
+    sampling:
+      # Sample 100% in development, 10% in production
+      ratio: "${TRACE_SAMPLE_RATIO:-1.0}"
+      
+      # Adaptive sampling based on service load
+      adaptive:
+        enabled: true
+        target_tps: 10  # Target traces per second
+        max_tps: 100    # Maximum traces per second
+      
+      # Per-service sampling rules
+      rules:
+        - service: "model-router"
+          ratio: 1.0
+        - service: "llm-*"
+          ratio: 0.5  # Lower sampling for high-volume LLM calls
+        - service: "frontend"
+          ratio: 0.1  # Even lower for frontend requests
+    
+    # Resource detection
+    resource:
+      detectors:
+        - env
+        - system
+        - process
+        - container
+      
+      # Additional resource attributes
+      attributes:
+        service.namespace: "eai-mcp"
+        service.instance.id: "${HOSTNAME:-unknown}"
+        deployment.environment: "${ENVIRONMENT:-development}"
+
+  # Instrumentation configuration
+  instrumentation:
+    # HTTP requests/responses
+    http:
+      enabled: true
+      capture_headers: true
+      capture_body: false  # Privacy consideration
+      exclude_urls:
+        - "/health"
+        - "/metrics" 
+        - "/favicon.ico"
+      
+      # Request/response size limits
+      max_request_size: 1024   # bytes
+      max_response_size: 1024  # bytes
+    
+    # Database operations
+    database:
+      enabled: true
+      capture_sql: true
+      sanitize_sql: true  # Remove sensitive data
+      
+      # Specific database configurations  
+      postgresql:
+        enabled: true
+        capture_parameters: false
+      
+      redis:
+        enabled: true
+        capture_keys: false  # Privacy consideration
+    
+    # LLM-specific tracing
+    llm:
+      enabled: true
+      capture_prompts: false    # Privacy consideration
+      capture_responses: false  # Privacy consideration
+      capture_tokens: true
+      capture_model_params: true
+      
+      # Model-specific settings
+      models:
+        claude:
+          capture_context_length: true
+          capture_reasoning_traces: false
+        
+        local_models:
+          capture_embeddings: false
+          capture_vector_operations: true
+    
+    # Agent collaboration tracing
+    agents:
+      enabled: true
+      capture_messages: false      # Privacy consideration
+      capture_consensus_process: true
+      capture_handoff_details: true
+      capture_collaboration_graph: true
+      
+      # Collaboration flow tracking
+      workflows:
+        planning: true
+        verification: true
+        deployment: true
+    
+    # Custom application spans
+    custom:
+      enabled: true
+      
+      # Business logic spans
+      spans:
+        - name: "code_generation"
+          capture_inputs: false
+          capture_outputs: false
+          capture_metrics: true
+        
+        - name: "security_scan" 
+          capture_results: true
+          capture_vulnerabilities: true
+        
+        - name: "performance_analysis"
+          capture_metrics: true
+          capture_recommendations: true
+
+  # Span processing and enhancement
+  processing:
+    # Batch processing
+    batch:
+      enabled: true
+      timeout: 5s
+      max_queue_size: 2048
+      max_export_batch_size: 512
+    
+    # Span filtering
+    filters:
+      # Drop noisy spans
+      drop_spans:
+        - name_regex: ".*heartbeat.*"
+        - name_regex: ".*health.*check.*"
+        - duration_ms: "<10"  # Drop very fast operations
+      
+      # Enhance spans with additional data
+      enhance_spans:
+        - add_service_tags: true
+        - add_environment_context: true
+        - add_user_context: false  # Privacy consideration
+    
+    # Error handling
+    error_handling:
+      capture_exceptions: true
+      capture_stack_traces: true
+      max_stack_trace_size: 2048
+      
+      # Error classification
+      classify_errors:
+        - pattern: ".*timeout.*"
+          type: "timeout"
+          severity: "warning"
+        
+        - pattern: ".*connection.*refused.*"
+          type: "connectivity"
+          severity: "error"
+        
+        - pattern: ".*authentication.*failed.*"
+          type: "security"
+          severity: "critical"
+
+  # Performance optimization
+  performance:
+    # Memory management
+    memory:
+      max_spans_in_memory: 10000
+      cleanup_interval: 30s
+    
+    # CPU optimization
+    cpu:
+      max_sampling_overhead: 5  # percent
+      adaptive_sampling: true
+    
+    # Network optimization
+    network:
+      compression: true
+      batch_timeout: 1s
+      retry_policy:
+        max_attempts: 3
+        backoff_multiplier: 2
+        max_backoff: 30s
+
+  # Security and privacy
+  security:
+    # Data sanitization
+    sanitization:
+      enabled: true
+      patterns:
+        - regex: "password=.*"
+          replacement: "password=***"
+        - regex: "token=.*"
+          replacement: "token=***"
+        - regex: "api[_-]?key=.*"
+          replacement: "api_key=***"
+        - regex: "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"
+          replacement: "email@***"
+    
+    # Access control
+    access:
+      require_auth: false  # For internal tracing
+      allowed_ips: []      # Empty = allow all
+      rate_limiting:
+        enabled: true
+        requests_per_minute: 1000
+
+  # Integration with monitoring systems
+  integrations:
+    # Prometheus metrics
+    prometheus:
+      enabled: true
+      namespace: "eai_mcp_tracing"
+      metrics:
+        - spans_created_total
+        - spans_exported_total
+        - span_duration_histogram
+        - trace_errors_total
+    
+    # Grafana dashboards
+    grafana:
+      enabled: true
+      dashboard_configs:
+        - name: "trace_overview"
+          panels: ["service_map", "latency_heatmap", "error_rates"]
+        
+        - name: "llm_tracing"
+          panels: ["model_performance", "token_usage", "context_analysis"]
+        
+        - name: "agent_collaboration"
+          panels: ["consensus_flows", "handoff_patterns", "collaboration_success"]
+    
+    # Alerting
+    alerting:
+      enabled: true
+      rules:
+        - name: "high_trace_error_rate"
+          condition: "trace_errors_total / traces_total > 0.05"
+          severity: "warning"
+        
+        - name: "trace_export_failure"
+          condition: "spans_export_failures_total > 0"
+          severity: "critical"
+        
+        - name: "high_trace_latency"
+          condition: "span_duration_p95 > 10s"
+          severity: "warning"
+
+  # Development and debugging
+  development:
+    # Debug mode
+    debug:
+      enabled: "${DEBUG_TRACING:-false}"
+      log_level: "debug"
+      console_exporter: true
+    
+    # Local development
+    local:
+      enabled: "${LOCAL_DEVELOPMENT:-false}"
+      jaeger_ui_url: "http://localhost:16686"
+      sample_ratio: 1.0  # 100% sampling in development
+    
+    # Testing
+    testing:
+      enabled: false
+      mock_exporter: true
+      capture_test_traces: true
+      test_span_validation: true
+
+# Service-specific tracing configurations
+services:
+  model_router:
+    spans:
+      - "model_selection"
+      - "request_routing"
+      - "response_aggregation"
+    
+    metrics:
+      - "routing_decisions"
+      - "model_health_checks"
+  
+  plan_management:
+    spans:
+      - "task_decomposition"
+      - "consensus_building"
+      - "plan_validation"
+    
+    metrics:
+      - "planning_success_rate"
+      - "consensus_time"
+  
+  git_worktree_manager:
+    spans:
+      - "git_operations"
+      - "worktree_management"
+      - "merge_operations"
+    
+    metrics:
+      - "git_operation_success"
+      - "merge_conflicts"
+  
+  workflow_orchestrator:
+    spans:
+      - "workflow_execution"
+      - "step_coordination"
+      - "error_recovery"
+    
+    metrics:
+      - "workflow_completion_rate"
+      - "step_failure_rate"
+  
+  verification_feedback:
+    spans:
+      - "code_analysis"
+      - "security_scanning"
+      - "quality_assessment"
+    
+    metrics:
+      - "verification_coverage"
+      - "security_issues_found"
+
+# Trace analysis and insights
+analysis:
+  # Critical path analysis
+  critical_path:
+    enabled: true
+    percentile: 95
+    min_duration_ms: 100
+  
+  # Bottleneck detection
+  bottlenecks:
+    enabled: true
+    detection_algorithms:
+      - "statistical_outliers"
+      - "trend_analysis"
+      - "dependency_analysis"
+  
+  # Performance regression detection
+  regression:
+    enabled: true
+    baseline_period: "7d"
+    sensitivity: 0.2  # 20% degradation threshold
+  
+  # Capacity planning insights
+  capacity:
+    enabled: true
+    forecasting_horizon: "30d"
+    growth_rate_analysis: true
+    resource_correlation: true

@@ -31,15 +31,15 @@ logger = logging.getLogger(__name__)
 class CollaborationOrchestrator:
     """Orchestrates multi-agent collaborations and consensus building."""
 
-    def __init__(
-        self,
-        redis: Optional[Redis] = None,
-        message_broker: Optional[A2AMessageBroker] = None,
-    ) -> None:
-        self.redis = redis or get_redis_connection()
-        self.message_broker = message_broker or A2AMessageBroker()
+    def __init__(self) -> None:
+        self.redis: Optional[Redis] = None
+        self.message_broker: Optional[A2AMessageBroker] = None
         self.active_sessions: Dict[UUID, CollaborationSession] = {}
         self.consensus_decisions: Dict[UUID, ConsensusDecision] = {}
+
+    async def initialize(self) -> None:
+        self.redis = await get_redis_connection()
+        self.message_broker = await A2AMessageBroker.create()
 
     async def create_collaboration_session(
         self,
