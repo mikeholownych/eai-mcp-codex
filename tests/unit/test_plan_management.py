@@ -7,9 +7,10 @@ from src.plan_management.plan_manager import (
     PlanStatus,
 )
 from src.common.database import DatabaseManager
+from src.common.tenant import tenant_context, async_tenant_context
 import os
 
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
+import pytest_asyncio
 
 
 @pytest.fixture(autouse=True)
@@ -17,24 +18,48 @@ async def setup_and_teardown_db():
     os.environ["TESTING_MODE"] = "true"
     db_manager = DatabaseManager("plan_management_db")
     await db_manager.connect()
-    # In a real test, you might create tables here if not using in-memory
     yield
     await db_manager.disconnect()
     os.environ["TESTING_MODE"] = "false"
 
 
 @pytest.mark.asyncio
-async def test_create_plan() -> None:
-    plan = await create_plan("test")
-    assert plan.id is not None
-    assert plan.title == "test"
-    assert plan.status == PlanStatus.DRAFT
+async def test_update_plan_multi_tenant() -> None:
+    with tenant_context("tenant_update_a"):
+        plan = await create_plan("update_me")
+        updated = await update_plan(plan.id, {"title": "updated"})
+        assert updated is not None
+        assert updated.title == "updated"
 
-    retrieved_plan = await get_plan(plan.id)
-    assert retrieved_plan == plan
+    with tenant_context("tenant_update_b"):
+        # Attempt to update plan from another tenant should fail
+        result = await update_plan(plan.id, {"title": "fail"})
+        assert result is None
 
-    all_plans = await list_plans()
-    assert plan in all_plans
+    with tenant_context("tenant_update_a"):
+        await delete_plan(plan.id)
+        assert await get_plan(plan.id) is None
+
+
+@pytest.mark.asyncio
+async def test_delete_plan_wrong_tenant() -> None:
+    with tenant_context("tenant_del_a"):
+        plan = await create_plan("to_delete")
+
+    with tenant_context("tenant_del_b"):
+        # Delete attempt from non-owner tenant should fail
+        result = await delete_plan(plan.id)
+        assert result is False
+
+    with tenant_context("tenant_del_a"):
+        assert await get_plan(plan.id) is not None
+        await delete_plan(plan.id)
+        assert await get_plan(plan.id) is None
+
+
+def test_tenant_context_resets() -> None:
+    """Ensure tenant_context restores previous tenant."""
+    from src.common.tenant import get_current_tenant
 
     await delete_plan(plan.id)
     assert await get_plan(plan.id) is None

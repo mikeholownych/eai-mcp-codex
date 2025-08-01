@@ -1,0 +1,9 @@
+[
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "Stop",
+    "stop_hook_active": false
+  }
+]
