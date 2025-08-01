@@ -9,6 +9,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Structured debug logging
+ */
+export function debug(label: string, data: unknown): void {
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.log(`[DEBUG] ${label}:`, JSON.stringify(data, null, 2))
+  }
+}
+
+/**
  * Format bytes to human readable string
  */
 export function formatBytes(bytes: number, decimals = 2): string {
