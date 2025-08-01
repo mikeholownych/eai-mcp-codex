@@ -18,3 +18,5 @@ numpy
 alembic
 pytest-asyncio
 abacusai
+mkdocs>=1.6
+mkdocs-material>=9.6

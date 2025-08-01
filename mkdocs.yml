@@ -1,0 +1,44 @@
+site_name: Ethical AI Insider Documentation
+site_url: https://docs.ethical-ai-insider.com
+repo_url: https://github.com/ethical-ai-insider/eai-mcp-codex
+docs_dir: docs
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Data Flow: architecture/data-flow.md
+      - Service Communication: architecture/service-communication.md
+  - API Reference:
+      - Model Router: api/model-router.md
+      - Plan Management: api/plan-management.md
+      - Git Worktree: api/git-worktree.md
+      - Workflow Orchestrator: api/workflow-orchestrator.md
+      - Verification Feedback: api/verification-feedback.md
+  - Development:
+      - Coding Standards: development/coding-standards.md
+      - Contributing: development/contributing.md
+      - Testing Guide: development/testing-guide.md
+  - Deployment:
+      - Docker Setup: deployment/docker-setup.md
+      - Kubernetes: deployment/kubernetes.md
+      - Production Guide: deployment/production-guide.md
+  - Guides:
+      - Collaboration Patterns: collaboration-patterns.md
+      - Custom Agents: custom-agents.md
+      - A2A Communication Guide: a2a-communication-guide.md
+      - Performance Optimization: performance-optimization.md
+      - Troubleshooting Guide: troubleshooting-guide.md
+      - Multi Developer Coordination: multi-developer-coordination-system.md
