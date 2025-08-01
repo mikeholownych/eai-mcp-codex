@@ -487,6 +487,8 @@ make test-collaboration
 - **Testing**: Unit tests, integration tests, A2A scenarios
 - **Performance**: Benchmark critical paths
 
+For full online documentation visit [docs.ethical-ai-insider.com](https://docs.ethical-ai-insider.com).
+
 ## 📚 **Documentation**
 
 ### **Core Documentation**
