@@ -271,6 +271,22 @@ class MockAsyncpgPool:
         return None
 
 
+async def get_postgres_connection(dsn: str | None = None):
+    """Return a single asyncpg connection or a mock in testing mode."""
+    if os.getenv("TESTING_MODE") == "true":
+        return MockAsyncpgConnection()
+
+    if "asyncpg" not in globals():
+        import asyncpg  # type: ignore
+
+    dsn = dsn or os.getenv("DATABASE_URL", "postgresql://localhost/postgres")
+    try:
+        return await asyncpg.connect(dsn)
+    except Exception as e:  # pragma: no cover - connection failures tested elsewhere
+        logger.error("Failed to connect to Postgres: %s", e)
+        raise
+
+
 def deserialize_datetime_str(dt_str: str | None) -> Optional[datetime]:
     """Deserialize a datetime from ISO format string."""
     if not dt_str:
