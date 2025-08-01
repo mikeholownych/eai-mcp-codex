@@ -4,7 +4,10 @@ import chalk from 'chalk';
 import yaml from 'yaml';
 import { AgentClient } from './agent';
 
-export async function run(file: string, options: { format?: string }) {
+export async function run(
+  file: string,
+  options: { format?: string; dryRun?: boolean },
+) {
   try {
     const resolvedPath = path.resolve(file);
     if (!fs.existsSync(resolvedPath)) {
@@ -28,6 +31,9 @@ export async function run(file: string, options: { format?: string }) {
       const name = step.command;
       const args = step.args || {};
       console.log(chalk.blue(`\n▶ Executing: ${name} ${JSON.stringify(args)}`));
+      if (options.dryRun) {
+        continue; // Skip execution in dry-run mode
+      }
       try {
         await client.dispatchCommand(name, args);
       } catch (err: any) {
