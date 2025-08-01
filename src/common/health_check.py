@@ -5,7 +5,7 @@ from datetime import datetime
 from dataclasses import dataclass
 
 from .logging import get_logger
-from .database import DatabaseManager # Import DatabaseManager
+from .database import DatabaseManager  # Import DatabaseManager
 
 logger = get_logger("health")
 
