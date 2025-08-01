@@ -41,10 +41,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const response = await authApi.getCurrentUser()
-      if (response.success && response.data) {
+      if (response?.success && response.data) {
         setUser(response.data)
       } else {
-        localStorage.removeItem('auth_token')
+        throw new Error('Unexpected auth response')
       }
     } catch (error) {
       console.error('Auth check failed:', error)
