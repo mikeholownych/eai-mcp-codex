@@ -3,11 +3,9 @@
  * Handles loading and processing of command-specific Markdown files from commands/ subdirectory
  */
 
-import * as path from 'path';
 import { ConfigurationManager } from '../config/configuration-manager';
 import { MarkdownParser } from '../utils/markdown-parser';
 import {
-  MCPConfiguration,
   CommandConfiguration,
   ConfigurationLoadOptions,
   ConfigurationError,
