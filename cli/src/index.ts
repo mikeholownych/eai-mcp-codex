@@ -150,6 +150,7 @@ program
   .command('batch <file>')
   .description('Run multiple commands from a JSON or YAML file')
   .option('-f, --format <format>', 'Input format (json|yaml)')
+  .option('--dry-run', 'Print commands without executing')
   .action(batch.run);
 
 // Configuration commands
