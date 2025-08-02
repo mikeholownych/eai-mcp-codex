@@ -1,0 +1,252 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # MCP Service Logs
+  - job_name: mcp-services
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: mcp-services
+          __path__: /var/log/mcp/*/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            service: service_name
+            request_id: request_id
+      - labels:
+          level:
+          service:
+          request_id:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+
+  # Docker Container Logs
+  - job_name: docker
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          __path__: /var/lib/docker/containers/*/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            attrs:
+      - json:
+          source: attrs
+          expressions:
+            tag:
+      - regex:
+          source: tag
+          expression: '^.+/(?P<container_name>[^:]+):.+$'
+      - labels:
+          stream:
+          container_name:
+      - output:
+          source: output
+
+  # Nginx Access Logs
+  - job_name: nginx-access
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx-access
+          __path__: /var/log/mcp/nginx/access.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time_local>[^\]]+)\] "(?P<method>\S+) (?P<request_uri>\S+) (?P<protocol>\S+)" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>[^"]*)" "(?P<http_user_agent>[^"]*)"'
+      - labels:
+          method:
+          status:
+          remote_addr:
+      - timestamp:
+          source: time_local
+          format: 02/Jan/2006:15:04:05 -0700
+
+  # Nginx Error Logs
+  - job_name: nginx-error
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx-error
+          __path__: /var/log/mcp/nginx/error.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] (?P<pid>\d+)#(?P<tid>\d+): (?P<message>.*)'
+      - labels:
+          level:
+          pid:
+      - timestamp:
+          source: timestamp
+          format: 2006/01/02 15:04:05
+
+  # PostgreSQL Logs
+  - job_name: postgresql
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: postgresql
+          __path__: /var/log/mcp/postgres/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+) \[(?P<pid>\d+)\] (?P<level>\w+):  (?P<message>.*)'
+      - labels:
+          level:
+          pid:
+      - timestamp:
+          source: timestamp
+          format: 2006-01-02 15:04:05.000 MST
+
+  # Redis Logs
+  - job_name: redis
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: redis
+          __path__: /var/log/mcp/redis/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<pid>\d+):(?P<role>\w+) (?P<timestamp>\d{2} \w{3} \d{4} \d{2}:\d{2}:\d{2}\.\d{3}) (?P<level>[*#-]) (?P<message>.*)'
+      - labels:
+          level:
+          role:
+          pid:
+      - timestamp:
+          source: timestamp
+          format: 02 Jan 2006 15:04:05.000
+
+  # Application-specific log patterns
+  - job_name: model-router
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: model-router
+          service: model-router
+          __path__: /var/log/mcp/model-router/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            model: model
+            latency: latency_ms
+            tokens: tokens
+      - labels:
+          level:
+          model:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+
+  - job_name: plan-management
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: plan-management
+          service: plan-management
+          __path__: /var/log/mcp/plan-management/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            plan_id: plan_id
+            task_id: task_id
+      - labels:
+          level:
+          plan_id:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+
+  - job_name: workflow-orchestrator
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: workflow-orchestrator
+          service: workflow-orchestrator
+          __path__: /var/log/mcp/workflow-orchestrator/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            workflow_id: workflow_id
+            step: step
+      - labels:
+          level:
+          workflow_id:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+
+  - job_name: verification-feedback
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: verification-feedback
+          service: verification-feedback
+          __path__: /var/log/mcp/verification-feedback/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            verification_id: verification_id
+            score: score
+      - labels:
+          level:
+          verification_id:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+
+  - job_name: git-worktree
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: git-worktree
+          service: git-worktree-manager
+          __path__: /var/log/mcp/git-worktree/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            repo: repository
+            branch: branch
+      - labels:
+          level:
+          repo:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano

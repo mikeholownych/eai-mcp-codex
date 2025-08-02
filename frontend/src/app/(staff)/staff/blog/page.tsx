@@ -6,7 +6,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { useRouter } from 'next/navigation'
 import { debug } from '@/lib/utils'
-import { BLOG_STATUS_COLORS, BLOG_STATUS_ICONS } from '@/lib/statusHelpers'
+import { getBlogStatusColor, getBlogStatusIcon } from '@/lib/statusHelpers'
 import {
   PencilSquareIcon,
   DocumentTextIcon,
@@ -86,14 +86,6 @@ const mockBlogPosts = [
   }
 ]
 
-const getStatusColor = (status: string) =>
-  BLOG_STATUS_COLORS[status] ?? BLOG_STATUS_COLORS.draft
-
-const getStatusIcon = (status: string) =>
-  BLOG_STATUS_ICONS[status] ?? BLOG_STATUS_ICONS.draft
-
-const getStatusIcon = (status: string) =>
-  statusIcons[status] ?? <DocumentTextIcon className="h-4 w-4" />
 
 export default function BlogContentManagement() {
   const { user } = useAuth()
@@ -326,8 +318,8 @@ export default function BlogContentManagement() {
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(post.status)}`}>
-                      {getStatusIcon(post.status)}
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBlogStatusColor(post.status)}`}>
+                      {getBlogStatusIcon(post.status)}
                       <span className="ml-1 capitalize">{post.status}</span>
                     </span>
                   </td>

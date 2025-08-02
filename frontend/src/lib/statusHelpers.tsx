@@ -72,3 +72,31 @@ export const VISIBILITY_COLORS: Record<string, string> = {
   standard: 'bg-green-500/10 text-green-400',
   free: 'bg-gray-500/10 text-gray-400',
 }
+
+// Helper functions
+export const getBlogStatusColor = (status: string): string => 
+  BLOG_STATUS_COLORS[status] ?? BLOG_STATUS_COLORS.draft
+
+export const getBlogStatusIcon = (status: string): JSX.Element => 
+  BLOG_STATUS_ICONS[status] ?? BLOG_STATUS_ICONS.draft
+
+export const getTicketStatusColor = (status: string): string => 
+  TICKET_STATUS_COLORS[status] ?? TICKET_STATUS_COLORS.open
+
+export const getTicketStatusIcon = (status: string): JSX.Element => 
+  TICKET_STATUS_ICONS[status] ?? TICKET_STATUS_ICONS.open
+
+export const getUserStatusColor = (status: string): string => 
+  USER_STATUS_COLORS[status] ?? USER_STATUS_COLORS.active
+
+export const getUserStatusIcon = (status: string): JSX.Element => 
+  USER_STATUS_ICONS[status] ?? USER_STATUS_ICONS.active
+
+export const getVideoStatusColor = (status: string): string => 
+  VIDEO_STATUS_COLORS[status] ?? VIDEO_STATUS_COLORS.draft
+
+export const getVideoStatusIcon = (status: string): JSX.Element => 
+  VIDEO_STATUS_ICONS[status] ?? VIDEO_STATUS_ICONS.draft
+
+export const getVisibilityColor = (visibility: string): string => 
+  VISIBILITY_COLORS[visibility] ?? VISIBILITY_COLORS.free

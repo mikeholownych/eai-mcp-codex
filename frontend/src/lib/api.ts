@@ -81,21 +81,42 @@ class ApiClient {
     return response.data
   }
 
-  // Model Router endpoints
+  // Model Router endpoints - Updated to match backend API
   async routeRequest(prompt: string, options?: {
     model?: string
     temperature?: number
     maxTokens?: number
-  }): Promise<ApiResponse<CodeRequest>> {
-    const response = await this.client.post('/api/model/route', {
+    taskType?: string
+    priority?: string
+    systemPrompt?: string
+    context?: any
+  }): Promise<ApiResponse<any>> {
+    const requestId = Date.now().toString()
+    const response = await this.client.post('/model/route', {
       text: prompt,
-      ...options,
+      request_id: requestId,
+      temperature: options?.temperature || 0.7,
+      max_tokens: options?.maxTokens || 4096,
+      task_type: options?.taskType,
+      priority: options?.priority || 'medium',
+      system_prompt: options?.systemPrompt,
+      context: options?.context,
     })
     return response.data
   }
 
-  async getModels(): Promise<ApiResponse<string[]>> {
-    const response = await this.client.get('/api/model/models')
+  async getAvailableModels(): Promise<ApiResponse<any>> {
+    const response = await this.client.get('/model/models')
+    return response.data
+  }
+
+  async getModelStats(): Promise<ApiResponse<any>> {
+    const response = await this.client.get('/model/stats')
+    return response.data
+  }
+
+  async testClaudeConnection(): Promise<ApiResponse<any>> {
+    const response = await this.client.post('/model/health/claude')
     return response.data
   }
 
@@ -279,7 +300,9 @@ export const authApi = {
 
 export const modelApi = {
   routeRequest: apiClient.routeRequest.bind(apiClient),
-  getModels: apiClient.getModels.bind(apiClient),
+  getAvailableModels: apiClient.getAvailableModels.bind(apiClient),
+  getModelStats: apiClient.getModelStats.bind(apiClient),
+  testClaudeConnection: apiClient.testClaudeConnection.bind(apiClient),
 }
 
 export const planApi = {
