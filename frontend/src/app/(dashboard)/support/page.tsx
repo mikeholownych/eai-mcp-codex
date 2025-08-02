@@ -168,7 +168,7 @@ export default function SupportPage() {
     category: 'General',
     priority: 'medium' as const,
   })
-  const { user } = useAuth()
+  useAuth()
 
   const handleCreateTicket = (e: React.FormEvent) => {
     e.preventDefault()

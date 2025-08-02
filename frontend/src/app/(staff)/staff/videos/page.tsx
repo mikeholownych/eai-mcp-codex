@@ -105,14 +105,6 @@ const mockVideos = [
   }
 ]
 
-const getStatusColor = (status: string) =>
-  VIDEO_STATUS_COLORS[status] ?? VIDEO_STATUS_COLORS.draft
-
-const getStatusIcon = (status: string) =>
-  VIDEO_STATUS_ICONS[status] ?? VIDEO_STATUS_ICONS.draft
-
-const getVisibilityColor = (visibility: string) =>
-  VISIBILITY_COLORS[visibility] ?? VISIBILITY_COLORS.free
 
 const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
@@ -138,7 +130,7 @@ export default function VideoContentManagement() {
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
         <h3 className="mt-2 text-sm font-medium text-white">Access Denied</h3>
         <p className="mt-1 text-sm text-gray-400">
-          You don't have permission to access video management.
+          You don&apos;t have permission to access video management.
         </p>
       </div>
     )
@@ -630,7 +622,7 @@ export default function VideoContentManagement() {
               <div className="text-center py-8">
                 <CloudUploadIcon className="h-16 w-16 text-blue-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-white mb-2">Uploading Video...</h3>
-                <p className="text-gray-400 mb-6">Please don't close this window</p>
+                <p className="text-gray-400 mb-6">Please don&apos;t close this window</p>
                 
                 <div className="bg-slate-700 rounded-full h-4 mb-4">
                   <div 

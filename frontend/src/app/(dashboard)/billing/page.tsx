@@ -7,11 +7,9 @@ import Button from '@/components/ui/Button'
 import {
   CreditCardIcon,
   DocumentTextIcon,
-  ArrowPathIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   CalendarDaysIcon,
-  BanknotesIcon,
   ChartBarIcon,
   DocumentArrowDownIcon,
 } from '@heroicons/react/24/outline'
@@ -117,7 +115,7 @@ const paymentMethods = [
 export default function BillingPage() {
   const [currentPlan, setCurrentPlan] = useState('pro')
   const [isChangingPlan, setIsChangingPlan] = useState(false)
-  const { user } = useAuth()
+  useAuth()
 
   const handlePlanChange = async (planId: string) => {
     setIsChangingPlan(true)
