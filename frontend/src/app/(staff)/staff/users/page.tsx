@@ -41,8 +41,6 @@ const getStatusColor = (status: string) =>
 const getStatusIcon = (status: string) =>
   USER_STATUS_ICONS[status] ?? USER_STATUS_ICONS.active
 
-const getStatusIcon = (status: string) => statusIcons[status] ?? <ClockIcon className="h-4 w-4" />
-
 export default function UserManagement() {
   const { user: currentUser } = useAuth()
   const router = useRouter()

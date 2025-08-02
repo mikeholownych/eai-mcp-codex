@@ -92,9 +92,6 @@ const getStatusColor = (status: string) =>
 const getStatusIcon = (status: string) =>
   BLOG_STATUS_ICONS[status] ?? BLOG_STATUS_ICONS.draft
 
-const getStatusIcon = (status: string) =>
-  statusIcons[status] ?? <DocumentTextIcon className="h-4 w-4" />
-
 export default function BlogContentManagement() {
   const { user } = useAuth()
   const router = useRouter()

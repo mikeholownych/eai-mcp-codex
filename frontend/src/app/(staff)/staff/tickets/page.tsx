@@ -41,8 +41,6 @@ const getStatusColor = (status: string) =>
 const getStatusIcon = (status: string) =>
   TICKET_STATUS_ICONS[status] ?? TICKET_STATUS_ICONS.open
 
-const getStatusIcon = (status: string) => statusIcons[status] ?? <ClockIcon className="h-4 w-4" />
-
 const categories = [
   'All Categories',
   'API',

@@ -147,9 +147,6 @@ def check_disk_usage(
     }
 
 
-
-
-
 def check_redis_connection(redis_client) -> Dict[str, Any]:
     """Check Redis connectivity."""
     try:
