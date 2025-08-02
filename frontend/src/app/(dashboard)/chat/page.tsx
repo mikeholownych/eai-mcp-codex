@@ -9,8 +9,6 @@ import {
   PaperAirplaneIcon,
   SparklesIcon,
   UserCircleIcon,
-  DocumentTextIcon,
-  CodeBracketIcon,
   LightBulbIcon,
   ClipboardDocumentIcon,
   TrashIcon,

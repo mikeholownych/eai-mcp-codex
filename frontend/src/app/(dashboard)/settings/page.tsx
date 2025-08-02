@@ -12,7 +12,6 @@ import {
   BellIcon,
   ShieldCheckIcon,
   PaintBrushIcon,
-  GlobeAltIcon,
   TrashIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'

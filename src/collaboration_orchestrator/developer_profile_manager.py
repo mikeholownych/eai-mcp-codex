@@ -28,6 +28,27 @@ logger = logging.getLogger(__name__)
 class DeveloperProfileManager:
     """Manages developer agent profiles, capabilities, and performance tracking."""
 
+    @classmethod
+    async def create(
+        cls,
+        redis: Optional[Redis] = None,
+        postgres_pool: Optional[asyncpg.Pool] = None
+    ) -> "DeveloperProfileManager":
+        """Create a new DeveloperProfileManager instance."""
+        instance = cls()
+        instance.redis = redis or await get_redis_connection()
+        # Create a DatabaseManager that uses the existing pool
+        if postgres_pool:
+            # Create a mock DatabaseManager that uses the existing pool
+            instance.db_manager = DatabaseManager('multi_developer_orchestrator')
+            instance.db_manager._pool = postgres_pool
+        else:
+            instance.db_manager = DatabaseManager('multi_developer_orchestrator')
+            await instance.db_manager.connect()
+        instance.profile_cache = {}
+        instance.cache_manager = get_cache_manager("orchestrator")
+        return instance
+
     def __init__(
         self, 
         db_manager: Optional[DatabaseManager] = None,

@@ -90,7 +90,7 @@ services:
       - POSTGRES_DB=mcp_database
       - POSTGRES_USER=mcp_user
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}
-      - POSTGRES_MULTIPLE_DATABASES=plan_management_db,git_worktree_db,workflow_orchestrator_db,verification_feedback_db,staff_db,grafana_db,auth_db
+      - POSTGRES_MULTIPLE_DATABASES=plan_management_db,git_worktree_db,workflow_orchestrator_db,verification_feedback_db,staff_db,grafana_db,auth_db,multi_developer_orchestrator_db
       
       # Performance & Corruption Prevention
       - POSTGRES_INITDB_ARGS=--data-checksums
@@ -663,10 +663,16 @@ services:
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://mcp_user:${RABBITMQ_PASSWORD:-mcp_secure_password}@rabbitmq:5672/%2F
       - CONSUL_URL=http://consul:8500
       - SERVICE_NAME=collaboration-orchestrator
       - SERVICE_PORT=8012
-      # Collaboration Orchestrator does not use a database directly
+      # Multi-developer orchestrator database configuration
+      - MULTI_DEVELOPER_ORCHESTRATOR_DB_HOST=postgres
+      - MULTI_DEVELOPER_ORCHESTRATOR_DB_USER=mcp_user
+      - MULTI_DEVELOPER_ORCHESTRATOR_DB_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}
+      - MULTI_DEVELOPER_ORCHESTRATOR_DB_PORT=5432
+      - MULTI_DEVELOPER_ORCHESTRATOR_DB_NAME=multi_developer_orchestrator_db
       - A2A_COMMUNICATION_URL=http://a2a-communication:8010
       - AGENT_POOL_URL=http://agent-pool:8011
     # ports:
@@ -723,11 +729,7 @@ services:
     volumes:
       - ./logs/planner-agent:/app/logs
       - ./config:/app/config:ro
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8013/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    # No health check - this is a background agent using RabbitMQ
     networks:
       - mcp-network
     deploy:
@@ -766,11 +768,7 @@ services:
     volumes:
       - ./logs/security-agent:/app/logs
       - ./config:/app/config:ro
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8014/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    # No health check - this is a background agent using RabbitMQ
     networks:
       - mcp-network
     deploy:
@@ -810,11 +808,7 @@ services:
     volumes:
       - ./logs/developer-agent:/app/logs
       - ./config:/app/config:ro
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8015/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    # No health check - this is a background agent using RabbitMQ
     networks:
       - mcp-network
     deploy:

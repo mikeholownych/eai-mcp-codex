@@ -16,8 +16,6 @@ import {
   CreditCardIcon,
   BanknotesIcon,
   ExclamationTriangleIcon,
-  InformationCircleIcon,
-  PlusIcon,
   CalendarDaysIcon,
 } from '@heroicons/react/24/outline'
 

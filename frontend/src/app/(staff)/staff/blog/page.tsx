@@ -6,7 +6,6 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { useRouter } from 'next/navigation'
 import { debug } from '@/lib/utils'
-import { getBlogStatusColor, getBlogStatusIcon } from '@/lib/statusHelpers'
 import {
   PencilSquareIcon,
   DocumentTextIcon,
@@ -19,7 +18,6 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   ClockIcon,
-  GlobeAltIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline'
 
@@ -85,12 +83,6 @@ const mockBlogPosts = [
     seo_score: 91
   }
 ]
-
-const getStatusColor = (status: string) =>
-  BLOG_STATUS_COLORS[status] ?? BLOG_STATUS_COLORS.draft
-
-const getStatusIcon = (status: string) =>
-  BLOG_STATUS_ICONS[status] ?? BLOG_STATUS_ICONS.draft
 
 export default function BlogContentManagement() {
   const { user } = useAuth()

@@ -12,7 +12,6 @@ import {
   ClockIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  DocumentTextIcon,
   TagIcon,
   UserCircleIcon,
   ArrowRightIcon,
@@ -319,7 +318,7 @@ export default function SupportPage() {
           <div className="lg:col-span-3">
             <Card className="p-6">
               <div className="space-y-6">
-                {selectedTicket.messages.map((message, index) => (
+                {selectedTicket.messages.map((message) => (
                   <div key={message.id} className={`flex ${message.isStaff ? 'justify-start' : 'justify-end'}`}>
                     <div className={`flex max-w-4xl ${message.isStaff ? 'flex-row' : 'flex-row-reverse'}`}>
                       <div className="flex-shrink-0">

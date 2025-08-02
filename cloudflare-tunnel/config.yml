@@ -21,7 +21,7 @@ ingress:
 
   # Staff Frontend domain - Staff portal application (port 3001)
   - hostname: staff.ethical-ai-insider.com
-    service: http://staff-frontend:3001
+    service: http://mcp-staff-frontend:3000
     originRequest:
       connectTimeout: 30s
       tlsTimeout: 30s
@@ -32,9 +32,9 @@ ingress:
       httpHostHeader: staff.ethical-ai-insider.com
       originServerName: staff.ethical-ai-insider.com
 
-  # Frontend domain - Next.js application (direct connection)  
+  # Frontend domain - Next.js application (port 3000 internally, mapped to 3002 on host)  
   - hostname: new.ethical-ai-insider.com
-    service: http://frontend:3000
+    service: http://mcp-frontend:3000
     originRequest:
       connectTimeout: 30s
       tlsTimeout: 30s

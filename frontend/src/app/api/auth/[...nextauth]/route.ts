@@ -94,7 +94,7 @@ const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === 'google' || account?.provider === 'github') {
         try {
           // Register/login user with OAuth provider
@@ -135,7 +135,7 @@ const authOptions: NextAuthOptions = {
 
       return true
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
         token.role = user.role
         token.tenantId = user.tenantId

@@ -9,7 +9,6 @@ import {
   ShieldCheckIcon,
   ServerIcon,
   CpuChipIcon,
-  CircleStackIcon,
   CloudIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
@@ -18,8 +17,6 @@ import {
   ArrowDownIcon,
   ChartBarIcon,
   BoltIcon,
-  SignalIcon,
-  GlobeAltIcon,
   CommandLineIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline'
@@ -51,30 +48,6 @@ const getHealthColor = (status: string) =>
 const getHealthIcon = (status: string) =>
   HEALTH_ICONS[status.toLowerCase()] ?? HEALTH_ICONS.loading
 
-const mockSystemHealth = {
-  api_performance: {
-    status: 'healthy',
-    success_rate: 94.0,
-    avg_response_time: 235
-  },
-  database_status: {
-    status: 'optimal',
-    utilization: 89.0,
-    connection_pool: 'healthy'
-  },
-  memory_usage: {
-    status: 'moderate',
-    usage_percent: 67.0,
-    available_gb: 12.4
-  },
-  service_status: {
-    model_router: 'healthy',
-    plan_management: 'healthy',
-    git_worktree: 'healthy',
-    workflow_orchestrator: 'healthy',
-    verification_feedback: 'healthy'
-  }
-}
 
 const mockMetrics = {
   cpu_usage: { current: 45.2, trend: 'up', change: '+5.2%' },
@@ -114,7 +87,7 @@ const mockAlerts = [
 
 export default function SystemMonitoring() {
   const { user } = useAuth()
-  const { stats: systemStats, loading: statsLoading, error: statsError } = useSystemStats()
+  const { loading: statsLoading, error: statsError } = useSystemStats()
   const { health: systemHealth, loading: healthLoading, error: healthError, refetch } = useSystemHealth()
   const [selectedTimeRange, setSelectedTimeRange] = useState('1h')
   const [autoRefresh, setAutoRefresh] = useState(true)

@@ -9,7 +9,6 @@ interface LazyImageProps {
   className?: string
   width?: number
   height?: number
-  placeholder?: string
   blurDataURL?: string
   priority?: boolean
   onLoad?: () => void
@@ -22,7 +21,6 @@ export default function LazyImage({
   className = '',
   width,
   height,
-  placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjIi8+PC9zdmc+',
   blurDataURL,
   priority = false,
   onLoad,

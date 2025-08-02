@@ -44,7 +44,7 @@ async def startup() -> None:
     message_broker_instance = await A2AMessageBroker.create()
     db_manager = DatabaseManager('multi_developer_orchestrator')
     await db_manager.connect()
-    postgres_pool = db_manager.pool
+    postgres_pool = db_manager._pool
 
     app.state.developer_profile_manager = await DeveloperProfileManager.create(redis=redis_conn, postgres_pool=postgres_pool)
     app.state.intelligent_conflict_resolver = await IntelligentConflictResolver.create(profile_manager=app.state.developer_profile_manager, message_broker=message_broker_instance, postgres_pool=postgres_pool, redis=redis_conn)

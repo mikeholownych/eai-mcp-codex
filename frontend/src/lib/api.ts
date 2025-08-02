@@ -1,5 +1,5 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios'
-import { ApiResponse, User, CodeRequest, ChatSession, SupportTicket, Subscription, ModelRouteRequest, ModelRouteResponse, AvailableModel, ModelStats, SystemHealth } from '@/types'
+import axios, { AxiosInstance } from 'axios'
+import { ApiResponse, User, ChatSession, SupportTicket, Subscription, ModelRouteResponse, AvailableModel, ModelStats } from '@/types'
 import { API_CONFIG } from './config'
 
 class ApiClient {

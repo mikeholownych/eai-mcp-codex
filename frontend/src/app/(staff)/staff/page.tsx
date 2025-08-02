@@ -8,7 +8,6 @@ import Button from '@/components/ui/Button'
 import {
   UserGroupIcon,
   LifebuoyIcon,
-  ChartBarIcon,
   CreditCardIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,

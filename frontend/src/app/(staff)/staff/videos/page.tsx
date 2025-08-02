@@ -119,8 +119,7 @@ export default function VideoContentManagement() {
   const [selectedVisibility, setSelectedVisibility] = useState('all')
   const [selectedTag, setSelectedTag] = useState('all')
   const [showUploadModal, setShowUploadModal] = useState(false)
-  const [showPublishModal, setShowPublishModal] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
+    const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
 
   // Check if user has permission to manage video content
