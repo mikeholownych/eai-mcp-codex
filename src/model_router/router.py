@@ -16,7 +16,7 @@ from .config import settings
 from .models import ModelRequest, ModelResponse
 from .claude_client import get_claude_client
 from .local_client import get_local_client
-from .abacus_client import get_abacus_client
+from .abacus_client import get_zai_client
 
 
 logger = get_logger("model_router")
@@ -44,7 +44,11 @@ class RoutingTable:
     def _normalize_model_name(self, model: str) -> str:
         """Normalize model names from config to actual model names."""
         model_mapping = {
-            # Abacus.ai models (primary)
+            # z.ai models (primary)
+            "glm-4.5": "glm-4.5",
+            "glm4": "glm-4.5",
+            "zai": "glm-4.5",
+            # Abacus.ai models (fallback)
             "o3": "o3",
             "gpt-4o": "gpt-4o",
             "sonnet-4": "sonnet-4",
@@ -66,16 +70,16 @@ class RoutingTable:
             "local-llm": "local-llm",
         }
         return model_mapping.get(
-            model.lower(), "gpt-4o-mini"
-        )  # Default to efficient Abacus.ai model
+            model.lower(), "glm-4.5"
+        )  # Default to z.ai GLM-4.5 model
 
     def _intelligent_route(
         self, text: str, context: Optional[Dict[str, Any]] = None
     ) -> str:
         """Intelligent model selection based on content analysis with Abacus.ai priority."""
-        # Check for preference hierarchy: Abacus.ai -> Claude -> Local
+        # Check for preference hierarchy: z.ai -> Claude -> Local
         prefer_local_only = os.getenv("PREFER_LOCAL_MODELS", "false").lower() == "true"
-        use_abacus = os.getenv("USE_ABACUS_AI", "true").lower() == "true"
+        use_zai = os.getenv("USE_ZAI", "true").lower() == "true"
 
         # If local-only mode, skip cloud models
         if prefer_local_only:
@@ -110,8 +114,8 @@ class RoutingTable:
 
         # High complexity tasks - use most capable models
         if any(indicator in text_lower for indicator in complexity_indicators["high"]):
-            if use_abacus:
-                return "o3"  # Abacus.ai's most capable model
+            if use_zai:
+                return "glm-4.5"  # z.ai's GLM-4.5 model
             else:
                 return "claude-3-opus-20240229"  # Claude fallback
 
@@ -140,8 +144,8 @@ class RoutingTable:
         ]
 
         if any(indicator in text_lower for indicator in coding_indicators):
-            if use_abacus:
-                return "deepseek-r1"  # Abacus.ai specialized coding model
+            if use_zai:
+                return "glm-4.5"  # z.ai's GLM-4.5 model (good for coding)
             else:
                 return "claude-3-5-sonnet-20241022"  # Claude coding fallback
 
@@ -149,15 +153,15 @@ class RoutingTable:
         if any(
             indicator in text_lower for indicator in complexity_indicators["medium"]
         ):
-            if use_abacus:
-                return "gpt-4o"  # Balanced Abacus.ai model
+            if use_zai:
+                return "glm-4.5"  # z.ai's GLM-4.5 model (balanced)
             else:
                 return "claude-3-5-sonnet-20241022"  # Claude fallback
 
         # Long text handling
         if text_length > 2000:
-            if use_abacus:
-                return "sonnet-4"  # Good for long context
+            if use_zai:
+                return "glm-4.5"  # Good for long context
             else:
                 return "claude-3-5-sonnet-20241022"  # Claude fallback
 
@@ -171,8 +175,8 @@ class RoutingTable:
                 "security_analysis",
                 "complex_planning",
             ]:
-                if use_abacus:
-                    return "o3" if priority == "high" else "gpt-4o"
+                if use_zai:
+                    return "glm-4.5"  # z.ai's GLM-4.5 model
                 else:
                     return "claude-3-opus-20240229"
 
@@ -182,20 +186,20 @@ class RoutingTable:
                 "debugging",
                 "programming",
             ]:
-                if use_abacus:
-                    return "deepseek-r1"
+                if use_zai:
+                    return "glm-4.5"  # z.ai's GLM-4.5 model
                 else:
                     return "claude-3-5-sonnet-20241022"
 
             elif task_type in ["creative_writing", "content_generation"]:
-                if use_abacus:
-                    return "gpt-4o"
+                if use_zai:
+                    return "glm-4.5"  # z.ai's GLM-4.5 model
                 else:
                     return "claude-3-5-sonnet-20241022"
 
-        # Default routing - prefer efficient models
-        if use_abacus:
-            return "gpt-4o-mini"  # Fast and cost-effective Abacus.ai model
+        # Default routing - prefer z.ai GLM-4.5
+        if use_zai:
+            return "glm-4.5"  # z.ai's GLM-4.5 model
         else:
             return "claude-3-5-haiku-20241022"  # Claude fallback
 
@@ -206,9 +210,9 @@ def _load_rules(file_path: str) -> RoutingTable:
         logger.warning(f"Rules file not found: {file_path}, using default rules")
         return RoutingTable(
             [
-                (r"(?i)(complex|architecture|design|security)", "o3"),
-                (r"(?i)(code|debug|implement|refactor)", "deepseek-r1"),
-                (r".*", "gpt-4o-mini"),
+                (r"(?i)(complex|architecture|design|security)", "glm-4.5"),
+                (r"(?i)(code|debug|implement|refactor)", "glm-4.5"),
+                (r".*", "glm-4.5"),
             ]
         )
 
@@ -223,7 +227,7 @@ def _load_rules(file_path: str) -> RoutingTable:
         return RoutingTable(rules)
     except Exception as e:
         logger.error(f"Error loading rules from {file_path}: {e}")
-        return RoutingTable([(r".*", "gpt-4o-mini")])
+        return RoutingTable([(r".*", "glm-4.5")])
 
 
 _table = _load_rules(settings.rules_file)
@@ -244,18 +248,18 @@ async def route_async(req: ModelRequest) -> ModelResponse:
             elif req.context.get("task_type"):
                 system_prompt = _get_system_prompt_for_task(req.context["task_type"])
 
-        # Determine provider hierarchy: Abacus.ai -> Claude -> Local
+        # Determine provider hierarchy: z.ai -> Claude -> Local
         is_local_model = selected_model in ["mistral", "local-llm"]
         is_claude_model = selected_model.startswith("claude-")
-        is_abacus_model = not is_local_model and not is_claude_model
+        is_zai_model = not is_local_model and not is_claude_model
 
-        # Try Abacus.ai first (if available and selected)
-        if is_abacus_model:
+        # Try z.ai first (if available and selected)
+        if is_zai_model:
             try:
-                abacus_client = get_abacus_client()
-                if abacus_client.is_available():
-                    logger.info(f"Using Abacus.ai model: {selected_model}")
-                    response = await abacus_client.route_and_send(
+                zai_client = get_zai_client()
+                if zai_client.is_available():
+                    logger.info(f"Using z.ai model: {selected_model}")
+                    response = await zai_client.route_and_send(
                         text=req.text,
                         context=req.context,
                         system_prompt=system_prompt,
@@ -270,7 +274,7 @@ async def route_async(req: ModelRequest) -> ModelResponse:
                             datetime.utcnow() - response.timestamp
                         ).total_seconds()
                         * 1000,
-                        "provider": "abacus.ai",
+                        "provider": "z.ai",
                     }
 
                     return ModelResponse(
@@ -283,29 +287,27 @@ async def route_async(req: ModelRequest) -> ModelResponse:
                             "timestamp": response.timestamp.isoformat(),
                             "routing_decision": {
                                 "selected_model": selected_model,
-                                "selection_reason": "abacus_primary",
-                                "provider": "abacus.ai",
+                                "selection_reason": "zai_primary",
+                                "provider": "z.ai",
                             },
-                            "provider": "abacus.ai",
+                            "provider": "z.ai",
                         },
                     )
                 else:
-                    logger.warning("Abacus.ai not available, falling back to Claude")
+                    logger.warning("z.ai not available, falling back to Claude")
                     # Fallback to Claude equivalent
-                    if selected_model == "o3":
-                        selected_model = "claude-3-opus-20240229"
-                    elif selected_model in ["gpt-4o", "sonnet-4", "deepseek-r1"]:
+                    if selected_model in ["glm-4.5", "o3", "gpt-4o", "sonnet-4", "deepseek-r1"]:
                         selected_model = "claude-3-5-sonnet-20241022"
                     else:
                         selected_model = "claude-3-5-haiku-20241022"
 
             except Exception as e:
-                logger.error(f"Abacus.ai API error: {e}, falling back to Claude")
+                logger.error(f"z.ai API error: {e}, falling back to Claude")
                 # Continue to Claude fallback
                 pass
 
-        # Try Claude (if selected or fallback from Abacus.ai)
-        if selected_model.startswith("claude-") or is_abacus_model:
+        # Try Claude (if selected or fallback from z.ai)
+        if selected_model.startswith("claude-") or is_zai_model:
             try:
                 claude_client = get_claude_client()
                 claude_response = await claude_client.route_and_send(
@@ -335,7 +337,7 @@ async def route_async(req: ModelRequest) -> ModelResponse:
                             "selected_model": selected_model,
                             "selection_reason": (
                                 "claude_fallback"
-                                if is_abacus_model
+                                if is_zai_model
                                 else "claude_primary"
                             ),
                             "provider": "claude",
@@ -437,22 +439,22 @@ def _get_system_prompt_for_task(task_type: str) -> str:
 
 def get_routing_stats() -> Dict[str, Any]:
     """Get routing statistics and model usage information."""
-    abacus_client = get_abacus_client()
+    zai_client = get_zai_client()
     claude_client = get_claude_client()
 
     return {
         "available_models": {
-            "abacus": abacus_client.list_available_models(),
+            "zai": zai_client.list_available_models(),
             "claude": claude_client.list_available_models(),
             "local": ["mistral", "local-llm"],
         },
         "routing_rules_count": len(_table.rules),
-        "default_model": "gpt-4o-mini",
-        "fallback_hierarchy": ["abacus.ai", "claude", "local"],
+        "default_model": "glm-4.5",
+        "fallback_hierarchy": ["z.ai", "claude", "local"],
         "model_info": {
             **{
-                model: abacus_client.get_model_info(model)
-                for model in abacus_client.list_available_models()
+                model: zai_client.get_model_info(model)
+                for model in zai_client.list_available_models()
             },
             **{
                 model: claude_client.get_model_info(model)
@@ -465,18 +467,18 @@ def get_routing_stats() -> Dict[str, Any]:
 async def test_routing() -> Dict[str, Any]:
     """Test routing functionality with sample requests."""
     test_cases = [
-        {"text": "Hello, world!", "expected_model": "gpt-4o-mini"},
+        {"text": "Hello, world!", "expected_model": "glm-4.5"},
         {
             "text": "Design a microservices architecture for a large e-commerce platform",
-            "expected_model": "o3",
+            "expected_model": "glm-4.5",
         },
         {
             "text": "Review this Python code for bugs",
-            "expected_model": "deepseek-r1",
+            "expected_model": "glm-4.5",
         },
         {
             "text": "Simple question about Python syntax",
-            "expected_model": "gpt-4o-mini",
+            "expected_model": "glm-4.5",
         },
     ]
 

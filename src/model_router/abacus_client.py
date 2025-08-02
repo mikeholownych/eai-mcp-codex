@@ -1,4 +1,4 @@
-"""Abacus.ai client for LLM model routing."""
+"""z.ai client for LLM model routing."""
 
 from __future__ import annotations
 
@@ -17,36 +17,35 @@ except ImportError:
 from src.common.logging import get_logger
 from .models import LLMResponse
 
-logger = get_logger("abacus_client")
+logger = get_logger("zai_client")
 
 
-class AbacusAIClient:
-    """Client for Abacus.ai LLM models with intelligent model selection."""
+class ZAIClient:
+    """Client for z.ai LLM models with intelligent model selection."""
 
     def __init__(self, api_key: Optional[str] = None):
-        """Initialize AbacusAI client."""
-        self.api_key = api_key or os.getenv("ABACUSAI_API_KEY")
+        """Initialize z.ai client."""
+        self.api_key = api_key or os.getenv("ZAI_API_KEY")
         if not self.api_key:
             logger.warning(
-                "ABACUSAI_API_KEY not found. Abacus.ai client will not be available."
+                "ZAI_API_KEY not found. z.ai client will not be available."
             )
             self._client = None
         else:
             try:
-                if ApiClient is None:
-                    logger.error(
-                        "abacusai package not installed. Run: pip install abacusai"
-                    )
-                    self._client = None
-                else:
-                    self._client = ApiClient(self.api_key)
-                    logger.info("AbacusAI client initialized successfully")
+                # Initialize HTTP client for z.ai API
+                self._client = httpx.AsyncClient(timeout=60)
+                logger.info("z.ai client initialized successfully")
             except Exception as e:
-                logger.error(f"Failed to initialize AbacusAI client: {e}")
+                logger.error(f"Failed to initialize z.ai client: {e}")
                 self._client = None
 
         # Available models mapping
         self._model_mapping = {
+            # Primary z.ai GLM-4.5 model
+            "glm-4.5": "glm-4.5",
+            "glm4": "glm-4.5",
+            "zai": "glm-4.5",
             # High-capability models for complex tasks
             "gpt-4o": "gpt-4o",
             "o3": "o3",
@@ -64,7 +63,7 @@ class AbacusAIClient:
         }
 
     def is_available(self) -> bool:
-        """Check if AbacusAI client is available."""
+        """Check if z.ai client is available."""
         return self._client is not None
 
     def _select_optimal_model(
@@ -204,16 +203,16 @@ class AbacusAIClient:
         system_prompt: Optional[str] = None,
         model_override: Optional[str] = None,
     ) -> LLMResponse:
-        """Route request to optimal Abacus.ai model and return response."""
+        """Route request to optimal z.ai model and return response."""
         if not self.is_available():
-            raise Exception("AbacusAI client not available")
+            raise Exception("z.ai client not available")
 
         start_time = time.time()
 
         try:
-            # Select model
-            selected_model = model_override or self._select_optimal_model(text, context)
-            logger.info(f"Selected Abacus.ai model: {selected_model}")
+            # Select model - default to GLM-4.5 for z.ai
+            selected_model = model_override or "glm-4.5"
+            logger.info(f"Selected z.ai model: {selected_model}")
 
             # Prepare messages
             messages = []
@@ -221,43 +220,48 @@ class AbacusAIClient:
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": text})
 
-            async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.post(
-                    "https://api.abacus.ai/v1/chat",
-                    headers={"Authorization": f"Bearer {self.api_key}"},
-                    json={"model": selected_model, "messages": messages},
-                )
-                response.raise_for_status()
-                data = response.json()
-                response_content = data["choices"][0]["message"]["content"]
+            # Use z.ai API (https://api.z.ai/v1/chat/completions)
+            response = await self._client.post(
+                "https://api.z.ai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                json={
+                    "model": selected_model,
+                    "messages": messages,
+                    "temperature": 0.7,
+                    "max_tokens": 4000,
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            response_content = data["choices"][0]["message"]["content"]
 
             response_time = time.time() - start_time
 
             # Create response object
             return LLMResponse(
-                id=f"abacus_{int(time.time())}",
+                id=f"zai_{int(time.time())}",
                 content=response_content,
                 model=selected_model,
                 usage={
-                    "input_tokens": len(text.split()),
-                    "output_tokens": len(response_content.split()),
-                    "total_tokens": len(text.split()) + len(response_content.split()),
+                    "input_tokens": data.get("usage", {}).get("prompt_tokens", len(text.split())),
+                    "output_tokens": data.get("usage", {}).get("completion_tokens", len(response_content.split())),
+                    "total_tokens": data.get("usage", {}).get("total_tokens", len(text.split()) + len(response_content.split())),
                 },
                 timestamp=datetime.utcnow(),
-                stop_reason="end_turn",
+                stop_reason=data.get("choices", [{}])[0].get("finish_reason", "stop"),
                 metadata={
-                    "provider": "abacus.ai",
+                    "provider": "z.ai",
                     "response_time": response_time,
                     "selected_model": selected_model,
                 },
             )
 
         except Exception as e:
-            logger.error(f"Error calling Abacus.ai API: {e}")
+            logger.error(f"Error calling z.ai API: {e}")
             raise
 
     def list_available_models(self) -> List[str]:
-        """Return list of available Abacus.ai models."""
+        """Return list of available z.ai models."""
         if not self.is_available():
             return []
         return list(self._model_mapping.keys())
@@ -269,6 +273,12 @@ class AbacusAIClient:
 
         # Model capability information
         model_info = {
+            "glm-4.5": {
+                "capability": "highest",
+                "best_for": ["complex reasoning", "coding", "analysis", "general tasks"],
+                "cost": "medium",
+                "speed": "fast",
+            },
             "o3": {
                 "capability": "highest",
                 "best_for": ["complex reasoning", "research", "analysis"],
@@ -312,6 +322,11 @@ class AbacusAIClient:
         )
 
 
-def get_abacus_client() -> AbacusAIClient:
-    """Get AbacusAI client instance."""
-    return AbacusAIClient()
+def get_zai_client() -> ZAIClient:
+    """Get z.ai client instance."""
+    return ZAIClient()
+
+# Keep backward compatibility
+def get_abacus_client() -> ZAIClient:
+    """Get z.ai client instance (backward compatibility)."""
+    return get_zai_client()

@@ -119,7 +119,7 @@ export default function StaffDashboard() {
           Staff Dashboard
         </h1>
         <p className="mt-2 text-gray-400">
-          Welcome back, {user?.name}. Here's your system overview for today.
+          Welcome back, {user?.name}. Here&apos;s your system overview for today.
         </p>
       </div>
 

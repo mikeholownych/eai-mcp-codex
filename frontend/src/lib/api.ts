@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
-import { ApiResponse, User, CodeRequest, ChatSession, SupportTicket, Subscription } from '@/types'
+import { ApiResponse, User, CodeRequest, ChatSession, SupportTicket, Subscription, ModelRouteRequest, ModelRouteResponse, AvailableModel, ModelStats, SystemHealth } from '@/types'
 import { API_CONFIG } from './config'
 
 class ApiClient {
@@ -89,8 +89,8 @@ class ApiClient {
     taskType?: string
     priority?: string
     systemPrompt?: string
-    context?: any
-  }): Promise<ApiResponse<any>> {
+    context?: Record<string, unknown>
+  }): Promise<ApiResponse<ModelRouteResponse>> {
     const requestId = Date.now().toString()
     const response = await this.client.post('/model/route', {
       text: prompt,
@@ -105,17 +105,17 @@ class ApiClient {
     return response.data
   }
 
-  async getAvailableModels(): Promise<ApiResponse<any>> {
+  async getAvailableModels(): Promise<ApiResponse<AvailableModel[]>> {
     const response = await this.client.get('/model/models')
     return response.data
   }
 
-  async getModelStats(): Promise<ApiResponse<any>> {
+  async getModelStats(): Promise<ApiResponse<ModelStats>> {
     const response = await this.client.get('/model/stats')
     return response.data
   }
 
-  async testClaudeConnection(): Promise<ApiResponse<any>> {
+  async testClaudeConnection(): Promise<ApiResponse<{ status: string; message: string }>> {
     const response = await this.client.post('/model/health/claude')
     return response.data
   }
@@ -125,17 +125,17 @@ class ApiClient {
     title: string
     description: string
     requirements: string[]
-  }): Promise<ApiResponse<any>> {
+  }): Promise<ApiResponse<{ id: string; title: string; status: string }>> {
     const response = await this.client.post('/api/plans/create', data)
     return response.data
   }
 
-  async getPlans(): Promise<ApiResponse<any[]>> {
+  async getPlans(): Promise<ApiResponse<Array<{ id: string; title: string; description: string; status: string }>>> {
     const response = await this.client.get('/api/plans')
     return response.data
   }
 
-  async getPlan(id: string): Promise<ApiResponse<any>> {
+  async getPlan(id: string): Promise<ApiResponse<{ id: string; title: string; description: string; requirements: string[] }>> {
     const response = await this.client.get(`/api/plans/${id}`)
     return response.data
   }
@@ -145,12 +145,12 @@ class ApiClient {
     repository: string
     branch: string
     name: string
-  }): Promise<ApiResponse<any>> {
+  }): Promise<ApiResponse<{ id: string; path: string; status: string }>> {
     const response = await this.client.post('/api/git/create', data)
     return response.data
   }
 
-  async getWorktrees(): Promise<ApiResponse<any[]>> {
+  async getWorktrees(): Promise<ApiResponse<Array<{ id: string; repository: string; branch: string; name: string }>>> {
     const response = await this.client.get('/api/git/list')
     return response.data
   }
@@ -159,18 +159,18 @@ class ApiClient {
   async createWorkflow(data: {
     name: string
     description: string
-    steps: any[]
-  }): Promise<ApiResponse<any>> {
+    steps: Array<{ id: string; name: string; type: string }>
+  }): Promise<ApiResponse<{ id: string; name: string; status: string }>> {
     const response = await this.client.post('/api/workflows/create', data)
     return response.data
   }
 
-  async executeWorkflow(id: string): Promise<ApiResponse<any>> {
+  async executeWorkflow(id: string): Promise<ApiResponse<{ id: string; status: string; result: unknown }>> {
     const response = await this.client.post(`/api/workflows/${id}/execute`)
     return response.data
   }
 
-  async getWorkflows(): Promise<ApiResponse<any[]>> {
+  async getWorkflows(): Promise<ApiResponse<Array<{ id: string; name: string; description: string; status: string }>>> {
     const response = await this.client.get('/api/workflows')
     return response.data
   }
@@ -180,13 +180,13 @@ class ApiClient {
     type: string
     title: string
     description: string
-    metadata?: any
-  }): Promise<ApiResponse<any>> {
+    metadata?: Record<string, unknown>
+  }): Promise<ApiResponse<{ id: string; status: string }>> {
     const response = await this.client.post('/api/feedback/submit', data)
     return response.data
   }
 
-  async getFeedback(): Promise<ApiResponse<any[]>> {
+  async getFeedback(): Promise<ApiResponse<Array<{ id: string; type: string; title: string; status: string }>>> {
     const response = await this.client.get('/api/feedback/list')
     return response.data
   }
@@ -202,7 +202,7 @@ class ApiClient {
     return response.data
   }
 
-  async sendChatMessage(sessionId: string, message: string): Promise<ApiResponse<any>> {
+  async sendChatMessage(sessionId: string, message: string): Promise<ApiResponse<{ id: string; content: string; role: string; timestamp: Date }>> {
     const response = await this.client.post(`/api/chat/sessions/${sessionId}/messages`, {
       content: message,
     })
@@ -240,7 +240,7 @@ class ApiClient {
     return response.data
   }
 
-  async getInvoices(): Promise<ApiResponse<any[]>> {
+  async getInvoices(): Promise<ApiResponse<Invoice[]>> {
     const response = await this.client.get('/api/billing/invoices')
     return response.data
   }
@@ -253,35 +253,35 @@ class ApiClient {
   }
 
   // Video Library endpoints
-  async getVideos(): Promise<ApiResponse<any[]>> {
+  async getVideos(): Promise<ApiResponse<Array<{ id: string; title: string; description: string; duration: number }>>> {
     const response = await this.client.get('/api/videos')
     return response.data
   }
 
-  async getVideo(id: string): Promise<ApiResponse<any>> {
+  async getVideo(id: string): Promise<ApiResponse<{ id: string; title: string; description: string; url: string }>> {
     const response = await this.client.get(`/api/videos/${id}`)
     return response.data
   }
 
   // Analytics endpoints
-  async getAnalytics(timeRange: string): Promise<ApiResponse<any>> {
+  async getAnalytics(timeRange: string): Promise<ApiResponse<{ metrics: Array<{ metric: string; value: number; change: number }> }>> {
     const response = await this.client.get(`/api/analytics?range=${timeRange}`)
     return response.data
   }
 
-  async getDashboardStats(): Promise<ApiResponse<any>> {
+  async getDashboardStats(): Promise<ApiResponse<{ users: number; subscriptions: number; revenue: number }>> {
     const response = await this.client.get('/api/analytics/dashboard')
     return response.data
   }
 
   // Health check
-  async healthCheck(): Promise<ApiResponse<any>> {
+  async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: Date }>> {
     const response = await this.client.get('/health')
     return response.data
   }
 
   // System status
-  async getSystemStatus(): Promise<ApiResponse<any>> {
+  async getSystemStatus(): Promise<ApiResponse<{ status: string; services: Record<string, string> }>> {
     const response = await this.client.get('/status')
     return response.data
   }

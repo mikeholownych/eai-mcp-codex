@@ -527,6 +527,7 @@ services:
       context: .
       dockerfile: docker/auth-service.Dockerfile
     container_name: mcp-auth-service
+    command: ["python", "start.py"]
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379

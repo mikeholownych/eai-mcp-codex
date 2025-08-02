@@ -257,15 +257,15 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <p className="text-gray-300">
-            Don't have an account?{' '}
-            <Link
-              href="/register"
-              className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
-            >
-              Sign up for free
-            </Link>
-          </p>
+                <p className="text-gray-300">
+                  Don&apos;t have an account?{' '}
+                  <Link
+                    href="/register"
+                    className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
+                  >
+                    Sign up for free
+                  </Link>
+                </p>
         </motion.div>
       </motion.div>
     </div>

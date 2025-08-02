@@ -8,10 +8,6 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { debug } from '@/lib/utils'
 import {
-  getTicketStatusColor,
-  getTicketStatusIcon,
-} from '@/lib/statusHelpers'
-import {
   LifebuoyIcon,
   MagnifyingGlassIcon,
   ClockIcon,
@@ -35,11 +31,6 @@ const priorityColors: Record<string, string> = {
 const getPriorityColor = (priority: string) =>
   priorityColors[priority] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
 
-const getStatusColor = (status: string) =>
-  TICKET_STATUS_COLORS[status] ?? TICKET_STATUS_COLORS.open
-
-const getStatusIcon = (status: string) =>
-  TICKET_STATUS_ICONS[status] ?? TICKET_STATUS_ICONS.open
 
 const categories = [
   'All Categories',
@@ -83,7 +74,7 @@ export default function StaffTicketManagement() {
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
         <h3 className="mt-2 text-sm font-medium text-white">Access Denied</h3>
         <p className="mt-1 text-sm text-gray-400">
-          You don't have permission to access support tickets.
+          You don&apos;t have permission to access support tickets.
         </p>
       </div>
     )
@@ -126,7 +117,7 @@ export default function StaffTicketManagement() {
       refetch() // Refresh the tickets list
       if (selectedTicket && selectedTicket.id === ticketId) {
         // Update the selected ticket status for immediate UI feedback
-        setSelectedTicket({ ...selectedTicket, status: newStatus as any })
+        setSelectedTicket({ ...selectedTicket, status: newStatus as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed' })
       }
     } catch (error) {
       debug('Failed to update ticket status', error)
@@ -140,7 +131,7 @@ export default function StaffTicketManagement() {
       refetch() // Refresh the tickets list
       if (selectedTicket && selectedTicket.id === ticketId) {
         // Update the selected ticket priority for immediate UI feedback
-        setSelectedTicket({ ...selectedTicket, priority: newPriority as any })
+        setSelectedTicket({ ...selectedTicket, priority: newPriority as 'low' | 'medium' | 'high' | 'urgent' })
       }
     } catch (error) {
       debug('Failed to update ticket priority', error)
@@ -163,7 +154,7 @@ export default function StaffTicketManagement() {
             ← Back to Tickets
           </Button>
           <div className="flex items-center space-x-3">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedTicket.status)}`}>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTicketStatusColor(selectedTicket.status)}`}>
               {getStatusIcon(selectedTicket.status)}
               <span className="ml-1">{selectedTicket.status.replace('-', ' ').toUpperCase()}</span>
             </span>

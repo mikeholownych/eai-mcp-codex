@@ -1,17 +1,18 @@
 rules:
-  # Coding-specific tasks get the specialized model
+  # All tasks use z.ai GLM-4.5 as the primary model
   - match: '(?i).*(code|function|class|algorithm|programming|debug|implement|python|javascript|java|c\+\+|sql|api|refactor|optimize|bug|error|syntax|variable).*'
-    model: deepseek-coder
+    model: glm-4.5
+  # Complex tasks use z.ai GLM-4.5
+  - match: '(?i).*(architecture|security|complex|analysis|research).*'
+    model: glm-4.5
+  - match: '^/analysis'
+    model: glm-4.5
   # Local models for development and general use
   - match: '(?i).*(local|offline|mistral).*'
-    model: mistral
+    model: deepseek-coder
+  # Simple tasks also use z.ai GLM-4.5
   - match: '(?i).*(simple|quick|basic|test).*'
-    model: deepseek-coder
-  # Complex tasks that might benefit from Claude
-  - match: '(?i).*(architecture|security|complex|analysis|research).*'
-    model: sonnet
-  - match: '^/analysis'
-    model: sonnet
-  # Default to coding model for development efficiency
+    model: glm-4.5
+  # Default to z.ai GLM-4.5
   - match: '.*'
-    model: deepseek-coder
+    model: glm-4.5

@@ -20,6 +20,9 @@ COPY src/common/ ./src/common/
 # Create auth service structure
 COPY src/auth_service/ ./src/auth_service/
 
+# Copy start script
+COPY scripts/start_auth_service.py ./start.py
+
 # Create logs directory
 RUN mkdir -p /app/logs
 
@@ -36,4 +39,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8007/health || exit 1
 
 # Run the service
-CMD ["python", "-m", "src.auth_service.app"]
+CMD ["python", "start.py"]

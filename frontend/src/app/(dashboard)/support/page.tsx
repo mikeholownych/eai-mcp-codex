@@ -58,7 +58,7 @@ const tickets: Ticket[] = [
       },
       {
         id: '2',
-        content: 'Hi John, thank you for reaching out. We\'re investigating this issue. Can you please provide your API key prefix and the timestamp of when you first noticed this issue?',
+        content: 'Hi John, thank you for reaching out. We&apos;re investigating this issue. Can you please provide your API key prefix and the timestamp of when you first noticed this issue?',
         isStaff: true,
         author: 'Sarah Support',
         timestamp: new Date('2024-01-20T11:45:00'),
@@ -72,7 +72,7 @@ const tickets: Ticket[] = [
       },
       {
         id: '4',
-        content: 'Thanks for the details. We\'ve identified the issue and are working on a fix. This should be resolved within the next 2 hours.',
+        content: 'Thanks for the details. We&apos;ve identified the issue and are working on a fix. This should be resolved within the next 2 hours.',
         isStaff: true,
         author: 'Sarah Support',
         timestamp: new Date('2024-01-21T14:15:00'),
@@ -117,7 +117,7 @@ const tickets: Ticket[] = [
       },
       {
         id: '2',
-        content: 'We\'ve reviewed your account and found the duplicate charge. A refund has been processed and should appear in your account within 3-5 business days.',
+        content: 'We&apos;ve reviewed your account and found the duplicate charge. A refund has been processed and should appear in your account within 3-5 business days.',
         isStaff: true,
         author: 'Mike Billing',
         timestamp: new Date('2024-01-18T17:30:00'),
@@ -255,7 +255,7 @@ export default function SupportPage() {
                 </label>
                 <select
                   value={newTicketData.priority}
-                  onChange={(e) => setNewTicketData(prev => ({ ...prev, priority: e.target.value as any }))}
+                  onChange={(e) => setNewTicketData(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' | 'urgent' }))}
                   className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 >
                   <option value="low">Low</option>
@@ -497,7 +497,7 @@ export default function SupportPage() {
           <LifebuoyIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-white mb-2">No support tickets</h3>
           <p className="text-gray-400 mb-6">
-            You haven't created any support tickets yet. If you need help, don't hesitate to reach out!
+            You haven&apos;t created any support tickets yet. If you need help, don&apos;t hesitate to reach out!
           </p>
           <Button variant="primary" onClick={() => setShowNewTicketForm(true)}>
             <PlusIcon className="h-4 w-4 mr-2" />
