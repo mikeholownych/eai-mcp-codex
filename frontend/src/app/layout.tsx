@@ -92,37 +92,39 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Web Vitals tracking
-              function vitals(name, value, id) {
-                if (typeof gtag !== 'undefined') {
-                  gtag('event', name, {
-                    event_category: 'Web Vitals',
-                    value: Math.round(name === 'CLS' ? value * 1000 : value),
-                    event_label: id,
-                    non_interaction: true,
-                  });
+              if (typeof window !== 'undefined') {
+                // Web Vitals tracking
+                function vitals(name, value, id) {
+                  if (typeof gtag !== 'undefined') {
+                    gtag('event', name, {
+                      event_category: 'Web Vitals',
+                      value: Math.round(name === 'CLS' ? value * 1000 : value),
+                      event_label: id,
+                      non_interaction: true,
+                    });
+                  }
+
+                  // Send to custom analytics endpoint
+                  if (typeof fetch !== 'undefined') {
+                    fetch('/api/analytics/vitals', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ name, value, id, url: window.location.href })
+                    }).catch(() => {});
+                  }
                 }
-                
-                // Send to custom analytics endpoint
-                if (typeof fetch !== 'undefined') {
-                  fetch('/api/analytics/vitals', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, value, id, url: window.location.href })
-                  }).catch(() => {});
+
+                // Load Web Vitals library and track metrics
+                if ('loading' in HTMLImageElement.prototype) {
+                  (async () => {
+                    const { onFCP, onLCP, onCLS, onFID, onTTFB } = await import('https://unpkg.com/web-vitals@3/dist/web-vitals.js');
+                    onFCP(vitals);
+                    onLCP(vitals);
+                    onCLS(vitals);
+                    onFID(vitals);
+                    onTTFB(vitals);
+                  })();
                 }
-              }
-              
-              // Load Web Vitals library and track metrics
-              if ('loading' in HTMLImageElement.prototype) {
-                (async () => {
-                  const { onFCP, onLCP, onCLS, onFID, onTTFB } = await import('https://unpkg.com/web-vitals@3/dist/web-vitals.js');
-                  onFCP(vitals);
-                  onLCP(vitals);
-                  onCLS(vitals);
-                  onFID(vitals);
-                  onTTFB(vitals);
-                })();
               }
             `,
           }}
