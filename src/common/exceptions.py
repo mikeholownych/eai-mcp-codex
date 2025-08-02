@@ -239,3 +239,46 @@ def create_error_response(
         response["details"] = details
 
     return response
+
+
+def setup_exception_handlers(app):
+    """Setup global exception handlers for FastAPI application."""
+    from fastapi import Request
+    from fastapi.responses import JSONResponse
+    from .logging import get_logger
+    
+    logger = get_logger("exception_handler")
+    
+    @app.exception_handler(ServiceError)
+    async def service_error_handler(request: Request, exc: ServiceError):
+        """Handle custom service errors."""
+        logger.error(f"Service error: {exc.message}")
+        http_exc = service_error_to_http_exception(exc)
+        return JSONResponse(
+            status_code=http_exc.status_code,
+            content=http_exc.detail
+        )
+    
+    @app.exception_handler(HTTPException)
+    async def http_exception_handler(request: Request, exc: HTTPException):
+        """Handle HTTP exceptions."""
+        logger.error(f"HTTP error {exc.status_code}: {exc.detail}")
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"error": True, "message": exc.detail}
+        )
+    
+    @app.exception_handler(Exception)
+    async def general_exception_handler(request: Request, exc: Exception):
+        """Handle general exceptions."""
+        logger.error(f"Unhandled exception: {str(exc)}")
+        return JSONResponse(
+            status_code=500,
+            content=create_error_response(
+                "INTERNAL_ERROR",
+                "An unexpected error occurred"
+            )
+        )
+    
+    logger.info("Exception handlers configured")
+    return app
