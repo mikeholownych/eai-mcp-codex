@@ -118,9 +118,6 @@ const getStatusIcon = (status: string) =>
 const getVisibilityColor = (visibility: string) =>
   VISIBILITY_COLORS[visibility] ?? VISIBILITY_COLORS.free
 
-const getVisibilityColor = (visibility: string) =>
-  visibilityColors[visibility] ?? 'bg-gray-500/10 text-gray-400'
-
 const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
