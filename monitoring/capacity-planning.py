@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
-from prometheus_client.parser import text_string_to_metric_families
 import aiohttp
 import yaml
 from pathlib import Path
@@ -336,7 +335,6 @@ class TrendAnalyzer:
         ).reshape(-1, 1)
         
         predictions = model.predict(future_timestamps)
-        current_pred = model.predict(X[-1].reshape(-1, 1))[0]
         
         # Calculate when threshold will be reached
         days_until_threshold = None
