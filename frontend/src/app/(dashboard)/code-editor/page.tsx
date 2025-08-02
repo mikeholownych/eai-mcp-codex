@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -12,7 +12,6 @@ import {
   CommandLineIcon,
   CogIcon,
   BookOpenIcon,
-  ChevronDownIcon,
 } from '@heroicons/react/24/outline'
 
 // Dynamically import Monaco Editor to avoid SSR issues

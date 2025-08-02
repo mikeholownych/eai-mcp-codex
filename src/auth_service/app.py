@@ -19,11 +19,16 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Auth Service...")
     
     # Register with Consul
-    consul_client = ConsulClient()
+    consul_url = os.getenv("CONSUL_URL", "http://localhost:8500")
+    logger.info(f"Using CONSUL_URL: {consul_url}")
+    consul_client = ConsulClient(consul_url=consul_url)
     
     service_name = os.getenv("SERVICE_NAME", "auth-service")
     service_port = int(os.getenv("SERVICE_PORT", "8007"))
-    service_host = os.getenv("SERVICE_HOST", "0.0.0.0")
+    
+    # Use container hostname for service registration (Consul will resolve to actual IP)
+    import socket
+    service_host = socket.gethostname()
     
     await consul_client.register_service(
         name=service_name,

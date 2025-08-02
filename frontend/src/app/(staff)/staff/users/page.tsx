@@ -35,11 +35,6 @@ const roleColors: Record<string, string> = {
 
 const getRoleColor = (role: string) => roleColors[role] ?? 'bg-gray-500/10 text-gray-400'
 
-const getStatusColor = (status: string) =>
-  USER_STATUS_COLORS[status] ?? USER_STATUS_COLORS.active
-
-const getStatusIcon = (status: string) =>
-  USER_STATUS_ICONS[status] ?? USER_STATUS_ICONS.active
 
 export default function UserManagement() {
   const { user: currentUser } = useAuth()
@@ -87,7 +82,7 @@ export default function UserManagement() {
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
         <h3 className="mt-2 text-sm font-medium text-white">Access Denied</h3>
         <p className="mt-1 text-sm text-gray-400">
-          You don't have permission to access user management.
+          You don&apos;t have permission to access user management.
         </p>
       </div>
     )

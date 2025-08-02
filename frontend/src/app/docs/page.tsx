@@ -257,7 +257,7 @@ export default function DocsPage() {
               Comprehensive Documentation Coming Soon
             </h3>
             <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
-              We're working on detailed documentation covering every aspect of the MCP Agent Network. 
+              We&apos;re working on detailed documentation covering every aspect of the MCP Agent Network. 
               In the meantime, reach out to our team for specific questions or implementation guidance.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

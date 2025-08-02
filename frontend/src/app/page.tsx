@@ -518,7 +518,7 @@ export default function HomePage() {
                       ))}
                     </div>
                     <p className="text-gray-300 mb-6 text-lg leading-relaxed italic">
-                      "{testimonial.content}"
+                      &quot;{testimonial.content}&quot;
                     </p>
                     <div className="flex items-center">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold mr-4">

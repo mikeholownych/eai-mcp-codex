@@ -94,7 +94,7 @@ export default function ChatPage() {
     }
 
     initializeChat()
-  }, [])
+  }, [selectedModel])
 
   const handleSendMessage = async (content?: string) => {
     const messageContent = content || inputMessage.trim()
