@@ -109,13 +109,10 @@ class AgentMonitorService:
 
             # Configure uvicorn server
             config = uvicorn.Config(
-                app=self.app,
-                host="0.0.0.0",
-                port=8016,
-                log_level="info"
+                app=self.app, host="0.0.0.0", port=8016, log_level="info"
             )
             server = uvicorn.Server(config)
-            
+
             # Start server
             await server.serve()
 

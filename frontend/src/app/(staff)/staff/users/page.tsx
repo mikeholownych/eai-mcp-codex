@@ -35,6 +35,11 @@ const roleColors: Record<string, string> = {
 
 const getRoleColor = (role: string) => roleColors[role] ?? 'bg-gray-500/10 text-gray-400'
 
+const getStatusColor = (status: string) =>
+  USER_STATUS_COLORS[status] ?? USER_STATUS_COLORS.active
+
+const getStatusIcon = (status: string) =>
+  USER_STATUS_ICONS[status] ?? USER_STATUS_ICONS.active
 
 export default function UserManagement() {
   const { user: currentUser } = useAuth()

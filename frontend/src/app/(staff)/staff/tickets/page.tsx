@@ -35,6 +35,11 @@ const priorityColors: Record<string, string> = {
 const getPriorityColor = (priority: string) =>
   priorityColors[priority] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
 
+const getStatusColor = (status: string) =>
+  TICKET_STATUS_COLORS[status] ?? TICKET_STATUS_COLORS.open
+
+const getStatusIcon = (status: string) =>
+  TICKET_STATUS_ICONS[status] ?? TICKET_STATUS_ICONS.open
 
 const categories = [
   'All Categories',

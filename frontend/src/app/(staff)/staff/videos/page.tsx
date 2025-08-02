@@ -15,19 +15,15 @@ import {
   ArrowUpTrayIcon as CloudUploadIcon,
   TagIcon,
   PlayIcon,
-  PauseIcon,
   EyeIcon,
   TrashIcon,
-  PlusIcon,
   MagnifyingGlassIcon,
-  CalendarDaysIcon,
   ClockIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   DocumentTextIcon,
   CogIcon,
   ShareIcon,
-  ChartBarIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline'
 
@@ -109,6 +105,14 @@ const mockVideos = [
   }
 ]
 
+const getStatusColor = (status: string) =>
+  VIDEO_STATUS_COLORS[status] ?? VIDEO_STATUS_COLORS.draft
+
+const getStatusIcon = (status: string) =>
+  VIDEO_STATUS_ICONS[status] ?? VIDEO_STATUS_ICONS.draft
+
+const getVisibilityColor = (visibility: string) =>
+  VISIBILITY_COLORS[visibility] ?? VISIBILITY_COLORS.free
 
 const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
