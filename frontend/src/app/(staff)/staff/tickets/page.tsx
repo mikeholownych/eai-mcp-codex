@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTickets, useTicketActions, useTicketStats } from '@/hooks/useStaff'
 import { Ticket } from '@/lib/staffApi'
@@ -17,7 +17,6 @@ import {
   TagIcon,
   ChatBubbleBottomCenterTextIcon,
   ArrowRightIcon,
-  FunnelIcon,
 } from '@heroicons/react/24/outline'
 
 
@@ -51,7 +50,7 @@ export default function StaffTicketManagement() {
   const [selectedPriority, setSelectedPriority] = useState<string>('all')
   const [selectedCategory, setSelectedCategory] = useState<string>('All Categories')
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
+  const currentPage = 1
 
   // Build filters for API call
   const filters = {
@@ -65,7 +64,7 @@ export default function StaffTicketManagement() {
 
   const { tickets, total, loading, error, refetch } = useTickets(filters)
   const { stats: ticketStats, loading: statsLoading } = useTicketStats()
-  const { assignTicket, updateTicketStatus, updateTicketPriority, loading: actionLoading } = useTicketActions()
+  const { assignTicket, updateTicketStatus, loading: actionLoading } = useTicketActions()
 
   // Check if user has permission to view tickets
   if (!user || !['admin', 'manager', 'support'].includes(user.role)) {
@@ -125,20 +124,7 @@ export default function StaffTicketManagement() {
     }
   }
 
-  const handleUpdatePriority = async (ticketId: string, newPriority: string) => {
-    try {
-      await updateTicketPriority(ticketId, newPriority)
-      refetch() // Refresh the tickets list
-      if (selectedTicket && selectedTicket.id === ticketId) {
-        // Update the selected ticket priority for immediate UI feedback
-        setSelectedTicket({ ...selectedTicket, priority: newPriority as 'low' | 'medium' | 'high' | 'urgent' })
-      }
-    } catch (error) {
-      debug('Failed to update ticket priority', error)
-      alert('Failed to update ticket priority')
-    }
-  }
-
+  
   const handleViewTicket = (ticket: Ticket) => {
     setSelectedTicket(ticket)
   }

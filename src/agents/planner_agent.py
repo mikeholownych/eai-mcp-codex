@@ -15,22 +15,24 @@ class PlannerAgent(BaseAgent):
         """Factory compatible with legacy startup scripts."""
         return cls(agent_id=agent_id, name=name)
 
-    def __init__(self, agent_id: str, name: str = None):
-        config = AgentConfig(
-            agent_id=agent_id,
-            agent_type="planner",
-            name=name or f"Planner-{agent_id}",
-            capabilities=[
-                "task_breakdown",
-                "estimation",
-                "dependency_analysis",
-                "project_planning",
-                "milestone_creation",
-                "resource_planning",
-            ],
-            max_concurrent_tasks=5,
-            heartbeat_interval=30,
-        )
+    def __init__(self, agent_id: str = None, name: str = None, config: AgentConfig = None):
+        if config is None:
+            # Legacy initialization with individual parameters
+            config = AgentConfig(
+                agent_id=agent_id,
+                agent_type="planner",
+                name=name or f"Planner-{agent_id}",
+                capabilities=[
+                    "task_breakdown",
+                    "estimation",
+                    "dependency_analysis",
+                    "project_planning",
+                    "milestone_creation",
+                    "resource_planning",
+                ],
+                max_concurrent_tasks=5,
+                heartbeat_interval=30,
+            )
         super().__init__(config)
 
         # Planner-specific state

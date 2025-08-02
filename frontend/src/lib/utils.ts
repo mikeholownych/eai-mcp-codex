@@ -14,7 +14,6 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function debug(label: string, data: unknown): void {
   if (process.env.NODE_ENV !== 'production') {
-    // eslint-disable-next-line no-console
     console.log(`[DEBUG] ${label}:`, JSON.stringify(data, null, 2))
   }
 }
@@ -181,7 +180,7 @@ export function stringToColor(str: string): string {
 /**
  * Format code for display
  */
-export function formatCode(code: string, language: string = 'javascript'): string {
+export function formatCode(code: string): string {
   // This would typically use a syntax highlighter
   // For now, just return the code as-is
   return code

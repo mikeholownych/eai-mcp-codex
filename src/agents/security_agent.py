@@ -16,18 +16,20 @@ class SecurityAgent(BaseAgent):
         """Factory compatible with legacy startup scripts."""
         return cls(agent_id=agent_id, name=name)
 
-    def __init__(self, agent_id: str, name: str = None):
-        config = AgentConfig(
-            agent_id=agent_id,
-            agent_type="security",
-            name=name or f"Security-{agent_id}",
-            capabilities=[
-                "vulnerability_analysis",
-                "security_review",
-                "compliance_check",
-                "threat_modeling",
-                "penetration_testing",
-                "security_architecture",
+    def __init__(self, agent_id: str = None, name: str = None, config: AgentConfig = None):
+        if config is None:
+            # Legacy initialization with individual parameters
+            config = AgentConfig(
+                agent_id=agent_id,
+                agent_type="security",
+                name=name or f"Security-{agent_id}",
+                capabilities=[
+                    "vulnerability_analysis",
+                    "security_review",
+                    "compliance_check",
+                    "threat_modeling",
+                    "penetration_testing",
+                    "security_architecture",
                 "authentication_review",
                 "authorization_review",
                 "data_protection_review",

@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import Button from '@/components/ui/Button'
 import {
   HomeIcon,
   CodeBracketIcon,

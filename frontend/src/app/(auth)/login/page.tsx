@@ -49,7 +49,7 @@ export default function LoginPage() {
           router.push('/staff')
         }
       }
-    } catch (err) {
+    } catch (_) {
       setError('Login failed. Please try again.')
     } finally {
       setLoading(false)
@@ -68,7 +68,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError(`${provider} authentication failed`)
       }
-    } catch (err) {
+    } catch (_) {
       setError(`${provider} authentication failed`)
     } finally {
       setOauthLoading(null)

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { 
   BellIcon, 
   MagnifyingGlassIcon, 
@@ -12,7 +13,6 @@ import {
 import { Menu } from '@headlessui/react'
 import { cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
 
 interface HeaderProps {
   title?: string
@@ -129,9 +129,11 @@ const Header: React.FC<HeaderProps> = ({
           <Menu as="div" className="relative">
             <Menu.Button className="flex items-center space-x-2 p-2 text-gray-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors">
               {user.avatar ? (
-                <img 
+                <Image 
                   src={user.avatar} 
                   alt={user.name}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full"
                 />
               ) : (

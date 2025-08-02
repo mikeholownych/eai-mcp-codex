@@ -3,10 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUsers, useUserActions } from '@/hooks/useStaff'
-import { User } from '@/lib/staffApi'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
 import { useRouter } from 'next/navigation'
 import { debug } from '@/lib/utils'
 import { getUserStatusColor, getUserStatusIcon } from '@/lib/statusHelpers'
@@ -19,7 +17,6 @@ import {
   ShieldCheckIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ClockIcon,
   EyeIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline'
@@ -42,8 +39,7 @@ export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedRole, setSelectedRole] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1)
+    const currentPage = 1
   const [userStats, setUserStats] = useState({
     total: 0,
     active: 0,

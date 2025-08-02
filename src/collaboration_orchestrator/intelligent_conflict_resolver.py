@@ -218,6 +218,26 @@ class AutomatedResolutionEngine:
 class IntelligentConflictResolver:
     """Main conflict resolution system for multi-developer coordination."""
 
+    @classmethod
+    async def create(
+        cls,
+        profile_manager: DeveloperProfileManager,
+        message_broker: Optional[A2AMessageBroker] = None,
+        postgres_pool: Optional[asyncpg.Pool] = None,
+        redis: Optional[Redis] = None,
+    ) -> "IntelligentConflictResolver":
+        """Create a new IntelligentConflictResolver instance."""
+        instance = cls(
+            profile_manager=profile_manager,
+            message_broker=message_broker,
+            postgres_pool=postgres_pool,
+            redis=redis,
+        )
+        # Initialize the message_broker if not provided
+        if not instance.message_broker:
+            instance.message_broker = await A2AMessageBroker.create()
+        return instance
+
     def __init__(
         self,
         profile_manager: DeveloperProfileManager,

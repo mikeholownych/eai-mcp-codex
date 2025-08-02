@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { motion, useAnimation } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { 
   CheckIcon,
@@ -18,6 +18,9 @@ import {
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import ProductTour from '@/components/demo/ProductTour'
+import ParticleBackground from '@/components/effects/ParticleBackground'
+import EnhancedFeatures from '@/components/effects/ScrollAnimation'
+import InteractiveDemo from '@/components/demo/InteractiveDemo'
 import StructuredData, { 
   organizationSchema, 
   softwareApplicationSchema, 
@@ -211,18 +214,17 @@ const AnimatedCounter = ({ value, suffix = '', duration = 2000 }) => {
 }
 
 export default function HomePage() {
-  const [isVisible, setIsVisible] = useState(false)
   const [showTour, setShowTour] = useState(false)
-
-  useEffect(() => {
-    setIsVisible(true)
-  }, [])
+  const [showDemo, setShowDemo] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+      {/* 3D Particle Background */}
+      <ParticleBackground />
+      
       {/* Background Effects */}
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900" />
-      <div className="fixed inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900" style={{ zIndex: 2 }} />
+      <div className="fixed inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" style={{ zIndex: 3 }} />
       
       {/* Navigation */}
       <motion.nav 
@@ -230,6 +232,7 @@ export default function HomePage() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
         className="relative border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-xl"
+        style={{ zIndex: 10 }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -245,7 +248,7 @@ export default function HomePage() {
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
-              {['Features', 'Pricing', 'Docs', 'Blog'].map((item, index) => (
+              {['Features', 'Pricing', 'Docs', 'Blog'].map((item) => (
                 <motion.div key={item} whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300 }}>
                   <Link href={`#${item.toLowerCase()}`} className="text-gray-300 hover:text-white transition-colors relative group">
                     {item}
@@ -274,7 +277,7 @@ export default function HomePage() {
       </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden" style={{ zIndex: 5 }}>
         <motion.div 
           className="max-w-7xl mx-auto text-center"
           variants={containerVariants}
@@ -367,10 +370,10 @@ export default function HomePage() {
                 variant="outline" 
                 size="lg" 
                 className="w-full sm:w-auto border-slate-600 text-slate-300 hover:bg-slate-800/50 hover:border-slate-500 px-8 py-4 text-lg backdrop-blur-sm"
-                onClick={() => setShowTour(true)}
+                onClick={() => setShowDemo(true)}
               >
                 <PlayIcon className="w-5 h-5 mr-2" />
-                Watch Demo
+                Live Demo
               </Button>
             </motion.div>
           </motion.div>
@@ -415,8 +418,11 @@ export default function HomePage() {
         </motion.div>
       </section>
 
+      {/* Enhanced Features Section */}
+      <EnhancedFeatures />
+      
       {/* Features Section */}
-      <section id="features" className="relative py-24 px-4 sm:px-6 lg:px-8">
+      <section id="features" className="relative py-24 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
         <div className="max-w-7xl mx-auto">
           <motion.div 
             className="text-center mb-20"
@@ -483,7 +489,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-800/30" style={{ zIndex: 5 }}>
         <div className="max-w-7xl mx-auto">
           <motion.div 
             className="text-center mb-16"
@@ -538,7 +544,7 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">
+      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -595,7 +601,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
         <div className="max-w-4xl mx-auto text-center">
           <Card className="bg-slate-800 border-slate-700">
             <Card.Content className="py-16">
@@ -631,7 +637,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-700 bg-slate-800 py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="border-t border-slate-700 bg-slate-800 py-12 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -690,6 +696,12 @@ export default function HomePage() {
         </div>
       </footer>
 
+      {/* Interactive Demo */}
+      <InteractiveDemo 
+        isOpen={showDemo} 
+        onClose={() => setShowDemo(false)} 
+      />
+      
       {/* Product Tour */}
       <ProductTour 
         isOpen={showTour} 
