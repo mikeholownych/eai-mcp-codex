@@ -376,6 +376,26 @@ def setup_metrics_endpoint(app, endpoint: str = "/metrics"):
         logger.error(f"Failed to setup metrics endpoint: {e}")
 
 
+def setup_metrics(app):
+    """Setup metrics collection for FastAPI application."""
+    try:
+        from fastapi import Response
+        
+        @app.get("/metrics")
+        async def metrics():
+            """Prometheus metrics endpoint."""
+            return Response(
+                get_metrics_output(), 
+                media_type=get_metrics_content_type()
+            )
+        
+        logger.info("Metrics endpoint configured at /metrics")
+        return app
+    except Exception as e:
+        logger.error(f"Failed to setup metrics: {e}")
+        return app
+
+
 def reset_metrics():
     """Reset all metrics (useful for testing)."""
     global default_registry, _service_collectors
