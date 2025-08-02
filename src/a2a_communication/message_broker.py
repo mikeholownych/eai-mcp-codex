@@ -31,6 +31,35 @@ class RabbitMQConnection:
         self.connection.close()
 
 
+import asyncio
+import json
+import logging
+import os
+from datetime import datetime, timedelta
+from typing import List, Optional
+from uuid import UUID
+
+import pika
+from src.common.redis_client import get_redis_connection
+
+from .models import A2AMessage, AgentRegistration, AgentStatus
+
+
+logger = logging.getLogger(__name__)
+
+
+class RabbitMQConnection:
+    def __init__(self, host=os.environ.get("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/%2F")):
+        self.connection = pika.BlockingConnection(pika.URLParameters(host))
+        self.channel = self.connection.channel()
+
+    def __enter__(self):
+        return self.channel
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.connection.close()
+
+
 class A2AMessageBroker:
     """Handles A2A message routing, delivery, and persistence."""
 
@@ -38,11 +67,16 @@ class A2AMessageBroker:
     async def create(cls):
         self = cls()
         self.redis = await get_redis_connection()
+        await asyncio.to_thread(self._setup_rabbitmq)
         return self
 
     def __init__(self):
         self.message_ttl = 3600  # 1 hour default TTL
-        self._setup_rabbitmq()
+
+    def _setup_rabbitmq(self):
+        with RabbitMQConnection() as channel:
+            channel.exchange_declare(exchange="agent_exchange", exchange_type="topic")
+            channel.exchange_declare(exchange="broadcast_exchange", exchange_type="fanout")
 
     def _setup_rabbitmq(self):
         with RabbitMQConnection() as channel:

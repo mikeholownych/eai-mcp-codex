@@ -6,9 +6,9 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { debug } from '@/lib/utils'
 import {
-  VIDEO_STATUS_COLORS,
-  VIDEO_STATUS_ICONS,
-  VISIBILITY_COLORS,
+  getVideoStatusColor,
+  getVideoStatusIcon,
+  getVisibilityColor,
 } from '@/lib/statusHelpers'
 import {
   VideoCameraIcon,
@@ -356,8 +356,8 @@ export default function VideoContentManagement() {
             <div className="relative aspect-video bg-slate-700 flex items-center justify-center">
               <PlayIcon className="h-12 w-12 text-white/60" />
               <div className="absolute top-2 right-2">
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(video.status)}`}>
-                  {getStatusIcon(video.status)}
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getVideoStatusColor(video.status)}`}>
+                  {getVideoStatusIcon(video.status)}
                   <span className="ml-1 capitalize">{video.status}</span>
                 </span>
               </div>

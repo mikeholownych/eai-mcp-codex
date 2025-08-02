@@ -9,7 +9,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { useRouter } from 'next/navigation'
 import { debug } from '@/lib/utils'
-import { USER_STATUS_COLORS, USER_STATUS_ICONS } from '@/lib/statusHelpers'
+import { getUserStatusColor, getUserStatusIcon } from '@/lib/statusHelpers'
 import {
   UserGroupIcon,
   PlusIcon,
@@ -296,8 +296,8 @@ export default function UserManagement() {
                     </span>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                      {getStatusIcon(user.status)}
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getUserStatusColor(user.status)}`}>
+                      {getUserStatusIcon(user.status)}
                       <span className="ml-1">{user.status}</span>
                     </span>
                   </td>
