@@ -86,6 +86,11 @@ const mockBlogPosts = [
   }
 ]
 
+const getStatusColor = (status: string) =>
+  BLOG_STATUS_COLORS[status] ?? BLOG_STATUS_COLORS.draft
+
+const getStatusIcon = (status: string) =>
+  BLOG_STATUS_ICONS[status] ?? BLOG_STATUS_ICONS.draft
 
 export default function BlogContentManagement() {
   const { user } = useAuth()
