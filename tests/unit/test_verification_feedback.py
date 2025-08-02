@@ -1,31 +1,31 @@
 import pytest
-from src.verification_feedback.verification_engine import (
-    verify,
-    get_verification_engine,
+
+from src.verification_feedback.feedback_processor import FeedbackProcessor
+from src.verification_feedback.models import (
+    FeedbackRequest,
+    FeedbackSeverity,
+    FeedbackType,
 )
-from src.common.database import DatabaseManager
-import os
-
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
-
-
-@pytest.fixture(autouse=True)
-async def setup_and_teardown_db():
-    os.environ["TESTING_MODE"] = "true"
-    db_manager = DatabaseManager("verification_feedback_db")
-    await db_manager.connect()
-    # In a real test, you might create tables here if not using in-memory
-    yield
-    await db_manager.disconnect()
-    os.environ["TESTING_MODE"] = "false"
 
 
 @pytest.mark.asyncio
-async def test_verify() -> None:
-    await get_verification_engine()
-    # Mock the actual verification logic if it involves external calls
-    # For now, just test the basic flow
-    feedback_id = "test_feedback_id"
-    # Assuming verify now returns a structured object or just a boolean for simplicity
-    result = await verify(feedback_id)  # Assuming verify takes an ID or some input
-    assert result is not None  # Or assert result.status == ExpectedStatus
+async def test_submit_and_fetch_feedback(monkeypatch) -> None:
+    """Feedback can be stored and retrieved using the processor."""
+    monkeypatch.setenv("TESTING_MODE", "true")
+    processor = FeedbackProcessor()
+    await processor.initialize_database()
+
+    request = FeedbackRequest(
+        feedback_type=FeedbackType.USER_FEEDBACK,
+        severity=FeedbackSeverity.MEDIUM,
+        title="Test feedback",
+        content="Something happened",
+    )
+
+    feedback = await processor.submit_feedback(request, source="tester")
+    fetched = await processor.get_feedback(feedback.id)
+
+    assert fetched is not None
+    assert fetched.title == "Test feedback"
+
+    await processor.shutdown_database()
