@@ -157,7 +157,7 @@ export default function CodeEditorPage() {
     }, 2000)
   }
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: { getValue: () => string; setValue: (value: string) => void; focus: () => void }) => {
     editorRef.current = editor
     
     // Configure editor options

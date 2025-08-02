@@ -283,7 +283,7 @@ export interface ModalProps {
 }
 
 // API Response Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
@@ -303,7 +303,7 @@ export interface PaginationMeta {
 // WebSocket Types
 export interface WebSocketMessage {
   type: string
-  payload: any
+  payload: unknown
   timestamp: Date
   sessionId?: string
 }
@@ -313,7 +313,7 @@ export interface FeatureFlag {
   key: string
   enabled: boolean
   rolloutPercentage: number
-  conditions?: Record<string, any>
+  conditions?: Record<string, unknown>
 }
 
 // Audit Log Types
@@ -324,7 +324,7 @@ export interface AuditLog {
   action: string
   resource: string
   resourceId: string
-  details: Record<string, any>
+  details: Record<string, unknown>
   ipAddress: string
   userAgent: string
   createdAt: Date
@@ -346,10 +346,80 @@ export interface AppConfig {
   }
 }
 
+// Model Router Types
+export interface ModelRouteRequest {
+  text: string
+  request_id: string
+  temperature?: number
+  max_tokens?: number
+  task_type?: string
+  priority?: string
+  system_prompt?: string
+  context?: Record<string, unknown>
+}
+
+export interface ModelRouteResponse {
+  request_id: string
+  model: string
+  response: string
+  tokens_used: number
+  processing_time: number
+  confidence: number
+  timestamp: Date
+}
+
+export interface AvailableModel {
+  id: string
+  name: string
+  description: string
+  parameters: {
+    max_tokens: number
+    temperature: {
+      min: number
+      max: number
+      default: number
+    }
+  }
+  status: 'available' | 'unavailable' | 'degraded'
+}
+
+export interface ModelStats {
+  total_requests: number
+  successful_requests: number
+  failed_requests: number
+  average_response_time: number
+  tokens_used: number
+  model_usage: Record<string, {
+    requests: number
+    tokens: number
+    avg_response_time: number
+  }>
+}
+
+// System Health Types
+export interface SystemHealth {
+  api_performance: {
+    status: 'healthy' | 'warning' | 'critical'
+    success_rate: number
+    avg_response_time: number
+  }
+  database_status: {
+    status: 'healthy' | 'optimal' | 'moderate' | 'critical'
+    utilization: number
+    connection_pool: string
+  }
+  memory_usage: {
+    status: 'healthy' | 'optimal' | 'moderate' | 'critical'
+    usage_percent: number
+    available_gb: number
+  }
+  service_status: Record<string, 'healthy' | 'warning' | 'critical'>
+}
+
 // Error Types
 export interface AppError {
   code: string
   message: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   timestamp: Date
 }

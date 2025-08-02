@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
+import type { SystemHealth } from '@/types'
 import { 
   StaffApiService, 
   User, 
@@ -70,7 +71,7 @@ export function useSystemStats() {
 
 // System Health Hook
 export function useSystemHealth() {
-  const [health, setHealth] = useState<any>(null)
+  const [health, setHealth] = useState<SystemHealth | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -411,7 +412,7 @@ export function useTicketActions() {
 
 // Ticket Stats Hook
 export function useTicketStats() {
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<{ total_tickets: number; by_status: Record<string, number>; avg_response_time: number } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 

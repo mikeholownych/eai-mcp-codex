@@ -5,13 +5,13 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer
 import secrets
 
-from .models import (
+from src.auth_service.models import (
     UserRegistration, UserLogin, UserResponse, TokenResponse,
     ApiKeyResponse, PasswordChange, ErrorResponse
 )
-from ..common.auth import get_auth_manager, AuthResult
-from ..common.fastapi_auth import get_current_user
-from ..common.logging import get_logger
+from src.common.auth import get_auth_manager, AuthResult
+from src.common.fastapi_auth import get_current_user
+from src.common.logging import get_logger
 
 logger = get_logger("auth_service")
 router = APIRouter()

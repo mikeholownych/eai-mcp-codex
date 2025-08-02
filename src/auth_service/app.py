@@ -5,10 +5,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from .routes import router
-from ..common.logging import get_logger
-from ..common.consul_client import ConsulClient
-from ..common.exceptions import setup_exception_handlers
+from src.auth_service.routes import router
+from src.common.logging import get_logger
+from src.common.consul_client import ConsulClient
+from src.common.exceptions import setup_exception_handlers
 
 logger = get_logger("auth_service")
 

@@ -3,6 +3,7 @@
  */
 
 import { api } from './api'
+import type { SystemHealth } from '@/types'
 
 // Base staff API URL
 const STAFF_API_BASE = '/api/staff'
@@ -109,10 +110,10 @@ export interface ListResponse<T> {
   per_page: number
 }
 
-export interface StaffResponse {
+export interface StaffResponse<T = unknown> {
   success: boolean
   message: string
-  data?: any
+  data?: T
   timestamp: string
 }
 
@@ -129,7 +130,7 @@ export class StaffApiService {
     return response.data
   }
 
-  static async getSystemHealth(): Promise<any> {
+  static async getSystemHealth(): Promise<SystemHealth> {
     const response = await api.get(`${STAFF_API_BASE}/health/system`)
     return response.data
   }
@@ -229,7 +230,7 @@ export class StaffApiService {
     return response.data
   }
 
-  static async getTicketStats(): Promise<any> {
+  static async getTicketStats(): Promise<{ total_tickets: number; by_status: Record<string, number>; avg_response_time: number }> {
     const response = await api.get(`${STAFF_API_BASE}/tickets/stats`)
     return response.data
   }
@@ -241,7 +242,7 @@ export function useStaffApi() {
 }
 
 // Error handling helper
-export function handleStaffApiError(error: any): string {
+export function handleStaffApiError(error: { response?: { data?: { message?: string } }; status?: number; message?: string }): string {
   if (error.response?.data?.message) {
     return error.response.data.message
   }
