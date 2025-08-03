@@ -1,0 +1,506 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Alerting Dashboard",
+    "tags": ["alerting", "active-alerts", "alert-history", "alert-suppression", "notification-status"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Alerting Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "count(ALERTS{alertstate=\"firing\"})",
+            "legendFormat": "Active Alerts",
+            "refId": "A"
+          },
+          {
+            "expr": "count(ALERTS{alertstate=\"pending\"})",
+            "legendFormat": "Pending Alerts",
+            "refId": "B"
+          },
+          {
+            "expr": "count(ALERTS{alertstate=\"suppressed\"})",
+            "legendFormat": "Suppressed Alerts",
+            "refId": "C"
+          },
+          {
+            "expr": "count(ALERTS{alertstate=\"resolved\"})",
+            "legendFormat": "Resolved Alerts",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 5 },
+                { "color": "red", "value": 10 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Alerts by Severity",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "count(ALERTS{alertstate=\"firing\"}) by (severity)",
+            "legendFormat": "{{severity}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Alerts by Service",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "count(ALERTS{alertstate=\"firing\"}) by (job)",
+            "legendFormat": "{{job}}",
+            "refId": "A"
+          },
+          {
+            "expr": "count(ALERTS{alertstate=\"pending\"}) by (job)",
+            "legendFormat": "{{job}} - Pending",
+            "refId": "B"
+          },
+          {
+            "expr": "count(ALERTS{alertstate=\"suppressed\"}) by (job)",
+            "legendFormat": "{{job}} - Suppressed",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Alert Count",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 5,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 10,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Alert History",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(ALERTS{alertstate=\"firing\"}[1h])",
+            "legendFormat": "Alerts Fired/hour",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(ALERTS{alertstate=\"resolved\"}[1h])",
+            "legendFormat": "Alerts Resolved/hour",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(ALERTS{alertstate=\"suppressed\"}[1h])",
+            "legendFormat": "Alerts Suppressed/hour",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(ALERTS_FOR_STATE[1h])",
+            "legendFormat": "Alert State Changes/hour",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 10 },
+                { "color": "red", "value": 50 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Alert Suppression",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "count(ALERTS{alertstate=\"suppressed\"}) by (alertname)",
+            "legendFormat": "{{alertname}}",
+            "refId": "A"
+          },
+          {
+            "expr": "ALERTS{alertstate=\"suppressed\"}",
+            "legendFormat": "{{alertname}} - Duration",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Suppressed Alerts / Duration",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 5,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 10,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Notification Status",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "count(ALERTMANAGER_NOTIFICATIONS_SENT) by (status)",
+            "legendFormat": "{{status}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Alert Response Time",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(ALERTMANAGER_NOTIFICATIONS_LATENCY_SECONDS_BUCKET[5m]))",
+            "legendFormat": "P50 Response Time",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(ALERTMANAGER_NOTIFICATIONS_LATENCY_SECONDS_BUCKET[5m]))",
+            "legendFormat": "P95 Response Time",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(ALERTMANAGER_NOTIFICATIONS_LATENCY_SECONDS_BUCKET[5m]))",
+            "legendFormat": "P99 Response Time",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Response Time (s)",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 5,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 30,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Active Alerts Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "ALERTS{alertstate=\"firing\"}",
+            "legendFormat": "{{alertname}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "alertstate": true
+              },
+              "indexByName": {
+                "alertname": 0,
+                "severity": 1,
+                "instance": 2,
+                "job": 3,
+                "summary": 4,
+                "description": 5
+              },
+              "renameByName": {
+                "alertname": "Alert Name",
+                "severity": "Severity",
+                "instance": "Instance",
+                "job": "Job",
+                "summary": "Summary",
+                "description": "Description"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Severity" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": null },
+                      { "color": "yellow", "value": "warning" },
+                      { "color": "red", "value": "critical" }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Alerting Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - ((count(ALERTS{alertstate=\"firing\"}) * 10) - (count(ALERTS{alertstate=\"pending\"}) * 5) - (histogram_quantile(0.95, rate(ALERTMANAGER_NOTIFICATIONS_LATENCY_SECONDS_BUCKET[5m])) * 2) - ((1 - (count(ALERTS{alertstate=\"resolved\"}) / (count(ALERTS{alertstate=\"firing\"}) + count(ALERTS{alertstate=\"resolved\"}))) * 100 * 3)",
+            "legendFormat": "Alerting Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Alert Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(count(ALERTS{alertstate=\"firing\"})[24h])",
+            "legendFormat": "Avg Active Alerts (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(rate(ALERTS{alertstate=\"firing\"}[1h])[24h])",
+            "legendFormat": "Avg Alerts Fired/hour (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(rate(ALERTS{alertstate=\"resolved\"}[1h])[24h])",
+            "legendFormat": "Avg Alerts Resolved/hour (24h)",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Alerts / Alerts/hour",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Alert Manager Health",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "ALERTMANAGER_HEALTH",
+            "legendFormat": "Alert Manager Health",
+            "refId": "A"
+          },
+          {
+            "expr": "ALERTMANAGER_CONFIG_HASH",
+            "legendFormat": "Config Hash",
+            "refId": "B"
+          },
+          {
+            "expr": "ALERTMANAGER_BUILD_INFO",
+            "legendFormat": "Build Info",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Health Status",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 0,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Alert Rules",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "ALERTMANAGER_RULES",
+            "legendFormat": "Alert Rules - {{alertname}}",
+            "refId": "A"
+          },
+          {
+            "expr": "ALERTMANAGER_RULES_EVALUATIONS_TOTAL",
+            "legendFormat": "Rule Evaluations - {{alertname}}",
+            "refId": "B"
+          },
+          {
+            "expr": "ALERTMANAGER_RULES_EVALUATION_TIME_SECONDS",
+            "legendFormat": "Rule Evaluation Time - {{alertname}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Rules / Evaluations / Time",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 10,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 30,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "severity",
+          "type": "query",
+          "query": "label_values(ALERTS, severity)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "job",
+          "type": "query",
+          "query": "label_values(ALERTS, job)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "alertname",
+          "type": "query",
+          "query": "label_values(ALERTS, alertname)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Alerting Events",
+          "datasource": "Prometheus",
+          "expr": "ALERTS_FOR_STATE",
+          "iconColor": "red",
+          "titleFormat": "Alert State Change: {{alertname}}"
+        },
+        {
+          "name": "Alert Manager Events",
+          "datasource": "Prometheus",
+          "expr": "ALERTMANAGER_NOTIFICATIONS_SENT",
+          "iconColor": "orange",
+          "titleFormat": "Alert Notification: {{alertname}}"
+        },
+        {
+          "name": "Alert Rule Changes",
+          "datasource": "Prometheus",
+          "expr": "changes(ALERTMANAGER_RULES[1h]) > 0",
+          "iconColor": "blue",
+          "titleFormat": "Alert Rule Changed"
+        }
+      ]
+    }
+  }
+}

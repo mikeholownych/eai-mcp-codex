@@ -464,6 +464,237 @@
           "expr": "changes(container_start_time_seconds{name=\"mcp-frontend\"}[1h]) > 0",
           "iconColor": "blue",
           "titleFormat": "Frontend Container Restart"
+        },
+        {
+          "id": 10,
+          "title": "User Experience Metrics by Browser",
+          "type": "graph",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+          "targets": [
+            {
+              "expr": "avg by (browser) (frontend_web_vitals_lcp)",
+              "legendFormat": "{{browser}} - LCP",
+              "refId": "A"
+            },
+            {
+              "expr": "avg by (browser) (frontend_web_vitals_fid)",
+              "legendFormat": "{{browser}} - FID",
+              "refId": "B"
+            },
+            {
+              "expr": "avg by (browser) (frontend_web_vitals_cls)",
+              "legendFormat": "{{browser}} - CLS",
+              "refId": "C"
+            }
+          ],
+          "yAxes": [
+            {
+              "label": "Milliseconds",
+              "min": 0
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "title": "User Experience Metrics by Device",
+          "type": "graph",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+          "targets": [
+            {
+              "expr": "avg by (device_type) (frontend_web_vitals_lcp)",
+              "legendFormat": "{{device_type}} - LCP",
+              "refId": "A"
+            },
+            {
+              "expr": "avg by (device_type) (frontend_web_vitals_fid)",
+              "legendFormat": "{{device_type}} - FID",
+              "refId": "B"
+            },
+            {
+              "expr": "avg by (device_type) (frontend_web_vitals_cls)",
+              "legendFormat": "{{device_type}} - CLS",
+              "refId": "C"
+            }
+          ],
+          "yAxes": [
+            {
+              "label": "Milliseconds",
+              "min": 0
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "title": "JavaScript Error Rate",
+          "type": "graph",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 58 },
+          "targets": [
+            {
+              "expr": "rate(frontend_js_errors_total[5m])",
+              "legendFormat": "JS Errors/sec",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(frontend_unhandled_rejections_total[5m])",
+              "legendFormat": "Unhandled Rejections/sec",
+              "refId": "B"
+            }
+          ],
+          "yAxes": [
+            {
+              "label": "Errors/sec",
+              "min": 0
+            }
+          ],
+          "thresholds": [
+            {
+              "value": 0.1,
+              "colorMode": "warning",
+              "op": "gt"
+            },
+            {
+              "value": 1,
+              "colorMode": "critical",
+              "op": "gt"
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "title": "Resource Loading Times",
+          "type": "graph",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 58 },
+          "targets": [
+            {
+              "expr": "avg by (resource_type) (frontend_resource_load_time_seconds)",
+              "legendFormat": "{{resource_type}} - Load Time",
+              "refId": "A"
+            }
+          ],
+          "yAxes": [
+            {
+              "label": "Seconds",
+              "min": 0
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "title": "User Engagement Metrics",
+          "type": "stat",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 66 },
+          "targets": [
+            {
+              "expr": "frontend_page_views_total",
+              "legendFormat": "Page Views",
+              "refId": "A"
+            },
+            {
+              "expr": "frontend_unique_users_total",
+              "legendFormat": "Unique Users",
+              "refId": "B"
+            },
+            {
+              "expr": "frontend_session_duration_seconds_avg",
+              "legendFormat": "Avg Session Duration",
+              "refId": "C"
+            },
+            {
+              "expr": "frontend_bounce_rate * 100",
+              "legendFormat": "Bounce Rate %",
+              "refId": "D"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": 0 },
+                  { "color": "yellow", "value": 50 },
+                  { "color": "red", "value": 80 }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Avg Session Duration" },
+                "properties": [
+                  { "id": "unit", "value": "s" }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "Bounce Rate %" },
+                "properties": [
+                  { "id": "unit", "value": "percent" },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "steps": [
+                        { "color": "green", "value": 0 },
+                        { "color": "yellow", "value": 40 },
+                        { "color": "red", "value": 60 }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 15,
+          "title": "API Call Performance",
+          "type": "graph",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 66 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, rate(frontend_api_call_duration_seconds_bucket[5m]))",
+              "legendFormat": "P50 API Response Time",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.95, rate(frontend_api_call_duration_seconds_bucket[5m]))",
+              "legendFormat": "P95 API Response Time",
+              "refId": "B"
+            },
+            {
+              "expr": "rate(frontend_api_call_errors_total[5m])",
+              "legendFormat": "API Errors/sec",
+              "refId": "C"
+            }
+          ],
+          "yAxes": [
+            {
+              "label": "Seconds / Errors/sec",
+              "min": 0
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "title": "Core Web Vitals Distribution",
+          "type": "heatmap",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 74 },
+          "targets": [
+            {
+              "expr": "frontend_web_vitals_lcp_bucket",
+              "legendFormat": "LCP",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "color": {
+              "mode": "opacity"
+            },
+            "heatmap": {},
+            "legend": {
+              "show": true
+            },
+            "tooltip": {
+              "show": true,
+              "showHistogram": true
+            }
+          }
         }
       ]
     }

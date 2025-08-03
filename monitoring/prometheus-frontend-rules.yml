@@ -1,5 +1,5 @@
-# Frontend-Specific Prometheus Alert Rules
-# Critical monitoring for Next.js application and static asset serving
+# Enhanced Frontend-Specific Prometheus Alert Rules
+# Critical monitoring for Next.js application and static asset serving with comprehensive coverage
 
 groups:
   - name: frontend_critical_alerts
@@ -9,27 +9,72 @@ groups:
         for: 30s
         labels:
           severity: critical
+          service: frontend
+          category: availability
         annotations:
           summary: "Frontend application completely unresponsive"
           description: "Frontend is not responding to requests for over 30 seconds - emergency restart may be required"
+          runbook_url: "https://docs.example.com/runbooks/frontend-unresponsive"
       
       - alert: FrontendHealthCheckFailing
         expr: up{job="frontend"} == 0
         for: 1m
         labels:
           severity: critical
+          service: frontend
+          category: availability
         annotations:
           summary: "Frontend health check failing"
           description: "Frontend health endpoint not responding - application may be hung"
+          runbook_url: "https://docs.example.com/runbooks/frontend-health-check"
       
       - alert: FrontendHighResponseTime
         expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="frontend"}[5m])) > 5
         for: 2m
         labels:
           severity: warning
+          service: frontend
+          category: performance
         annotations:
           summary: "Frontend response time degraded"
           description: "95th percentile response time is {{ $value }}s - investigating application performance"
+          runbook_url: "https://docs.example.com/runbooks/frontend-response-time"
+          
+      - alert: FrontendCriticalResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="frontend"}[5m])) > 10
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+          category: performance
+        annotations:
+          summary: "Frontend critical response time detected"
+          description: "95th percentile response time is {{ $value }}s - application is critically slow"
+          runbook_url: "https://docs.example.com/runbooks/frontend-critical-response-time"
+          
+      - alert: FrontendHighErrorRate
+        expr: rate(http_requests_total{job="frontend",status=~"4..|5.."}[5m]) / rate(http_requests_total{job="frontend"}[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          category: errors
+        annotations:
+          summary: "Frontend high error rate detected"
+          description: "Frontend error rate is {{ $value }}% - exceeding 5% threshold"
+          runbook_url: "https://docs.example.com/runbooks/frontend-error-rate"
+          
+      - alert: FrontendCriticalErrorRate
+        expr: rate(http_requests_total{job="frontend",status=~"5.."}[5m]) / rate(http_requests_total{job="frontend"}[5m]) * 100 > 10
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+          category: errors
+        annotations:
+          summary: "Frontend critical error rate detected"
+          description: "Frontend 5xx error rate is {{ $value }}% - exceeding 10% threshold"
+          runbook_url: "https://docs.example.com/runbooks/frontend-critical-error-rate"
 
   - name: static_asset_alerts
     rules:
@@ -38,36 +83,84 @@ groups:
         for: 1m
         labels:
           severity: warning
+          service: frontend
+          category: assets
         annotations:
           summary: "High rate of 404 errors for static assets"
           description: "{{ $value }} 404 errors per second - CSS/JS assets may not be loading"
+          runbook_url: "https://docs.example.com/runbooks/static-asset-404"
       
       - alert: CSSAssetsNotLoading
         expr: rate(http_requests_total{job="frontend",path=~".*\\.css",status!="200"}[5m]) > 0
         for: 30s
         labels:
           severity: critical
+          service: frontend
+          category: assets
         annotations:
           summary: "CSS assets failing to load"
           description: "CSS files returning non-200 status - user interface will be broken"
+          runbook_url: "https://docs.example.com/runbooks/css-assets-failed"
       
       - alert: JavaScriptAssetsNotLoading
         expr: rate(http_requests_total{job="frontend",path=~".*\\.js",status!="200"}[5m]) > 0
         for: 30s
         labels:
           severity: critical
+          service: frontend
+          category: assets
         annotations:
           summary: "JavaScript assets failing to load"
           description: "JS files returning non-200 status - application functionality will be broken"
+          runbook_url: "https://docs.example.com/runbooks/js-assets-failed"
       
       - alert: NextJSStaticAssetFailures
         expr: rate(http_requests_total{job="frontend",path=~"/_next/static/.*",status!="200"}[5m]) > 0.01
         for: 1m
         labels:
           severity: warning
+          service: frontend
+          category: assets
         annotations:
           summary: "Next.js static assets failing"
           description: "Next.js built assets not serving correctly - application performance degraded"
+          runbook_url: "https://docs.example.com/runbooks/nextjs-static-assets"
+          
+      - alert: ImageAssetsNotLoading
+        expr: rate(http_requests_total{job="frontend",path=~".*\\.(jpg|jpeg|png|gif|webp|svg)",status!="200"}[5m]) > 0.05
+        for: 1m
+        labels:
+          severity: warning
+          service: frontend
+          category: assets
+        annotations:
+          summary: "Image assets failing to load"
+          description: "Image files returning non-200 status - user experience degraded"
+          runbook_url: "https://docs.example.com/runbooks/image-assets-failed"
+          
+      - alert: FontAssetsNotLoading
+        expr: rate(http_requests_total{job="frontend",path=~".*\\.(woff|woff2|ttf|eot)",status!="200"}[5m]) > 0
+        for: 30s
+        labels:
+          severity: warning
+          service: frontend
+          category: assets
+        annotations:
+          summary: "Font assets failing to load"
+          description: "Font files returning non-200 status - text rendering may be affected"
+          runbook_url: "https://docs.example.com/runbooks/font-assets-failed"
+          
+      - alert: VideoAssetsNotLoading
+        expr: rate(http_requests_total{job="frontend",path=~".*\\.(mp4|webm|ogg)",status!="200"}[5m]) > 0
+        for: 30s
+        labels:
+          severity: warning
+          service: frontend
+          category: assets
+        annotations:
+          summary: "Video assets failing to load"
+          description: "Video files returning non-200 status - media content unavailable"
+          runbook_url: "https://docs.example.com/runbooks/video-assets-failed"
 
   - name: frontend_performance_alerts
     rules:
@@ -76,27 +169,84 @@ groups:
         for: 5m
         labels:
           severity: warning
+          service: frontend
+          category: resources
         annotations:
           summary: "Frontend container memory usage high"
           description: "Memory usage is {{ $value | humanizePercentage }} - may lead to application hang"
+          runbook_url: "https://docs.example.com/runbooks/frontend-memory-high"
+      
+      - alert: FrontendMemoryUsageCritical
+        expr: container_memory_usage_bytes{name="mcp-frontend"} / container_spec_memory_limit_bytes{name="mcp-frontend"} > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          service: frontend
+          category: resources
+        annotations:
+          summary: "Frontend container memory usage critical"
+          description: "Memory usage is {{ $value | humanizePercentage }} - application may crash soon"
+          runbook_url: "https://docs.example.com/runbooks/frontend-memory-critical"
       
       - alert: FrontendCPUUsageHigh
         expr: rate(container_cpu_usage_seconds_total{name="mcp-frontend"}[5m]) > 0.8
         for: 10m
         labels:
           severity: warning
+          service: frontend
+          category: resources
         annotations:
           summary: "Frontend container CPU usage high"
           description: "CPU usage is {{ $value | humanizePercentage }} - application performance may degrade"
+          runbook_url: "https://docs.example.com/runbooks/frontend-cpu-high"
+          
+      - alert: FrontendCPUUsageCritical
+        expr: rate(container_cpu_usage_seconds_total{name="mcp-frontend"}[5m]) > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          service: frontend
+          category: resources
+        annotations:
+          summary: "Frontend container CPU usage critical"
+          description: "CPU usage is {{ $value | humanizePercentage }} - application is severely throttled"
+          runbook_url: "https://docs.example.com/runbooks/frontend-cpu-critical"
       
       - alert: NextJSBuildProcessFailure
         expr: increase(container_oom_kills_total{name="mcp-frontend"}[5m]) > 0
         for: 0s
         labels:
           severity: critical
+          service: frontend
+          category: resources
         annotations:
           summary: "Frontend container killed due to OOM"
           description: "Container was killed due to out of memory - application will be unavailable"
+          runbook_url: "https://docs.example.com/runbooks/frontend-oom-kill"
+          
+      - alert: FrontendContainerRestarts
+        expr: rate(container_restarts_total{name="mcp-frontend"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          category: resources
+        annotations:
+          summary: "Frontend container restarting frequently"
+          description: "Frontend container restart rate is {{ $value }} per second - application instability"
+          runbook_url: "https://docs.example.com/runbooks/frontend-container-restarts"
+          
+      - alert: FrontendDiskUsageHigh
+        expr: (container_fs_usage_bytes{name="mcp-frontend"} / container_fs_limit_bytes{name="mcp-frontend"}) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          category: resources
+        annotations:
+          summary: "Frontend container disk usage high"
+          description: "Disk usage is {{ $value | humanizePercentage }} - may affect application performance"
+          runbook_url: "https://docs.example.com/runbooks/frontend-disk-high"
 
   - name: nginx_frontend_proxy_alerts
     rules:
@@ -105,27 +255,84 @@ groups:
         for: 1m
         labels:
           severity: critical
+          service: nginx
+          category: availability
         annotations:
           summary: "Nginx frontend proxy is down"
           description: "Nginx load balancer not responding - frontend will be inaccessible"
+          runbook_url: "https://docs.example.com/runbooks/nginx-down"
       
       - alert: NginxFrontendProxyErrors
         expr: rate(nginx_http_requests_total{status=~"5.."}[5m]) > 0.1
         for: 2m
         labels:
           severity: warning
+          service: nginx
+          category: errors
         annotations:
           summary: "High 5xx error rate from Nginx"
           description: "Nginx returning {{ $value }} 5xx errors per second - frontend proxy issues"
+          runbook_url: "https://docs.example.com/runbooks/nginx-5xx-errors"
+          
+      - alert: NginxFrontendProxyCriticalErrors
+        expr: rate(nginx_http_requests_total{status=~"5.."}[5m]) > 0.5
+        for: 1m
+        labels:
+          severity: critical
+          service: nginx
+          category: errors
+        annotations:
+          summary: "Critical 5xx error rate from Nginx"
+          description: "Nginx returning {{ $value }} 5xx errors per second - severe proxy issues"
+          runbook_url: "https://docs.example.com/runbooks/nginx-critical-5xx"
       
       - alert: NginxUpstreamConnectionFailures
         expr: rate(nginx_upstream_responses_total{status="upstream_error"}[5m]) > 0.01
         for: 1m
         labels:
           severity: critical
+          service: nginx
+          category: connectivity
         annotations:
           summary: "Nginx cannot connect to frontend upstream"
           description: "{{ $value }} upstream connection failures per second - frontend may be down"
+          runbook_url: "https://docs.example.com/runbooks/nginx-upstream-failures"
+          
+      - alert: NginxHighResponseTime
+        expr: histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket[5m])) > 2
+        for: 2m
+        labels:
+          severity: warning
+          service: nginx
+          category: performance
+        annotations:
+          summary: "Nginx high response time detected"
+          description: "95th percentile Nginx response time is {{ $value }}s - proxy performance degraded"
+          runbook_url: "https://docs.example.com/runbooks/nginx-response-time"
+          
+      - alert: NginxSSLCertificateExpiring
+        expr: (nginx_ssl_cert_not_after - time()) < (7 * 24 * 3600)
+        for: 0m
+        labels:
+          severity: warning
+          service: nginx
+          category: security
+        annotations:
+          summary: "Nginx SSL certificate expiring soon"
+          description: "Nginx SSL certificate will expire in {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.example.com/runbooks/nginx-ssl-expiry"
+          
+      - alert: NginxConfigurationReloadFailed
+        expr: increase(nginx_config_reloads_failed_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: nginx
+          category: configuration
+        annotations:
+          summary: "Nginx configuration reload failed"
+          description: "Nginx configuration reload failed - check configuration syntax"
+          runbook_url: "https://docs.example.com/runbooks/nginx-config-reload"
 
   - name: user_experience_alerts
     rules:
@@ -134,24 +341,141 @@ groups:
         for: 2m
         labels:
           severity: warning
+          service: frontend
+          category: performance
         annotations:
           summary: "Page load times are excessive"
           description: "95th percentile page load time is {{ $value }}s - user experience degraded"
+          runbook_url: "https://docs.example.com/runbooks/page-load-time"
+          
+      - alert: PageLoadTimeCritical
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="frontend",path="/"}[5m])) > 5
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+          category: performance
+        annotations:
+          summary: "Page load times are critical"
+          description: "95th percentile page load time is {{ $value }}s - user experience severely degraded"
+          runbook_url: "https://docs.example.com/runbooks/page-load-time-critical"
       
       - alert: APIEndpointFailures
         expr: rate(http_requests_total{job="frontend",path=~"/api/.*",status!="200"}[5m]) > 0.05
         for: 1m
         labels:
           severity: warning
+          service: frontend
+          category: errors
         annotations:
           summary: "High API endpoint failure rate"
           description: "{{ $value }} API failures per second - application functionality may be impaired"
+          runbook_url: "https://docs.example.com/runbooks/api-endpoint-failures"
+          
+      - alert: APIEndpointCriticalFailures
+        expr: rate(http_requests_total{job="frontend",path=~"/api/.*",status=~"5.."}[5m]) > 0.1
+        for: 30s
+        labels:
+          severity: critical
+          service: frontend
+          category: errors
+        annotations:
+          summary: "Critical API endpoint failure rate"
+          description: "{{ $value }} API 5xx failures per second - application functionality severely impaired"
+          runbook_url: "https://docs.example.com/runbooks/api-endpoint-critical-failures"
       
       - alert: WebVitalsScoreDegraded
         expr: frontend_web_vitals_lcp > 2.5 or frontend_web_vitals_fid > 100 or frontend_web_vitals_cls > 0.1
         for: 2m
         labels:
           severity: warning
+          service: frontend
+          category: performance
         annotations:
           summary: "Web Vitals scores degraded"
           description: "Core Web Vitals indicate poor user experience - LCP: {{ $labels.lcp }}ms, FID: {{ $labels.fid }}ms, CLS: {{ $labels.cls }}"
+          runbook_url: "https://docs.example.com/runbooks/web-vitals-degraded"
+          
+      - alert: WebVitalsScoreCritical
+        expr: frontend_web_vitals_lcp > 4 or frontend_web_vitals_fid > 300 or frontend_web_vitals_cls > 0.25
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+          category: performance
+        annotations:
+          summary: "Web Vitals scores critical"
+          description: "Core Web Vitals indicate critical user experience issues - LCP: {{ $labels.lcp }}ms, FID: {{ $labels.fid }}ms, CLS: {{ $labels.cls }}"
+          runbook_url: "https://docs.example.com/runbooks/web-vitals-critical"
+          
+      - alert: HighBounceRate
+        expr: rate(frontend_bounces_total[5m]) / rate(frontend_page_views_total[5m]) * 100 > 60
+        for: 10m
+        labels:
+          severity: warning
+          service: frontend
+          category: user_experience
+        annotations:
+          summary: "High bounce rate detected"
+          description: "Bounce rate is {{ $value }}% - users are leaving the site quickly"
+          runbook_url: "https://docs.example.com/runbooks/high-bounce-rate"
+          
+      - alert: LowSessionDuration
+        expr: rate(frontend_session_duration_seconds_sum[5m]) / rate(frontend_session_duration_count[5m]) < 60
+        for: 10m
+        labels:
+          severity: warning
+          service: frontend
+          category: user_experience
+        annotations:
+          summary: "Low session duration detected"
+          description: "Average session duration is {{ $value }}s - users are not staying long"
+          runbook_url: "https://docs.example.com/runbooks/low-session-duration"
+          
+      - alert: HighJavaScriptErrors
+        expr: rate(frontend_javascript_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          category: errors
+        annotations:
+          summary: "High JavaScript error rate detected"
+          description: "JavaScript error rate is {{ $value }} per second - application functionality may be impaired"
+          runbook_url: "https://docs.example.com/runbooks/javascript-errors"
+          
+      - alert: LowUserEngagement
+        expr: rate(frontend_user_interactions_total[5m]) / rate(frontend_page_views_total[5m]) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: frontend
+          category: user_experience
+        annotations:
+          summary: "Low user engagement detected"
+          description: "User engagement rate is {{ $value }} interactions per page view - users are not engaging with content"
+          runbook_url: "https://docs.example.com/runbooks/low-user-engagement"
+          
+      - alert: MobilePerformanceDegraded
+        expr: frontend_mobile_performance_score < 50
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          category: performance
+        annotations:
+          summary: "Mobile performance degraded"
+          description: "Mobile performance score is {{ $value }} - mobile user experience is poor"
+          runbook_url: "https://docs.example.com/runbooks/mobile-performance"
+          
+      - alert: AccessibilityScoreLow
+        expr: frontend_accessibility_score < 70
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          category: accessibility
+        annotations:
+          summary: "Accessibility score low"
+          description: "Accessibility score is {{ $value }} - site may not be accessible to all users"
+          runbook_url: "https://docs.example.com/runbooks/accessibility-score"

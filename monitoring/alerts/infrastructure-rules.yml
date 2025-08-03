@@ -1,0 +1,660 @@
+# Infrastructure Alerting Rules
+# Comprehensive monitoring for Kubernetes and container infrastructure
+
+groups:
+  - name: kubernetes_cluster_alerts
+    rules:
+      # Cluster Health
+      - alert: KubernetesClusterDown
+        expr: up{job="kubernetes-apiserver"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: availability
+        annotations:
+          summary: "Kubernetes cluster is down"
+          description: "Kubernetes API server on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-cluster-down"
+          
+      - alert: KubernetesNodeNotReady
+        expr: kube_node_status_condition{condition="Ready", status="true"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: availability
+        annotations:
+          summary: "Kubernetes node is not ready"
+          description: "Kubernetes node {{ $labels.node }} is not ready"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-node-not-ready"
+          
+      - alert: KubernetesNodeUnreachable
+        expr: kube_node_status_condition{condition="Ready", status="unknown"} == 1
+        for: 5m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: availability
+        annotations:
+          summary: "Kubernetes node is unreachable"
+          description: "Kubernetes node {{ $labels.node }} is unreachable"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-node-unreachable"
+      
+      # API Server
+      - alert: KubernetesAPIServerHighLatency
+        expr: histogram_quantile(0.95, rate(apiserver_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: performance
+        annotations:
+          summary: "Kubernetes API server high latency"
+          description: "95th percentile API server latency is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-api-latency"
+          
+      - alert: KubernetesAPIServerCriticalLatency
+        expr: histogram_quantile(0.95, rate(apiserver_request_duration_seconds_bucket[5m])) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: performance
+        annotations:
+          summary: "Kubernetes API server critical latency"
+          description: "95th percentile API server latency is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-api-critical-latency"
+          
+      - alert: KubernetesAPIServerErrors
+        expr: rate(apiserver_request_total{code=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: errors
+        annotations:
+          summary: "Kubernetes API server errors"
+          description: "API server error rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-api-errors"
+      
+      # etcd
+      - alert: KubernetesEtcdDown
+        expr: up{job="etcd"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: availability
+        annotations:
+          summary: "Kubernetes etcd is down"
+          description: "etcd on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-etcd-down"
+          
+      - alert: KubernetesEtcdHighLatency
+        expr: histogram_quantile(0.95, rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: performance
+        annotations:
+          summary: "Kubernetes etcd high latency"
+          description: "95th percentile etcd latency is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-etcd-latency"
+          
+      - alert: KubernetesEtcdLeaderChanges
+        expr: rate(etcd_server_leader_changes_seen_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: stability
+        annotations:
+          summary: "Kubernetes etcd leader changes"
+          description: "etcd leader change rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-etcd-leader-changes"
+      
+      # Scheduler
+      - alert: KubernetesSchedulerDown
+        expr: up{job="kube-scheduler"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: availability
+        annotations:
+          summary: "Kubernetes scheduler is down"
+          description: "Kubernetes scheduler on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-scheduler-down"
+          
+      - alert: KubernetesSchedulingLatency
+        expr: histogram_quantile(0.95, rate(scheduler_scheduling_latency_seconds_bucket[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: performance
+        annotations:
+          summary: "Kubernetes scheduling latency"
+          description: "95th percentile scheduling latency is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-scheduling-latency"
+      
+      # Controller Manager
+      - alert: KubernetesControllerManagerDown
+        expr: up{job="kube-controller-manager"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: availability
+        annotations:
+          summary: "Kubernetes controller manager is down"
+          description: "Kubernetes controller manager on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-controller-manager-down"
+          
+      - alert: KubernetesControllerManagerErrors
+        expr: rate(controller_manager_reconcile_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: errors
+        annotations:
+          summary: "Kubernetes controller manager errors"
+          description: "Controller manager error rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-controller-manager-errors"
+      
+      # Resources
+      - alert: KubernetesCPUOvercommitment
+        expr: sum(kube_pod_container_resource_requests_cpu_cores) / sum(kube_node_status_allocatable_cpu_cores) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: resources
+        annotations:
+          summary: "Kubernetes CPU overcommitment"
+          description: "CPU overcommitment ratio is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-cpu-overcommitment"
+          
+      - alert: KubernetesMemoryOvercommitment
+        expr: sum(kube_pod_container_resource_requests_memory_bytes) / sum(kube_node_status_allocatable_memory_bytes) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: resources
+        annotations:
+          summary: "Kubernetes memory overcommitment"
+          description: "Memory overcommitment ratio is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-memory-overcommitment"
+          
+      - alert: KubernetesPodsPending
+        expr: sum(kube_pod_status_phase{phase="Pending"}) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: resources
+        annotations:
+          summary: "Kubernetes pods pending"
+          description: "{{ $value }} pods are in pending state"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-pods-pending"
+          
+      - alert: KubernetesPodsFailed
+        expr: sum(kube_pod_status_phase{phase="Failed"}) > 5
+        for: 5m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: resources
+        annotations:
+          summary: "Kubernetes pods failed"
+          description: "{{ $value }} pods are in failed state"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-pods-failed"
+
+  - name: kubernetes_workload_alerts
+    rules:
+      # Pods
+      - alert: KubernetesPodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: workloads
+        annotations:
+          summary: "Kubernetes pod crash looping"
+          description: "Pod {{ $labels.pod }} is crash looping"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-pod-crash-looping"
+          
+      - alert: KubernetesPodNotReady
+        expr: sum by (namespace, pod) (kube_pod_status_ready{condition="false"}) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: workloads
+        annotations:
+          summary: "Kubernetes pod not ready"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not ready"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-pod-not-ready"
+          
+      - alert: KubernetesPodOOMKilled
+        expr: kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: workloads
+        annotations:
+          summary: "Kubernetes pod OOM killed"
+          description: "Pod {{ $labels.pod }} was OOM killed"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-pod-oom-killed"
+      
+      # Deployments
+      - alert: KubernetesDeploymentUnavailable
+        expr: kube_deployment_status_replicas_unavailable > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: workloads
+        annotations:
+          summary: "Kubernetes deployment unavailable"
+          description: "Deployment {{ $labels.deployment }} has {{ $value }} unavailable replicas"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-deployment-unavailable"
+          
+      - alert: KubernetesDeploymentRolloutFailed
+        expr: kube_deployment_status_replicas_updated != kube_deployment_status_replicas
+        for: 10m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: workloads
+        annotations:
+          summary: "Kubernetes deployment rollout failed"
+          description: "Deployment {{ $labels.deployment }} rollout is stuck"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-deployment-rollout-failed"
+      
+      # StatefulSets
+      - alert: KubernetesStatefulSetUnavailable
+        expr: kube_statefulset_status_replicas_current != kube_statefulset_status_replicas
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: workloads
+        annotations:
+          summary: "Kubernetes StatefulSet unavailable"
+          description: "StatefulSet {{ $labels.statefulset }} has unavailable replicas"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-statefulset-unavailable"
+      
+      # DaemonSets
+      - alert: KubernetesDaemonSetUnavailable
+        expr: kube_daemonset_status_number_unavailable > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: workloads
+        annotations:
+          summary: "Kubernetes DaemonSet unavailable"
+          description: "DaemonSet {{ $labels.daemonset }} has {{ $value }} unavailable pods"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-daemonset-unavailable"
+      
+      # Jobs
+      - alert: KubernetesJobFailed
+        expr: kube_job_status_failed > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: workloads
+        annotations:
+          summary: "Kubernetes job failed"
+          description: "Job {{ $labels.job }} has failed"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-job-failed"
+          
+      - alert: KubernetesJobStuck
+        expr: kube_job_status_active > 0 and time() - kube_job_status_start_time > 3600
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: workloads
+        annotations:
+          summary: "Kubernetes job stuck"
+          description: "Job {{ $labels.job }} has been running for over 1 hour"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-job-stuck"
+
+  - name: kubernetes_network_alerts
+    rules:
+      # Ingress
+      - alert: KubernetesIngressHighErrorRate
+        expr: sum(rate(nginx_ingress_controller_requests{status=~"5.."}[5m])) / sum(rate(nginx_ingress_controller_requests[5m])) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: network
+        annotations:
+          summary: "Kubernetes ingress high error rate"
+          description: "Ingress error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-ingress-error-rate"
+          
+      - alert: KubernetesIngressHighLatency
+        expr: histogram_quantile(0.95, rate(nginx_ingress_controller_request_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: network
+        annotations:
+          summary: "Kubernetes ingress high latency"
+          description: "95th percentile ingress latency is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-ingress-latency"
+      
+      # Network Policies
+      - alert: KubernetesNetworkPolicyDrops
+        expr: rate(network_policy_drops_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: network
+        annotations:
+          summary: "Kubernetes network policy drops"
+          description: "Network policy drop rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-network-policy-drops"
+      
+      # DNS
+      - alert: KubernetesDNSHighLatency
+        expr: histogram_quantile(0.95, rate(coredns_dns_request_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: network
+        annotations:
+          summary: "Kubernetes DNS high latency"
+          description: "95th percentile DNS latency is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-dns-latency"
+          
+      - alert: KubernetesDNSErrors
+        expr: rate(coredns_dns_requests_total{rcode!="NOERROR"}[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: network
+        annotations:
+          summary: "Kubernetes DNS errors"
+          description: "DNS error rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-dns-errors"
+
+  - name: kubernetes_storage_alerts
+    rules:
+      # Persistent Volumes
+      - alert: KubernetesPVClaimsPending
+        expr: kube_persistentvolumeclaim_status_phase{phase="Pending"} > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: storage
+        annotations:
+          summary: "Kubernetes PV claims pending"
+          description: "PersistentVolumeClaim {{ $labels.persistentvolumeclaim }} is pending"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-pv-pending"
+          
+      - alert: KubernetesPVClaimsLost
+        expr: kube_persistentvolumeclaim_status_phase{phase="Lost"} > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: storage
+        annotations:
+          summary: "Kubernetes PV claims lost"
+          description: "PersistentVolumeClaim {{ $labels.persistentvolumeclaim }} is lost"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-pv-lost"
+      
+      # Storage Classes
+      - alert: KubernetesStorageClassFull
+        expr: kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          service: kubernetes
+          category: storage
+        annotations:
+          summary: "Kubernetes storage class full"
+          description: "Storage usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-storage-full"
+          
+      - alert: KubernetesStorageClassHighUsage
+        expr: kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: kubernetes
+          category: storage
+        annotations:
+          summary: "Kubernetes storage class high usage"
+          description: "Storage usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/kubernetes-storage-high-usage"
+
+  - name: container_alerts
+    rules:
+      # Container Health
+      - alert: ContainerDown
+        expr: up{job=~".*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: containers
+          category: availability
+        annotations:
+          summary: "Container is down"
+          description: "Container {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/container-down"
+          
+      - alert: ContainerRestarts
+        expr: rate(container_restarts_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: containers
+          category: availability
+        annotations:
+          summary: "Container restarting frequently"
+          description: "Container {{ $labels.instance }} restart rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/container-restarts"
+          
+      - alert: ContainerOOMKilled
+        expr: increase(container_oom_kills_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: containers
+          category: availability
+        annotations:
+          summary: "Container OOM killed"
+          description: "Container {{ $labels.instance }} was OOM killed"
+          runbook_url: "https://docs.example.com/runbooks/container-oom-killed"
+      
+      # Container Resources
+      - alert: ContainerHighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: containers
+          category: resources
+        annotations:
+          summary: "Container high CPU usage"
+          description: "Container {{ $labels.instance }} CPU usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/container-cpu-high"
+          
+      - alert: ContainerCriticalCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          service: containers
+          category: resources
+        annotations:
+          summary: "Container critical CPU usage"
+          description: "Container {{ $labels.instance }} CPU usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/container-cpu-critical"
+          
+      - alert: ContainerHighMemoryUsage
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: containers
+          category: resources
+        annotations:
+          summary: "Container high memory usage"
+          description: "Container {{ $labels.instance }} memory usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/container-memory-high"
+          
+      - alert: ContainerCriticalMemoryUsage
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          service: containers
+          category: resources
+        annotations:
+          summary: "Container critical memory usage"
+          description: "Container {{ $labels.instance }} memory usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/container-memory-critical"
+          
+      - alert: ContainerHighDiskUsage
+        expr: container_fs_usage_bytes / container_fs_limit_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: containers
+          category: resources
+        annotations:
+          summary: "Container high disk usage"
+          description: "Container {{ $labels.instance }} disk usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/container-disk-high"
+          
+      - alert: ContainerCriticalDiskUsage
+        expr: container_fs_usage_bytes / container_fs_limit_bytes > 0.9
+        for: 2m
+        labels:
+          severity: critical
+          service: containers
+          category: resources
+        annotations:
+          summary: "Container critical disk usage"
+          description: "Container {{ $labels.instance }} disk usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/container-disk-critical"
+      
+      # Container Network
+      - alert: ContainerHighNetworkTraffic
+        expr: rate(container_network_receive_bytes_total[5m]) / 1024 / 1024 > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: containers
+          category: network
+        annotations:
+          summary: "Container high network traffic"
+          description: "Container {{ $labels.instance }} network receive rate is {{ $value }}MB/s"
+          runbook_url: "https://docs.example.com/runbooks/container-network-high"
+          
+      - alert: ContainerNetworkErrors
+        expr: rate(container_network_receive_errors_total[5m]) + rate(container_network_transmit_errors_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: containers
+          category: network
+        annotations:
+          summary: "Container network errors"
+          description: "Container {{ $labels.instance }} network error rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/container-network-errors"
+      
+      # Container Security
+      - alert: ContainerRunningAsRoot
+        expr: container_security_context_uid == 0
+        for: 0m
+        labels:
+          severity: warning
+          service: containers
+          category: security
+        annotations:
+          summary: "Container running as root"
+          description: "Container {{ $labels.instance }} is running as root user"
+          runbook_url: "https://docs.example.com/runbooks/container-root-user"
+          
+      - alert: ContainerPrivilegedMode
+        expr: container_security_context_privileged == 1
+        for: 0m
+        labels:
+          severity: critical
+          service: containers
+          category: security
+        annotations:
+          summary: "Container running in privileged mode"
+          description: "Container {{ $labels.instance }} is running in privileged mode"
+          runbook_url: "https://docs.example.com/runbooks/container-privileged"
+
+  - name: infrastructure_cross_service_alerts
+    rules:
+      # Overall Infrastructure Health
+      - alert: InfrastructureServicesDown
+        expr: count(up{job=~"kubernetes-.*|etcd|kube-.*"} == 0) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: infrastructure
+          category: availability
+        annotations:
+          summary: "Infrastructure services are down"
+          description: "{{ $value }} infrastructure services are down"
+          runbook_url: "https://docs.example.com/runbooks/infrastructure-services-down"
+          
+      - alert: InfrastructureHighErrorRate
+        expr: sum(rate(http_requests_total{job=~"kubernetes-.*|etcd|kube-.*", status=~"4..|5.."}[5m])) / sum(rate(http_requests_total{job=~"kubernetes-.*|etcd|kube-.*"}[5m])) * 100 > 10
+        for: 2m
+        labels:
+          severity: critical
+          service: infrastructure
+          category: errors
+        annotations:
+          summary: "Infrastructure high error rate"
+          description: "Overall infrastructure error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/infrastructure-high-error-rate"
+          
+      - alert: InfrastructureResourceExhaustion
+        expr: sum(container_memory_usage_bytes{job=~".*"}) / 1024 / 1024 / 1024 > 32
+        for: 5m
+        labels:
+          severity: critical
+          service: infrastructure
+          category: resources
+        annotations:
+          summary: "Infrastructure resource exhaustion"
+          description: "Total container memory usage is {{ $value }}GB"
+          runbook_url: "https://docs.example.com/runbooks/infrastructure-resource-exhaustion"
+          
+      - alert: InfrastructureSlowPerformance
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~"kubernetes-.*|etcd|kube-.*"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+          category: performance
+        annotations:
+          summary: "Infrastructure slow performance"
+          description: "Infrastructure response time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/infrastructure-slow-performance"

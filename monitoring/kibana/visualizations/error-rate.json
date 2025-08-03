@@ -1,0 +1,138 @@
+{
+  "_id": "ERROR_RATE",
+  "_type": "visualization",
+  "_source": {
+    "title": "Error Rate",
+    "type": "line",
+    "params": {
+      "type": "line",
+      "grid": {
+        "categoryLines": false,
+        "style": {
+          "color": "rgba(255,255,255,0)"
+        }
+      },
+      "categoryAxes": [
+        {
+          "id": "CategoryAxis-1",
+          "type": "category",
+          "position": "bottom",
+          "show": true,
+          "style": {},
+          "scale": {
+            "type": "linear"
+          },
+          "labels": {
+            "show": true,
+            "truncate": 100
+          },
+          "title": {
+            "text": "@timestamp per hour"
+          }
+        }
+      ],
+      "valueAxes": [
+        {
+          "id": "ValueAxis-1",
+          "name": "LeftAxis-1",
+          "type": "value",
+          "position": "left",
+          "show": true,
+          "style": {},
+          "scale": {
+            "type": "linear",
+            "mode": "normal"
+          },
+          "labels": {
+            "show": true,
+            "rotate": 0,
+            "filter": false,
+            "truncate": 100
+          },
+          "title": {
+            "text": "Count"
+          }
+        }
+      ],
+      "seriesParams": [
+        {
+          "data": {
+            "id": "1",
+            "label": "Error Count"
+          },
+          "drawLinesBetweenPoints": true,
+          "showCircles": true,
+          "interpolate": "linear",
+          "lineWidth": 2,
+          "valueAxis": "ValueAxis-1"
+        }
+      ],
+      "addTooltip": true,
+      "legendPosition": "right",
+      "showLegend": true,
+      "times": [],
+      "addTimeMarker": false
+    },
+    "aggs": [
+      {
+        "id": "1",
+        "enabled": true,
+        "type": "count",
+        "schema": "metric",
+        "params": {
+          "customLabel": "Error Count"
+        }
+      },
+      {
+        "id": "2",
+        "enabled": true,
+        "type": "date_histogram",
+        "schema": "segment",
+        "params": {
+          "field": "@timestamp",
+          "interval": "auto",
+          "time_zone": "UTC",
+          "customInterval": "1h",
+          "min_doc_count": 1,
+          "extended_bounds": {},
+          "format": "MMM D, YYYY @ HH:mm:ss"
+        }
+      },
+      {
+        "id": "3",
+        "enabled": true,
+        "type": "filters",
+        "schema": "group",
+        "params": {
+          "filters": [
+            {
+              "input": {
+                "query": {
+                  "query_string": {
+                    "query": "log_level:ERROR OR log_level:CRITICAL",
+                    "analyze_wildcard": false
+                  }
+                },
+                "language": "lucene"
+              },
+              "label": "Errors"
+            },
+            {
+              "input": {
+                "query": {
+                  "query_string": {
+                    "query": "log_level:WARNING OR log_level:WARN",
+                    "analyze_wildcard": false
+                  }
+                },
+                "language": "lucene"
+              },
+              "label": "Warnings"
+            }
+          ]
+        }
+      }
+    ],
+    "listeners": {}
+  }
+}

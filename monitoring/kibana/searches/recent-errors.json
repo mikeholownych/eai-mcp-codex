@@ -1,0 +1,31 @@
+{
+  "_id": "RECENT_ERRORS",
+  "_type": "search",
+  "_source": {
+    "title": "Recent Errors",
+    "description": "Recent error logs for troubleshooting",
+    "hits": 0,
+    "columns": [
+      "@timestamp",
+      "service_name",
+      "log_level",
+      "message",
+      "duration_ms",
+      "trace_id",
+      "operation"
+    ],
+    "sort": [
+      {
+        "@timestamp": {
+          "order": "desc",
+          "unmapped_type": "date"
+        }
+      }
+    ],
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"log_level:ERROR OR log_level:CRITICAL\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "indexPattern": "mcp-logs-*"
+  }
+}

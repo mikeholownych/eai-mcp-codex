@@ -1,0 +1,705 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Plan Management Dashboard",
+    "tags": ["plan-management", "task-decomposition", "consensus-building", "plan-validation", "backup-operations"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Plan Management Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(plan_management_operations_total[5m]))",
+            "legendFormat": "Plan Operations/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "plan_management_success_rate * 100",
+            "legendFormat": "Plan Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "plan_management_average_duration",
+            "legendFormat": "Avg Plan Duration",
+            "refId": "C"
+          },
+          {
+            "expr": "plan_management_performance_score * 100",
+            "legendFormat": "Plan Performance Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Task Decomposition",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(plan_management_task_decomposition_events_total[5m])",
+            "legendFormat": "Decomposition Events/sec - {{decomposition_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "plan_management_task_decomposition_success_rate * 100",
+            "legendFormat": "Decomposition Success Rate % - {{decomposition_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "plan_management_task_decomposition_average_time",
+            "legendFormat": "Avg Decomposition Time - {{decomposition_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "plan_management_task_decomposition_quality_score",
+            "legendFormat": "Decomposition Quality - {{decomposition_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Quality Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Consensus Building",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(plan_management_consensus_building_events_total[5m])",
+            "legendFormat": "Consensus Events/sec - {{consensus_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "plan_management_consensus_building_success_rate * 100",
+            "legendFormat": "Consensus Success Rate % - {{consensus_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "plan_management_consensus_building_average_time",
+            "legendFormat": "Avg Consensus Time - {{consensus_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "plan_management_consensus_building_effectiveness_score",
+            "legendFormat": "Consensus Effectiveness - {{consensus_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Effectiveness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Plan Validation",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(plan_management_plan_validation_events_total[5m])",
+            "legendFormat": "Validation Events/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "plan_management_plan_validation_success_rate * 100",
+            "legendFormat": "Validation Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "plan_management_plan_validation_average_time",
+            "legendFormat": "Avg Validation Time",
+            "refId": "C"
+          },
+          {
+            "expr": "plan_management_plan_validation_accuracy_score",
+            "legendFormat": "Validation Accuracy",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Backup Operations",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(plan_management_backup_operations_events_total[5m])",
+            "legendFormat": "Backup Events/sec - {{backup_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "plan_management_backup_operations_success_rate * 100",
+            "legendFormat": "Backup Success Rate % - {{backup_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "plan_management_backup_operations_average_time",
+            "legendFormat": "Avg Backup Time - {{backup_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "plan_management_backup_operations_reliability_score",
+            "legendFormat": "Backup Reliability - {{backup_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Reliability Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Plan Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(plan_management_operations_total[5m])",
+            "legendFormat": "{{plan_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Plan Management Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "plan_management_performance_score",
+            "legendFormat": "Performance Score - {{performance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "plan_management_efficiency_score",
+            "legendFormat": "Efficiency Score - {{efficiency_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "plan_management_reliability_score",
+            "legendFormat": "Reliability Score - {{reliability_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "plan_management_scalability_score",
+            "legendFormat": "Scalability Score - {{scalability_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Plan Management Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "rate(plan_management_task_decomposition_events_total[5m])",
+            "legendFormat": "{{decomposition_type}}",
+            "refId": "Decomposition",
+            "format": "table"
+          },
+          {
+            "expr": "rate(plan_management_consensus_building_events_total[5m])",
+            "legendFormat": "{{consensus_type}}",
+            "refId": "Consensus",
+            "format": "table"
+          },
+          {
+            "expr": "plan_management_success_rate * 100",
+            "legendFormat": "{{plan_type}}",
+            "refId": "Success",
+            "format": "table"
+          },
+          {
+            "expr": "plan_management_average_duration",
+            "legendFormat": "{{plan_type}}",
+            "refId": "Duration",
+            "format": "table"
+          },
+          {
+            "expr": "plan_management_performance_score",
+            "legendFormat": "{{performance_type}}",
+            "refId": "Performance",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "decomposition_type": 0,
+                "consensus_type": 1,
+                "plan_type": 2,
+                "performance_type": 3,
+                "Value #Decomposition": 4,
+                "Value #Consensus": 5,
+                "Value #Success": 6,
+                "Value #Duration": 7,
+                "Value #Performance": 8
+              },
+              "renameByName": {
+                "decomposition_type": "Decomposition Type",
+                "consensus_type": "Consensus Type",
+                "plan_type": "Plan Type",
+                "performance_type": "Performance Type",
+                "Value #Decomposition": "Decomposition Events/sec",
+                "Value #Consensus": "Consensus Events/sec",
+                "Value #Success": "Success Rate %",
+                "Value #Duration": "Avg Duration",
+                "Value #Performance": "Performance Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Success Rate %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Performance Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Plan Management Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - plan_management_success_rate) * 100 * 30) - (plan_management_average_duration * 20) - ((1 - plan_management_task_decomposition_success_rate) * 100 * 25) - ((1 - plan_management_consensus_building_success_rate) * 100 * 25))",
+            "legendFormat": "Plan Management Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Plan Management Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(sum(rate(plan_management_operations_total[5m]))[24h])",
+            "legendFormat": "Avg Operations/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(plan_management_success_rate * 100[24h])",
+            "legendFormat": "Avg Success Rate % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(plan_management_average_duration[24h])",
+            "legendFormat": "Avg Duration (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(plan_management_performance_score * 100[24h])",
+            "legendFormat": "Avg Performance Score % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations/sec / Success Rate % / Duration / Performance %",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Plan Execution",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(plan_management_plan_execution_events_total[5m])",
+            "legendFormat": "Execution Events/sec - {{execution_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "plan_management_plan_execution_success_rate * 100",
+            "legendFormat": "Execution Success Rate % - {{execution_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "plan_management_plan_execution_average_time",
+            "legendFormat": "Avg Execution Time - {{execution_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "plan_management_plan_execution_efficiency_score",
+            "legendFormat": "Execution Efficiency - {{execution_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Plan Optimization",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(plan_management_optimization_events_total[5m])",
+            "legendFormat": "Optimization Events/sec - {{optimization_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "plan_management_optimization_success_rate * 100",
+            "legendFormat": "Optimization Success Rate % - {{optimization_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "plan_management_optimization_improvement_score",
+            "legendFormat": "Optimization Improvement - {{optimization_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "plan_management_optimization_efficiency_score",
+            "legendFormat": "Optimization Efficiency - {{optimization_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Improvement Score / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "plan_type",
+          "type": "query",
+          "query": "label_values(plan_management_operations_total, plan_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "decomposition_type",
+          "type": "query",
+          "query": "label_values(plan_management_task_decomposition_events_total, decomposition_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "consensus_type",
+          "type": "query",
+          "query": "label_values(plan_management_consensus_building_events_total, consensus_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "backup_type",
+          "type": "query",
+          "query": "label_values(plan_management_backup_operations_events_total, backup_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "performance_type",
+          "type": "query",
+          "query": "label_values(plan_management_performance_score, performance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "efficiency_type",
+          "type": "query",
+          "query": "label_values(plan_management_efficiency_score, efficiency_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "reliability_type",
+          "type": "query",
+          "query": "label_values(plan_management_reliability_score, reliability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "scalability_type",
+          "type": "query",
+          "query": "label_values(plan_management_scalability_score, scalability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "execution_type",
+          "type": "query",
+          "query": "label_values(plan_management_plan_execution_events_total, execution_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "optimization_type",
+          "type": "query",
+          "query": "label_values(plan_management_optimization_events_total, optimization_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Plan Management Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Plan.*Management.*|.*Task.*Decomposition.*|.*Consensus.*Building.*|.*Plan.*Validation.*|.*Backup.*Operations.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Plan Management Alert: {{alertname}}"
+        },
+        {
+          "name": "Low Plan Success Rate",
+          "datasource": "Prometheus",
+          "expr": "plan_management_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Plan Success Rate: {{plan_type}}"
+        },
+        {
+          "name": "Low Decomposition Success Rate",
+          "datasource": "Prometheus",
+          "expr": "plan_management_task_decomposition_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Decomposition Success Rate: {{decomposition_type}}"
+        },
+        {
+          "name": "Low Consensus Success Rate",
+          "datasource": "Prometheus",
+          "expr": "plan_management_consensus_building_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Consensus Success Rate: {{consensus_type}}"
+        },
+        {
+          "name": "Low Validation Success Rate",
+          "datasource": "Prometheus",
+          "expr": "plan_management_plan_validation_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Validation Success Rate"
+        }
+      ]
+    }
+  }
+}

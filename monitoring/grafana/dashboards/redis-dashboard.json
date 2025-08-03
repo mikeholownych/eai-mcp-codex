@@ -1,0 +1,610 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Redis Dashboard",
+    "tags": ["redis", "cache-performance", "memory-usage", "hit-rates"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Redis Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "redis_up * 100",
+            "legendFormat": "Redis Availability %",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_connected_clients",
+            "legendFormat": "Connected Clients",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(redis_commands_processed_total[5m])",
+            "legendFormat": "Commands/sec",
+            "refId": "C"
+          },
+          {
+            "expr": "redis_keyspace_hits / (redis_keyspace_hits + redis_keyspace_misses) * 100",
+            "legendFormat": "Cache Hit Rate %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Cache Performance",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(redis_keyspace_hits_total[5m])",
+            "legendFormat": "Cache Hits/sec - {{db}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(redis_keyspace_misses_total[5m])",
+            "legendFormat": "Cache Misses/sec - {{db}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) * 100",
+            "legendFormat": "Cache Hit Rate % - {{db}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Hits/sec / Misses/sec / Hit Rate %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 90,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 70,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "redis_memory_used_bytes / 1024 / 1024",
+            "legendFormat": "Memory Used MB - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_memory_max_bytes / 1024 / 1024",
+            "legendFormat": "Memory Max MB - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "(redis_memory_used_bytes / redis_memory_max_bytes) * 100",
+            "legendFormat": "Memory Usage % - {{instance}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB / Usage %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 95,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Command Statistics",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(redis_commands_processed_total[5m])",
+            "legendFormat": "Commands/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(redis_keyspace_hits_total[5m])",
+            "legendFormat": "Keyspace Hits/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(redis_keyspace_misses_total[5m])",
+            "legendFormat": "Keyspace Misses/sec",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(redis_expired_keys_total[5m])",
+            "legendFormat": "Expired Keys/sec",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1000 },
+                { "color": "red", "value": 5000 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Key Operations",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(redis_keyspace_hits_total[5m])",
+            "legendFormat": "Key Hits/sec - {{db}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(redis_keyspace_misses_total[5m])",
+            "legendFormat": "Key Misses/sec - {{db}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(redis_expired_keys_total[5m])",
+            "legendFormat": "Expired Keys/sec - {{db}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(redis_evicted_keys_total[5m])",
+            "legendFormat": "Evicted Keys/sec - {{db}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Keys/sec",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 100,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 500,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Cache Hit vs Miss",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(redis_keyspace_hits_total[5m])",
+            "legendFormat": "Cache Hits",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(redis_keyspace_misses_total[5m])",
+            "legendFormat": "Cache Misses",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Network Traffic",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(redis_net_input_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "Input MB/s - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(redis_net_output_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "Output MB/s - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "redis_connected_clients",
+            "legendFormat": "Connected Clients - {{instance}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB/s / Clients",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 10,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Redis Performance by Instance",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "redis_up",
+            "legendFormat": "{{instance}}",
+            "refId": "Status",
+            "format": "table"
+          },
+          {
+            "expr": "redis_connected_clients",
+            "legendFormat": "{{instance}}",
+            "refId": "Clients",
+            "format": "table"
+          },
+          {
+            "expr": "rate(redis_commands_processed_total[5m])",
+            "legendFormat": "{{instance}}",
+            "refId": "Commands",
+            "format": "table"
+          },
+          {
+            "expr": "redis_keyspace_hits / (redis_keyspace_hits + redis_keyspace_misses) * 100",
+            "legendFormat": "{{instance}}",
+            "refId": "HitRate",
+            "format": "table"
+          },
+          {
+            "expr": "(redis_memory_used_bytes / redis_memory_max_bytes) * 100",
+            "legendFormat": "{{instance}}",
+            "refId": "Memory",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "job": true
+              },
+              "indexByName": {
+                "instance": 0,
+                "Value #Status": 1,
+                "Value #Clients": 2,
+                "Value #Commands": 3,
+                "Value #HitRate": 4,
+                "Value #Memory": 5
+              },
+              "renameByName": {
+                "instance": "Instance",
+                "Value #Status": "Status",
+                "Value #Clients": "Clients",
+                "Value #Commands": "Commands/sec",
+                "Value #HitRate": "Hit Rate %",
+                "Value #Memory": "Memory %"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Status" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "green", "value": 1 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Hit Rate %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Memory %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 80 },
+                      { "color": "red", "value": 95 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Redis Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - redis_up) * 100 * 30) - (((1 - (redis_keyspace_hits / (redis_keyspace_hits + redis_keyspace_misses))) * 100 * 25) - (((redis_memory_used_bytes / redis_memory_max_bytes) * 100 * 20) - ((rate(redis_expired_keys_total[5m]) * 15) - ((rate(redis_evicted_keys_total[5m]) * 10)",
+            "legendFormat": "Redis Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Persistence",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "rate(redis_rdb_changes_since_last_save[5m])",
+            "legendFormat": "Changes Since Last Save - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_rdb_last_bgsave_time_sec",
+            "legendFormat": "Last BG Save Time - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "redis_rdb_current_bgsave_time_sec",
+            "legendFormat": "Current BG Save Time - {{instance}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Changes / Time (s)",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 60,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 300,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Replication",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "redis_connected_slaves",
+            "legendFormat": "Connected Slaves - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_master_last_io_seconds_ago",
+            "legendFormat": "Master Last IO Seconds Ago - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "redis_slave_repl_offset",
+            "legendFormat": "Slave Replication Offset - {{instance}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Slaves / Seconds / Offset",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 30,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 60,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Redis Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "avg_over_time(rate(redis_commands_processed_total[5m])[24h])",
+            "legendFormat": "Avg Commands/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(redis_keyspace_hits / (redis_keyspace_hits + redis_keyspace_misses) * 100[24h])",
+            "legendFormat": "Avg Hit Rate % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time((redis_memory_used_bytes / redis_memory_max_bytes) * 100[24h])",
+            "legendFormat": "Avg Memory Usage % (24h)",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Commands/sec / Hit Rate % / Memory %",
+            "min": 0
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(redis_up, instance)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "db",
+          "type": "query",
+          "query": "label_values(redis_keyspace_hits_total, db)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Redis Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Redis.*|.*Cache.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Redis Alert: {{alertname}}"
+        },
+        {
+          "name": "Low Cache Hit Rate",
+          "datasource": "Prometheus",
+          "expr": "redis_keyspace_hits / (redis_keyspace_hits + redis_keyspace_misses) * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Cache Hit Rate: {{instance}}"
+        },
+        {
+          "name": "High Memory Usage",
+          "datasource": "Prometheus",
+          "expr": "(redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 80",
+          "iconColor": "orange",
+          "titleFormat": "High Memory Usage: {{instance}}"
+        },
+        {
+          "name": "High Evicted Keys",
+          "datasource": "Prometheus",
+          "expr": "rate(redis_evicted_keys_total[5m]) > 10",
+          "iconColor": "orange",
+          "titleFormat": "High Evicted Keys: {{instance}}"
+        }
+      ]
+    }
+  }
+}

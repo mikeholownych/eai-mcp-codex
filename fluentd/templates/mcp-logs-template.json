@@ -1,0 +1,911 @@
+{
+  "index_patterns": ["mcp-logs-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 3,
+      "number_of_replicas": 1,
+      "index.lifecycle.name": "mcp-logs-policy",
+      "index.lifecycle.rollover_alias": "mcp-logs",
+      "refresh_interval": "5s",
+      "mapping": {
+        "total_fields": {
+          "limit": 10000
+        },
+        "depth": {
+          "limit": 20
+        },
+        "nested_fields": {
+          "limit": 50
+        }
+      },
+      "analysis": {
+        "analyzer": {
+          "mcp_log_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "mcp_stop_filter",
+              "mcp_stemmer"
+            ]
+          },
+          "mcp_keyword_analyzer": {
+            "type": "custom",
+            "tokenizer": "keyword",
+            "filter": [
+              "lowercase"
+            ]
+          }
+        },
+        "filter": {
+          "mcp_stop_filter": {
+            "type": "stop",
+            "stopwords": [
+              "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if",
+              "in", "into", "is", "it", "no", "not", "of", "on", "or", "such",
+              "that", "the", "their", "then", "there", "these", "they", "this",
+              "to", "was", "will", "with", "error", "exception", "warning"
+            ]
+          },
+          "mcp_stemmer": {
+            "type": "stemmer",
+            "name": "english"
+          }
+        }
+      }
+    },
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "strings_as_keyword": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 256,
+              "fields": {
+                "text": {
+                  "type": "text",
+                  "analyzer": "mcp_log_analyzer"
+                }
+              }
+            }
+          }
+        },
+        {
+          "message_fields": {
+            "match": "message",
+            "mapping": {
+              "type": "text",
+              "analyzer": "mcp_log_analyzer",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        {
+          "timestamp_fields": {
+            "match": "*timestamp",
+            "mapping": {
+              "type": "date",
+              "format": "strict_date_optional_time||epoch_millis"
+            }
+          }
+        },
+        {
+          "numeric_fields": {
+            "match_mapping_type": "long",
+            "mapping": {
+              "type": "long",
+              "fields": {
+                "double": {
+                  "type": "double"
+                }
+              }
+            }
+          }
+        },
+        {
+          "double_fields": {
+            "match_mapping_type": "double",
+            "mapping": {
+              "type": "double",
+              "fields": {
+                "scaled_float": {
+                  "type": "scaled_float",
+                  "scaling_factor": 100
+                }
+              }
+            }
+          }
+        },
+        {
+          "geo_point_fields": {
+            "match": "*geo*",
+            "mapping": {
+              "type": "geo_point"
+            }
+          }
+        },
+        {
+          "ip_fields": {
+            "match": "*ip",
+            "mapping": {
+              "type": "ip"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "@version": {
+          "type": "keyword"
+        },
+        "message": {
+          "type": "text",
+          "analyzer": "mcp_log_analyzer",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "log_level": {
+          "type": "keyword"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "severity": {
+          "type": "keyword"
+        },
+        "service_name": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "mcp_log_analyzer"
+            }
+          }
+        },
+        "service_version": {
+          "type": "keyword"
+        },
+        "service_instance": {
+          "type": "keyword"
+        },
+        "environment": {
+          "type": "keyword"
+        },
+        "hostname": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "mcp_log_analyzer"
+            }
+          }
+        },
+        "cluster": {
+          "type": "keyword"
+        },
+        "datacenter": {
+          "type": "keyword"
+        },
+        "region": {
+          "type": "keyword"
+        },
+        "availability_zone": {
+          "type": "keyword"
+        },
+        "log_source": {
+          "type": "keyword"
+        },
+        "processing_node": {
+          "type": "keyword"
+        },
+        "log_type": {
+          "type": "keyword"
+        },
+        "log_category": {
+          "type": "keyword"
+        },
+        "business_unit": {
+          "type": "keyword"
+        },
+        "product": {
+          "type": "keyword"
+        },
+        "trace_id": {
+          "type": "keyword"
+        },
+        "span_id": {
+          "type": "keyword"
+        },
+        "trace_sampled": {
+          "type": "boolean"
+        },
+        "trace_flags": {
+          "type": "integer"
+        },
+        "parent_span_id": {
+          "type": "keyword"
+        },
+        "trace_context": {
+          "type": "text",
+          "index": false
+        },
+        "correlation_id": {
+          "type": "keyword"
+        },
+        "session_id": {
+          "type": "keyword"
+        },
+        "user_id": {
+          "type": "keyword"
+        },
+        "operation": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "mcp_log_analyzer"
+            }
+          }
+        },
+        "operation_type": {
+          "type": "keyword"
+        },
+        "workflow_id": {
+          "type": "keyword"
+        },
+        "workflow_type": {
+          "type": "keyword"
+        },
+        "workflow_step": {
+          "type": "keyword"
+        },
+        "business_process": {
+          "type": "keyword"
+        },
+        "business_function": {
+          "type": "keyword"
+        },
+        "business_transaction": {
+          "type": "keyword"
+        },
+        "duration_ms": {
+          "type": "long",
+          "fields": {
+            "double": {
+              "type": "double"
+            }
+          }
+        },
+        "duration_seconds": {
+          "type": "double"
+        },
+        "memory_usage_mb": {
+          "type": "double",
+          "fields": {
+            "long": {
+              "type": "long"
+            }
+          }
+        },
+        "memory_usage_percent": {
+          "type": "double"
+        },
+        "cpu_usage_percent": {
+          "type": "double"
+        },
+        "disk_usage_percent": {
+          "type": "double"
+        },
+        "network_io_bytes": {
+          "type": "long"
+        },
+        "throughput_rps": {
+          "type": "double"
+        },
+        "throughput_tps": {
+          "type": "double"
+        },
+        "throughput_qps": {
+          "type": "double"
+        },
+        "slow_operation_threshold": {
+          "type": "long"
+        },
+        "high_memory_threshold": {
+          "type": "double"
+        },
+        "high_cpu_threshold": {
+          "type": "double"
+        },
+        "is_slow_operation": {
+          "type": "boolean"
+        },
+        "is_high_memory": {
+          "type": "boolean"
+        },
+        "is_high_cpu": {
+          "type": "boolean"
+        },
+        "performance_score": {
+          "type": "integer"
+        },
+        "sla_compliant": {
+          "type": "boolean"
+        },
+        "sla_breach_reason": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "mcp_log_analyzer"
+            }
+          }
+        },
+        "sla_target_ms": {
+          "type": "long"
+        },
+        "security_level": {
+          "type": "keyword"
+        },
+        "security_category": {
+          "type": "keyword"
+        },
+        "security_severity": {
+          "type": "integer"
+        },
+        "compliance_frameworks": {
+          "type": "keyword"
+        },
+        "data_classification": {
+          "type": "keyword"
+        },
+        "retention_policy": {
+          "type": "keyword"
+        },
+        "contains_pii": {
+          "type": "boolean"
+        },
+        "contains_phi": {
+          "type": "boolean"
+        },
+        "contains_pci": {
+          "type": "boolean"
+        },
+        "is_security_event": {
+          "type": "boolean"
+        },
+        "is_compliance_event": {
+          "type": "boolean"
+        },
+        "is_audit_event": {
+          "type": "boolean"
+        },
+        "requires_investigation": {
+          "type": "boolean"
+        },
+        "access_level": {
+          "type": "keyword"
+        },
+        "access_controlled": {
+          "type": "boolean"
+        },
+        "encryption_required": {
+          "type": "boolean"
+        },
+        "threat_indicators": {
+          "type": "nested",
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "value": {
+              "type": "keyword"
+            }
+          }
+        },
+        "anomaly_score": {
+          "type": "integer"
+        },
+        "risk_score": {
+          "type": "integer"
+        },
+        "business_impact": {
+          "type": "keyword"
+        },
+        "business_priority": {
+          "type": "keyword"
+        },
+        "business_cost": {
+          "type": "double"
+        },
+        "customer_impact": {
+          "type": "keyword"
+        },
+        "customer_affected": {
+          "type": "boolean"
+        },
+        "customer_segment": {
+          "type": "keyword"
+        },
+        "operational_impact": {
+          "type": "keyword"
+        },
+        "operational_priority": {
+          "type": "keyword"
+        },
+        "financial_impact": {
+          "type": "keyword"
+        },
+        "financial_cost": {
+          "type": "double"
+        },
+        "process_efficiency": {
+          "type": "double"
+        },
+        "process_compliance": {
+          "type": "boolean"
+        },
+        "process_quality": {
+          "type": "keyword"
+        },
+        "service_level": {
+          "type": "keyword"
+        },
+        "service_priority": {
+          "type": "keyword"
+        },
+        "service_availability": {
+          "type": "double"
+        },
+        "log_quality_score": {
+          "type": "integer"
+        },
+        "log_completeness": {
+          "type": "double"
+        },
+        "log_accuracy": {
+          "type": "double"
+        },
+        "log_consistency": {
+          "type": "double"
+        },
+        "log_timeliness": {
+          "type": "double"
+        },
+        "validation_status": {
+          "type": "keyword"
+        },
+        "validation_errors": {
+          "type": "keyword"
+        },
+        "validation_warnings": {
+          "type": "keyword"
+        },
+        "data_quality_score": {
+          "type": "integer"
+        },
+        "data_integrity": {
+          "type": "keyword"
+        },
+        "data_freshness": {
+          "type": "keyword"
+        },
+        "processing_quality": {
+          "type": "keyword"
+        },
+        "processing_latency": {
+          "type": "double"
+        },
+        "processing_success": {
+          "type": "boolean"
+        },
+        "is_high_quality": {
+          "type": "boolean"
+        },
+        "requires_attention": {
+          "type": "boolean"
+        },
+        "needs_enrichment": {
+          "type": "boolean"
+        },
+        "alert_priority": {
+          "type": "keyword"
+        },
+        "alert_severity": {
+          "type": "keyword"
+        },
+        "alert_category": {
+          "type": "keyword"
+        },
+        "should_alert": {
+          "type": "boolean"
+        },
+        "alert_reason": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "mcp_log_analyzer"
+            }
+          }
+        },
+        "alert_threshold": {
+          "type": "double"
+        },
+        "notify_immediately": {
+          "type": "boolean"
+        },
+        "notification_channels": {
+          "type": "keyword"
+        },
+        "escalation_level": {
+          "type": "integer"
+        },
+        "alert_status": {
+          "type": "keyword"
+        },
+        "alert_acknowledged": {
+          "type": "boolean"
+        },
+        "alert_resolved": {
+          "type": "boolean"
+        },
+        "alert_frequency": {
+          "type": "double"
+        },
+        "alert_trend": {
+          "type": "keyword"
+        },
+        "alert_impact": {
+          "type": "keyword"
+        },
+        "dedup_key": {
+          "type": "keyword"
+        },
+        "fingerprint": {
+          "type": "keyword"
+        },
+        "hash_signature": {
+          "type": "keyword"
+        },
+        "is_duplicate": {
+          "type": "boolean"
+        },
+        "duplicate_count": {
+          "type": "integer"
+        },
+        "first_occurrence": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "last_occurrence": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "pattern_id": {
+          "type": "keyword"
+        },
+        "pattern_category": {
+          "type": "keyword"
+        },
+        "pattern_frequency": {
+          "type": "double"
+        },
+        "is_anomaly": {
+          "type": "boolean"
+        },
+        "anomaly_reason": {
+          "type": "keyword",
+          "fields": {
+            "text": {
+              "type": "text",
+              "analyzer": "mcp_log_analyzer"
+            }
+          }
+        },
+        "trend_direction": {
+          "type": "keyword"
+        },
+        "trend_significance": {
+          "type": "keyword"
+        },
+        "trend_change": {
+          "type": "boolean"
+        },
+        "compression_algorithm": {
+          "type": "keyword"
+        },
+        "compression_ratio": {
+          "type": "double"
+        },
+        "storage_size_bytes": {
+          "type": "long"
+        },
+        "retention_period": {
+          "type": "keyword"
+        },
+        "archival_date": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "deletion_date": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "storage_tier": {
+          "type": "keyword"
+        },
+        "storage_class": {
+          "type": "keyword"
+        },
+        "storage_location": {
+          "type": "keyword"
+        },
+        "backup_required": {
+          "type": "boolean"
+        },
+        "backup_frequency": {
+          "type": "keyword"
+        },
+        "backup_retention": {
+          "type": "keyword"
+        },
+        "storage_cost": {
+          "type": "double"
+        },
+        "processing_cost": {
+          "type": "double"
+        },
+        "total_cost": {
+          "type": "double"
+        },
+        "can_compress": {
+          "type": "boolean"
+        },
+        "can_archive": {
+          "type": "boolean"
+        },
+        "can_delete": {
+          "type": "boolean"
+        },
+        "error": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "message": {
+              "type": "text",
+              "analyzer": "mcp_log_analyzer"
+            },
+            "stack_trace": {
+              "type": "text",
+              "index": false
+            }
+          }
+        },
+        "http": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword",
+              "ignore_above": 2048
+            },
+            "status_code": {
+              "type": "integer"
+            },
+            "response_time_ms": {
+              "type": "long"
+            },
+            "user_agent": {
+              "type": "text",
+              "analyzer": "mcp_log_analyzer",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "remote_address": {
+              "type": "ip"
+            }
+          }
+        },
+        "database": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "text",
+              "index": false
+            },
+            "query_time_ms": {
+              "type": "long"
+            },
+            "rows_affected": {
+              "type": "integer"
+            },
+            "database_name": {
+              "type": "keyword"
+            },
+            "table_name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "llm": {
+          "type": "object",
+          "properties": {
+            "model_name": {
+              "type": "keyword"
+            },
+            "prompt_tokens": {
+              "type": "integer"
+            },
+            "completion_tokens": {
+              "type": "integer"
+            },
+            "total_tokens": {
+              "type": "integer"
+            },
+            "response_time_ms": {
+              "type": "long"
+            },
+            "cost_usd": {
+              "type": "double"
+            },
+            "temperature": {
+              "type": "double"
+            },
+            "max_tokens": {
+              "type": "integer"
+            }
+          }
+        },
+        "git": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "keyword"
+            },
+            "branch": {
+              "type": "keyword"
+            },
+            "commit_hash": {
+              "type": "keyword"
+            },
+            "author": {
+              "type": "keyword"
+            },
+            "operation": {
+              "type": "keyword"
+            },
+            "files_changed": {
+              "type": "integer"
+            }
+          }
+        },
+        "workflow": {
+          "type": "object",
+          "properties": {
+            "workflow_id": {
+              "type": "keyword"
+            },
+            "workflow_type": {
+              "type": "keyword"
+            },
+            "step_name": {
+              "type": "keyword"
+            },
+            "step_number": {
+              "type": "integer"
+            },
+            "total_steps": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "keyword"
+            }
+          }
+        },
+        "collaboration": {
+          "type": "object",
+          "properties": {
+            "collaboration_type": {
+              "type": "keyword"
+            },
+            "participants": {
+              "type": "keyword"
+            },
+            "consensus_time_ms": {
+              "type": "long"
+            },
+            "result": {
+              "type": "keyword"
+            },
+            "votes": {
+              "type": "integer"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "image": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "keyword"
+            }
+          }
+        },
+        "kubernetes": {
+          "type": "object",
+          "properties": {
+            "pod_name": {
+              "type": "keyword"
+            },
+            "namespace": {
+              "type": "keyword"
+            },
+            "deployment": {
+              "type": "keyword"
+            },
+            "node": {
+              "type": "keyword"
+            }
+          }
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "fluentd_received_at": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "processed_at": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "processed_by": {
+          "type": "keyword"
+        },
+        "processing_version": {
+          "type": "keyword"
+        }
+      }
+    },
+    "aliases": {
+      "mcp-logs-current": {}
+    }
+  },
+  "composed_of": [],
+  "version": 1,
+  "_meta": {
+    "description": "Template for MCP logs with comprehensive field mappings and analysis",
+    "managed": true,
+    "created_by": "fluentd"
+  }
+}

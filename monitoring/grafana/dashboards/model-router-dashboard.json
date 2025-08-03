@@ -1,0 +1,710 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Model Router Dashboard",
+    "tags": ["model-router", "model-selection-metrics", "request-routing", "response-aggregation", "model-health"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Model Router Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(model_router_requests_total[5m]))",
+            "legendFormat": "Router Requests/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "model_router_success_rate * 100",
+            "legendFormat": "Router Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "model_router_average_duration",
+            "legendFormat": "Avg Router Duration",
+            "refId": "C"
+          },
+          {
+            "expr": "model_router_performance_score * 100",
+            "legendFormat": "Router Performance Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Model Selection Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(model_router_model_selection_events_total[5m])",
+            "legendFormat": "Selection Events/sec - {{model}}",
+            "refId": "A"
+          },
+          {
+            "expr": "model_router_model_selection_success_rate * 100",
+            "legendFormat": "Selection Success Rate % - {{model}}",
+            "refId": "B"
+          },
+          {
+            "expr": "model_router_model_selection_average_time",
+            "legendFormat": "Avg Selection Time - {{model}}",
+            "refId": "C"
+          },
+          {
+            "expr": "model_router_model_selection_accuracy_score",
+            "legendFormat": "Selection Accuracy - {{model}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Accuracy Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Request Routing",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(model_router_request_routing_events_total[5m])",
+            "legendFormat": "Routing Events/sec - {{routing_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "model_router_request_routing_success_rate * 100",
+            "legendFormat": "Routing Success Rate % - {{routing_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "model_router_request_routing_average_time",
+            "legendFormat": "Avg Routing Time - {{routing_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "model_router_request_routing_efficiency_score",
+            "legendFormat": "Routing Efficiency - {{routing_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Response Aggregation",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(model_router_response_aggregation_events_total[5m])",
+            "legendFormat": "Aggregation Events/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "model_router_response_aggregation_success_rate * 100",
+            "legendFormat": "Aggregation Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "model_router_response_aggregation_average_time",
+            "legendFormat": "Avg Aggregation Time",
+            "refId": "C"
+          },
+          {
+            "expr": "model_router_response_aggregation_quality_score",
+            "legendFormat": "Aggregation Quality",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Model Health",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "model_router_model_health_score",
+            "legendFormat": "Health Score - {{model}}",
+            "refId": "A"
+          },
+          {
+            "expr": "model_router_model_availability_score",
+            "legendFormat": "Availability Score - {{model}}",
+            "refId": "B"
+          },
+          {
+            "expr": "model_router_model_performance_score",
+            "legendFormat": "Performance Score - {{model}}",
+            "refId": "C"
+          },
+          {
+            "expr": "model_router_model_reliability_score",
+            "legendFormat": "Reliability Score - {{model}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Model Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(model_router_model_selection_events_total[5m])",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Model Router Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "model_router_performance_score",
+            "legendFormat": "Performance Score - {{performance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "model_router_efficiency_score",
+            "legendFormat": "Efficiency Score - {{efficiency_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "model_router_reliability_score",
+            "legendFormat": "Reliability Score - {{reliability_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "model_router_scalability_score",
+            "legendFormat": "Scalability Score - {{scalability_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Model Router Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "rate(model_router_model_selection_events_total[5m])",
+            "legendFormat": "{{model}}",
+            "refId": "Selection",
+            "format": "table"
+          },
+          {
+            "expr": "rate(model_router_request_routing_events_total[5m])",
+            "legendFormat": "{{routing_type}}",
+            "refId": "Routing",
+            "format": "table"
+          },
+          {
+            "expr": "model_router_success_rate * 100",
+            "legendFormat": "{{model}}",
+            "refId": "Success",
+            "format": "table"
+          },
+          {
+            "expr": "model_router_average_duration",
+            "legendFormat": "{{model}}",
+            "refId": "Duration",
+            "format": "table"
+          },
+          {
+            "expr": "model_router_model_health_score",
+            "legendFormat": "{{model}}",
+            "refId": "Health",
+            "format": "table"
+          },
+          {
+            "expr": "model_router_performance_score",
+            "legendFormat": "{{performance_type}}",
+            "refId": "Performance",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "model": 0,
+                "routing_type": 1,
+                "performance_type": 2,
+                "Value #Selection": 3,
+                "Value #Routing": 4,
+                "Value #Success": 5,
+                "Value #Duration": 6,
+                "Value #Health": 7,
+                "Value #Performance": 8
+              },
+              "renameByName": {
+                "model": "Model",
+                "routing_type": "Routing Type",
+                "performance_type": "Performance Type",
+                "Value #Selection": "Selection Events/sec",
+                "Value #Routing": "Routing Events/sec",
+                "Value #Success": "Success Rate %",
+                "Value #Duration": "Avg Duration",
+                "Value #Health": "Health Score",
+                "Value #Performance": "Performance Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Success Rate %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Health Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Performance Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Model Router Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - model_router_success_rate) * 100 * 30) - (model_router_average_duration * 20) - ((1 - model_router_model_selection_success_rate) * 100 * 25) - ((1 - model_router_model_health_score) * 100 * 25))",
+            "legendFormat": "Model Router Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Model Router Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(sum(rate(model_router_requests_total[5m]))[24h])",
+            "legendFormat": "Avg Requests/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(model_router_success_rate * 100[24h])",
+            "legendFormat": "Avg Success Rate % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(model_router_average_duration[24h])",
+            "legendFormat": "Avg Duration (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(model_router_performance_score * 100[24h])",
+            "legendFormat": "Avg Performance Score % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec / Success Rate % / Duration / Performance %",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Model Load Balancing",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(model_router_load_balancing_events_total[5m])",
+            "legendFormat": "Load Balancing Events/sec - {{balancing_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "model_router_load_balancing_success_rate * 100",
+            "legendFormat": "Load Balancing Success Rate % - {{balancing_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "model_router_load_balancing_average_time",
+            "legendFormat": "Avg Load Balancing Time - {{balancing_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "model_router_load_balancing_efficiency_score",
+            "legendFormat": "Load Balancing Efficiency - {{balancing_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Model Optimization",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(model_router_optimization_events_total[5m])",
+            "legendFormat": "Optimization Events/sec - {{optimization_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "model_router_optimization_success_rate * 100",
+            "legendFormat": "Optimization Success Rate % - {{optimization_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "model_router_optimization_improvement_score",
+            "legendFormat": "Optimization Improvement - {{optimization_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "model_router_optimization_efficiency_score",
+            "legendFormat": "Optimization Efficiency - {{optimization_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Improvement Score / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "model",
+          "type": "query",
+          "query": "label_values(model_router_model_selection_events_total, model)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "routing_type",
+          "type": "query",
+          "query": "label_values(model_router_request_routing_events_total, routing_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "performance_type",
+          "type": "query",
+          "query": "label_values(model_router_performance_score, performance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "efficiency_type",
+          "type": "query",
+          "query": "label_values(model_router_efficiency_score, efficiency_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "reliability_type",
+          "type": "query",
+          "query": "label_values(model_router_reliability_score, reliability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "scalability_type",
+          "type": "query",
+          "query": "label_values(model_router_scalability_score, scalability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "balancing_type",
+          "type": "query",
+          "query": "label_values(model_router_load_balancing_events_total, balancing_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "optimization_type",
+          "type": "query",
+          "query": "label_values(model_router_optimization_events_total, optimization_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Model Router Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Model.*Router.*|.*Model.*Selection.*Metrics.*|.*Request.*Routing.*|.*Response.*Aggregation.*|.*Model.*Health.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Model Router Alert: {{alertname}}"
+        },
+        {
+          "name": "Low Router Success Rate",
+          "datasource": "Prometheus",
+          "expr": "model_router_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Router Success Rate"
+        },
+        {
+          "name": "Low Model Selection Success Rate",
+          "datasource": "Prometheus",
+          "expr": "model_router_model_selection_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Model Selection Success Rate: {{model}}"
+        },
+        {
+          "name": "Low Routing Success Rate",
+          "datasource": "Prometheus",
+          "expr": "model_router_request_routing_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Routing Success Rate: {{routing_type}}"
+        },
+        {
+          "name": "Low Model Health",
+          "datasource": "Prometheus",
+          "expr": "model_router_model_health_score < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Model Health: {{model}}"
+        }
+      ]
+    }
+  }
+}

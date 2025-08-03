@@ -1,0 +1,605 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Performance Dashboard",
+    "tags": ["performance", "response-times", "throughput", "latency-analysis", "bottleneck-identification"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Performance Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[5m]))",
+            "legendFormat": "Total Throughput",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Latency",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"4..|5..\"}[5m]) / rate(http_requests_total[5m]) * 100",
+            "legendFormat": "Error Rate %",
+            "refId": "C"
+          },
+          {
+            "expr": "performance_score * 100",
+            "legendFormat": "Performance Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "P95 Latency" },
+              "properties": [
+                { "id": "unit", "value": "s" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Response Time Distribution",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P50 Response Time - {{job}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Response Time - {{job}}",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P99 Response Time - {{job}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 2,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Throughput Analysis",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "Total Requests/sec - {{job}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"2..\"}[5m])",
+            "legendFormat": "Successful Requests/sec - {{job}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"4..|5..\"}[5m])",
+            "legendFormat": "Error Requests/sec - {{job}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Latency Heatmap",
+        "type": "heatmap",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "sum by(le) (rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "color": {
+            "mode": "opacity"
+          },
+          "heatmap": {},
+          "tooltip": {
+            "mode": "multi"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Performance by Endpoint",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{path=~\"/api/.*\"}[5m]))",
+            "legendFormat": "P95 Latency - {{path}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{path=~\"/api/.*\"}[5m])",
+            "legendFormat": "Requests/sec - {{path}}",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds / Requests/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Performance Score",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "performance_score",
+            "legendFormat": "Performance Score - {{performance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "latency_score",
+            "legendFormat": "Latency Score - {{performance_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "throughput_score",
+            "legendFormat": "Throughput Score - {{performance_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "error_rate_score",
+            "legendFormat": "Error Rate Score - {{performance_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Bottleneck Identification",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{job}}",
+            "refId": "Latency",
+            "format": "table"
+          },
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{job}}",
+            "refId": "Throughput",
+            "format": "table"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"4..|5..\"}[5m]) / rate(http_requests_total[5m]) * 100",
+            "legendFormat": "{{job}}",
+            "refId": "ErrorRate",
+            "format": "table"
+          },
+          {
+            "expr": "performance_score",
+            "legendFormat": "{{performance_type}}",
+            "refId": "Performance",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "job": 0,
+                "performance_type": 1,
+                "Value #Latency": 2,
+                "Value #Throughput": 3,
+                "Value #ErrorRate": 4,
+                "Value #Performance": 5
+              },
+              "renameByName": {
+                "job": "Service",
+                "performance_type": "Performance Type",
+                "Value #Latency": "P95 Latency (s)",
+                "Value #Throughput": "Requests/sec",
+                "Value #ErrorRate": "Error Rate %",
+                "Value #Performance": "Performance Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "P95 Latency (s)" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 1 },
+                      { "color": "red", "value": 2 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Error Rate %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 1 },
+                      { "color": "red", "value": 5 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Performance Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 8,
+        "title": "Performance Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "avg_over_time(sum(rate(http_requests_total[5m]))[24h])",
+            "legendFormat": "Avg Throughput (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))[24h])",
+            "legendFormat": "Avg P95 Latency (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(rate(http_requests_total{status=~\"4..|5..\"}[5m]) / rate(http_requests_total[5m]) * 100[24h])",
+            "legendFormat": "Avg Error Rate % (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(performance_score * 100[24h])",
+            "legendFormat": "Avg Performance Score % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Throughput / Latency / Error Rate % / Performance %",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Performance Anomalies",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+        "targets": [
+          {
+            "expr": "abs(rate(http_requests_total[5m]) - avg_over_time(rate(http_requests_total[5m])[1h])) / avg_over_time(rate(http_requests_total[5m])[1h]) * 100",
+            "legendFormat": "Throughput Anomaly % - {{job}}",
+            "refId": "A"
+          },
+          {
+            "expr": "abs(histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) - avg_over_time(histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))[1h])) / avg_over_time(histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))[1h]) * 100",
+            "legendFormat": "Latency Anomaly % - {{job}}",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Anomaly %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 20,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Performance by HTTP Method",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Latency - {{method}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "Requests/sec - {{method}}",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds / Requests/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Performance by Status Code",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=~\"2..\"}[5m])",
+            "legendFormat": "2xx Requests/sec - {{job}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"3..\"}[5m])",
+            "legendFormat": "3xx Requests/sec - {{job}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"4..\"}[5m])",
+            "legendFormat": "4xx Requests/sec - {{job}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[5m])",
+            "legendFormat": "5xx Requests/sec - {{job}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Performance Optimization",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 48 },
+        "targets": [
+          {
+            "expr": "rate(performance_optimization_events_total[5m])",
+            "legendFormat": "Optimization Events/sec - {{optimization_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "performance_optimization_success_rate * 100",
+            "legendFormat": "Optimization Success Rate % - {{optimization_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "performance_optimization_improvement_score",
+            "legendFormat": "Optimization Improvement - {{optimization_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "performance_optimization_efficiency_score",
+            "legendFormat": "Optimization Efficiency - {{optimization_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Improvement Score / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "job",
+          "type": "query",
+          "query": "label_values(http_requests_total, job)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "path",
+          "type": "query",
+          "query": "label_values(http_requests_total, path)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "method",
+          "type": "query",
+          "query": "label_values(http_requests_total, method)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "performance_type",
+          "type": "query",
+          "query": "label_values(performance_score, performance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "optimization_type",
+          "type": "query",
+          "query": "label_values(performance_optimization_events_total, optimization_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Performance Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Performance.*|.*Latency.*|.*Throughput.*|.*Bottleneck.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Performance Alert: {{alertname}}"
+        },
+        {
+          "name": "High Latency",
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2",
+          "iconColor": "orange",
+          "titleFormat": "High Latency: {{job}}"
+        },
+        {
+          "name": "Low Throughput",
+          "datasource": "Prometheus",
+          "expr": "rate(http_requests_total[5m]) < 10",
+          "iconColor": "orange",
+          "titleFormat": "Low Throughput: {{job}}"
+        },
+        {
+          "name": "High Error Rate",
+          "datasource": "Prometheus",
+          "expr": "rate(http_requests_total{status=~\"4..|5..\"}[5m]) / rate(http_requests_total[5m]) * 100 > 5",
+          "iconColor": "orange",
+          "titleFormat": "High Error Rate: {{job}}"
+        },
+        {
+          "name": "Performance Anomaly",
+          "datasource": "Prometheus",
+          "expr": "abs(rate(http_requests_total[5m]) - avg_over_time(rate(http_requests_total[5m])[1h])) / avg_over_time(rate(http_requests_total[5m])[1h]) * 100 > 50",
+          "iconColor": "orange",
+          "titleFormat": "Performance Anomaly: {{job}}"
+        }
+      ]
+    }
+  }
+}

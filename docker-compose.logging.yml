@@ -1,0 +1,366 @@
+# Docker Compose for MCP Log Aggregation Pipeline
+# Includes Fluentd, Elasticsearch, Kibana, Prometheus, and Alertmanager
+
+version: '3.8'
+
+services:
+  # Fluentd log collector and processor
+  fluentd:
+    image: fluent/fluentd:v1.16-1
+    container_name: mcp-fluentd
+    hostname: fluentd
+    ports:
+      - "24224:24224"   # Forward input
+      - "24224:24224/udp" # Forward input UDP
+      - "5140:5140"     # Syslog input
+      - "24231:24231"   # Metrics endpoint
+    volumes:
+      - ./fluentd/conf:/fluentd/etc
+      - ./fluentd/templates:/etc/fluentd/templates
+      - ./fluentd/policies:/etc/fluentd/policies
+      - ./logs:/var/log/fluentd
+      - /var/log:/var/log/host:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    environment:
+      - FLUENTD_CONF=fluent.conf
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_USER=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      - ELASTICSEARCH_SCHEME=http
+      - ELASTICSEARCH_SSL_VERIFY=false
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - CLUSTER_NAME=${CLUSTER_NAME:-mcp-cluster}
+    networks:
+      - logging
+      - monitoring
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Elasticsearch for log storage and indexing
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: mcp-elasticsearch
+    hostname: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - ./monitoring/elasticsearch/config:/usr/share/elasticsearch/config
+      - ./monitoring/elasticsearch/plugins:/usr/share/elasticsearch/plugins
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - cluster.name=mcp-logging
+      - node.name=mcp-node-1
+      - network.host=0.0.0.0
+    networks:
+      - logging
+      - monitoring
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Kibana for log analysis and visualization
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: mcp-kibana
+    hostname: kibana
+    ports:
+      - "5601:5601"
+    volumes:
+      - ./monitoring/kibana/config:/usr/share/kibana/config
+      - ./monitoring/kibana/dashboards:/usr/share/kibana/data/dashboards
+      - ./monitoring/kibana/visualizations:/usr/share/kibana/data/visualizations
+      - ./monitoring/kibana/searches:/usr/share/kibana/data/searches
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      - SERVER_NAME=kibana
+      - SERVER_HOST=0.0.0.0
+      - XPACK_MONITORING_ENABLED=true
+      - XPACK_MONITORING_COLLECTION_ENABLED=true
+    networks:
+      - logging
+      - monitoring
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Prometheus for metrics collection and alerting
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: mcp-prometheus
+    hostname: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./monitoring/prometheus/prometheus-log-metrics.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/log_alerting_rules.yml:/etc/prometheus/log_alerting_rules.yml
+      - ./monitoring/prometheus/log_recording_rules.yml:/etc/prometheus/log_recording_rules.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - monitoring
+    depends_on:
+      - fluentd
+      - elasticsearch
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Alertmanager for alert management
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: mcp-alertmanager
+    hostname: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - alertmanager_data:/alertmanager
+      - ./monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: mcp-grafana
+    hostname: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/config:/etc/grafana
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-piechart-panel
+      - GF_SMTP_ENABLED=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+      - elasticsearch
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Logstash for additional log processing (optional)
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.12.0
+    container_name: mcp-logstash
+    hostname: logstash
+    ports:
+      - "5044:5044"   # Beats input
+      - "5000:5000"   # TCP input
+      - "5000:5000/udp" # UDP input
+      - "9600:9600"   # Monitoring API
+    volumes:
+      - ./monitoring/logstash/config:/usr/share/logstash/config
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline
+    environment:
+      - LS_JAVA_OPTS=-Xmx1g -Xms1g
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+    networks:
+      - logging
+      - monitoring
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Filebeat for log collection from files
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.12.0
+    container_name: mcp-filebeat
+    hostname: filebeat
+    volumes:
+      - ./monitoring/filebeat/config:/usr/share/filebeat/config
+      - ./logs:/var/log/logs:ro
+      - /var/log:/var/log/host:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - KIBANA_HOST=kibana
+      - KIBANA_PORT=5601
+    networks:
+      - logging
+    depends_on:
+      - elasticsearch
+      - kibana
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Metricbeat for system metrics collection
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:8.12.0
+    container_name: mcp-metricbeat
+    hostname: metricbeat
+    volumes:
+      - ./monitoring/metricbeat/config:/usr/share/metricbeat/config
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - KIBANA_HOST=kibana
+      - KIBANA_PORT=5601
+    networks:
+      - monitoring
+    depends_on:
+      - elasticsearch
+      - kibana
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Packetbeat for network traffic analysis
+  packetbeat:
+    image: docker.elastic.co/beats/packetbeat:8.12.0
+    container_name: mcp-packetbeat
+    hostname: packetbeat
+    volumes:
+      - ./monitoring/packetbeat/config:/usr/share/packetbeat/config
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - KIBANA_HOST=kibana
+      - KIBANA_PORT=5601
+    networks:
+      - monitoring
+    depends_on:
+      - elasticsearch
+      - kibana
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Auditbeat for audit data collection
+  auditbeat:
+    image: docker.elastic.co/beats/auditbeat:8.12.0
+    container_name: mcp-auditbeat
+    hostname: auditbeat
+    volumes:
+      - ./monitoring/auditbeat/config:/usr/share/auditbeat/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - KIBANA_HOST=kibana
+      - KIBANA_PORT=5601
+    networks:
+      - monitoring
+    depends_on:
+      - elasticsearch
+      - kibana
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Heartbeat for uptime monitoring
+  heartbeat:
+    image: docker.elastic.co/beats/heartbeat:8.12.0
+    container_name: mcp-heartbeat
+    hostname: heartbeat
+    volumes:
+      - ./monitoring/heartbeat/config:/usr/share/heartbeat/config
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - KIBANA_HOST=kibana
+      - KIBANA_PORT=5601
+    networks:
+      - monitoring
+    depends_on:
+      - elasticsearch
+      - kibana
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  elasticsearch_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  alertmanager_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  logging:
+    driver: bridge
+    name: mcp-logging
+  monitoring:
+    driver: bridge
+    name: mcp-monitoring

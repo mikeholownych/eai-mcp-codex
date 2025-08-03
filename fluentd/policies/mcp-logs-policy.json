@@ -1,0 +1,63 @@
+{
+  "policy": {
+    "description": "MCP Logs Index Lifecycle Management Policy",
+    "default": false,
+    "phases": {
+      "hot": {
+        "min_age": "0ms",
+        "actions": {
+          "rollover": {
+            "max_size": "50gb",
+            "max_age": "7d",
+            "max_docs": 10000000
+          },
+          "set_priority": {
+            "priority": 100
+          },
+          "read_only": {
+            "enabled": false
+          }
+        }
+      },
+      "warm": {
+        "min_age": "7d",
+        "actions": {
+          "forcemerge": {
+            "max_num_segments": 1
+          },
+          "shrink": {
+            "number_of_shards": 1
+          },
+          "set_priority": {
+            "priority": 50
+          },
+          "read_only": {
+            "enabled": true
+          }
+        }
+      },
+      "cold": {
+        "min_age": "30d",
+        "actions": {
+          "set_priority": {
+            "priority": 0
+          },
+          "freeze": {
+            "enabled": true
+          },
+          "read_only": {
+            "enabled": true
+          }
+        }
+      },
+      "delete": {
+        "min_age": "365d",
+        "actions": {
+          "delete": {
+            "delete_searchable_snapshot": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,360 @@
+# Alertmanager Configuration for MCP Log-Based Alerts
+# Configuration for alert routing, grouping, and notification
+
+global:
+  # SMTP configuration for email notifications
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@mcp.ai'
+  smtp_auth_username: 'alerts@mcp.ai'
+  smtp_auth_password: 'password'
+  
+  # Slack webhook configuration
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+  
+  # Default notification settings
+  resolve_timeout: 5m
+  
+# Route configuration for alert routing
+route:
+  group_by: ['alertname', 'severity', 'category']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default'
+  routes:
+    # Critical alerts route
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 5s
+      group_interval: 5s
+      repeat_interval: 15m
+      continue: true
+    
+    # Security alerts route
+    - match:
+        category: security
+      receiver: 'security-alerts'
+      group_wait: 5s
+      group_interval: 5s
+      repeat_interval: 30m
+      continue: true
+    
+    # Performance alerts route
+    - match:
+        category: performance
+      receiver: 'performance-alerts'
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 1h
+      continue: true
+    
+    # Infrastructure alerts route
+    - match:
+        category: infrastructure
+      receiver: 'infrastructure-alerts'
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 1h
+      continue: true
+    
+    # Compliance alerts route
+    - match:
+        category: compliance
+      receiver: 'compliance-alerts'
+      group_wait: 30s
+      group_interval: 30s
+      repeat_interval: 2h
+      continue: true
+    
+    # Anomaly alerts route
+    - match:
+        category: anomaly
+      receiver: 'anomaly-alerts'
+      group_wait: 30s
+      group_interval: 30s
+      repeat_interval: 2h
+      continue: true
+
+# Receiver configurations
+receivers:
+  # Default receiver
+  - name: 'default'
+    email_configs:
+      - to: 'devops@mcp.ai'
+        subject: '[MCP] {{ .GroupLabels.alertname }} - {{ .GroupLabels.severity }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Category: {{ .Labels.category }}
+          Service: {{ .Labels.service_name }}
+          Instance: {{ .Labels.instance }}
+          Timestamp: {{ .StartsAt }}
+          Runbook: {{ .Annotations.runbook_url }}
+          
+          {{ end }}
+    slack_configs:
+      - channel: '#mcp-alerts'
+        title: '[MCP] {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Severity*: {{ .Labels.severity }}
+          *Category*: {{ .Labels.category }}
+          *Service*: {{ .Labels.service_name }}
+          *Instance*: {{ .Labels.instance }}
+          *Timestamp*: {{ .StartAt }}
+          *Runbook*: {{ .Annotations.runbook_url }}
+          
+          {{ end }}
+        color: 'warning'
+  
+  # Critical alerts receiver
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'critical@mcp.ai'
+        subject: '[CRITICAL] MCP Alert - {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          CRITICAL ALERT: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Category: {{ .Labels.category }}
+          Service: {{ .Labels.service_name }}
+          Instance: {{ .Labels.instance }}
+          Timestamp: {{ .StartsAt }}
+          Runbook: {{ .Annotations.runbook_url }}
+          
+          IMMEDIATE ACTION REQUIRED!
+          {{ end }}
+    slack_configs:
+      - channel: '#mcp-critical'
+        title: '[CRITICAL] MCP Alert'
+        text: |
+          {{ range .Alerts }}
+          *CRITICAL ALERT*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Severity*: {{ .Labels.severity }}
+          *Category*: {{ .Labels.category }}
+          *Service*: {{ .Labels.service_name }}
+          *Instance*: {{ .Labels.instance }}
+          *Timestamp*: {{ .StartAt }}
+          *Runbook*: {{ .Annotations.runbook_url }}
+          
+          *IMMEDIATE ACTION REQUIRED!*
+          {{ end }}
+        color: 'danger'
+    webhook_configs:
+      - url: 'http://pagerduty-webhook:8080/v1/webhook'
+        send_resolved: true
+        http_config:
+          basic_auth:
+            username: 'pagerduty'
+            password: 'token'
+  
+  # Security alerts receiver
+  - name: 'security-alerts'
+    email_configs:
+      - to: 'security@mcp.ai'
+        subject: '[SECURITY] MCP Alert - {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          SECURITY ALERT: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Category: {{ .Labels.category }}
+          Service: {{ .Labels.service_name }}
+          Instance: {{ .Labels.instance }}
+          Timestamp: {{ .StartsAt }}
+          Runbook: {{ .Annotations.runbook_url }}
+          
+          Security investigation required.
+          {{ end }}
+    slack_configs:
+      - channel: '#mcp-security'
+        title: '[SECURITY] MCP Alert'
+        text: |
+          {{ range .Alerts }}
+          *SECURITY ALERT*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Severity*: {{ .Labels.severity }}
+          *Category*: {{ .Labels.category }}
+          *Service*: {{ .Labels.service_name }}
+          *Instance*: {{ .Labels.instance }}
+          *Timestamp*: {{ .StartAt }}
+          *Runbook*: {{ .Annotations.runbook_url }}
+          
+          *Security investigation required.*
+          {{ end }}
+        color: 'danger'
+  
+  # Performance alerts receiver
+  - name: 'performance-alerts'
+    email_configs:
+      - to: 'performance@mcp.ai'
+        subject: '[PERFORMANCE] MCP Alert - {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          PERFORMANCE ALERT: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Category: {{ .Labels.category }}
+          Service: {{ .Labels.service_name }}
+          Instance: {{ .Labels.instance }}
+          Timestamp: {{ .StartsAt }}
+          Runbook: {{ .Annotations.runbook_url }}
+          
+          Performance optimization may be required.
+          {{ end }}
+    slack_configs:
+      - channel: '#mcp-performance'
+        title: '[PERFORMANCE] MCP Alert'
+        text: |
+          {{ range .Alerts }}
+          *PERFORMANCE ALERT*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Severity*: {{ .Labels.severity }}
+          *Category*: {{ .Labels.category }}
+          *Service*: {{ .Labels.service_name }}
+          *Instance*: {{ .Labels.instance }}
+          *Timestamp*: {{ .StartAt }}
+          *Runbook*: {{ .Annotations.runbook_url }}
+          
+          *Performance optimization may be required.*
+          {{ end }}
+        color: 'warning'
+  
+  # Infrastructure alerts receiver
+  - name: 'infrastructure-alerts'
+    email_configs:
+      - to: 'infrastructure@mcp.ai'
+        subject: '[INFRASTRUCTURE] MCP Alert - {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          INFRASTRUCTURE ALERT: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Category: {{ .Labels.category }}
+          Service: {{ .Labels.service_name }}
+          Instance: {{ .Labels.instance }}
+          Timestamp: {{ .StartsAt }}
+          Runbook: {{ .Annotations.runbook_url }}
+          
+          Infrastructure maintenance may be required.
+          {{ end }}
+    slack_configs:
+      - channel: '#mcp-infrastructure'
+        title: '[INFRASTRUCTURE] MCP Alert'
+        text: |
+          {{ range .Alerts }}
+          *INFRASTRUCTURE ALERT*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Severity*: {{ .Labels.severity }}
+          *Category*: {{ .Labels.category }}
+          *Service*: {{ .Labels.service_name }}
+          *Instance*: {{ .Labels.instance }}
+          *Timestamp*: {{ .StartAt }}
+          *Runbook*: {{ .Annotations.runbook_url }}
+          
+          *Infrastructure maintenance may be required.*
+          {{ end }}
+        color: 'warning'
+  
+  # Compliance alerts receiver
+  - name: 'compliance-alerts'
+    email_configs:
+      - to: 'compliance@mcp.ai'
+        subject: '[COMPLIANCE] MCP Alert - {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          COMPLIANCE ALERT: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Category: {{ .Labels.category }}
+          Service: {{ .Labels.service_name }}
+          Instance: {{ .Labels.instance }}
+          Timestamp: {{ .StartsAt }}
+          Runbook: {{ .Annotations.runbook_url }}
+          
+          Compliance review required.
+          {{ end }}
+    slack_configs:
+      - channel: '#mcp-compliance'
+        title: '[COMPLIANCE] MCP Alert'
+        text: |
+          {{ range .Alerts }}
+          *COMPLIANCE ALERT*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Severity*: {{ .Labels.severity }}
+          *Category*: {{ .Labels.category }}
+          *Service*: {{ .Labels.service_name }}
+          *Instance*: {{ .Labels.instance }}
+          *Timestamp*: {{ .StartAt }}
+          *Runbook*: {{ .Annotations.runbook_url }}
+          
+          *Compliance review required.*
+          {{ end }}
+        color: '#FFA500'
+  
+  # Anomaly alerts receiver
+  - name: 'anomaly-alerts'
+    email_configs:
+      - to: 'anomaly@mcp.ai'
+        subject: '[ANOMALY] MCP Alert - {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          ANOMALY ALERT: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Category: {{ .Labels.category }}
+          Service: {{ .Labels.service_name }}
+          Instance: {{ .Labels.instance }}
+          Timestamp: {{ .StartsAt }}
+          Runbook: {{ .Annotations.runbook_url }}
+          
+          Anomaly investigation required.
+          {{ end }}
+    slack_configs:
+      - channel: '#mcp-anomaly'
+        title: '[ANOMALY] MCP Alert'
+        text: |
+          {{ range .Alerts }}
+          *ANOMALY ALERT*: {{ .Annotations.summary }}
+          *Description*: {{ .Annotations.description }}
+          *Severity*: {{ .Labels.severity }}
+          *Category*: {{ .Labels.category }}
+          *Service*: {{ .Labels.service_name }}
+          *Instance*: {{ .Labels.instance }}
+          *Timestamp*: {{ .StartAt }}
+          *Runbook*: {{ .Annotations.runbook_url }}
+          
+          *Anomaly investigation required.*
+          {{ end }}
+        color: '#9400D3'
+
+# Inhibition rules to prevent alert spam
+inhibit_rules:
+  # Inhibit warning alerts if critical alerts are firing for the same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['service_name', 'alertname']
+  
+  # Inhibit info alerts if warning alerts are firing for the same service
+  - source_match:
+      severity: 'warning'
+    target_match:
+      severity: 'info'
+    equal: ['service_name', 'alertname']
+  
+  # Inhibit lower severity security alerts if critical security alerts are firing
+  - source_match:
+      severity: 'critical'
+      category: 'security'
+    target_match:
+      category: 'security'
+    equal: ['service_name']

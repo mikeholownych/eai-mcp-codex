@@ -1,0 +1,432 @@
+# Structured Logging Configuration for EAI-MCP Platform
+# Comprehensive logging setup with correlation to tracing and multiple outputs
+
+logging:
+  version: 1
+  disable_existing_loggers: false
+  
+  # Formatters for different log output formats
+  formatters:
+    # JSON formatter for structured logging
+    json:
+      class: pythonjsonlogger.jsonlogger.JsonFormatter
+      format: "%(asctime)s %(name)s %(levelname)s %(message)s"
+      datefmt: "%Y-%m-%dT%H:%M:%S.%fZ"
+    
+    # Standard text formatter for console output
+    standard:
+      format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+    
+    # Detailed formatter with file and line info
+    detailed:
+      format: "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+    
+    # Compact formatter for high-volume logs
+    compact:
+      format: "%(asctime)s %(levelname)s %(message)s"
+      datefmt: "%Y-%m-%d %H:%M:%S"
+  
+  # Filters for log processing
+  filters:
+    # Filter to add trace correlation
+    trace_correlation:
+      class: src.common.logging_config.TraceCorrelationFilter
+    
+    # Filter to add service metadata
+    service_metadata:
+      class: src.common.logging_config.ServiceMetadataFilter
+    
+    # Filter to sanitize sensitive data
+    sensitive_data:
+      class: src.common.logging_config.SensitiveDataFilter
+    
+    # Filter to add request context
+    request_context:
+      class: src.common.logging_config.RequestContextFilter
+    
+    # Filter to add performance metrics
+    performance_metrics:
+      class: src.common.logging_config.PerformanceMetricsFilter
+  
+  # Handlers for different log outputs
+  handlers:
+    # Console handler for development
+    console:
+      class: logging.StreamHandler
+      level: INFO
+      formatter: standard
+      stream: ext://sys.stdout
+      filters: [trace_correlation, service_metadata, sensitive_data]
+    
+    # Main application log file
+    app_file:
+      class: logging.handlers.RotatingFileHandler
+      level: DEBUG
+      formatter: json
+      filename: logs/app.log
+      maxBytes: 10485760  # 10MB
+      backupCount: 10
+      encoding: utf8
+      filters: [trace_correlation, service_metadata, sensitive_data, request_context]
+    
+    # Error log file
+    error_file:
+      class: logging.handlers.RotatingFileHandler
+      level: ERROR
+      formatter: json
+      filename: logs/error.log
+      maxBytes: 10485760  # 10MB
+      backupCount: 20
+      encoding: utf8
+      filters: [trace_correlation, service_metadata, sensitive_data, request_context]
+    
+    # Performance log file
+    performance_file:
+      class: logging.handlers.RotatingFileHandler
+      level: INFO
+      formatter: json
+      filename: logs/performance.log
+      maxBytes: 10485760  # 10MB
+      backupCount: 5
+      encoding: utf8
+      filters: [trace_correlation, service_metadata, performance_metrics]
+    
+    # Security log file
+    security_file:
+      class: logging.handlers.RotatingFileHandler
+      level: INFO
+      formatter: json
+      filename: logs/security.log
+      maxBytes: 10485760  # 10MB
+      backupCount: 30
+      encoding: utf8
+      filters: [trace_correlation, service_metadata, sensitive_data]
+    
+    # Audit log file
+    audit_file:
+      class: logging.handlers.RotatingFileHandler
+      level: INFO
+      formatter: json
+      filename: logs/audit.log
+      maxBytes: 10485760  # 10MB
+      backupCount: 90
+      encoding: utf8
+      filters: [trace_correlation, service_metadata, sensitive_data, request_context]
+    
+    # Syslog handler for centralized logging
+    syslog:
+      class: logging.handlers.SysLogHandler
+      level: WARNING
+      formatter: compact
+      address: /dev/log
+      facility: local0
+      filters: [trace_correlation, service_metadata]
+    
+    # Fluentd handler for log aggregation
+    fluentd:
+      class: fluent.handler.FluentHandler
+      level: INFO
+      formatter: json
+      tag: mcp
+      host: localhost
+      port: 24224
+      timeout: 3.0
+      filters: [trace_correlation, service_metadata, sensitive_data, request_context]
+    
+    # CloudWatch handler (if available)
+    cloudwatch:
+      class: watchtower.CloudWatchLogHandler
+      level: INFO
+      formatter: json
+      log_group_name: mcp-logs
+      stream_name: "${SERVICE_NAME:-unknown-service}-${ENVIRONMENT:-development}"
+      send_interval: 10
+      filters: [trace_correlation, service_metadata, sensitive_data]
+  
+  # Logger configurations
+  loggers:
+    # Root logger
+    "":
+      level: INFO
+      handlers: [console, app_file, fluentd]
+      propagate: false
+    
+    # Application loggers
+    app:
+      level: DEBUG
+      handlers: [app_file, fluentd]
+      propagate: false
+    
+    # Security logger
+    security:
+      level: INFO
+      handlers: [security_file, audit_file, fluentd]
+      propagate: false
+    
+    # Performance logger
+    performance:
+      level: INFO
+      handlers: [performance_file, fluentd]
+      propagate: false
+    
+    # Audit logger
+    audit:
+      level: INFO
+      handlers: [audit_file, fluentd]
+      propagate: false
+    
+    # Error logger
+    errors:
+      level: ERROR
+      handlers: [error_file, fluentd]
+      propagate: false
+    
+    # Third-party library loggers
+    uvicorn:
+      level: INFO
+      handlers: [console, app_file]
+      propagate: false
+    
+    sqlalchemy:
+      level: WARNING
+      handlers: [app_file]
+      propagate: false
+    
+    httpx:
+      level: INFO
+      handlers: [app_file]
+      propagate: false
+    
+    redis:
+      level: WARNING
+      handlers: [app_file]
+      propagate: false
+    
+    # Service-specific loggers
+    model_router:
+      level: INFO
+      handlers: [app_file, performance_file, fluentd]
+      propagate: false
+    
+    plan_management:
+      level: INFO
+      handlers: [app_file, audit_file, fluentd]
+      propagate: false
+    
+    git_worktree:
+      level: INFO
+      handlers: [app_file, fluentd]
+      propagate: false
+    
+    workflow_orchestrator:
+      level: INFO
+      handlers: [app_file, performance_file, fluentd]
+      propagate: false
+    
+    verification_feedback:
+      level: INFO
+      handlers: [app_file, security_file, fluentd]
+      propagate: false
+  
+  # Log rotation and retention policies
+  rotation:
+    enabled: true
+    max_size: 10485760  # 10MB
+    backup_count: 10
+    compression: true
+    compression_format: zip
+    
+    # Retention policies by log type
+    retention:
+      app: 30 days
+      error: 90 days
+      performance: 7 days
+      security: 365 days
+      audit: 1825 days  # 5 years
+  
+  # Log sanitization and privacy
+  sanitization:
+    enabled: true
+    patterns:
+      # API keys and tokens
+      - regex: "api[_-]?key[\\'\\"]?\\s*[:=]\\s*[\\'\\"]([^\\'\\\"]+)[\\'\\\"]"
+        replacement: "api_key=***"
+      - regex: "authorization[\\'\\"]?\\s*[:=]\\s*[\\'\\"]([^\\'\\\"]+)[\\'\\\"]"
+        replacement: "authorization=***"
+      - regex: "bearer[\\'\\"]?\\s*([^\\s\\'\\\"]+)"
+        replacement: "bearer=***"
+      - regex: "token[\\'\\"]?\\s*[:=]\\s*[\\'\\"]([^\\'\\\"]+)[\\'\\\"]"
+        replacement: "token=***"
+      
+      # Passwords
+      - regex: "password[\\'\\"]?\\s*[:=]\\s*[\\'\\"]([^\\'\\\"]+)[\\'\\\"]"
+        replacement: "password=***"
+      - regex: "passwd[\\'\\"]?\\s*[:=]\\s*[\\'\\"]([^\\'\\\"]+)[\\'\\\"]"
+        replacement: "passwd=***"
+      
+      # Secrets
+      - regex: "secret[\\'\\"]?\\s*[:=]\\s*[\\'\\"]([^\\'\\\"]+)[\\'\\\"]"
+        replacement: "secret=***"
+      - regex: "private[_-]?key[\\'\\"]?\\s*[:=]\\s*[\\'\\"]([^\\'\\\"]+)[\\'\\\"]"
+        replacement: "private_key=***"
+      
+      # Personal information
+      - regex: "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"
+        replacement: "email@***"
+      - regex: "\\b\\d{3}[-.]?\\d{2}[-.]?\\d{4}\\b"
+        replacement: "SSN=***"
+      - regex: "\\b\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}\\b"
+        replacement: "credit_card=***"
+      
+      # Database connection strings
+      - regex: "postgresql://([^:]+):([^@]+)@"
+        replacement: "postgresql://user:***@"
+      - regex: "mysql://([^:]+):([^@]+)@"
+        replacement: "mysql://user:***@"
+      - regex: "mongodb://([^:]+):([^@]+)@"
+        replacement: "mongodb://user:***@"
+  
+  # Log enrichment
+  enrichment:
+    enabled: true
+    
+    # Service metadata
+    service:
+      name: "${SERVICE_NAME:-unknown-service}"
+      version: "${SERVICE_VERSION:-1.0.0}"
+      environment: "${ENVIRONMENT:-development}"
+      instance_id: "${HOSTNAME:-unknown}"
+    
+    # Request correlation
+    request:
+      include_request_id: true
+      include_user_id: false  # Privacy consideration
+      include_session_id: false  # Privacy consideration
+      include_ip_address: false  # Privacy consideration
+    
+    # Performance metrics
+    performance:
+      include_timing: true
+      include_memory_usage: true
+      include_cpu_usage: true
+    
+    # Business context
+    business:
+      include_operation_type: true
+      include_business_process: true
+      include_workflow_id: true
+  
+  # Log-based alerting
+  alerting:
+    enabled: true
+    
+    # Error rate alerts
+    error_rate:
+      threshold: 0.05  # 5% error rate
+      window: 5m  # 5 minute window
+      severity: warning
+    
+    # Security alerts
+    security:
+      failed_logins:
+        threshold: 5
+        window: 5m
+        severity: critical
+      
+      unauthorized_access:
+        threshold: 1
+        window: 1m
+        severity: critical
+    
+    # Performance alerts
+    performance:
+      slow_operations:
+        threshold: 10s  # 10 seconds
+        window: 1m
+        severity: warning
+      
+      high_memory_usage:
+        threshold: 0.9  # 90% memory usage
+        window: 5m
+        severity: warning
+  
+  # Log validation and quality
+  validation:
+    enabled: true
+    
+    # Required fields
+    required_fields:
+      - timestamp
+      - level
+      - message
+      - service.name
+    
+    # Field validation
+    field_validation:
+      timestamp:
+        type: datetime
+        format: iso8601
+      
+      level:
+        type: string
+        enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+      
+      trace.trace_id:
+        type: string
+        pattern: "^[0-9a-f]{32}$"
+      
+      trace.span_id:
+        type: string
+        pattern: "^[0-9a-f]{16}$"
+    
+    # Message validation
+    message_validation:
+      max_length: 10000
+      min_length: 1
+      allowed_characters: "[\\x20-\\x7E\\r\\n\\t]"
+  
+  # Log export and archiving
+  export:
+    enabled: true
+    
+    # Export to cloud storage
+    cloud_storage:
+      provider: "${CLOUD_STORAGE_PROVIDER:-s3}"
+      bucket: "${LOG_STORAGE_BUCKET:-mcp-logs}"
+      region: "${CLOUD_STORAGE_REGION:-us-east-1}"
+      retention_days: 365
+    
+    # Export to Elasticsearch
+    elasticsearch:
+      enabled: true
+      hosts: ["${ELASTICSEARCH_HOST:-localhost:9200}"]
+      index_prefix: "mcp-logs"
+      index_template: "mcp-logs-template"
+    
+    # Export to data warehouse
+    data_warehouse:
+      enabled: false
+      provider: "${DATA_WAREHOUSE_PROVIDER:-bigquery}"
+      dataset: "${DATA_WAREHOUSE_DATASET:-mcp_logs}"
+      table: "${DATA_WAREHOUSE_TABLE:-structured_logs}"
+  
+  # Development and debugging
+  development:
+    debug_mode: "${DEBUG_LOGGING:-false}"
+    console_output: true
+    include_stack_traces: true
+    include_debug_info: true
+    
+    # Local development settings
+    local:
+      log_level: DEBUG
+      file_output: true
+      fluentd_output: false
+    
+    # Testing settings
+    testing:
+      log_level: DEBUG
+      capture_test_logs: true
+      separate_test_logs: true

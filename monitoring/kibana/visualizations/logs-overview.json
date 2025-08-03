@@ -1,0 +1,75 @@
+{
+  "_id": "LOGS_OVERVIEW",
+  "_type": "visualization",
+  "_source": {
+    "title": "Logs Overview",
+    "type": "metric",
+    "params": {
+      "metric": {
+        "id": "1",
+        "type": "count",
+        "field": "@timestamp"
+      },
+      "bucket": {
+        "id": "2",
+        "type": "date_histogram",
+        "field": "@timestamp",
+        "interval": "auto",
+        "time_zone": "UTC"
+      }
+    },
+    "aggs": [
+      {
+        "id": "1",
+        "enabled": true,
+        "type": "count",
+        "schema": "metric",
+        "params": {
+          "customLabel": "Total Logs"
+        }
+      },
+      {
+        "id": "2",
+        "enabled": true,
+        "type": "date_histogram",
+        "schema": "segment",
+        "params": {
+          "field": "@timestamp",
+          "interval": "auto",
+          "time_zone": "UTC",
+          "customInterval": "2h",
+          "min_doc_count": 1,
+          "extended_bounds": {},
+          "format": "MMM D, YYYY @ HH:mm:ss"
+        }
+      },
+      {
+        "id": "3",
+        "enabled": true,
+        "type": "terms",
+        "schema": "group",
+        "params": {
+          "field": "log_level",
+          "size": 10,
+          "order": "desc",
+          "orderBy": "1",
+          "customLabel": "Log Level"
+        }
+      },
+      {
+        "id": "4",
+        "enabled": true,
+        "type": "terms",
+        "schema": "group",
+        "params": {
+          "field": "service_name",
+          "size": 10,
+          "order": "desc",
+          "orderBy": "1",
+          "customLabel": "Service Name"
+        }
+      }
+    ],
+    "listeners": {}
+  }
+}
