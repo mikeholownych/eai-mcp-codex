@@ -2,13 +2,13 @@
 
 import React from 'react'
 import Card from '@/components/ui/Card'
+import CardContent from '@/components/ui/CardContent'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
-import { useStaffDashboard, useSystemHealth } from '@/hooks/useStaff'
+import { useStaffDashboard } from '@/hooks/useStaff'
 
 const StaffDashboard: React.FC = () => {
   const { data: dashboardData, loading, error } = useStaffDashboard()
-  const { data: healthData } = useSystemHealth()
 
   if (loading) {
     return (
@@ -32,14 +32,6 @@ const StaffDashboard: React.FC = () => {
   const quickActions = dashboardData?.quick_actions || []
   const recentTickets = dashboardData?.recent_tickets || []
 
-  const getHealthColor = (status: string) => {
-    switch (status) {
-      case 'healthy': return 'text-green-400'
-      case 'warning': return 'text-yellow-400'
-      case 'critical': return 'text-red-400'
-      default: return 'text-slate-400'
-    }
-  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import Card from '@/components/ui/Card'
+import CardContent from '@/components/ui/CardContent'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
@@ -11,8 +12,8 @@ import { useTickets, useTicketActions, useTicketStats } from '@/hooks/useStaff'
 import { Ticket, TicketCreate, TicketUpdate } from '@/lib/staffApi'
 
 const TicketManagement: React.FC = () => {
-  const { tickets, total, loading, error, refetch } = useTickets()
-  const { createTicket, updateTicket, assignTicket, updateTicketStatus, updateTicketPriority, loading: actionLoading } = useTicketActions()
+  const { tickets, loading, error, refetch } = useTickets()
+  const { createTicket, updateTicket, updateTicketStatus, loading: actionLoading } = useTicketActions()
   const { stats } = useTicketStats()
   
   const [searchTerm, setSearchTerm] = useState('')
@@ -349,7 +350,7 @@ const TicketManagement: React.FC = () => {
           <Select
             label="Priority"
             value={formData.priority}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as any }))}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as 'low' | 'medium' | 'high' | 'urgent' }))}
             options={[
               { value: 'low', label: 'Low' },
               { value: 'medium', label: 'Medium' },
@@ -411,7 +412,7 @@ const TicketManagement: React.FC = () => {
           <Select
             label="Priority"
             value={formData.priority}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as any }))}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as 'low' | 'medium' | 'high' | 'urgent' }))}
             options={[
               { value: 'low', label: 'Low' },
               { value: 'medium', label: 'Medium' },
@@ -423,7 +424,7 @@ const TicketManagement: React.FC = () => {
           <Select
             label="Status"
             value={formData.status}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed' }))}
             options={[
               { value: 'open', label: 'Open' },
               { value: 'in-progress', label: 'In Progress' },

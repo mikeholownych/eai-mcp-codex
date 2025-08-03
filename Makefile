@@ -110,11 +110,11 @@ status: ## Show service status
 	@docker compose ps
 	@echo ""
 	@echo "🏥 Health Checks:"
-	@docker compose exec model-router python health_check.py --service=model-router --port=8001 2>/dev/null && echo "✅ Model Router: Healthy" || echo "❌ Model Router: Unhealthy"
-	@docker compose exec plan-management python health_check.py --service=plan-management --port=8002 2>/dev/null && echo "✅ Plan Management: Healthy" || echo "❌ Plan Management: Unhealthy"
-	@docker compose exec git-worktree-manager python health_check.py --service=git-worktree --port=8003 2>/dev/null && echo "✅ Git Worktree: Healthy" || echo "❌ Git Worktree: Unhealthy"
-	@docker compose exec workflow-orchestrator python health_check.py --service=workflow-orchestrator --port=8004 2>/dev/null && echo "✅ Workflow Orchestrator: Healthy" || echo "❌ Workflow Orchestrator: Unhealthy"
-	@docker compose exec verification-feedback python health_check.py --service=verification-feedback --port=8005 2>/dev/null && echo "✅ Verification Feedback: Healthy" || echo "❌ Verification Feedback: Unhealthy"
+	@docker exec mcp-model-router-1 curl -f http://localhost:8001/health >/dev/null 2>&1 && echo "✅ Model Router: Healthy" || echo "❌ Model Router: Unhealthy"
+	@docker exec mcp-plan-management-1 curl -f http://localhost:8002/health >/dev/null 2>&1 && echo "✅ Plan Management: Healthy" || echo "❌ Plan Management: Unhealthy"
+	@docker exec mcp-git-worktree curl -f http://localhost:8003/health >/dev/null 2>&1 && echo "✅ Git Worktree: Healthy" || echo "❌ Git Worktree: Unhealthy"
+	@docker exec mcp-workflow-orchestrator-1 curl -f http://localhost:8004/health >/dev/null 2>&1 && echo "✅ Workflow Orchestrator: Healthy" || echo "❌ Workflow Orchestrator: Unhealthy"
+	@docker exec mcp-verification-feedback-1 curl -f http://localhost:8005/health >/dev/null 2>&1 && echo "✅ Verification Feedback: Healthy" || echo "❌ Verification Feedback: Unhealthy"
 
 monitoring: ## Open monitoring dashboards
 	@echo "📊 Opening monitoring dashboards..."
