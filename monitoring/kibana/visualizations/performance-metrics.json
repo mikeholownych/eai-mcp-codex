@@ -1,0 +1,127 @@
+{
+  "_id": "PERFORMANCE_METRICS",
+  "_type": "visualization",
+  "_source": {
+    "title": "Performance Metrics",
+    "type": "line",
+    "params": {
+      "type": "line",
+      "grid": {
+        "categoryLines": false,
+        "style": {
+          "color": "rgba(255,255,255,0)"
+        }
+      },
+      "categoryAxes": [
+        {
+          "id": "CategoryAxis-1",
+          "type": "category",
+          "position": "bottom",
+          "show": true,
+          "style": {},
+          "scale": {
+            "type": "linear"
+          },
+          "labels": {
+            "show": true,
+            "truncate": 100
+          },
+          "title": {
+            "text": "@timestamp per hour"
+          }
+        }
+      ],
+      "valueAxes": [
+        {
+          "id": "ValueAxis-1",
+          "name": "LeftAxis-1",
+          "type": "value",
+          "position": "left",
+          "show": true,
+          "style": {},
+          "scale": {
+            "type": "linear",
+            "mode": "normal"
+          },
+          "labels": {
+            "show": true,
+            "rotate": 0,
+            "filter": false,
+            "truncate": 100
+          },
+          "title": {
+            "text": "Milliseconds"
+          }
+        }
+      ],
+      "seriesParams": [
+        {
+          "data": {
+            "id": "1",
+            "label": "Avg Response Time"
+          },
+          "drawLinesBetweenPoints": true,
+          "showCircles": true,
+          "interpolate": "linear",
+          "lineWidth": 2,
+          "valueAxis": "ValueAxis-1"
+        },
+        {
+          "data": {
+            "id": "2",
+            "label": "95th Percentile"
+          },
+          "drawLinesBetweenPoints": true,
+          "showCircles": true,
+          "interpolate": "linear",
+          "lineWidth": 2,
+          "valueAxis": "ValueAxis-1"
+        }
+      ],
+      "addTooltip": true,
+      "legendPosition": "right",
+      "showLegend": true,
+      "times": [],
+      "addTimeMarker": false
+    },
+    "aggs": [
+      {
+        "id": "1",
+        "enabled": true,
+        "type": "avg",
+        "schema": "metric",
+        "params": {
+          "field": "duration_ms",
+          "customLabel": "Avg Response Time"
+        }
+      },
+      {
+        "id": "2",
+        "enabled": true,
+        "type": "percentiles",
+        "schema": "metric",
+        "params": {
+          "field": "duration_ms",
+          "percents": [95],
+          "customLabel": "95th Percentile"
+        }
+      },
+      {
+        "id": "3",
+        "enabled": true,
+        "type": "date_histogram",
+        "schema": "segment",
+        "params": {
+          "field": "@timestamp",
+          "interval": "auto",
+          "time_zone": "UTC",
+          "customInterval": "1h",
+          "min_doc_count": 1,
+          "extended_bounds": {},
+          "format": "MMM D, YYYY @ HH:mm:ss"
+        }
+      }
+    ],
+    "listeners": {}
+  }
+}

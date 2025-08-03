@@ -1,0 +1,608 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "SLO Dashboard",
+    "tags": ["slo", "service-level-objectives", "error-budgets", "compliance-monitoring", "trend-analysis"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "SLO Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "slo_availability_percentage",
+            "legendFormat": "Availability %",
+            "refId": "A"
+          },
+          {
+            "expr": "slo_latency_percentage",
+            "legendFormat": "Latency %",
+            "refId": "B"
+          },
+          {
+            "expr": "slo_error_rate_percentage",
+            "legendFormat": "Error Rate %",
+            "refId": "C"
+          },
+          {
+            "expr": "slo_compliance_percentage",
+            "legendFormat": "Compliance %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 95 },
+                { "color": "green", "value": 99 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Service Level Objectives",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "slo_availability_percentage",
+            "legendFormat": "Availability % - {{service}}",
+            "refId": "A"
+          },
+          {
+            "expr": "slo_latency_percentage",
+            "legendFormat": "Latency % - {{service}}",
+            "refId": "B"
+          },
+          {
+            "expr": "slo_error_rate_percentage",
+            "legendFormat": "Error Rate % - {{service}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 95,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 90,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Budget",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "slo_error_budget_remaining_percentage",
+            "legendFormat": "Error Budget Remaining % - {{service}}",
+            "refId": "A"
+          },
+          {
+            "expr": "slo_error_budget_burn_rate",
+            "legendFormat": "Error Budget Burn Rate - {{service}}",
+            "refId": "B"
+          },
+          {
+            "expr": "slo_error_budget_time_remaining",
+            "legendFormat": "Error Budget Time Remaining - {{service}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage / Burn Rate / Time",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 20,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 5,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "SLO Compliance",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "slo_compliance_percentage",
+            "legendFormat": "Compliance %",
+            "refId": "A"
+          },
+          {
+            "expr": "slo_violations_count",
+            "legendFormat": "Violations",
+            "refId": "B"
+          },
+          {
+            "expr": "slo_violations_rate",
+            "legendFormat": "Violations Rate",
+            "refId": "C"
+          },
+          {
+            "expr": "slo_violations_duration",
+            "legendFormat": "Violations Duration",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 95 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "SLO Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "avg_over_time(slo_availability_percentage[24h])",
+            "legendFormat": "Avg Availability % (24h) - {{service}}",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(slo_latency_percentage[24h])",
+            "legendFormat": "Avg Latency % (24h) - {{service}}",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(slo_error_rate_percentage[24h])",
+            "legendFormat": "Avg Error Rate % (24h) - {{service}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 95,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 90,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "SLO Status Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "slo_compliance_percentage",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "SLO Violations",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(slo_violations_count[5m])",
+            "legendFormat": "Violations/sec - {{service}}",
+            "refId": "A"
+          },
+          {
+            "expr": "slo_violations_duration",
+            "legendFormat": "Violations Duration - {{service}}",
+            "refId": "B"
+          },
+          {
+            "expr": "slo_violations_severity",
+            "legendFormat": "Violations Severity - {{service}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Violations/sec / Duration / Severity",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 5,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "SLO Details by Service",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "slo_availability_percentage",
+            "legendFormat": "{{service}}",
+            "refId": "Availability",
+            "format": "table"
+          },
+          {
+            "expr": "slo_latency_percentage",
+            "legendFormat": "{{service}}",
+            "refId": "Latency",
+            "format": "table"
+          },
+          {
+            "expr": "slo_error_rate_percentage",
+            "legendFormat": "{{service}}",
+            "refId": "ErrorRate",
+            "format": "table"
+          },
+          {
+            "expr": "slo_error_budget_remaining_percentage",
+            "legendFormat": "{{service}}",
+            "refId": "ErrorBudget",
+            "format": "table"
+          },
+          {
+            "expr": "slo_compliance_percentage",
+            "legendFormat": "{{service}}",
+            "refId": "Compliance",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "instance": true,
+                "job": true
+              },
+              "indexByName": {
+                "service": 0,
+                "Value #Availability": 1,
+                "Value #Latency": 2,
+                "Value #ErrorRate": 3,
+                "Value #ErrorBudget": 4,
+                "Value #Compliance": 5
+              },
+              "renameByName": {
+                "service": "Service",
+                "Value #Availability": "Availability %",
+                "Value #Latency": "Latency %",
+                "Value #ErrorRate": "Error Rate %",
+                "Value #ErrorBudget": "Error Budget %",
+                "Value #Compliance": "Compliance %"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 95 },
+                      { "color": "green", "value": 99 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "SLO Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "(slo_availability_percentage * 40 + slo_latency_percentage * 30 + slo_error_rate_percentage * 20 + slo_compliance_percentage * 10) / 100",
+            "legendFormat": "SLO Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "SLO Targets vs Actual",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "slo_availability_percentage",
+            "legendFormat": "Actual Availability % - {{service}}",
+            "refId": "A"
+          },
+          {
+            "expr": "slo_availability_target_percentage",
+            "legendFormat": "Target Availability % - {{service}}",
+            "refId": "B"
+          },
+          {
+            "expr": "slo_latency_percentage",
+            "legendFormat": "Actual Latency % - {{service}}",
+            "refId": "C"
+          },
+          {
+            "expr": "slo_latency_target_percentage",
+            "legendFormat": "Target Latency % - {{service}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 95,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 90,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "SLO Compliance Monitoring",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "slo_compliance_percentage",
+            "legendFormat": "Compliance % - {{service}}",
+            "refId": "A"
+          },
+          {
+            "expr": "slo_compliance_target_percentage",
+            "legendFormat": "Compliance Target % - {{service}}",
+            "refId": "B"
+          },
+          {
+            "expr": "slo_violations_count",
+            "legendFormat": "Violations - {{service}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage / Violations",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 95,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 90,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "SLO Trend Analysis",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "avg_over_time(slo_availability_percentage[7d])",
+            "legendFormat": "Avg Availability % (7d) - {{service}}",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(slo_latency_percentage[7d])",
+            "legendFormat": "Avg Latency % (7d) - {{service}}",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(slo_error_rate_percentage[7d])",
+            "legendFormat": "Avg Error Rate % (7d) - {{service}}",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(slo_compliance_percentage[7d])",
+            "legendFormat": "Avg Compliance % (7d) - {{service}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 95,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 90,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "service",
+          "type": "query",
+          "query": "label_values(slo_availability_percentage, service)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "time_range",
+          "type": "custom",
+          "options": [
+            { "text": "1h", "value": "1h" },
+            { "text": "6h", "value": "6h" },
+            { "text": "24h", "value": "24h" },
+            { "text": "7d", "value": "7d" },
+            { "text": "30d", "value": "30d" }
+          ],
+          "current": {
+            "text": "24h",
+            "value": "24h"
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "SLO Violations",
+          "datasource": "Prometheus",
+          "expr": "slo_violations_count > 0",
+          "iconColor": "red",
+          "titleFormat": "SLO Violation: {{service}}"
+        },
+        {
+          "name": "Low Error Budget",
+          "datasource": "Prometheus",
+          "expr": "slo_error_budget_remaining_percentage < 20",
+          "iconColor": "orange",
+          "titleFormat": "Low Error Budget: {{service}}"
+        },
+        {
+          "name": "SLO Target Miss",
+          "datasource": "Prometheus",
+          "expr": "slo_availability_percentage < slo_availability_target_percentage",
+          "iconColor": "orange",
+          "titleFormat": "SLO Target Miss: {{service}}"
+        },
+        {
+          "name": "SLO Compliance Issue",
+          "datasource": "Prometheus",
+          "expr": "slo_compliance_percentage < slo_compliance_target_percentage",
+          "iconColor": "orange",
+          "titleFormat": "SLO Compliance Issue: {{service}}"
+        }
+      ]
+    }
+  }
+}

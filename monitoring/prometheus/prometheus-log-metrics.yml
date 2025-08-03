@@ -1,0 +1,50 @@
+# Prometheus Configuration for Log-Based Metrics Extraction
+# Configuration for scraping metrics from logs via Fluentd
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "log_alerting_rules.yml"
+  - "log_recording_rules.yml"
+
+scrape_configs:
+  # Scrape Fluentd metrics
+  - job_name: 'fluentd'
+    static_configs:
+      - targets: ['fluentd:24231']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Scrape log-based application metrics
+  - job_name: 'mcp-log-metrics'
+    static_configs:
+      - targets: ['fluentd:24231']
+    metrics_path: '/log-metrics'
+    scrape_interval: 30s
+    scrape_timeout: 15s
+
+  # Scrape Elasticsearch metrics
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+    metrics_path: '/_prometheus/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 15s
+
+  # Scrape Kibana metrics
+  - job_name: 'kibana'
+    static_configs:
+      - targets: ['kibana:5601']
+    metrics_path: '/api/status'
+    scrape_interval: 30s
+    scrape_timeout: 15s
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093

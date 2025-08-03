@@ -1,0 +1,695 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Workflow Orchestrator Dashboard",
+    "tags": ["workflow-orchestrator", "workflow-execution", "step-coordination", "error-recovery", "agent-handoffs"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Workflow Orchestrator Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(workflow_orchestrator_operations_total[5m]))",
+            "legendFormat": "Workflow Operations/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "workflow_orchestrator_success_rate * 100",
+            "legendFormat": "Workflow Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "workflow_orchestrator_average_duration",
+            "legendFormat": "Avg Workflow Duration",
+            "refId": "C"
+          },
+          {
+            "expr": "workflow_orchestrator_performance_score * 100",
+            "legendFormat": "Workflow Performance Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Workflow Execution",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(workflow_orchestrator_workflow_execution_events_total[5m])",
+            "legendFormat": "Execution Events/sec - {{workflow_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "workflow_orchestrator_workflow_execution_success_rate * 100",
+            "legendFormat": "Execution Success Rate % - {{workflow_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "workflow_orchestrator_workflow_execution_average_time",
+            "legendFormat": "Avg Execution Time - {{workflow_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "workflow_orchestrator_workflow_execution_efficiency_score",
+            "legendFormat": "Execution Efficiency - {{workflow_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Step Coordination",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(workflow_orchestrator_step_coordination_events_total[5m])",
+            "legendFormat": "Coordination Events/sec - {{coordination_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "workflow_orchestrator_step_coordination_success_rate * 100",
+            "legendFormat": "Coordination Success Rate % - {{coordination_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "workflow_orchestrator_step_coordination_average_time",
+            "legendFormat": "Avg Coordination Time - {{coordination_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "workflow_orchestrator_step_coordination_effectiveness_score",
+            "legendFormat": "Coordination Effectiveness - {{coordination_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Effectiveness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Error Recovery",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(workflow_orchestrator_error_recovery_events_total[5m])",
+            "legendFormat": "Recovery Events/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "workflow_orchestrator_error_recovery_success_rate * 100",
+            "legendFormat": "Recovery Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "workflow_orchestrator_error_recovery_average_time",
+            "legendFormat": "Avg Recovery Time",
+            "refId": "C"
+          },
+          {
+            "expr": "workflow_orchestrator_error_recovery_effectiveness_score",
+            "legendFormat": "Recovery Effectiveness",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Agent Handoffs",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(workflow_orchestrator_agent_handoffs_events_total[5m])",
+            "legendFormat": "Handoff Events/sec - {{handoff_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "workflow_orchestrator_agent_handoffs_success_rate * 100",
+            "legendFormat": "Handoff Success Rate % - {{handoff_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "workflow_orchestrator_agent_handoffs_average_time",
+            "legendFormat": "Avg Handoff Time - {{handoff_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "workflow_orchestrator_agent_handoffs_efficiency_score",
+            "legendFormat": "Handoff Efficiency - {{handoff_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Workflow Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(workflow_orchestrator_workflow_execution_events_total[5m])",
+            "legendFormat": "{{workflow_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Workflow Orchestrator Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "workflow_orchestrator_performance_score",
+            "legendFormat": "Performance Score - {{performance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "workflow_orchestrator_efficiency_score",
+            "legendFormat": "Efficiency Score - {{efficiency_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "workflow_orchestrator_reliability_score",
+            "legendFormat": "Reliability Score - {{reliability_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "workflow_orchestrator_scalability_score",
+            "legendFormat": "Scalability Score - {{scalability_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Workflow Orchestrator Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "rate(workflow_orchestrator_workflow_execution_events_total[5m])",
+            "legendFormat": "{{workflow_type}}",
+            "refId": "Execution",
+            "format": "table"
+          },
+          {
+            "expr": "rate(workflow_orchestrator_step_coordination_events_total[5m])",
+            "legendFormat": "{{coordination_type}}",
+            "refId": "Coordination",
+            "format": "table"
+          },
+          {
+            "expr": "workflow_orchestrator_success_rate * 100",
+            "legendFormat": "{{workflow_type}}",
+            "refId": "Success",
+            "format": "table"
+          },
+          {
+            "expr": "workflow_orchestrator_average_duration",
+            "legendFormat": "{{workflow_type}}",
+            "refId": "Duration",
+            "format": "table"
+          },
+          {
+            "expr": "workflow_orchestrator_performance_score",
+            "legendFormat": "{{performance_type}}",
+            "refId": "Performance",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "workflow_type": 0,
+                "coordination_type": 1,
+                "performance_type": 2,
+                "Value #Execution": 3,
+                "Value #Coordination": 4,
+                "Value #Success": 5,
+                "Value #Duration": 6,
+                "Value #Performance": 7
+              },
+              "renameByName": {
+                "workflow_type": "Workflow Type",
+                "coordination_type": "Coordination Type",
+                "performance_type": "Performance Type",
+                "Value #Execution": "Execution Events/sec",
+                "Value #Coordination": "Coordination Events/sec",
+                "Value #Success": "Success Rate %",
+                "Value #Duration": "Avg Duration",
+                "Value #Performance": "Performance Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Success Rate %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Performance Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Workflow Orchestrator Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - workflow_orchestrator_success_rate) * 100 * 30) - (workflow_orchestrator_average_duration * 20) - ((1 - workflow_orchestrator_workflow_execution_success_rate) * 100 * 25) - ((1 - workflow_orchestrator_step_coordination_success_rate) * 100 * 25))",
+            "legendFormat": "Workflow Orchestrator Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Workflow Orchestrator Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(sum(rate(workflow_orchestrator_operations_total[5m]))[24h])",
+            "legendFormat": "Avg Operations/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(workflow_orchestrator_success_rate * 100[24h])",
+            "legendFormat": "Avg Success Rate % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(workflow_orchestrator_average_duration[24h])",
+            "legendFormat": "Avg Duration (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(workflow_orchestrator_performance_score * 100[24h])",
+            "legendFormat": "Avg Performance Score % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations/sec / Success Rate % / Duration / Performance %",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Workflow Scheduling",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(workflow_orchestrator_workflow_scheduling_events_total[5m])",
+            "legendFormat": "Scheduling Events/sec - {{scheduling_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "workflow_orchestrator_workflow_scheduling_success_rate * 100",
+            "legendFormat": "Scheduling Success Rate % - {{scheduling_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "workflow_orchestrator_workflow_scheduling_average_time",
+            "legendFormat": "Avg Scheduling Time - {{scheduling_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "workflow_orchestrator_workflow_scheduling_efficiency_score",
+            "legendFormat": "Scheduling Efficiency - {{scheduling_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Workflow Optimization",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(workflow_orchestrator_optimization_events_total[5m])",
+            "legendFormat": "Optimization Events/sec - {{optimization_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "workflow_orchestrator_optimization_success_rate * 100",
+            "legendFormat": "Optimization Success Rate % - {{optimization_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "workflow_orchestrator_optimization_improvement_score",
+            "legendFormat": "Optimization Improvement - {{optimization_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "workflow_orchestrator_optimization_efficiency_score",
+            "legendFormat": "Optimization Efficiency - {{optimization_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Improvement Score / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "workflow_type",
+          "type": "query",
+          "query": "label_values(workflow_orchestrator_workflow_execution_events_total, workflow_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "coordination_type",
+          "type": "query",
+          "query": "label_values(workflow_orchestrator_step_coordination_events_total, coordination_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "handoff_type",
+          "type": "query",
+          "query": "label_values(workflow_orchestrator_agent_handoffs_events_total, handoff_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "performance_type",
+          "type": "query",
+          "query": "label_values(workflow_orchestrator_performance_score, performance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "efficiency_type",
+          "type": "query",
+          "query": "label_values(workflow_orchestrator_efficiency_score, efficiency_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "reliability_type",
+          "type": "query",
+          "query": "label_values(workflow_orchestrator_reliability_score, reliability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "scalability_type",
+          "type": "query",
+          "query": "label_values(workflow_orchestrator_scalability_score, scalability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "scheduling_type",
+          "type": "query",
+          "query": "label_values(workflow_orchestrator_workflow_scheduling_events_total, scheduling_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "optimization_type",
+          "type": "query",
+          "query": "label_values(workflow_orchestrator_optimization_events_total, optimization_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Workflow Orchestrator Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Workflow.*Orchestrator.*|.*Workflow.*Execution.*|.*Step.*Coordination.*|.*Error.*Recovery.*|.*Agent.*Handoffs.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Workflow Orchestrator Alert: {{alertname}}"
+        },
+        {
+          "name": "Low Workflow Success Rate",
+          "datasource": "Prometheus",
+          "expr": "workflow_orchestrator_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Workflow Success Rate: {{workflow_type}}"
+        },
+        {
+          "name": "Low Execution Success Rate",
+          "datasource": "Prometheus",
+          "expr": "workflow_orchestrator_workflow_execution_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Execution Success Rate: {{workflow_type}}"
+        },
+        {
+          "name": "Low Coordination Success Rate",
+          "datasource": "Prometheus",
+          "expr": "workflow_orchestrator_step_coordination_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Coordination Success Rate: {{coordination_type}}"
+        },
+        {
+          "name": "Low Handoff Success Rate",
+          "datasource": "Prometheus",
+          "expr": "workflow_orchestrator_agent_handoffs_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Handoff Success Rate: {{handoff_type}}"
+        }
+      ]
+    }
+  }
+}

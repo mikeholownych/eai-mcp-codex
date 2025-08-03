@@ -1,0 +1,671 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "AI Agent Dashboard",
+    "tags": ["ai-agent", "agent-performance", "collaboration-metrics", "consensus-building", "handoff-efficiency"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "AI Agent Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(ai_agent_operations_total[5m]))",
+            "legendFormat": "Agent Operations/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_agent_success_rate * 100",
+            "legendFormat": "Agent Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_agent_average_duration",
+            "legendFormat": "Avg Agent Duration",
+            "refId": "C"
+          },
+          {
+            "expr": "ai_agent_performance_score * 100",
+            "legendFormat": "Agent Performance Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Agent Performance",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(ai_agent_operations_total[5m])",
+            "legendFormat": "Operations/sec - {{agent_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_agent_success_rate * 100",
+            "legendFormat": "Success Rate % - {{agent_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_agent_average_duration",
+            "legendFormat": "Avg Duration - {{agent_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "ai_agent_efficiency_score",
+            "legendFormat": "Efficiency Score - {{agent_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations/sec / Success Rate % / Duration / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Collaboration Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(ai_agent_collaboration_events_total[5m])",
+            "legendFormat": "Collaboration Events/sec - {{collaboration_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_agent_collaboration_success_rate * 100",
+            "legendFormat": "Collaboration Success Rate % - {{collaboration_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_agent_collaboration_average_time",
+            "legendFormat": "Avg Collaboration Time - {{collaboration_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "ai_agent_collaboration_effectiveness_score",
+            "legendFormat": "Collaboration Effectiveness - {{collaboration_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Effectiveness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Consensus Building",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(ai_agent_consensus_events_total[5m])",
+            "legendFormat": "Consensus Events/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_agent_consensus_success_rate * 100",
+            "legendFormat": "Consensus Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_agent_consensus_average_time",
+            "legendFormat": "Avg Consensus Time",
+            "refId": "C"
+          },
+          {
+            "expr": "ai_agent_consensus_effectiveness_score",
+            "legendFormat": "Consensus Effectiveness",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Handoff Efficiency",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(ai_agent_handoff_events_total[5m])",
+            "legendFormat": "Handoff Events/sec - {{handoff_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_agent_handoff_success_rate * 100",
+            "legendFormat": "Handoff Success Rate % - {{handoff_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_agent_handoff_average_time",
+            "legendFormat": "Avg Handoff Time - {{handoff_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "ai_agent_handoff_efficiency_score",
+            "legendFormat": "Handoff Efficiency - {{handoff_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Agent Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(ai_agent_operations_total[5m])",
+            "legendFormat": "{{agent_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "AI Agent Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "ai_agent_performance_score",
+            "legendFormat": "Performance Score - {{performance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_agent_efficiency_score",
+            "legendFormat": "Efficiency Score - {{performance_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_agent_reliability_score",
+            "legendFormat": "Reliability Score - {{performance_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "ai_agent_scalability_score",
+            "legendFormat": "Scalability Score - {{performance_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "AI Agent Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "rate(ai_agent_operations_total[5m])",
+            "legendFormat": "{{agent_type}}",
+            "refId": "Operations",
+            "format": "table"
+          },
+          {
+            "expr": "rate(ai_agent_collaboration_events_total[5m])",
+            "legendFormat": "{{collaboration_type}}",
+            "refId": "Collaboration",
+            "format": "table"
+          },
+          {
+            "expr": "ai_agent_success_rate * 100",
+            "legendFormat": "{{agent_type}}",
+            "refId": "Success",
+            "format": "table"
+          },
+          {
+            "expr": "ai_agent_average_duration",
+            "legendFormat": "{{agent_type}}",
+            "refId": "Duration",
+            "format": "table"
+          },
+          {
+            "expr": "ai_agent_performance_score",
+            "legendFormat": "{{performance_type}}",
+            "refId": "Performance",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "agent_type": 0,
+                "collaboration_type": 1,
+                "performance_type": 2,
+                "Value #Operations": 3,
+                "Value #Collaboration": 4,
+                "Value #Success": 5,
+                "Value #Duration": 6,
+                "Value #Performance": 7
+              },
+              "renameByName": {
+                "agent_type": "Agent Type",
+                "collaboration_type": "Collaboration Type",
+                "performance_type": "Performance Type",
+                "Value #Operations": "Operations/sec",
+                "Value #Collaboration": "Collaboration Events/sec",
+                "Value #Success": "Success Rate %",
+                "Value #Duration": "Avg Duration",
+                "Value #Performance": "Performance Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Success Rate %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Performance Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "AI Agent Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - ai_agent_success_rate) * 100 * 30) - (ai_agent_average_duration * 20) - ((1 - ai_agent_collaboration_success_rate) * 100 * 25) - ((1 - ai_agent_consensus_success_rate) * 100 * 25))",
+            "legendFormat": "AI Agent Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "AI Agent Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(sum(rate(ai_agent_operations_total[5m]))[24h])",
+            "legendFormat": "Avg Operations/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(ai_agent_success_rate * 100[24h])",
+            "legendFormat": "Avg Success Rate % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(ai_agent_average_duration[24h])",
+            "legendFormat": "Avg Duration (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(ai_agent_performance_score * 100[24h])",
+            "legendFormat": "Avg Performance Score % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations/sec / Success Rate % / Duration / Performance %",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Agent Communication",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(ai_agent_communication_events_total[5m])",
+            "legendFormat": "Communication Events/sec - {{communication_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_agent_communication_success_rate * 100",
+            "legendFormat": "Communication Success Rate % - {{communication_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_agent_communication_average_time",
+            "legendFormat": "Avg Communication Time - {{communication_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "ai_agent_communication_effectiveness_score",
+            "legendFormat": "Communication Effectiveness - {{communication_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Effectiveness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Agent Learning",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(ai_agent_learning_events_total[5m])",
+            "legendFormat": "Learning Events/sec - {{learning_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "ai_agent_learning_success_rate * 100",
+            "legendFormat": "Learning Success Rate % - {{learning_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "ai_agent_learning_improvement_score",
+            "legendFormat": "Learning Improvement - {{learning_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "ai_agent_learning_efficiency_score",
+            "legendFormat": "Learning Efficiency - {{learning_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Improvement Score / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "agent_type",
+          "type": "query",
+          "query": "label_values(ai_agent_operations_total, agent_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "collaboration_type",
+          "type": "query",
+          "query": "label_values(ai_agent_collaboration_events_total, collaboration_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "handoff_type",
+          "type": "query",
+          "query": "label_values(ai_agent_handoff_events_total, handoff_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "performance_type",
+          "type": "query",
+          "query": "label_values(ai_agent_performance_score, performance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "communication_type",
+          "type": "query",
+          "query": "label_values(ai_agent_communication_events_total, communication_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "learning_type",
+          "type": "query",
+          "query": "label_values(ai_agent_learning_events_total, learning_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "AI Agent Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*AI.*Agent.*|.*Agent.*Performance.*|.*Collaboration.*Metrics.*|.*Consensus.*Building.*|.*Handoff.*Efficiency.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "AI Agent Alert: {{alertname}}"
+        },
+        {
+          "name": "Low Agent Success Rate",
+          "datasource": "Prometheus",
+          "expr": "ai_agent_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Agent Success Rate: {{agent_type}}"
+        },
+        {
+          "name": "Low Collaboration Success Rate",
+          "datasource": "Prometheus",
+          "expr": "ai_agent_collaboration_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Collaboration Success Rate: {{collaboration_type}}"
+        },
+        {
+          "name": "Low Consensus Success Rate",
+          "datasource": "Prometheus",
+          "expr": "ai_agent_consensus_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Consensus Success Rate"
+        },
+        {
+          "name": "Low Handoff Success Rate",
+          "datasource": "Prometheus",
+          "expr": "ai_agent_handoff_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Handoff Success Rate: {{handoff_type}}"
+        }
+      ]
+    }
+  }
+}

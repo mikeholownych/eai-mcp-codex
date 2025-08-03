@@ -1,0 +1,1038 @@
+# Error Budget Monitoring and Burn Rate Alerts
+# Comprehensive error budget tracking and burn rate alerting for all services
+
+groups:
+  - name: error_budget_calculations
+    rules:
+      # Error Budget Calculations for MCP Services
+      - record: error_budget:mcp_services_availability_remaining_percentage
+        expr: |
+          (
+            (100 - slo:mcp_services_availability_percentage) /
+            (100 - 99.9)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "mcp-services"
+          target: "99.9"
+          
+      - record: error_budget:mcp_services_latency_remaining_percentage
+        expr: |
+          (
+            (100 - slo:mcp_services_latency_percentage) /
+            (100 - 95)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "mcp-services"
+          target: "95"
+          
+      - record: error_budget:mcp_services_error_rate_remaining_percentage
+        expr: |
+          (
+            (100 - slo:mcp_services_error_rate_percentage) /
+            (100 - 1)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "mcp-services"
+          target: "1"
+          
+      - record: error_budget:mcp_services_burn_rate_1h
+        expr: |
+          (
+            rate(slo:mcp_services_error_rate_percentage[1h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "mcp-services"
+          window: "1h"
+          
+      - record: error_budget:mcp_services_burn_rate_6h
+        expr: |
+          (
+            rate(slo:mcp_services_error_rate_percentage[6h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "mcp-services"
+          window: "6h"
+          
+      - record: error_budget:mcp_services_burn_rate_24h
+        expr: |
+          (
+            rate(slo:mcp_services_error_rate_percentage[24h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "mcp-services"
+          window: "24h"
+          
+      # Error Budget Calculations for Model Router
+      - record: error_budget:model_router_availability_remaining_percentage
+        expr: |
+          (
+            (100 - slo:model_router_availability_percentage) /
+            (100 - 99.9)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "model-router"
+          target: "99.9"
+          
+      - record: error_budget:model_router_latency_remaining_percentage
+        expr: |
+          (
+            (100 - slo:model_router_latency_percentage) /
+            (100 - 95)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "model-router"
+          target: "95"
+          
+      - record: error_budget:model_router_error_rate_remaining_percentage
+        expr: |
+          (
+            (100 - slo:model_router_error_rate_percentage) /
+            (100 - 1)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "model-router"
+          target: "1"
+          
+      - record: error_budget:model_router_burn_rate_1h
+        expr: |
+          (
+            rate(slo:model_router_error_rate_percentage[1h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "model-router"
+          window: "1h"
+          
+      - record: error_budget:model_router_burn_rate_6h
+        expr: |
+          (
+            rate(slo:model_router_error_rate_percentage[6h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "model-router"
+          window: "6h"
+          
+      - record: error_budget:model_router_burn_rate_24h
+        expr: |
+          (
+            rate(slo:model_router_error_rate_percentage[24h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "model-router"
+          window: "24h"
+          
+      # Error Budget Calculations for Plan Management
+      - record: error_budget:plan_management_availability_remaining_percentage
+        expr: |
+          (
+            (100 - slo:plan_management_availability_percentage) /
+            (100 - 99.9)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "plan-management"
+          target: "99.9"
+          
+      - record: error_budget:plan_management_latency_remaining_percentage
+        expr: |
+          (
+            (100 - slo:plan_management_latency_percentage) /
+            (100 - 95)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "plan-management"
+          target: "95"
+          
+      - record: error_budget:plan_management_error_rate_remaining_percentage
+        expr: |
+          (
+            (100 - slo:plan_management_error_rate_percentage) /
+            (100 - 1)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "plan-management"
+          target: "1"
+          
+      - record: error_budget:plan_management_burn_rate_1h
+        expr: |
+          (
+            rate(slo:plan_management_error_rate_percentage[1h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "plan-management"
+          window: "1h"
+          
+      - record: error_budget:plan_management_burn_rate_6h
+        expr: |
+          (
+            rate(slo:plan_management_error_rate_percentage[6h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "plan-management"
+          window: "6h"
+          
+      - record: error_budget:plan_management_burn_rate_24h
+        expr: |
+          (
+            rate(slo:plan_management_error_rate_percentage[24h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "plan-management"
+          window: "24h"
+          
+      # Error Budget Calculations for Git Worktree Manager
+      - record: error_budget:git_worktree_availability_remaining_percentage
+        expr: |
+          (
+            (100 - slo:git_worktree_availability_percentage) /
+            (100 - 99.9)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "git-worktree-manager"
+          target: "99.9"
+          
+      - record: error_budget:git_worktree_latency_remaining_percentage
+        expr: |
+          (
+            (100 - slo:git_worktree_latency_percentage) /
+            (100 - 95)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "git-worktree-manager"
+          target: "95"
+          
+      - record: error_budget:git_worktree_error_rate_remaining_percentage
+        expr: |
+          (
+            (100 - slo:git_worktree_error_rate_percentage) /
+            (100 - 1)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "git-worktree-manager"
+          target: "1"
+          
+      - record: error_budget:git_worktree_burn_rate_1h
+        expr: |
+          (
+            rate(slo:git_worktree_error_rate_percentage[1h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "git-worktree-manager"
+          window: "1h"
+          
+      - record: error_budget:git_worktree_burn_rate_6h
+        expr: |
+          (
+            rate(slo:git_worktree_error_rate_percentage[6h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "git-worktree-manager"
+          window: "6h"
+          
+      - record: error_budget:git_worktree_burn_rate_24h
+        expr: |
+          (
+            rate(slo:git_worktree_error_rate_percentage[24h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "git-worktree-manager"
+          window: "24h"
+          
+      # Error Budget Calculations for Workflow Orchestrator
+      - record: error_budget:workflow_orchestrator_availability_remaining_percentage
+        expr: |
+          (
+            (100 - slo:workflow_orchestrator_availability_percentage) /
+            (100 - 99.9)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "workflow-orchestrator"
+          target: "99.9"
+          
+      - record: error_budget:workflow_orchestrator_latency_remaining_percentage
+        expr: |
+          (
+            (100 - slo:workflow_orchestrator_latency_percentage) /
+            (100 - 95)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "workflow-orchestrator"
+          target: "95"
+          
+      - record: error_budget:workflow_orchestrator_error_rate_remaining_percentage
+        expr: |
+          (
+            (100 - slo:workflow_orchestrator_error_rate_percentage) /
+            (100 - 1)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "workflow-orchestrator"
+          target: "1"
+          
+      - record: error_budget:workflow_orchestrator_burn_rate_1h
+        expr: |
+          (
+            rate(slo:workflow_orchestrator_error_rate_percentage[1h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "workflow-orchestrator"
+          window: "1h"
+          
+      - record: error_budget:workflow_orchestrator_burn_rate_6h
+        expr: |
+          (
+            rate(slo:workflow_orchestrator_error_rate_percentage[6h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "workflow-orchestrator"
+          window: "6h"
+          
+      - record: error_budget:workflow_orchestrator_burn_rate_24h
+        expr: |
+          (
+            rate(slo:workflow_orchestrator_error_rate_percentage[24h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "workflow-orchestrator"
+          window: "24h"
+          
+      # Error Budget Calculations for Verification Feedback
+      - record: error_budget:verification_feedback_availability_remaining_percentage
+        expr: |
+          (
+            (100 - slo:verification_feedback_availability_percentage) /
+            (100 - 99.9)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "verification-feedback"
+          target: "99.9"
+          
+      - record: error_budget:verification_feedback_latency_remaining_percentage
+        expr: |
+          (
+            (100 - slo:verification_feedback_latency_percentage) /
+            (100 - 95)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "verification-feedback"
+          target: "95"
+          
+      - record: error_budget:verification_feedback_error_rate_remaining_percentage
+        expr: |
+          (
+            (100 - slo:verification_feedback_error_rate_percentage) /
+            (100 - 1)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "verification-feedback"
+          target: "1"
+          
+      - record: error_budget:verification_feedback_burn_rate_1h
+        expr: |
+          (
+            rate(slo:verification_feedback_error_rate_percentage[1h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "verification-feedback"
+          window: "1h"
+          
+      - record: error_budget:verification_feedback_burn_rate_6h
+        expr: |
+          (
+            rate(slo:verification_feedback_error_rate_percentage[6h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "verification-feedback"
+          window: "6h"
+          
+      - record: error_budget:verification_feedback_burn_rate_24h
+        expr: |
+          (
+            rate(slo:verification_feedback_error_rate_percentage[24h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "verification-feedback"
+          window: "24h"
+          
+      # Error Budget Calculations for Frontend
+      - record: error_budget:frontend_availability_remaining_percentage
+        expr: |
+          (
+            (100 - slo:frontend_availability_percentage) /
+            (100 - 99.9)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "frontend"
+          target: "99.9"
+          
+      - record: error_budget:frontend_latency_remaining_percentage
+        expr: |
+          (
+            (100 - slo:frontend_latency_percentage) /
+            (100 - 95)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "frontend"
+          target: "95"
+          
+      - record: error_budget:frontend_error_rate_remaining_percentage
+        expr: |
+          (
+            (100 - slo:frontend_error_rate_percentage) /
+            (100 - 1)
+          ) * 100
+        labels:
+          slo: "error_budget_remaining"
+          service: "frontend"
+          target: "1"
+          
+      - record: error_budget:frontend_burn_rate_1h
+        expr: |
+          (
+            rate(slo:frontend_error_rate_percentage[1h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "frontend"
+          window: "1h"
+          
+      - record: error_budget:frontend_burn_rate_6h
+        expr: |
+          (
+            rate(slo:frontend_error_rate_percentage[6h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "frontend"
+          window: "6h"
+          
+      - record: error_budget:frontend_burn_rate_24h
+        expr: |
+          (
+            rate(slo:frontend_error_rate_percentage[24h]) /
+            (1 / (30 * 24 * 60))
+          )
+        labels:
+          slo: "burn_rate"
+          service: "frontend"
+          window: "24h"
+
+  - name: error_budget_alerts
+    rules:
+      # Error Budget Alerts for MCP Services
+      - alert: MCPServicesErrorBudgetExhausted
+        expr: error_budget:mcp_services_availability_remaining_percentage < 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "mcp-services"
+          category: "error_budget"
+        annotations:
+          summary: "MCP Services error budget exhausted"
+          description: "MCP Services error budget is exhausted: {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-error-budget-exhausted"
+          
+      - alert: MCPServicesErrorBudgetCritical
+        expr: error_budget:mcp_services_availability_remaining_percentage < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: "mcp-services"
+          category: "error_budget"
+        annotations:
+          summary: "MCP Services error budget critical"
+          description: "MCP Services error budget is critical: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-error-budget-critical"
+          
+      - alert: MCPServicesErrorBudgetWarning
+        expr: error_budget:mcp_services_availability_remaining_percentage < 25
+        for: 10m
+        labels:
+          severity: warning
+          service: "mcp-services"
+          category: "error_budget"
+        annotations:
+          summary: "MCP Services error budget warning"
+          description: "MCP Services error budget is low: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-error-budget-warning"
+          
+      - alert: MCPServicesFastBurnRate
+        expr: error_budget:mcp_services_burn_rate_1h > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "mcp-services"
+          category: "error_budget"
+        annotations:
+          summary: "MCP Services fast burn rate detected"
+          description: "MCP Services error budget burn rate (1h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-fast-burn-rate"
+          
+      - alert: MCPServicesHighBurnRate
+        expr: error_budget:mcp_services_burn_rate_6h > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: "mcp-services"
+          category: "error_budget"
+        annotations:
+          summary: "MCP Services high burn rate detected"
+          description: "MCP Services error budget burn rate (6h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-high-burn-rate"
+          
+      - alert: MCPServicesSustainedBurnRate
+        expr: error_budget:mcp_services_burn_rate_24h > 1.2
+        for: 30m
+        labels:
+          severity: warning
+          service: "mcp-services"
+          category: "error_budget"
+        annotations:
+          summary: "MCP Services sustained burn rate detected"
+          description: "MCP Services error budget burn rate (24h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-sustained-burn-rate"
+      
+      # Error Budget Alerts for Model Router
+      - alert: ModelRouterErrorBudgetExhausted
+        expr: error_budget:model_router_availability_remaining_percentage < 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "model-router"
+          category: "error_budget"
+        annotations:
+          summary: "Model Router error budget exhausted"
+          description: "Model Router error budget is exhausted: {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/model-router-error-budget-exhausted"
+          
+      - alert: ModelRouterErrorBudgetCritical
+        expr: error_budget:model_router_availability_remaining_percentage < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: "model-router"
+          category: "error_budget"
+        annotations:
+          summary: "Model Router error budget critical"
+          description: "Model Router error budget is critical: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/model-router-error-budget-critical"
+          
+      - alert: ModelRouterErrorBudgetWarning
+        expr: error_budget:model_router_availability_remaining_percentage < 25
+        for: 10m
+        labels:
+          severity: warning
+          service: "model-router"
+          category: "error_budget"
+        annotations:
+          summary: "Model Router error budget warning"
+          description: "Model Router error budget is low: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/model-router-error-budget-warning"
+          
+      - alert: ModelRouterFastBurnRate
+        expr: error_budget:model_router_burn_rate_1h > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "model-router"
+          category: "error_budget"
+        annotations:
+          summary: "Model Router fast burn rate detected"
+          description: "Model Router error budget burn rate (1h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/model-router-fast-burn-rate"
+          
+      - alert: ModelRouterHighBurnRate
+        expr: error_budget:model_router_burn_rate_6h > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: "model-router"
+          category: "error_budget"
+        annotations:
+          summary: "Model Router high burn rate detected"
+          description: "Model Router error budget burn rate (6h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/model-router-high-burn-rate"
+          
+      - alert: ModelRouterSustainedBurnRate
+        expr: error_budget:model_router_burn_rate_24h > 1.2
+        for: 30m
+        labels:
+          severity: warning
+          service: "model-router"
+          category: "error_budget"
+        annotations:
+          summary: "Model Router sustained burn rate detected"
+          description: "Model Router error budget burn rate (24h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/model-router-sustained-burn-rate"
+      
+      # Error Budget Alerts for Plan Management
+      - alert: PlanManagementErrorBudgetExhausted
+        expr: error_budget:plan_management_availability_remaining_percentage < 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "plan-management"
+          category: "error_budget"
+        annotations:
+          summary: "Plan Management error budget exhausted"
+          description: "Plan Management error budget is exhausted: {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-error-budget-exhausted"
+          
+      - alert: PlanManagementErrorBudgetCritical
+        expr: error_budget:plan_management_availability_remaining_percentage < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: "plan-management"
+          category: "error_budget"
+        annotations:
+          summary: "Plan Management error budget critical"
+          description: "Plan Management error budget is critical: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-error-budget-critical"
+          
+      - alert: PlanManagementErrorBudgetWarning
+        expr: error_budget:plan_management_availability_remaining_percentage < 25
+        for: 10m
+        labels:
+          severity: warning
+          service: "plan-management"
+          category: "error_budget"
+        annotations:
+          summary: "Plan Management error budget warning"
+          description: "Plan Management error budget is low: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-error-budget-warning"
+          
+      - alert: PlanManagementFastBurnRate
+        expr: error_budget:plan_management_burn_rate_1h > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "plan-management"
+          category: "error_budget"
+        annotations:
+          summary: "Plan Management fast burn rate detected"
+          description: "Plan Management error budget burn rate (1h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-fast-burn-rate"
+          
+      - alert: PlanManagementHighBurnRate
+        expr: error_budget:plan_management_burn_rate_6h > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: "plan-management"
+          category: "error_budget"
+        annotations:
+          summary: "Plan Management high burn rate detected"
+          description: "Plan Management error budget burn rate (6h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-high-burn-rate"
+          
+      - alert: PlanManagementSustainedBurnRate
+        expr: error_budget:plan_management_burn_rate_24h > 1.2
+        for: 30m
+        labels:
+          severity: warning
+          service: "plan-management"
+          category: "error_budget"
+        annotations:
+          summary: "Plan Management sustained burn rate detected"
+          description: "Plan Management error budget burn rate (24h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-sustained-burn-rate"
+      
+      # Error Budget Alerts for Git Worktree Manager
+      - alert: GitWorktreeErrorBudgetExhausted
+        expr: error_budget:git_worktree_availability_remaining_percentage < 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "git-worktree-manager"
+          category: "error_budget"
+        annotations:
+          summary: "Git Worktree Manager error budget exhausted"
+          description: "Git Worktree Manager error budget is exhausted: {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-error-budget-exhausted"
+          
+      - alert: GitWorktreeErrorBudgetCritical
+        expr: error_budget:git_worktree_availability_remaining_percentage < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: "git-worktree-manager"
+          category: "error_budget"
+        annotations:
+          summary: "Git Worktree Manager error budget critical"
+          description: "Git Worktree Manager error budget is critical: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-error-budget-critical"
+          
+      - alert: GitWorktreeErrorBudgetWarning
+        expr: error_budget:git_worktree_availability_remaining_percentage < 25
+        for: 10m
+        labels:
+          severity: warning
+          service: "git-worktree-manager"
+          category: "error_budget"
+        annotations:
+          summary: "Git Worktree Manager error budget warning"
+          description: "Git Worktree Manager error budget is low: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-error-budget-warning"
+          
+      - alert: GitWorktreeFastBurnRate
+        expr: error_budget:git_worktree_burn_rate_1h > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "git-worktree-manager"
+          category: "error_budget"
+        annotations:
+          summary: "Git Worktree Manager fast burn rate detected"
+          description: "Git Worktree Manager error budget burn rate (1h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-fast-burn-rate"
+          
+      - alert: GitWorktreeHighBurnRate
+        expr: error_budget:git_worktree_burn_rate_6h > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: "git-worktree-manager"
+          category: "error_budget"
+        annotations:
+          summary: "Git Worktree Manager high burn rate detected"
+          description: "Git Worktree Manager error budget burn rate (6h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-high-burn-rate"
+          
+      - alert: GitWorktreeSustainedBurnRate
+        expr: error_budget:git_worktree_burn_rate_24h > 1.2
+        for: 30m
+        labels:
+          severity: warning
+          service: "git-worktree-manager"
+          category: "error_budget"
+        annotations:
+          summary: "Git Worktree Manager sustained burn rate detected"
+          description: "Git Worktree Manager error budget burn rate (24h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-sustained-burn-rate"
+      
+      # Error Budget Alerts for Workflow Orchestrator
+      - alert: WorkflowOrchestratorErrorBudgetExhausted
+        expr: error_budget:workflow_orchestrator_availability_remaining_percentage < 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "workflow-orchestrator"
+          category: "error_budget"
+        annotations:
+          summary: "Workflow Orchestrator error budget exhausted"
+          description: "Workflow Orchestrator error budget is exhausted: {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-error-budget-exhausted"
+          
+      - alert: WorkflowOrchestratorErrorBudgetCritical
+        expr: error_budget:workflow_orchestrator_availability_remaining_percentage < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: "workflow-orchestrator"
+          category: "error_budget"
+        annotations:
+          summary: "Workflow Orchestrator error budget critical"
+          description: "Workflow Orchestrator error budget is critical: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-error-budget-critical"
+          
+      - alert: WorkflowOrchestratorErrorBudgetWarning
+        expr: error_budget:workflow_orchestrator_availability_remaining_percentage < 25
+        for: 10m
+        labels:
+          severity: warning
+          service: "workflow-orchestrator"
+          category: "error_budget"
+        annotations:
+          summary: "Workflow Orchestrator error budget warning"
+          description: "Workflow Orchestrator error budget is low: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-error-budget-warning"
+          
+      - alert: WorkflowOrchestratorFastBurnRate
+        expr: error_budget:workflow_orchestrator_burn_rate_1h > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "workflow-orchestrator"
+          category: "error_budget"
+        annotations:
+          summary: "Workflow Orchestrator fast burn rate detected"
+          description: "Workflow Orchestrator error budget burn rate (1h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-fast-burn-rate"
+          
+      - alert: WorkflowOrchestratorHighBurnRate
+        expr: error_budget:workflow_orchestrator_burn_rate_6h > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: "workflow-orchestrator"
+          category: "error_budget"
+        annotations:
+          summary: "Workflow Orchestrator high burn rate detected"
+          description: "Workflow Orchestrator error budget burn rate (6h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-high-burn-rate"
+          
+      - alert: WorkflowOrchestratorSustainedBurnRate
+        expr: error_budget:workflow_orchestrator_burn_rate_24h > 1.2
+        for: 30m
+        labels:
+          severity: warning
+          service: "workflow-orchestrator"
+          category: "error_budget"
+        annotations:
+          summary: "Workflow Orchestrator sustained burn rate detected"
+          description: "Workflow Orchestrator error budget burn rate (24h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-sustained-burn-rate"
+      
+      # Error Budget Alerts for Verification Feedback
+      - alert: VerificationFeedbackErrorBudgetExhausted
+        expr: error_budget:verification_feedback_availability_remaining_percentage < 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "verification-feedback"
+          category: "error_budget"
+        annotations:
+          summary: "Verification Feedback error budget exhausted"
+          description: "Verification Feedback error budget is exhausted: {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-error-budget-exhausted"
+          
+      - alert: VerificationFeedbackErrorBudgetCritical
+        expr: error_budget:verification_feedback_availability_remaining_percentage < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: "verification-feedback"
+          category: "error_budget"
+        annotations:
+          summary: "Verification Feedback error budget critical"
+          description: "Verification Feedback error budget is critical: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-error-budget-critical"
+          
+      - alert: VerificationFeedbackErrorBudgetWarning
+        expr: error_budget:verification_feedback_availability_remaining_percentage < 25
+        for: 10m
+        labels:
+          severity: warning
+          service: "verification-feedback"
+          category: "error_budget"
+        annotations:
+          summary: "Verification Feedback error budget warning"
+          description: "Verification Feedback error budget is low: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-error-budget-warning"
+          
+      - alert: VerificationFeedbackFastBurnRate
+        expr: error_budget:verification_feedback_burn_rate_1h > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "verification-feedback"
+          category: "error_budget"
+        annotations:
+          summary: "Verification Feedback fast burn rate detected"
+          description: "Verification Feedback error budget burn rate (1h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-fast-burn-rate"
+          
+      - alert: VerificationFeedbackHighBurnRate
+        expr: error_budget:verification_feedback_burn_rate_6h > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: "verification-feedback"
+          category: "error_budget"
+        annotations:
+          summary: "Verification Feedback high burn rate detected"
+          description: "Verification Feedback error budget burn rate (6h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-high-burn-rate"
+          
+      - alert: VerificationFeedbackSustainedBurnRate
+        expr: error_budget:verification_feedback_burn_rate_24h > 1.2
+        for: 30m
+        labels:
+          severity: warning
+          service: "verification-feedback"
+          category: "error_budget"
+        annotations:
+          summary: "Verification Feedback sustained burn rate detected"
+          description: "Verification Feedback error budget burn rate (24h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-sustained-burn-rate"
+      
+      # Error Budget Alerts for Frontend
+      - alert: FrontendErrorBudgetExhausted
+        expr: error_budget:frontend_availability_remaining_percentage < 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "frontend"
+          category: "error_budget"
+        annotations:
+          summary: "Frontend error budget exhausted"
+          description: "Frontend error budget is exhausted: {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/frontend-error-budget-exhausted"
+          
+      - alert: FrontendErrorBudgetCritical
+        expr: error_budget:frontend_availability_remaining_percentage < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: "frontend"
+          category: "error_budget"
+        annotations:
+          summary: "Frontend error budget critical"
+          description: "Frontend error budget is critical: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/frontend-error-budget-critical"
+          
+      - alert: FrontendErrorBudgetWarning
+        expr: error_budget:frontend_availability_remaining_percentage < 25
+        for: 10m
+        labels:
+          severity: warning
+          service: "frontend"
+          category: "error_budget"
+        annotations:
+          summary: "Frontend error budget warning"
+          description: "Frontend error budget is low: {{ $value }}% remaining"
+          runbook_url: "https://docs.example.com/runbooks/frontend-error-budget-warning"
+          
+      - alert: FrontendFastBurnRate
+        expr: error_budget:frontend_burn_rate_1h > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "frontend"
+          category: "error_budget"
+        annotations:
+          summary: "Frontend fast burn rate detected"
+          description: "Frontend error budget burn rate (1h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/frontend-fast-burn-rate"
+          
+      - alert: FrontendHighBurnRate
+        expr: error_budget:frontend_burn_rate_6h > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: "frontend"
+          category: "error_budget"
+        annotations:
+          summary: "Frontend high burn rate detected"
+          description: "Frontend error budget burn rate (6h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/frontend-high-burn-rate"
+          
+      - alert: FrontendSustainedBurnRate
+        expr: error_budget:frontend_burn_rate_24h > 1.2
+        for: 30m
+        labels:
+          severity: warning
+          service: "frontend"
+          category: "error_budget"
+        annotations:
+          summary: "Frontend sustained burn rate detected"
+          description: "Frontend error budget burn rate (24h) is {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/frontend-sustained-burn-rate"
+
+  - name: error_budget_aggregate_alerts
+    rules:
+      # Aggregate Error Budget Alerts
+      - alert: MultipleServicesErrorBudgetCritical
+        expr: count(error_budget:.*_availability_remaining_percentage < 10) > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "aggregate"
+          category: "error_budget"
+        annotations:
+          summary: "Multiple services error budget critical"
+          description: "{{ $value }} services have critical error budgets"
+          runbook_url: "https://docs.example.com/runbooks/multiple-services-error-budget-critical"
+          
+      - alert: MultipleServicesFastBurnRate
+        expr: count(error_budget:.*_burn_rate_1h > 2) > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: "aggregate"
+          category: "error_budget"
+        annotations:
+          summary: "Multiple services fast burn rate detected"
+          description: "{{ $value }} services have fast burn rates"
+          runbook_url: "https://docs.example.com/runbooks/multiple-services-fast-burn-rate"
+          
+      - alert: SystemWideErrorBudgetDegradation
+        expr: avg(error_budget:.*_availability_remaining_percentage) < 50
+        for: 10m
+        labels:
+          severity: warning
+          service: "aggregate"
+          category: "error_budget"
+        annotations:
+          summary: "System-wide error budget degradation"
+          description: "Average error budget remaining is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/system-wide-error-budget-degradation"
+          
+      - alert: ErrorBudgetBurnRateTrendIncreasing
+        expr: predict_linear(error_budget:.*_burn_rate_1h[1h], 3600) > 3
+        for: 10m
+        labels:
+          severity: warning
+          service: "aggregate"
+          category: "error_budget"
+        annotations:
+          summary: "Error budget burn rate trend increasing"
+          description: "Error budget burn rate is predicted to increase to {{ $value }}x"
+          runbook_url: "https://docs.example.com/runbooks/error-budget-burn-rate-trend-increasing"

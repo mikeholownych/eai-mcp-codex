@@ -1,1 +1,393 @@
-{"title": "Dashboard", "panels": []}
+{
+  "dashboard": {
+    "id": null,
+    "title": "MCP Workflow Analytics",
+    "tags": ["mcp", "workflow", "analytics", "orchestration"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Workflow Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "mcp_workflows_active_total",
+            "legendFormat": "Active Workflows",
+            "refId": "A"
+          },
+          {
+            "expr": "mcp_workflows_completed_total",
+            "legendFormat": "Completed Workflows",
+            "refId": "B"
+          },
+          {
+            "expr": "mcp_workflows_failed_total",
+            "legendFormat": "Failed Workflows",
+            "refId": "C"
+          },
+          {
+            "expr": "mcp_workflows_pending_total",
+            "legendFormat": "Pending Workflows",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 10 },
+                { "color": "red", "value": 50 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Failed Workflows" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 1 },
+                      { "color": "red", "value": 5 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Workflow Execution Rate",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(mcp_workflows_started_total[5m])",
+            "legendFormat": "Workflows Started/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(mcp_workflows_completed_total[5m])",
+            "legendFormat": "Workflows Completed/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(mcp_workflows_failed_total[5m])",
+            "legendFormat": "Workflows Failed/sec",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Workflows/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Workflow Duration",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(mcp_workflow_duration_seconds_bucket[5m]))",
+            "legendFormat": "P50 Duration",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(mcp_workflow_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Duration",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(mcp_workflow_duration_seconds_bucket[5m]))",
+            "legendFormat": "P99 Duration",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 60,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 300,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Workflow Steps Analysis",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "mcp_workflow_steps_active_total",
+            "legendFormat": "Active Steps",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(mcp_workflow_steps_completed_total[5m])",
+            "legendFormat": "Steps Completed/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(mcp_workflow_steps_failed_total[5m])",
+            "legendFormat": "Steps Failed/sec",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Steps / Rate",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Agent Handoff Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(mcp_agent_handoffs_total[5m])",
+            "legendFormat": "Agent Handoffs/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(mcp_agent_handoff_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Handoff Duration",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(mcp_agent_handoff_failed_total[5m])",
+            "legendFormat": "Failed Handoffs/sec",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Count / Seconds",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Workflow Success Rate",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(mcp_workflows_completed_total[5m]) / (rate(mcp_workflows_completed_total[5m]) + rate(mcp_workflows_failed_total[5m])) * 100",
+            "legendFormat": "Success Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 90 },
+                { "color": "green", "value": 95 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Workflow Type Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "mcp_workflows_by_type",
+            "legendFormat": "{{workflow_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Workflow Error Analysis",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "mcp_workflow_errors_total",
+            "legendFormat": "{{error_type}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "job": true,
+                "instance": true
+              },
+              "indexByName": {
+                "error_type": 0,
+                "Value": 1
+              },
+              "renameByName": {
+                "error_type": "Error Type",
+                "Value": "Count"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Count" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 5 },
+                      { "color": "red", "value": 20 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Workflow Resource Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "mcp_workflow_cpu_usage_seconds_total",
+            "legendFormat": "CPU Usage (seconds)",
+            "refId": "A"
+          },
+          {
+            "expr": "mcp_workflow_memory_usage_bytes / 1024 / 1024",
+            "legendFormat": "Memory Usage (MB)",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Resource Usage",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Workflow Throughput",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "rate(mcp_workflow_tokens_processed_total[5m])",
+            "legendFormat": "Tokens Processed/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(mcp_workflow_tasks_processed_total[5m])",
+            "legendFormat": "Tasks Processed/sec",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Items/sec",
+            "min": 0
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "workflow_type",
+          "type": "query",
+          "query": "label_values(mcp_workflows_by_type, workflow_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "agent",
+          "type": "query",
+          "query": "label_values(mcp_agent_handoffs_total, agent_name)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Workflow Failures",
+          "datasource": "Prometheus",
+          "expr": "rate(mcp_workflows_failed_total[5m]) > 0.1",
+          "iconColor": "red",
+          "titleFormat": "Workflow Failure Detected"
+        },
+        {
+          "name": "High Workflow Duration",
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.95, rate(mcp_workflow_duration_seconds_bucket[5m])) > 300",
+          "iconColor": "orange",
+          "titleFormat": "High Workflow Duration"
+        }
+      ]
+    }
+  }
+}

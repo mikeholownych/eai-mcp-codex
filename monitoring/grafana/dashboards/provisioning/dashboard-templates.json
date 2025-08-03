@@ -1,0 +1,314 @@
+{
+  "templates": {
+    "serviceDashboard": {
+      "name": "Service Dashboard Template",
+      "description": "Template for creating service-specific dashboards",
+      "template": {
+        "dashboard": {
+          "id": null,
+          "title": "{{service_name}} Dashboard",
+          "tags": ["service", "{{service_name}}", "performance", "monitoring"],
+          "timezone": "browser",
+          "refresh": "30s",
+          "time": {
+            "from": "now-1h",
+            "to": "now"
+          },
+          "panels": [
+            {
+              "id": 1,
+              "title": "{{service_name}} Overview",
+              "type": "stat",
+              "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+              "targets": [
+                {
+                  "expr": "up{job=\"{{service_name}}\"} * 100",
+                  "legendFormat": "Availability %",
+                  "refId": "A"
+                },
+                {
+                  "expr": "rate(http_requests_total{job=\"{{service_name}}\"}[5m])",
+                  "legendFormat": "Requests/sec",
+                  "refId": "B"
+                },
+                {
+                  "expr": "rate(http_requests_total{job=\"{{service_name}}\",status=~\"5..\"}[5m]) / rate(http_requests_total{job=\"{{service_name}}\"}[5m]) * 100",
+                  "legendFormat": "Error Rate %",
+                  "refId": "C"
+                },
+                {
+                  "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"{{service_name}}\"}[5m]))",
+                  "legendFormat": "P95 Latency",
+                  "refId": "D"
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "red", "value": 90 }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": { "id": "byRegexp", "options": ".*%" },
+                    "properties": [
+                      { "id": "unit", "value": "percent" }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": 2,
+              "title": "{{service_name}} Performance",
+              "type": "graph",
+              "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+              "targets": [
+                {
+                  "expr": "rate(http_requests_total{job=\"{{service_name}}\"}[5m])",
+                  "legendFormat": "Requests/sec",
+                  "refId": "A"
+                },
+                {
+                  "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"{{service_name}}\"}[5m]))",
+                  "legendFormat": "P50 Latency",
+                  "refId": "B"
+                },
+                {
+                  "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"{{service_name}}\"}[5m]))",
+                  "legendFormat": "P95 Latency",
+                  "refId": "C"
+                },
+                {
+                  "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"{{service_name}}\"}[5m]))",
+                  "legendFormat": "P99 Latency",
+                  "refId": "D"
+                }
+              ],
+              "yAxes": [
+                {
+                  "label": "Requests/sec / Latency",
+                  "min": 0
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "title": "{{service_name}} Resource Usage",
+              "type": "graph",
+              "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+              "targets": [
+                {
+                  "expr": "container_memory_usage_bytes{name=\"{{service_name}}\"} / 1024 / 1024",
+                  "legendFormat": "Memory MB",
+                  "refId": "A"
+                },
+                {
+                  "expr": "rate(container_cpu_usage_seconds_total{name=\"{{service_name}}\"}[5m]) * 100",
+                  "legendFormat": "CPU %",
+                  "refId": "B"
+                }
+              ],
+              "yAxes": [
+                {
+                  "label": "MB / CPU %",
+                  "min": 0
+                }
+              ]
+            }
+          ],
+          "templating": {
+            "list": [
+              {
+                "name": "instance",
+                "type": "query",
+                "query": "label_values(up{job=\"{{service_name}}\"}, instance)",
+                "refresh": 1,
+                "includeAll": true,
+                "multi": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "agentDashboard": {
+      "name": "Agent Dashboard Template",
+      "description": "Template for creating agent-specific dashboards",
+      "template": {
+        "dashboard": {
+          "id": null,
+          "title": "{{agent_name}} Agent Dashboard",
+          "tags": ["agent", "{{agent_name}}", "ai", "monitoring"],
+          "timezone": "browser",
+          "refresh": "30s",
+          "time": {
+            "from": "now-1h",
+            "to": "now"
+          },
+          "panels": [
+            {
+              "id": 1,
+              "title": "{{agent_name}} Agent Overview",
+              "type": "stat",
+              "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+              "targets": [
+                {
+                  "expr": "agent_up{agent=\"{{agent_name}}\"} * 100",
+                  "legendFormat": "Availability %",
+                  "refId": "A"
+                },
+                {
+                  "expr": "rate(agent_requests_total{agent=\"{{agent_name}}\"}[5m])",
+                  "legendFormat": "Requests/sec",
+                  "refId": "B"
+                },
+                {
+                  "expr": "rate(agent_errors_total{agent=\"{{agent_name}}\"}[5m]) / rate(agent_requests_total{agent=\"{{agent_name}}\"}[5m]) * 100",
+                  "legendFormat": "Error Rate %",
+                  "refId": "C"
+                },
+                {
+                  "expr": "histogram_quantile(0.95, rate(agent_processing_time_seconds_bucket{agent=\"{{agent_name}}\"}[5m]))",
+                  "legendFormat": "P95 Processing Time",
+                  "refId": "D"
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "red", "value": 90 }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": { "id": "byRegexp", "options": ".*%" },
+                    "properties": [
+                      { "id": "unit", "value": "percent" }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": 2,
+              "title": "{{agent_name}} Agent Performance",
+              "type": "graph",
+              "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+              "targets": [
+                {
+                  "expr": "rate(agent_requests_total{agent=\"{{agent_name}}\"}[5m])",
+                  "legendFormat": "Requests/sec",
+                  "refId": "A"
+                },
+                {
+                  "expr": "histogram_quantile(0.50, rate(agent_processing_time_seconds_bucket{agent=\"{{agent_name}}\"}[5m]))",
+                  "legendFormat": "P50 Processing Time",
+                  "refId": "B"
+                },
+                {
+                  "expr": "histogram_quantile(0.95, rate(agent_processing_time_seconds_bucket{agent=\"{{agent_name}}\"}[5m]))",
+                  "legendFormat": "P95 Processing Time",
+                  "refId": "C"
+                }
+              ],
+              "yAxes": [
+                {
+                  "label": "Requests/sec / Processing Time",
+                  "min": 0
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "title": "{{agent_name}} Agent Collaboration",
+              "type": "graph",
+              "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+              "targets": [
+                {
+                  "expr": "rate(agent_collaboration_requests_total{agent=\"{{agent_name}}\"}[5m])",
+                  "legendFormat": "Collaboration Requests/sec",
+                  "refId": "A"
+                },
+                {
+                  "expr": "rate(agent_collaboration_responses_total{agent=\"{{agent_name}}\"}[5m])",
+                  "legendFormat": "Collaboration Responses/sec",
+                  "refId": "B"
+                },
+                {
+                  "expr": "agent_collaboration_success_rate{agent=\"{{agent_name}}\"} * 100",
+                  "legendFormat": "Collaboration Success Rate %",
+                  "refId": "C"
+                }
+              ],
+              "yAxes": [
+                {
+                  "label": "Requests/sec / Success Rate %",
+                  "min": 0
+                }
+              ]
+            }
+          ],
+          "templating": {
+            "list": [
+              {
+                "name": "instance",
+                "type": "query",
+                "query": "label_values(agent_up{agent=\"{{agent_name}}\"}, instance)",
+                "refresh": 1,
+                "includeAll": true,
+                "multi": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "automation": {
+    "autoCreateDashboards": true,
+    "dashboardCreationRules": [
+      {
+        "condition": "service_discovery",
+        "template": "serviceDashboard",
+        "parameters": {
+          "service_name": "{{service_name}}"
+        }
+      },
+      {
+        "condition": "agent_discovery",
+        "template": "agentDashboard",
+        "parameters": {
+          "agent_name": "{{agent_name}}"
+        }
+      }
+    ],
+    "updateRules": [
+      {
+        "condition": "metric_change",
+        "action": "update_dashboard",
+        "parameters": {
+          "dashboard_id": "{{dashboard_id}}",
+          "panel_id": "{{panel_id}}"
+        }
+      }
+    ],
+    "cleanupRules": [
+      {
+        "condition": "service_removed",
+        "action": "archive_dashboard",
+        "parameters": {
+          "dashboard_name": "{{service_name}} Dashboard"
+        }
+      }
+    ]
+  }
+}

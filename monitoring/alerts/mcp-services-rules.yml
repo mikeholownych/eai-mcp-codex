@@ -1,0 +1,615 @@
+# MCP Services Alerting Rules
+# Comprehensive monitoring for all MCP (Multimodal Content Processor) services
+
+groups:
+  - name: model_router_alerts
+    rules:
+      # Availability
+      - alert: ModelRouterServiceDown
+        expr: up{job="mcp-services", instance="model-router:8001"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: model-router
+          category: availability
+        annotations:
+          summary: "Model Router service is down"
+          description: "Model Router service on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/model-router-down"
+          
+      - alert: ModelRouterUnhealthy
+        expr: mcp_health_check{service="model-router"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: model-router
+          category: availability
+        annotations:
+          summary: "Model Router service is unhealthy"
+          description: "Model Router health check failed on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/model-router-unhealthy"
+      
+      # Performance
+      - alert: ModelRouterHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="mcp-services", instance="model-router:8001"}[5m])) > 2
+        for: 2m
+        labels:
+          severity: warning
+          service: model-router
+          category: performance
+        annotations:
+          summary: "Model Router response time degraded"
+          description: "95th percentile response time is {{ $value }}s for Model Router"
+          runbook_url: "https://docs.example.com/runbooks/model-router-response-time"
+          
+      - alert: ModelRouterCriticalResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="mcp-services", instance="model-router:8001"}[5m])) > 5
+        for: 1m
+        labels:
+          severity: critical
+          service: model-router
+          category: performance
+        annotations:
+          summary: "Model Router critical response time"
+          description: "95th percentile response time is {{ $value }}s for Model Router"
+          runbook_url: "https://docs.example.com/runbooks/model-router-critical-response-time"
+      
+      # Error Rate
+      - alert: ModelRouterHighErrorRate
+        expr: rate(http_requests_total{job="mcp-services", instance="model-router:8001", status=~"4..|5.."}[5m]) / rate(http_requests_total{job="mcp-services", instance="model-router:8001"}[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: model-router
+          category: errors
+        annotations:
+          summary: "Model Router high error rate"
+          description: "Model Router error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/model-router-error-rate"
+          
+      - alert: ModelRouterCriticalErrorRate
+        expr: rate(http_requests_total{job="mcp-services", instance="model-router:8001", status=~"5.."}[5m]) / rate(http_requests_total{job="mcp-services", instance="model-router:8001"}[5m]) * 100 > 10
+        for: 1m
+        labels:
+          severity: critical
+          service: model-router
+          category: errors
+        annotations:
+          summary: "Model Router critical error rate"
+          description: "Model Router 5xx error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/model-router-critical-error-rate"
+      
+      # Resource Usage
+      - alert: ModelRouterHighMemoryUsage
+        expr: process_resident_memory_bytes{job="mcp-services", instance="model-router:8001"} / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+          service: model-router
+          category: resources
+        annotations:
+          summary: "Model Router high memory usage"
+          description: "Model Router memory usage is {{ $value }}MB"
+          runbook_url: "https://docs.example.com/runbooks/model-router-memory-high"
+          
+      - alert: ModelRouterHighCPUUsage
+        expr: rate(process_cpu_seconds_total{job="mcp-services", instance="model-router:8001"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: model-router
+          category: resources
+        annotations:
+          summary: "Model Router high CPU usage"
+          description: "Model Router CPU usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/model-router-cpu-high"
+      
+      # Model Routing Specific
+      - alert: ModelRouterModelUnavailable
+        expr: mcp_model_router_unavailable_models > 0
+        for: 2m
+        labels:
+          severity: warning
+          service: model-router
+          category: models
+        annotations:
+          summary: "Model Router has unavailable models"
+          description: "{{ $value }} models are unavailable in Model Router"
+          runbook_url: "https://docs.example.com/runbooks/model-router-models-unavailable"
+          
+      - alert: ModelRouterQueueFull
+        expr: mcp_model_router_queue_size > 1000
+        for: 2m
+        labels:
+          severity: critical
+          service: model-router
+          category: queue
+        annotations:
+          summary: "Model Router queue is full"
+          description: "Model Router queue size is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/model-router-queue-full"
+          
+      - alert: ModelRouterLowSuccessRate
+        expr: mcp_model_router_success_rate < 0.95
+        for: 5m
+        labels:
+          severity: warning
+          service: model-router
+          category: performance
+        annotations:
+          summary: "Model Router low success rate"
+          description: "Model Router success rate is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/model-router-low-success-rate"
+
+  - name: plan_management_alerts
+    rules:
+      # Availability
+      - alert: PlanManagementServiceDown
+        expr: up{job="mcp-services", instance="plan-management:8002"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: plan-management
+          category: availability
+        annotations:
+          summary: "Plan Management service is down"
+          description: "Plan Management service on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-down"
+          
+      - alert: PlanManagementUnhealthy
+        expr: mcp_health_check{service="plan-management"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: plan-management
+          category: availability
+        annotations:
+          summary: "Plan Management service is unhealthy"
+          description: "Plan Management health check failed on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-unhealthy"
+      
+      # Performance
+      - alert: PlanManagementHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="mcp-services", instance="plan-management:8002"}[5m])) > 2
+        for: 2m
+        labels:
+          severity: warning
+          service: plan-management
+          category: performance
+        annotations:
+          summary: "Plan Management response time degraded"
+          description: "95th percentile response time is {{ $value }}s for Plan Management"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-response-time"
+      
+      # Error Rate
+      - alert: PlanManagementHighErrorRate
+        expr: rate(http_requests_total{job="mcp-services", instance="plan-management:8002", status=~"4..|5.."}[5m]) / rate(http_requests_total{job="mcp-services", instance="plan-management:8002"}[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: plan-management
+          category: errors
+        annotations:
+          summary: "Plan Management high error rate"
+          description: "Plan Management error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-error-rate"
+      
+      # Resource Usage
+      - alert: PlanManagementHighMemoryUsage
+        expr: process_resident_memory_bytes{job="mcp-services", instance="plan-management:8002"} / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+          service: plan-management
+          category: resources
+        annotations:
+          summary: "Plan Management high memory usage"
+          description: "Plan Management memory usage is {{ $value }}MB"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-memory-high"
+      
+      # Plan Management Specific
+      - alert: PlanManagementStorageFull
+        expr: mcp_plan_management_storage_usage > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          service: plan-management
+          category: storage
+        annotations:
+          summary: "Plan Management storage is full"
+          description: "Plan Management storage usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-storage-full"
+          
+      - alert: PlanManagementPlanCorruption
+        expr: mcp_plan_management_corrupted_plans > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: plan-management
+          category: data
+        annotations:
+          summary: "Plan Management has corrupted plans"
+          description: "{{ $value }} plans are corrupted in Plan Management"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-corrupted-plans"
+          
+      - alert: PlanManagementVersionConflict
+        expr: mcp_plan_management_version_conflicts > 0
+        for: 2m
+        labels:
+          severity: warning
+          service: plan-management
+          category: data
+        annotations:
+          summary: "Plan Management has version conflicts"
+          description: "{{ $value }} version conflicts in Plan Management"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-version-conflicts"
+
+  - name: git_worktree_alerts
+    rules:
+      # Availability
+      - alert: GitWorktreeServiceDown
+        expr: up{job="mcp-services", instance="git-worktree-manager:8003"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: git-worktree-manager
+          category: availability
+        annotations:
+          summary: "Git Worktree Manager service is down"
+          description: "Git Worktree Manager service on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-down"
+          
+      - alert: GitWorktreeUnhealthy
+        expr: mcp_health_check{service="git-worktree-manager"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: git-worktree-manager
+          category: availability
+        annotations:
+          summary: "Git Worktree Manager service is unhealthy"
+          description: "Git Worktree Manager health check failed on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-unhealthy"
+      
+      # Performance
+      - alert: GitWorktreeHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="mcp-services", instance="git-worktree-manager:8003"}[5m])) > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: git-worktree-manager
+          category: performance
+        annotations:
+          summary: "Git Worktree Manager response time degraded"
+          description: "95th percentile response time is {{ $value }}s for Git Worktree Manager"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-response-time"
+      
+      # Error Rate
+      - alert: GitWorktreeHighErrorRate
+        expr: rate(http_requests_total{job="mcp-services", instance="git-worktree-manager:8003", status=~"4..|5.."}[5m]) / rate(http_requests_total{job="mcp-services", instance="git-worktree-manager:8003"}[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: git-worktree-manager
+          category: errors
+        annotations:
+          summary: "Git Worktree Manager high error rate"
+          description: "Git Worktree Manager error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-error-rate"
+      
+      # Git Operations
+      - alert: GitWorktreeCloneFailures
+        expr: rate(mcp_git_worktree_clone_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: git-worktree-manager
+          category: git
+        annotations:
+          summary: "Git Worktree Manager clone failures"
+          description: "Git clone failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-clone-failures"
+          
+      - alert: GitWorktreeSyncFailures
+        expr: rate(mcp_git_worktree_sync_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: git-worktree-manager
+          category: git
+        annotations:
+          summary: "Git Worktree Manager sync failures"
+          description: "Git sync failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-sync-failures"
+          
+      - alert: GitWorktreeTooManyWorktrees
+        expr: mcp_git_worktree_active_count > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: git-worktree-manager
+          category: git
+        annotations:
+          summary: "Git Worktree Manager has too many worktrees"
+          description: "{{ $value }} active worktrees in Git Worktree Manager"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-too-many"
+          
+      - alert: GitWorktreeDiskSpaceLow
+        expr: mcp_git_worktree_disk_usage > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: git-worktree-manager
+          category: storage
+        annotations:
+          summary: "Git Worktree Manager disk space low"
+          description: "Git Worktree Manager disk usage is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-disk-low"
+
+  - name: workflow_orchestrator_alerts
+    rules:
+      # Availability
+      - alert: WorkflowOrchestratorServiceDown
+        expr: up{job="mcp-services", instance="workflow-orchestrator:8004"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: workflow-orchestrator
+          category: availability
+        annotations:
+          summary: "Workflow Orchestrator service is down"
+          description: "Workflow Orchestrator service on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-down"
+          
+      - alert: WorkflowOrchestratorUnhealthy
+        expr: mcp_health_check{service="workflow-orchestrator"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: workflow-orchestrator
+          category: availability
+        annotations:
+          summary: "Workflow Orchestrator service is unhealthy"
+          description: "Workflow Orchestrator health check failed on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-unhealthy"
+      
+      # Performance
+      - alert: WorkflowOrchestratorHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="mcp-services", instance="workflow-orchestrator:8004"}[5m])) > 3
+        for: 2m
+        labels:
+          severity: warning
+          service: workflow-orchestrator
+          category: performance
+        annotations:
+          summary: "Workflow Orchestrator response time degraded"
+          description: "95th percentile response time is {{ $value }}s for Workflow Orchestrator"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-response-time"
+      
+      # Error Rate
+      - alert: WorkflowOrchestratorHighErrorRate
+        expr: rate(http_requests_total{job="mcp-services", instance="workflow-orchestrator:8004", status=~"4..|5.."}[5m]) / rate(http_requests_total{job="mcp-services", instance="workflow-orchestrator:8004"}[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: workflow-orchestrator
+          category: errors
+        annotations:
+          summary: "Workflow Orchestrator high error rate"
+          description: "Workflow Orchestrator error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-error-rate"
+      
+      # Workflow Specific
+      - alert: WorkflowOrchestratorStuckWorkflows
+        expr: mcp_workflow_orchestrator_stuck_workflows > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: workflow-orchestrator
+          category: workflows
+        annotations:
+          summary: "Workflow Orchestrator has stuck workflows"
+          description: "{{ $value }} workflows are stuck in Workflow Orchestrator"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-stuck-workflows"
+          
+      - alert: WorkflowOrchestratorFailedWorkflows
+        expr: rate(mcp_workflow_orchestrator_failed_workflows_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: workflow-orchestrator
+          category: workflows
+        annotations:
+          summary: "Workflow Orchestrator has failed workflows"
+          description: "Workflow failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-failed-workflows"
+          
+      - alert: WorkflowOrchestratorQueueFull
+        expr: mcp_workflow_orchestrator_queue_size > 1000
+        for: 2m
+        labels:
+          severity: critical
+          service: workflow-orchestrator
+          category: queue
+        annotations:
+          summary: "Workflow Orchestrator queue is full"
+          description: "Workflow Orchestrator queue size is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-queue-full"
+          
+      - alert: WorkflowOrchestratorHighMemoryUsage
+        expr: process_resident_memory_bytes{job="mcp-services", instance="workflow-orchestrator:8004"} / 1024 / 1024 > 2048
+        for: 5m
+        labels:
+          severity: warning
+          service: workflow-orchestrator
+          category: resources
+        annotations:
+          summary: "Workflow Orchestrator high memory usage"
+          description: "Workflow Orchestrator memory usage is {{ $value }}MB"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-memory-high"
+
+  - name: verification_feedback_alerts
+    rules:
+      # Availability
+      - alert: VerificationFeedbackServiceDown
+        expr: up{job="mcp-services", instance="verification-feedback:8005"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: verification-feedback
+          category: availability
+        annotations:
+          summary: "Verification Feedback service is down"
+          description: "Verification Feedback service on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-down"
+          
+      - alert: VerificationFeedbackUnhealthy
+        expr: mcp_health_check{service="verification-feedback"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: verification-feedback
+          category: availability
+        annotations:
+          summary: "Verification Feedback service is unhealthy"
+          description: "Verification Feedback health check failed on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-unhealthy"
+      
+      # Performance
+      - alert: VerificationFeedbackHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="mcp-services", instance="verification-feedback:8005"}[5m])) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: verification-feedback
+          category: performance
+        annotations:
+          summary: "Verification Feedback response time degraded"
+          description: "95th percentile response time is {{ $value }}s for Verification Feedback"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-response-time"
+      
+      # Error Rate
+      - alert: VerificationFeedbackHighErrorRate
+        expr: rate(http_requests_total{job="mcp-services", instance="verification-feedback:8005", status=~"4..|5.."}[5m]) / rate(http_requests_total{job="mcp-services", instance="verification-feedback:8005"}[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: verification-feedback
+          category: errors
+        annotations:
+          summary: "Verification Feedback high error rate"
+          description: "Verification Feedback error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-error-rate"
+      
+      # Verification Specific
+      - alert: VerificationFeedbackFailedVerifications
+        expr: rate(mcp_verification_feedback_failed_verifications_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: verification-feedback
+          category: verification
+        annotations:
+          summary: "Verification Feedback has failed verifications"
+          description: "Verification failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-failed"
+          
+      - alert: VerificationFeedbackLowQualityScore
+        expr: mcp_verification_feedback_quality_score < 0.7
+        for: 5m
+        labels:
+          severity: warning
+          service: verification-feedback
+          category: quality
+        annotations:
+          summary: "Verification Feedback low quality score"
+          description: "Verification quality score is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-low-quality"
+          
+      - alert: VerificationFeedbackHighProcessingTime
+        expr: histogram_quantile(0.95, rate(mcp_verification_feedback_processing_time_seconds_bucket[5m])) > 30
+        for: 2m
+        labels:
+          severity: warning
+          service: verification-feedback
+          category: performance
+        annotations:
+          summary: "Verification Feedback high processing time"
+          description: "95th percentile verification processing time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-processing-time"
+          
+      - alert: VerificationFeedbackQueueBacklog
+        expr: mcp_verification_feedback_queue_size > 500
+        for: 2m
+        labels:
+          severity: warning
+          service: verification-feedback
+          category: queue
+        annotations:
+          summary: "Verification Feedback queue backlog"
+          description: "Verification Feedback queue size is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-queue-backlog"
+
+  - name: mcp_services_cross_service_alerts
+    rules:
+      # Service Communication
+      - alert: MCPServicesCommunicationFailure
+        expr: rate(mcp_service_communication_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: mcp-services
+          category: communication
+        annotations:
+          summary: "MCP Services communication failure"
+          description: "Service communication failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-communication-failure"
+          
+      - alert: MCPServicesHighLatency
+        expr: histogram_quantile(0.95, rate(mcp_service_communication_latency_seconds_bucket[5m])) > 2
+        for: 2m
+        labels:
+          severity: warning
+          service: mcp-services
+          category: communication
+        annotations:
+          summary: "MCP Services high communication latency"
+          description: "95th percentile service communication latency is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-high-latency"
+      
+      # Overall System Health
+      - alert: MCPServicesMultipleServicesDown
+        expr: count(up{job="mcp-services"} == 0) > 1
+        for: 1m
+        labels:
+          severity: critical
+          service: mcp-services
+          category: availability
+        annotations:
+          summary: "Multiple MCP services are down"
+          description: "{{ $value }} MCP services are down"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-multiple-down"
+          
+      - alert: MCPServicesHighErrorRate
+        expr: sum(rate(http_requests_total{job="mcp-services", status=~"4..|5.."}[5m])) / sum(rate(http_requests_total{job="mcp-services"}[5m])) * 100 > 10
+        for: 2m
+        labels:
+          severity: critical
+          service: mcp-services
+          category: errors
+        annotations:
+          summary: "MCP Services high overall error rate"
+          description: "Overall MCP services error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-high-error-rate"
+          
+      - alert: MCPServicesResourceExhaustion
+        expr: sum(process_resident_memory_bytes{job="mcp-services"}) / 1024 / 1024 / 1024 > 16
+        for: 5m
+        labels:
+          severity: critical
+          service: mcp-services
+          category: resources
+        annotations:
+          summary: "MCP Services resource exhaustion"
+          description: "Total MCP services memory usage is {{ $value }}GB"
+          runbook_url: "https://docs.example.com/runbooks/mcp-services-resource-exhaustion"

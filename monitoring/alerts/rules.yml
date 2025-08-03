@@ -1,8 +1,506 @@
-alert_rules:
-  - alert: HighErrorRate
-    expr: rate(http_requests_total{status="500"}[5m]) > 0.05
-    for: 5m
-    labels:
-      severity: critical
-    annotations:
-      summary: "High error rate detected"
+# Comprehensive Alerting Rules for MCP Services
+# System-wide monitoring and alerting for production infrastructure
+
+groups:
+  - name: system_health_alerts
+    interval: 30s
+    rules:
+      # Node/Instance Health
+      - alert: NodeDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: system_health
+        annotations:
+          summary: "Node is down"
+          description: "Node {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://docs.example.com/runbooks/node-down"
+          
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: system_health
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/high-cpu"
+          
+      - alert: CriticalCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
+        for: 2m
+        labels:
+          severity: critical
+          category: system_health
+        annotations:
+          summary: "Critical CPU usage detected"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/critical-cpu"
+          
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: system_health
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/high-memory"
+          
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          category: system_health
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/critical-memory"
+          
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: system_health
+        annotations:
+          summary: "High disk usage detected"
+          description: "Disk usage is {{ $value }}% on {{ $labels.instance }} mount {{ $labels.mountpoint }}"
+          runbook_url: "https://docs.example.com/runbooks/high-disk"
+          
+      - alert: CriticalDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          category: system_health
+        annotations:
+          summary: "Critical disk usage detected"
+          description: "Disk usage is {{ $value }}% on {{ $labels.instance }} mount {{ $labels.mountpoint }}"
+          runbook_url: "https://docs.example.com/runbooks/critical-disk"
+          
+      - alert: HighNetworkErrors
+        expr: rate(node_network_receive_errs_total[5m]) + rate(node_network_transmit_errs_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: system_health
+        annotations:
+          summary: "High network error rate detected"
+          description: "Network error rate is {{ $value }} errors/sec on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/network-errors"
+
+  - name: service_health_alerts
+    interval: 30s
+    rules:
+      # Service Availability
+      - alert: ServiceDown
+        expr: up{job=~"mcp-services|frontend|llm-.*|rabbitmq|postgres|redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: service_health
+        annotations:
+          summary: "Service is down"
+          description: "Service {{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://docs.example.com/runbooks/service-down"
+          
+      - alert: HighServiceErrorRate
+        expr: rate(http_requests_total{status=~"4..|5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: service_health
+        annotations:
+          summary: "High service error rate detected"
+          description: "Error rate is {{ $value }}% for service {{ $labels.job }}"
+          runbook_url: "https://docs.example.com/runbooks/service-error-rate"
+          
+      - alert: CriticalServiceErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 10
+        for: 1m
+        labels:
+          severity: critical
+          category: service_health
+        annotations:
+          summary: "Critical service error rate detected"
+          description: "5xx error rate is {{ $value }}% for service {{ $labels.job }}"
+          runbook_url: "https://docs.example.com/runbooks/critical-service-error-rate"
+          
+      - alert: HighServiceLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          category: service_health
+        annotations:
+          summary: "High service latency detected"
+          description: "95th percentile response time is {{ $value }}s for service {{ $labels.job }}"
+          runbook_url: "https://docs.example.com/runbooks/service-latency"
+          
+      - alert: CriticalServiceLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 5
+        for: 2m
+        labels:
+          severity: critical
+          category: service_health
+        annotations:
+          summary: "Critical service latency detected"
+          description: "95th percentile response time is {{ $value }}s for service {{ $labels.job }}"
+          runbook_url: "https://docs.example.com/runbooks/critical-service-latency"
+
+  - name: mcp_service_alerts
+    interval: 30s
+    rules:
+      # Model Router Service
+      - alert: ModelRouterHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="model-router"}[5m])) > 1
+        for: 2m
+        labels:
+          severity: warning
+          category: mcp_service
+          service: model-router
+        annotations:
+          summary: "Model Router high latency detected"
+          description: "95th percentile response time is {{ $value }}s for Model Router"
+          runbook_url: "https://docs.example.com/runbooks/model-router-latency"
+          
+      - alert: ModelRouterHighErrorRate
+        expr: rate(http_requests_total{job="model-router",status=~"5.."}[5m]) / rate(http_requests_total{job="model-router"}[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          category: mcp_service
+          service: model-router
+        annotations:
+          summary: "Model Router high error rate detected"
+          description: "5xx error rate is {{ $value }}% for Model Router"
+          runbook_url: "https://docs.example.com/runbooks/model-router-errors"
+          
+      # Plan Management Service
+      - alert: PlanManagementHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="plan-management"}[5m])) > 1.5
+        for: 2m
+        labels:
+          severity: warning
+          category: mcp_service
+          service: plan-management
+        annotations:
+          summary: "Plan Management high latency detected"
+          description: "95th percentile response time is {{ $value }}s for Plan Management"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-latency"
+          
+      - alert: PlanManagementStorageIssues
+        expr: rate(plan_management_storage_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          category: mcp_service
+          service: plan-management
+        annotations:
+          summary: "Plan Management storage issues detected"
+          description: "Storage error rate is {{ $value }} errors/sec for Plan Management"
+          runbook_url: "https://docs.example.com/runbooks/plan-management-storage"
+          
+      # Git Worktree Manager
+      - alert: GitWorktreeHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="git-worktree-manager"}[5m])) > 2
+        for: 2m
+        labels:
+          severity: warning
+          category: mcp_service
+          service: git-worktree-manager
+        annotations:
+          summary: "Git Worktree Manager high latency detected"
+          description: "95th percentile response time is {{ $value }}s for Git Worktree Manager"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-latency"
+          
+      - alert: GitWorktreeSyncFailures
+        expr: rate(git_worktree_sync_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          category: mcp_service
+          service: git-worktree-manager
+        annotations:
+          summary: "Git Worktree sync failures detected"
+          description: "Sync failure rate is {{ $value }} failures/sec for Git Worktree Manager"
+          runbook_url: "https://docs.example.com/runbooks/git-worktree-sync"
+          
+      # Workflow Orchestrator
+      - alert: WorkflowOrchestratorHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="workflow-orchestrator"}[5m])) > 3
+        for: 2m
+        labels:
+          severity: warning
+          category: mcp_service
+          service: workflow-orchestrator
+        annotations:
+          summary: "Workflow Orchestrator high latency detected"
+          description: "95th percentile response time is {{ $value }}s for Workflow Orchestrator"
+          runbook_url: "https://docs.example.com/runbooks/workflow-orchestrator-latency"
+          
+      - alert: WorkflowFailuresHigh
+        expr: rate(workflow_failures_total[5m]) > 0.2
+        for: 2m
+        labels:
+          severity: critical
+          category: mcp_service
+          service: workflow-orchestrator
+        annotations:
+          summary: "High workflow failure rate detected"
+          description: "Workflow failure rate is {{ $value }} failures/sec for Workflow Orchestrator"
+          runbook_url: "https://docs.example.com/runbooks/workflow-failures"
+          
+      # Verification Feedback
+      - alert: VerificationFeedbackHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="verification-feedback"}[5m])) > 2
+        for: 2m
+        labels:
+          severity: warning
+          category: mcp_service
+          service: verification-feedback
+        annotations:
+          summary: "Verification Feedback high latency detected"
+          description: "95th percentile response time is {{ $value }}s for Verification Feedback"
+          runbook_url: "https://docs.example.com/runbooks/verification-feedback-latency"
+          
+      - alert: VerificationFailuresHigh
+        expr: rate(verification_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          category: mcp_service
+          service: verification-feedback
+        annotations:
+          summary: "High verification failure rate detected"
+          description: "Verification failure rate is {{ $value }} failures/sec for Verification Feedback"
+          runbook_url: "https://docs.example.com/runbooks/verification-failures"
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      # PostgreSQL
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL instance on {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://docs.example.com/runbooks/postgresql-down"
+          
+      - alert: PostgreSQLHighConnections
+        expr: pg_stat_database_numbackends / pg_settings_max_connections * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "PostgreSQL high connection count detected"
+          description: "PostgreSQL connection usage is {{ $value }}% on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/postgresql-connections"
+          
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_database_calls_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "PostgreSQL slow queries detected"
+          description: "PostgreSQL has {{ $value }} slow queries/sec on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/postgresql-slow-queries"
+          
+      - alert: PostgreSQLHighReplicationLag
+        expr: pg_stat_replication_lag > 30
+        for: 2m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "PostgreSQL high replication lag detected"
+          description: "PostgreSQL replication lag is {{ $value }} seconds on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/postgresql-replication-lag"
+          
+      # Redis
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "Redis is down"
+          description: "Redis instance on {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://docs.example.com/runbooks/redis-down"
+          
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "Redis high memory usage detected"
+          description: "Redis memory usage is {{ $value }}% on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/redis-memory"
+          
+      - alert: RedisSlowlog
+        expr: redis_slowlog_length > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "Redis slow queries detected"
+          description: "Redis has {{ $value }} slow queries in slowlog on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/redis-slowlog"
+
+  - name: message_queue_alerts
+    interval: 30s
+    rules:
+      # RabbitMQ
+      - alert: RabbitMQDown
+        expr: rabbitmq_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: message_queue
+        annotations:
+          summary: "RabbitMQ is down"
+          description: "RabbitMQ instance on {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://docs.example.com/runbooks/rabbitmq-down"
+          
+      - alert: RabbitMQQueueMessagesHigh
+        expr: rabbitmq_queue_messages > 10000
+        for: 5m
+        labels:
+          severity: warning
+          category: message_queue
+        annotations:
+          summary: "RabbitMQ high message count detected"
+          description: "RabbitMQ queue {{ $labels.queue }} has {{ $value }} messages"
+          runbook_url: "https://docs.example.com/runbooks/rabbitmq-queue-messages"
+          
+      - alert: RabbitMQNoConsumers
+        expr: rabbitmq_queue_consumers == 0
+        for: 2m
+        labels:
+          severity: critical
+          category: message_queue
+        annotations:
+          summary: "RabbitMQ queue has no consumers"
+          description: "RabbitMQ queue {{ $labels.queue }} has no active consumers"
+          runbook_url: "https://docs.example.com/runbooks/rabbitmq-no-consumers"
+          
+      - alert: RabbitMQUnroutableMessages
+        expr: rate(rabbitmq_channel_messages_unroutable_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          category: message_queue
+        annotations:
+          summary: "RabbitMQ unroutable messages detected"
+          description: "RabbitMQ has {{ $value }} unroutable messages/sec"
+          runbook_url: "https://docs.example.com/runbooks/rabbitmq-unroutable"
+
+  - name: security_alerts
+    interval: 30s
+    rules:
+      - alert: HighAuthenticationFailures
+        expr: rate(authentication_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High authentication failure rate detected"
+          description: "Authentication failure rate is {{ $value }} failures/sec"
+          runbook_url: "https://docs.example.com/runbooks/auth-failures"
+          
+      - alert: CriticalAuthenticationFailures
+        expr: rate(authentication_failures_total[5m]) > 20
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Critical authentication failure rate detected"
+          description: "Authentication failure rate is {{ $value }} failures/sec"
+          runbook_url: "https://docs.example.com/runbooks/critical-auth-failures"
+          
+      - alert: AuthorizationFailures
+        expr: rate(authorization_failures_total[5m]) > 2
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Authorization failures detected"
+          description: "Authorization failure rate is {{ $value }} failures/sec"
+          runbook_url: "https://docs.example.com/runbooks/authz-failures"
+          
+      - alert: SSLCertificateExpiring
+        expr: (ssl_cert_not_after - time()) < (7 * 24 * 3600)
+        for: 0m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate for {{ $labels.instance }} will expire in {{ $value }} days"
+          runbook_url: "https://docs.example.com/runbooks/ssl-expiry"
+
+  - name: business_alerts
+    interval: 30s
+    rules:
+      - alert: WorkflowProcessingDelay
+        expr: histogram_quantile(0.95, rate(workflow_processing_duration_seconds_bucket[5m])) > 300
+        for: 5m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "Workflow processing delay detected"
+          description: "95th percentile workflow processing time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/workflow-delay"
+          
+      - alert: HighWorkflowFailureRate
+        expr: rate(workflow_failures_total[5m]) / rate(workflow_started_total[5m]) * 100 > 10
+        for: 5m
+        labels:
+          severity: critical
+          category: business
+        annotations:
+          summary: "High workflow failure rate detected"
+          description: "Workflow failure rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/workflow-failure-rate"
+          
+      - alert: AgentCollaborationIssues
+        expr: rate(agent_collaboration_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "Agent collaboration issues detected"
+          description: "Agent collaboration failure rate is {{ $value }} failures/sec"
+          runbook_url: "https://docs.example.com/runbooks/agent-collaboration"
+          
+      - alert: LowAgentAvailability
+        expr: agent_available_count / agent_total_count * 100 < 50
+        for: 5m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "Low agent availability detected"
+          description: "Agent availability is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/agent-availability"

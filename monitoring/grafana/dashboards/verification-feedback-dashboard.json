@@ -1,0 +1,705 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Verification Feedback Dashboard",
+    "tags": ["verification-feedback", "code-analysis", "security-scanning", "quality-assessment", "verification-reports"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Verification Feedback Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(verification_feedback_operations_total[5m]))",
+            "legendFormat": "Verification Operations/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "verification_feedback_success_rate * 100",
+            "legendFormat": "Verification Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "verification_feedback_average_duration",
+            "legendFormat": "Avg Verification Duration",
+            "refId": "C"
+          },
+          {
+            "expr": "verification_feedback_performance_score * 100",
+            "legendFormat": "Verification Performance Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Code Analysis",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(verification_feedback_code_analysis_events_total[5m])",
+            "legendFormat": "Analysis Events/sec - {{analysis_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "verification_feedback_code_analysis_success_rate * 100",
+            "legendFormat": "Analysis Success Rate % - {{analysis_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "verification_feedback_code_analysis_average_time",
+            "legendFormat": "Avg Analysis Time - {{analysis_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "verification_feedback_code_analysis_quality_score",
+            "legendFormat": "Analysis Quality - {{analysis_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Quality Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Security Scanning",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(verification_feedback_security_scanning_events_total[5m])",
+            "legendFormat": "Scanning Events/sec - {{scanning_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "verification_feedback_security_scanning_success_rate * 100",
+            "legendFormat": "Scanning Success Rate % - {{scanning_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "verification_feedback_security_scanning_average_time",
+            "legendFormat": "Avg Scanning Time - {{scanning_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "verification_feedback_security_scanning_effectiveness_score",
+            "legendFormat": "Scanning Effectiveness - {{scanning_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Effectiveness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Quality Assessment",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(verification_feedback_quality_assessment_events_total[5m])",
+            "legendFormat": "Assessment Events/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "verification_feedback_quality_assessment_success_rate * 100",
+            "legendFormat": "Assessment Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "verification_feedback_quality_assessment_average_time",
+            "legendFormat": "Avg Assessment Time",
+            "refId": "C"
+          },
+          {
+            "expr": "verification_feedback_quality_assessment_accuracy_score",
+            "legendFormat": "Assessment Accuracy",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Verification Reports",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(verification_feedback_verification_reports_events_total[5m])",
+            "legendFormat": "Report Events/sec - {{report_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "verification_feedback_verification_reports_success_rate * 100",
+            "legendFormat": "Report Success Rate % - {{report_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "verification_feedback_verification_reports_average_time",
+            "legendFormat": "Avg Report Time - {{report_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "verification_feedback_verification_reports_completeness_score",
+            "legendFormat": "Report Completeness - {{report_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Completeness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Verification Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(verification_feedback_operations_total[5m])",
+            "legendFormat": "{{verification_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Verification Feedback Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "verification_feedback_performance_score",
+            "legendFormat": "Performance Score - {{performance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "verification_feedback_efficiency_score",
+            "legendFormat": "Efficiency Score - {{efficiency_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "verification_feedback_reliability_score",
+            "legendFormat": "Reliability Score - {{reliability_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "verification_feedback_scalability_score",
+            "legendFormat": "Scalability Score - {{scalability_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Verification Feedback Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "rate(verification_feedback_code_analysis_events_total[5m])",
+            "legendFormat": "{{analysis_type}}",
+            "refId": "Analysis",
+            "format": "table"
+          },
+          {
+            "expr": "rate(verification_feedback_security_scanning_events_total[5m])",
+            "legendFormat": "{{scanning_type}}",
+            "refId": "Scanning",
+            "format": "table"
+          },
+          {
+            "expr": "verification_feedback_success_rate * 100",
+            "legendFormat": "{{verification_type}}",
+            "refId": "Success",
+            "format": "table"
+          },
+          {
+            "expr": "verification_feedback_average_duration",
+            "legendFormat": "{{verification_type}}",
+            "refId": "Duration",
+            "format": "table"
+          },
+          {
+            "expr": "verification_feedback_performance_score",
+            "legendFormat": "{{performance_type}}",
+            "refId": "Performance",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "analysis_type": 0,
+                "scanning_type": 1,
+                "verification_type": 2,
+                "performance_type": 3,
+                "Value #Analysis": 4,
+                "Value #Scanning": 5,
+                "Value #Success": 6,
+                "Value #Duration": 7,
+                "Value #Performance": 8
+              },
+              "renameByName": {
+                "analysis_type": "Analysis Type",
+                "scanning_type": "Scanning Type",
+                "verification_type": "Verification Type",
+                "performance_type": "Performance Type",
+                "Value #Analysis": "Analysis Events/sec",
+                "Value #Scanning": "Scanning Events/sec",
+                "Value #Success": "Success Rate %",
+                "Value #Duration": "Avg Duration",
+                "Value #Performance": "Performance Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Success Rate %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Performance Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Verification Feedback Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - verification_feedback_success_rate) * 100 * 30) - (verification_feedback_average_duration * 20) - ((1 - verification_feedback_code_analysis_success_rate) * 100 * 25) - ((1 - verification_feedback_security_scanning_success_rate) * 100 * 25))",
+            "legendFormat": "Verification Feedback Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Verification Feedback Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(sum(rate(verification_feedback_operations_total[5m]))[24h])",
+            "legendFormat": "Avg Operations/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(verification_feedback_success_rate * 100[24h])",
+            "legendFormat": "Avg Success Rate % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(verification_feedback_average_duration[24h])",
+            "legendFormat": "Avg Duration (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(verification_feedback_performance_score * 100[24h])",
+            "legendFormat": "Avg Performance Score % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations/sec / Success Rate % / Duration / Performance %",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Compliance Checking",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(verification_feedback_compliance_checking_events_total[5m])",
+            "legendFormat": "Compliance Events/sec - {{compliance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "verification_feedback_compliance_checking_success_rate * 100",
+            "legendFormat": "Compliance Success Rate % - {{compliance_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "verification_feedback_compliance_checking_average_time",
+            "legendFormat": "Avg Compliance Time - {{compliance_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "verification_feedback_compliance_checking_effectiveness_score",
+            "legendFormat": "Compliance Effectiveness - {{compliance_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Effectiveness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Verification Optimization",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(verification_feedback_optimization_events_total[5m])",
+            "legendFormat": "Optimization Events/sec - {{optimization_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "verification_feedback_optimization_success_rate * 100",
+            "legendFormat": "Optimization Success Rate % - {{optimization_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "verification_feedback_optimization_improvement_score",
+            "legendFormat": "Optimization Improvement - {{optimization_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "verification_feedback_optimization_efficiency_score",
+            "legendFormat": "Optimization Efficiency - {{optimization_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Improvement Score / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "verification_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_operations_total, verification_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "analysis_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_code_analysis_events_total, analysis_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "scanning_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_security_scanning_events_total, scanning_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "report_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_verification_reports_events_total, report_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "performance_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_performance_score, performance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "efficiency_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_efficiency_score, efficiency_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "reliability_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_reliability_score, reliability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "scalability_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_scalability_score, scalability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "compliance_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_compliance_checking_events_total, compliance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "optimization_type",
+          "type": "query",
+          "query": "label_values(verification_feedback_optimization_events_total, optimization_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Verification Feedback Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Verification.*Feedback.*|.*Code.*Analysis.*|.*Security.*Scanning.*|.*Quality.*Assessment.*|.*Verification.*Reports.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Verification Feedback Alert: {{alertname}}"
+        },
+        {
+          "name": "Low Verification Success Rate",
+          "datasource": "Prometheus",
+          "expr": "verification_feedback_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Verification Success Rate: {{verification_type}}"
+        },
+        {
+          "name": "Low Analysis Success Rate",
+          "datasource": "Prometheus",
+          "expr": "verification_feedback_code_analysis_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Analysis Success Rate: {{analysis_type}}"
+        },
+        {
+          "name": "Low Scanning Success Rate",
+          "datasource": "Prometheus",
+          "expr": "verification_feedback_security_scanning_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Scanning Success Rate: {{scanning_type}}"
+        },
+        {
+          "name": "Low Assessment Success Rate",
+          "datasource": "Prometheus",
+          "expr": "verification_feedback_quality_assessment_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Assessment Success Rate"
+        }
+      ]
+    }
+  }
+}

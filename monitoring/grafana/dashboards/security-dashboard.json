@@ -1,0 +1,675 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Security Dashboard",
+    "tags": ["security", "security-events", "authentication", "authorization", "compliance-monitoring"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Security Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(security_events_total[5m]))",
+            "legendFormat": "Security Events/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{status=\"401\"}[5m]) / rate(http_requests_total[5m]) * 100",
+            "legendFormat": "Auth Failure Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(http_requests_total{status=\"403\"}[5m]) / rate(http_requests_total[5m]) * 100",
+            "legendFormat": "Authz Failure Rate %",
+            "refId": "C"
+          },
+          {
+            "expr": "security_score * 100",
+            "legendFormat": "Security Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Security Events",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(security_events_total[5m])",
+            "legendFormat": "Security Events/sec - {{event_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(security_events_total{severity=\"critical\"}[5m])",
+            "legendFormat": "Critical Events/sec - {{event_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(security_events_total{severity=\"high\"}[5m])",
+            "legendFormat": "High Events/sec - {{event_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(security_events_total{severity=\"medium\"}[5m])",
+            "legendFormat": "Medium Events/sec - {{event_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 5,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Authentication Events",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(authentication_events_total[5m])",
+            "legendFormat": "Auth Events/sec - {{auth_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(authentication_events_total{result=\"success\"}[5m])",
+            "legendFormat": "Auth Success/sec - {{auth_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(authentication_events_total{result=\"failure\"}[5m])",
+            "legendFormat": "Auth Failure/sec - {{auth_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "authentication_success_rate * 100",
+            "legendFormat": "Auth Success Rate % - {{auth_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 90,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 70,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Authorization Events",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(authorization_events_total[5m])",
+            "legendFormat": "Authz Events/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(authorization_events_total{result=\"success\"}[5m])",
+            "legendFormat": "Authz Success/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(authorization_events_total{result=\"failure\"}[5m])",
+            "legendFormat": "Authz Failure/sec",
+            "refId": "C"
+          },
+          {
+            "expr": "authorization_success_rate * 100",
+            "legendFormat": "Authz Success Rate %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 90 },
+                { "color": "red", "value": 70 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Compliance Monitoring",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(compliance_checking_events_total[5m])",
+            "legendFormat": "Compliance Checks/sec - {{compliance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(compliance_checking_events_total{result=\"pass\"}[5m])",
+            "legendFormat": "Compliance Pass/sec - {{compliance_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(compliance_checking_events_total{result=\"fail\"}[5m])",
+            "legendFormat": "Compliance Fail/sec - {{compliance_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "compliance_pass_rate * 100",
+            "legendFormat": "Compliance Pass Rate % - {{compliance_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Checks/sec / Pass Rate %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 95,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 90,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Security Event Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(security_events_total[5m])",
+            "legendFormat": "{{event_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Security Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "security_score",
+            "legendFormat": "Security Score - {{security_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "security_effectiveness_score",
+            "legendFormat": "Security Effectiveness - {{security_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "security_reliability_score",
+            "legendFormat": "Security Reliability - {{security_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "security_compliance_score",
+            "legendFormat": "Security Compliance - {{security_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Security Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "rate(security_events_total[5m])",
+            "legendFormat": "{{event_type}}",
+            "refId": "SecurityEvents",
+            "format": "table"
+          },
+          {
+            "expr": "rate(authentication_events_total[5m])",
+            "legendFormat": "{{auth_type}}",
+            "refId": "AuthEvents",
+            "format": "table"
+          },
+          {
+            "expr": "rate(authorization_events_total[5m])",
+            "legendFormat": "{{authz_type}}",
+            "refId": "AuthzEvents",
+            "format": "table"
+          },
+          {
+            "expr": "rate(compliance_checking_events_total[5m])",
+            "legendFormat": "{{compliance_type}}",
+            "refId": "ComplianceEvents",
+            "format": "table"
+          },
+          {
+            "expr": "security_score",
+            "legendFormat": "{{security_type}}",
+            "refId": "SecurityScore",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "event_type": 0,
+                "auth_type": 1,
+                "authz_type": 2,
+                "compliance_type": 3,
+                "security_type": 4,
+                "Value #SecurityEvents": 5,
+                "Value #AuthEvents": 6,
+                "Value #AuthzEvents": 7,
+                "Value #ComplianceEvents": 8,
+                "Value #SecurityScore": 9
+              },
+              "renameByName": {
+                "event_type": "Security Event Type",
+                "auth_type": "Auth Type",
+                "authz_type": "Authz Type",
+                "compliance_type": "Compliance Type",
+                "security_type": "Security Type",
+                "Value #SecurityEvents": "Security Events/sec",
+                "Value #AuthEvents": "Auth Events/sec",
+                "Value #AuthzEvents": "Authz Events/sec",
+                "Value #ComplianceEvents": "Compliance Events/sec",
+                "Value #SecurityScore": "Security Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Security Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Security Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - authentication_success_rate) * 100 * 30) - ((1 - authorization_success_rate) * 100 * 30) - ((1 - compliance_pass_rate) * 100 * 20) - (rate(security_events_total{severity=\"critical\"}[5m]) * 20))",
+            "legendFormat": "Security Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Security Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(sum(rate(security_events_total[5m]))[24h])",
+            "legendFormat": "Avg Security Events/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(authentication_success_rate * 100[24h])",
+            "legendFormat": "Avg Auth Success Rate % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(authorization_success_rate * 100[24h])",
+            "legendFormat": "Avg Authz Success Rate % (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(compliance_pass_rate * 100[24h])",
+            "legendFormat": "Avg Compliance Pass Rate % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Pass Rate %",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Threat Detection",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(threat_detection_events_total[5m])",
+            "legendFormat": "Threat Detection Events/sec - {{threat_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(threat_detection_events_total{result=\"positive\"}[5m])",
+            "legendFormat": "Positive Detection/sec - {{threat_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(threat_detection_events_total{result=\"false_positive\"}[5m])",
+            "legendFormat": "False Positive/sec - {{threat_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "threat_detection_accuracy_rate * 100",
+            "legendFormat": "Detection Accuracy % - {{threat_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Accuracy %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 90,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 70,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Security Incidents",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(security_incident_events_total[5m])",
+            "legendFormat": "Security Incidents/sec - {{incident_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(security_incident_events_total{severity=\"critical\"}[5m])",
+            "legendFormat": "Critical Incidents/sec - {{incident_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(security_incident_events_total{severity=\"high\"}[5m])",
+            "legendFormat": "High Incidents/sec - {{incident_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "security_incident_resolution_rate * 100",
+            "legendFormat": "Incident Resolution Rate % - {{incident_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Incidents/sec / Resolution Rate %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 90,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 70,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "event_type",
+          "type": "query",
+          "query": "label_values(security_events_total, event_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "auth_type",
+          "type": "query",
+          "query": "label_values(authentication_events_total, auth_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "authz_type",
+          "type": "query",
+          "query": "label_values(authorization_events_total, authz_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "compliance_type",
+          "type": "query",
+          "query": "label_values(compliance_checking_events_total, compliance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "security_type",
+          "type": "query",
+          "query": "label_values(security_score, security_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "threat_type",
+          "type": "query",
+          "query": "label_values(threat_detection_events_total, threat_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "incident_type",
+          "type": "query",
+          "query": "label_values(security_incident_events_total, incident_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Security Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Security.*|.*Authentication.*|.*Authorization.*|.*Compliance.*|.*Threat.*|.*Incident.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Security Alert: {{alertname}}"
+        },
+        {
+          "name": "High Security Events",
+          "datasource": "Prometheus",
+          "expr": "rate(security_events_total[5m]) > 5",
+          "iconColor": "orange",
+          "titleFormat": "High Security Events: {{event_type}}"
+        },
+        {
+          "name": "Low Auth Success Rate",
+          "datasource": "Prometheus",
+          "expr": "authentication_success_rate * 100 < 90",
+          "iconColor": "orange",
+          "titleFormat": "Low Auth Success Rate: {{auth_type}}"
+        },
+        {
+          "name": "Low Authz Success Rate",
+          "datasource": "Prometheus",
+          "expr": "authorization_success_rate * 100 < 90",
+          "iconColor": "orange",
+          "titleFormat": "Low Authz Success Rate: {{authz_type}}"
+        },
+        {
+          "name": "Low Compliance Pass Rate",
+          "datasource": "Prometheus",
+          "expr": "compliance_pass_rate * 100 < 95",
+          "iconColor": "orange",
+          "titleFormat": "Low Compliance Pass Rate: {{compliance_type}}"
+        },
+        {
+          "name": "Critical Security Incident",
+          "datasource": "Prometheus",
+          "expr": "rate(security_incident_events_total{severity=\"critical\"}[5m]) > 0",
+          "iconColor": "red",
+          "titleFormat": "Critical Security Incident: {{incident_type}}"
+        }
+      ]
+    }
+  }
+}
