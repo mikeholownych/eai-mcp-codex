@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import Card from '@/components/ui/Card'
+import CardContent from '@/components/ui/CardContent'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
@@ -11,8 +12,8 @@ import { useUsers, useUserActions } from '@/hooks/useStaff'
 import { User, UserCreate, UserUpdate } from '@/lib/staffApi'
 
 const UserManagement: React.FC = () => {
-  const { users, total, loading, error, refetch } = useUsers()
-  const { createUser, updateUser, deleteUser, suspendUser, activateUser, loading: actionLoading } = useUserActions()
+  const { users, loading, error, refetch } = useUsers()
+  const { createUser, updateUser, suspendUser, activateUser, loading: actionLoading } = useUserActions()
   
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -282,7 +283,7 @@ const UserManagement: React.FC = () => {
           <Select
             label="Role"
             value={formData.role}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as any }))}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as 'customer' | 'admin' | 'manager' | 'support' | 'content' }))}
             options={[
               { value: 'customer', label: 'Customer' },
               { value: 'admin', label: 'Admin' },
@@ -295,7 +296,7 @@ const UserManagement: React.FC = () => {
           <Select
             label="Status"
             value={formData.status}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'active' | 'inactive' | 'suspended' }))}
             options={[
               { value: 'active', label: 'Active' },
               { value: 'inactive', label: 'Inactive' },
@@ -348,7 +349,7 @@ const UserManagement: React.FC = () => {
           <Select
             label="Role"
             value={formData.role}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as any }))}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as 'customer' | 'admin' | 'manager' | 'support' | 'content' }))}
             options={[
               { value: 'customer', label: 'Customer' },
               { value: 'admin', label: 'Admin' },
@@ -361,7 +362,7 @@ const UserManagement: React.FC = () => {
           <Select
             label="Status"
             value={formData.status}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'active' | 'inactive' | 'suspended' }))}
             options={[
               { value: 'active', label: 'Active' },
               { value: 'inactive', label: 'Inactive' },

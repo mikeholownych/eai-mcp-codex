@@ -1,171 +1,146 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const crypto = require('crypto');
+const isProd = process.env.NODE_ENV === 'production';
 
-const nextConfig: NextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
+const nextConfig = {
+  reactStrictMode: !isProd,
+  
+  // Output configuration for production
+  output: isProd ? 'standalone' : undefined,
+  
+  // Production optimizations
+  ...(isProd ? {
+    compress: true,
+    poweredByHeader: false,
+    generateEtags: false,
+    swcMinify: true,
+    experimental: {
+      optimizeCss: true,
+      optimizePackageImports: ['@headlessui/react', '@heroicons/react'],
+    },
+  } : {}),
+  
+  // Environment variables
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000',
+    NEXT_PUBLIC_EARLY_ACCESS: process.env.NEXT_PUBLIC_EARLY_ACCESS || 'false',
+    NEXT_PUBLIC_SITE_URL: process.env.NEXTAUTH_URL || 'https://new.ethical-ai-insider.com',
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+
+  // Image domains for external images
   images: {
-    domains: ['localhost', 'new.ethical-ai-insider.com'],
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 31536000, // 1 year
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-  },
-  output: 'standalone',
-  compress: true,
-  
-  // Server external packages
-  serverExternalPackages: ['sharp'],
-  
-  // Performance optimizations  
-  experimental: {
-    optimizePackageImports: [
-      '@headlessui/react',
-      '@heroicons/react',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      '@radix-ui/react-tabs',
-      '@radix-ui/react-toast',
-      'lucide-react',
-      'recharts'
+    domains: ['avatars.githubusercontent.com', 'github.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        port: '',
+        pathname: '/u/**',
+      },
     ],
   },
-  
-  // Bundle analysis and optimization
-  webpack: (config, { dev, isServer }) => {
-    // Production optimizations
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Vendor chunk for third-party libraries
-          vendor: {
-            name: 'vendor',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 20
-          },
-          // Common chunk for shared code
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true
-          }
-        }
-      };
-    }
-    
-    return config;
+
+  // Redirects for better UX
+  async redirects() {
+    return [
+      {
+        source: '/dashboard',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/app',
+        destination: '/',
+        permanent: false,
+      },
+    ];
   },
-  
+
+  // Security headers
   async headers() {
-    const securityHeaders = [
-      {
-        key: 'Content-Security-Policy',
-        value: [
-          "default-src 'self'",
-          "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-          "font-src 'self' https://fonts.gstatic.com",
-          "img-src 'self' data: https:",
-          "connect-src 'self' https:",
-          "frame-src 'self'",
-          "object-src 'none'",
-          "base-uri 'self'",
-          "form-action 'self'",
-          "frame-ancestors 'none'",
-          "upgrade-insecure-requests"
-        ].join('; ')
-      },
-      {
-        key: 'X-Frame-Options',
-        value: 'DENY'
-      },
-      {
-        key: 'X-Content-Type-Options',
-        value: 'nosniff'
-      },
-      {
-        key: 'Referrer-Policy',
-        value: 'strict-origin-when-cross-origin'
-      },
-      {
-        key: 'Permissions-Policy',
-        value: 'camera=(), microphone=(), geolocation=()'
-      }
-    ];
-
-    const performanceHeaders = [
-      {
-        key: 'X-DNS-Prefetch-Control',
-        value: 'on'
-      },
-      {
-        key: 'Strict-Transport-Security',
-        value: 'max-age=31536000; includeSubDomains; preload'
-      }
-    ];
-
     return [
       {
         source: '/(.*)',
-        headers: [...securityHeaders, ...performanceHeaders],
-      },
-      // Static assets caching
-      {
-        source: '/_next/static/(.*)',
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
-        ]
-      },
-      // Font preloading and caching
-      {
-        source: '/fonts/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
+            key: 'X-Frame-Options',
+            value: 'DENY',
           },
           {
-            key: 'Cross-Origin-Resource-Policy',
-            value: 'cross-origin'
-          }
-        ]
-      },
-      // API routes performance headers
-      {
-        source: '/api/(.*)',
-        headers: [
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
           {
-            key: 'Cache-Control',
-            value: 'no-store, must-revalidate'
-          }
-        ]
-      }
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
     ];
   },
-  
-  async redirects() {
-    return [
-      // Temporarily disabled to fix production issue
-      // {
-      //   source: '/:path+/',
-      //   destination: '/:path+',
-      //   permanent: true,
-      // },
-    ];
+
+  // Webpack configuration for better builds
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Production optimizations
+    if (!dev) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          framework: {
+            chunks: 'all',
+            name: 'framework',
+            test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+            priority: 40,
+            enforce: true,
+          },
+          lib: {
+            test(module) {
+              return module.size() > 160000 && /node_modules[/\\]/.test(module.identifier());
+            },
+            name(module) {
+              const hash = crypto.createHash('sha1');
+              hash.update(module.identifier());
+              return hash.digest('hex').substring(0, 8);
+            },
+            priority: 30,
+            minChunks: 1,
+            reuseExistingChunk: true,
+          },
+        },
+      };
+    }
+
+    return config;
+  },
+
+  // Error handling
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
+
+  // TypeScript configuration
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+
+  // ESLint configuration
+  eslint: {
+    ignoreDuringBuilds: false,
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
