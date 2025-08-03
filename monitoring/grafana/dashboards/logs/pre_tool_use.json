@@ -1,0 +1,78 @@
+[
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "docker restart mcp-grafana",
+      "description": "Restart Grafana to reload clean dashboards"
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "sleep 10 && docker logs mcp-grafana --tail 5",
+      "description": "Check Grafana provisioning status"
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "LS",
+    "tool_input": {
+      "path": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards"
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "mkdir -p /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards-clean",
+      "description": "Create clean dashboards directory"
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "cp /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards/*.json /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards-clean/",
+      "description": "Copy only dashboard JSON files"
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "cp /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards/dashboard.yml /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards-clean/",
+      "description": "Copy dashboard configuration"
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "cd /opt/Tmux-Orchestrator/llm-stack/rag-agent && sed -i.bak 's|\\./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro|./monitoring/grafana/dashboards-clean:/etc/grafana/provisioning/dashboards:ro|' docker-compose.yml",
+      "description": "Update docker-compose to use clean dashboards directory"
+    }
+  }
+]

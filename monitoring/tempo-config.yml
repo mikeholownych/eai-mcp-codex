@@ -3,26 +3,18 @@ server:
   grpc_listen_port: 9095
 
 distributor:
-  receivers:                           # this configuration will listen on all ports and protocols that tempo is capable of.
-    jaeger:                            # the receives all come from the OpenTelemetry collector.  more configuration information can
-      protocols:                       # be found there: https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver
-        thrift_http:                   #
-        grpc:                          # for a production deployment you should only enable the receivers you need!
-        thrift_binary:
-        thrift_compact:
-    zipkin:
+  receivers:
     otlp:
       protocols:
         http:
         grpc:
-    opencensus:
 
 ingester:
-  max_block_duration: 5m               # cut the headblock when this much time passes. this is being set for demo purposes and should probably be left alone normally
+  max_block_duration: 5m
 
 compactor:
   compaction:
-    block_retention: 1h                # overall Tempo trace retention. set for demo purposes
+    block_retention: 1h
 
 metrics_generator:
   registry:
@@ -37,40 +29,13 @@ metrics_generator:
 
 storage:
   trace:
-    backend: local                     # backend configuration to use
+    backend: local
     wal:
-      path: /tmp/tempo/wal             # where to store the the wal locally
+      path: /tmp/tempo/wal
     local:
       path: /tmp/tempo/blocks
-    pool:
-      max_workers: 100                 # worker pool determines the number of parallel requests to the object store backend
-      queue_depth: 10000
 
 overrides:
-  defaults:
-    metrics_generator:
-      processors: [service-graphs, span-metrics] # enables metrics generator
-    max_traces_per_user: 1000000
-    max_search_bytes_per_trace: 5000
-    forwarders: ['jaeger']
-  per_tenant_override_config: /conf/overrides.yaml
+  max_traces_per_user: 1000000
 
 multitenancy_enabled: false
-
-querier:
-  query_timeout: 30s
-  search:
-    duration_slo: 5s
-    throughput_bytes_slo: 1.073741824e+09
-  trace_by_id:
-    duration_slo: 5s
-
-query_frontend:
-  search:
-    duration_slo: 5s
-    throughput_bytes_slo: 1.073741824e+09
-  trace_by_id:
-    duration_slo: 5s
-
-usage_report:
-  reporting_enabled: false

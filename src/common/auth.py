@@ -191,6 +191,9 @@ class AuthManager:
         }
 
         token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
+        # Ensure token is a string (PyJWT v2.0+ returns bytes)
+        if isinstance(token, bytes):
+            token = token.decode('utf-8')
         logger.info(f"Created JWT token for user: {username}")
         return token
 
@@ -243,7 +246,7 @@ class AuthManager:
         """Revoke a JWT token."""
         try:
             # Decode without verification to get JTI
-            payload = jwt.decode(token, options={"verify_signature": False})
+            payload = jwt.decode(token, options={"verify_signature": False}, algorithms=["none"])
             jti = payload.get("jti")
             if jti:
                 self._revoked_tokens.add(jti)

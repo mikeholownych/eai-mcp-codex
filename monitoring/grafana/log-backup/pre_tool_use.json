@@ -1,0 +1,35 @@
+[
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "find /opt/Tmux-Orchestrator -name \"docker-compose*.yml\" -type f",
+      "description": "Find docker-compose files"
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "grep -A 10 -B 5 \"grafana\" /opt/Tmux-Orchestrator/llm-stack/rag-agent/docker-compose.yml",
+      "description": "Check Grafana configuration in docker-compose"
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "mv /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards/logs /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/log-backup",
+      "description": "Move logs directory out of dashboards volume mount"
+    }
+  }
+]
