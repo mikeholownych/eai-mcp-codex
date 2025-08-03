@@ -8,8 +8,8 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { debug } from '@/lib/utils'
 import {
-  TICKET_STATUS_COLORS,
-  TICKET_STATUS_ICONS,
+  getTicketStatusColor,
+  getTicketStatusIcon,
 } from '@/lib/statusHelpers'
 import {
   LifebuoyIcon,
@@ -40,8 +40,6 @@ const getStatusColor = (status: string) =>
 
 const getStatusIcon = (status: string) =>
   TICKET_STATUS_ICONS[status] ?? TICKET_STATUS_ICONS.open
-
-const getStatusIcon = (status: string) => statusIcons[status] ?? <ClockIcon className="h-4 w-4" />
 
 const categories = [
   'All Categories',
@@ -426,8 +424,8 @@ export default function StaffTicketManagement() {
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
                   <h3 className="text-lg font-semibold text-white">{ticket.title}</h3>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
-                    {getStatusIcon(ticket.status)}
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTicketStatusColor(ticket.status)}`}>
+                    {getTicketStatusIcon(ticket.status)}
                     <span className="ml-1">{ticket.status.replace('-', ' ')}</span>
                   </span>
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(ticket.priority)}`}>

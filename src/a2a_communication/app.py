@@ -2,21 +2,20 @@
 
 from fastapi import FastAPI
 
-from src.common.logging import get_logger
 from src.common.health_check import health
-
+from .message_broker import A2AMessageBroker
 from .routes import router
 
 app = FastAPI(title="A2A Communication Hub")
 app.include_router(router)
-logger = get_logger("a2a_communication")
+
+
+@app.on_event("startup")
+async def startup() -> None:
+    """Create and store the message broker on startup."""
+    app.state.broker = await A2AMessageBroker.create()
 
 
 @app.get("/health")
 def health_check() -> dict:
     return health()
-
-
-@app.on_event("startup")
-def startup() -> None:
-    logger.info("A2A Communication Hub service started")

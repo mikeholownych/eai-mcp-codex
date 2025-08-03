@@ -25,6 +25,8 @@ from .multi_developer_orchestrator import MultiDeveloperOrchestrator
 from .developer_profile_manager import DeveloperProfileManager
 from .intelligent_conflict_resolver import IntelligentConflictResolver
 
+
+router = APIRouter()
 logger = get_logger("multi_developer_orchestrator")
 
 

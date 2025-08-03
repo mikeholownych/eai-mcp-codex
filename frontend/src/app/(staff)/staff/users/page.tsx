@@ -9,7 +9,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { useRouter } from 'next/navigation'
 import { debug } from '@/lib/utils'
-import { USER_STATUS_COLORS, USER_STATUS_ICONS } from '@/lib/statusHelpers'
+import { getUserStatusColor, getUserStatusIcon } from '@/lib/statusHelpers'
 import {
   UserGroupIcon,
   PlusIcon,
@@ -40,8 +40,6 @@ const getStatusColor = (status: string) =>
 
 const getStatusIcon = (status: string) =>
   USER_STATUS_ICONS[status] ?? USER_STATUS_ICONS.active
-
-const getStatusIcon = (status: string) => statusIcons[status] ?? <ClockIcon className="h-4 w-4" />
 
 export default function UserManagement() {
   const { user: currentUser } = useAuth()
@@ -298,8 +296,8 @@ export default function UserManagement() {
                     </span>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                      {getStatusIcon(user.status)}
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getUserStatusColor(user.status)}`}>
+                      {getUserStatusIcon(user.status)}
                       <span className="ml-1">{user.status}</span>
                     </span>
                   </td>
