@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { modelApi } from '@/lib/api'
 import {
   PaperAirplaneIcon,
   SparklesIcon,
@@ -33,7 +34,8 @@ const suggestionPrompts = [
   'Design a database schema for an e-commerce app',
 ]
 
-const modelOptions = [
+// Default model options as fallback
+const defaultModelOptions = [
   { value: 'claude-3.7-sonnet', label: 'Claude 3.7 Sonnet (Recommended)' },
   { value: 'claude-o3', label: 'Claude O3 (Advanced)' },
   { value: 'claude-sonnet-4', label: 'Claude Sonnet 4 (Latest)' },
@@ -44,6 +46,8 @@ export default function ChatPage() {
   const [inputMessage, setInputMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [selectedModel, setSelectedModel] = useState('claude-3.7-sonnet')
+  const [modelOptions, setModelOptions] = useState(defaultModelOptions)
+  const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
 
@@ -54,6 +58,43 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Load available models and test connection on mount
+  useEffect(() => {
+    const initializeChat = async () => {
+      try {
+        // Test Claude connection
+        const connectionTest = await modelApi.testClaudeConnection()
+        setConnectionStatus(connectionTest.success && connectionTest.data?.claude_api_connected ? 'connected' : 'disconnected')
+
+        // Load available models
+        const modelsResponse = await modelApi.getAvailableModels()
+        if (modelsResponse.success && modelsResponse.data) {
+          const dynamicModelOptions = Object.keys(modelsResponse.data).map((modelName) => {
+            const modelInfo = modelsResponse.data[modelName]
+            return {
+              value: modelName,
+              label: `${modelName} (${modelInfo.use_cases?.join(', ') || 'General Purpose'})`
+            }
+          })
+          
+          if (dynamicModelOptions.length > 0) {
+            setModelOptions(dynamicModelOptions)
+            // Set first available model as default if current selection not available
+            if (!dynamicModelOptions.find(m => m.value === selectedModel)) {
+              setSelectedModel(dynamicModelOptions[0].value)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to initialize chat:', error)
+        setConnectionStatus('disconnected')
+        // Keep default model options on error
+      }
+    }
+
+    initializeChat()
+  }, [])
 
   const handleSendMessage = async (content?: string) => {
     const messageContent = content || inputMessage.trim()
@@ -71,8 +112,44 @@ export default function ChatPage() {
     setInputMessage('')
     setIsTyping(true)
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Call real AI model through model-router service
+      const response = await modelApi.routeRequest(messageContent, {
+        model: selectedModel,
+        taskType: messageContent.toLowerCase().includes('code') ? 'code_generation' : 'general',
+        temperature: 0.7,
+        maxTokens: 4096,
+        context: {
+          conversation_history: messages.slice(-5), // Send last 5 messages for context
+          user_preferences: { model: selectedModel }
+        }
+      })
+
+      if (response.success && response.data) {
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: response.data.result || response.data.content || 'I received your message but couldn\'t generate a response.',
+          timestamp: new Date(),
+          type: messageContent.toLowerCase().includes('code') ? 'code' : 'text',
+        }
+        
+        setMessages(prev => [...prev, aiMessage])
+      } else {
+        // Fallback message if API call succeeds but no proper response
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'I apologize, but I encountered an issue generating a response. Please try again.',
+          timestamp: new Date(),
+          type: 'text',
+        }
+        setMessages(prev => [...prev, errorMessage])
+      }
+    } catch (error) {
+      console.error('Error calling model API:', error)
+      
+      // Fallback to mock response if API fails
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -82,8 +159,9 @@ export default function ChatPage() {
       }
       
       setMessages(prev => [...prev, aiMessage])
+    } finally {
       setIsTyping(false)
-    }, 2000)
+    }
   }
 
   const generateAIResponse = (prompt: string): string => {
@@ -215,10 +293,27 @@ Feel free to share your code or ask specific technical questions!`
         </div>
         
         <div className="flex items-center space-x-3">
+          {/* Connection Status Indicator */}
+          <div className="flex items-center space-x-2">
+            <div 
+              className={`w-2 h-2 rounded-full ${
+                connectionStatus === 'connected' ? 'bg-green-500' : 
+                connectionStatus === 'disconnected' ? 'bg-red-500' : 
+                'bg-yellow-500'
+              }`}
+            />
+            <span className="text-xs text-gray-400">
+              {connectionStatus === 'connected' ? 'AI Connected' : 
+               connectionStatus === 'disconnected' ? 'AI Offline' : 
+               'Connecting...'}
+            </span>
+          </div>
+          
           <select
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
-            className="bg-slate-700 text-white text-sm rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            className="bg-slate-700 text-white text-sm rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 min-w-[200px]"
+            disabled={connectionStatus === 'disconnected'}
           >
             {modelOptions.map((model) => (
               <option key={model.value} value={model.value}>
@@ -374,8 +469,9 @@ Feel free to share your code or ask specific technical questions!`
               <Button
                 variant="primary"
                 onClick={() => handleSendMessage()}
-                disabled={!inputMessage.trim() || isTyping}
+                disabled={!inputMessage.trim() || isTyping || connectionStatus === 'disconnected'}
                 className="px-4 py-3"
+                title={connectionStatus === 'disconnected' ? 'AI service is offline' : ''}
               >
                 <PaperAirplaneIcon className="h-5 w-5" />
               </Button>

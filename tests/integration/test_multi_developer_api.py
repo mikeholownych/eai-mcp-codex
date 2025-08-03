@@ -320,8 +320,16 @@ class TestTeamCoordinationPlanEndpoints:
             }
         ]
         
-        with patch('src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create', new_callable=AsyncMock) as mock_create_orchestrator,
-             patch('src.collaboration_orchestrator.multi_developer_orchestrator.DeveloperProfileManager.create', new_callable=AsyncMock) as mock_create_profile_manager:
+        with (
+            patch(
+                'src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create',
+                new_callable=AsyncMock,
+            ) as mock_create_orchestrator,
+            patch(
+                'src.collaboration_orchestrator.multi_developer_orchestrator.DeveloperProfileManager.create',
+                new_callable=AsyncMock,
+            ) as mock_create_profile_manager,
+        ):
             mock_orchestrator_instance = AsyncMock()
             mock_create_orchestrator.return_value = mock_orchestrator_instance
             mock_orchestrator_instance.get_coordination_plan.return_value = mock_plan
@@ -411,8 +419,16 @@ class TestConflictResolutionEndpoints:
             "created_at": datetime.utcnow().isoformat(),
         }
         
-        with patch('src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create', new_callable=AsyncMock) as mock_create_orchestrator,
-             patch('src.collaboration_orchestrator.intelligent_conflict_resolver.IntelligentConflictResolver.create', new_callable=AsyncMock) as mock_create_conflict_resolver:
+        with (
+            patch(
+                'src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create',
+                new_callable=AsyncMock,
+            ) as mock_create_orchestrator,
+            patch(
+                'src.collaboration_orchestrator.intelligent_conflict_resolver.IntelligentConflictResolver.create',
+                new_callable=AsyncMock,
+            ) as mock_create_conflict_resolver,
+        ):
             mock_orchestrator_instance = AsyncMock()
             mock_create_orchestrator.return_value = mock_orchestrator_instance
             mock_orchestrator_instance.get_coordination_plan.return_value = mock_plan
@@ -595,8 +611,16 @@ class TestSystemHealthEndpoints:
     @pytest.mark.asyncio
     async def test_get_system_health(self, client):
         """Test system health check."""
-        with patch('src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create', new_callable=AsyncMock) as mock_create_orchestrator,
-             patch('src.collaboration_orchestrator.intelligent_conflict_resolver.IntelligentConflictResolver.create', new_callable=AsyncMock) as mock_create_conflict_resolver:
+        with (
+            patch(
+                'src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create',
+                new_callable=AsyncMock,
+            ) as mock_create_orchestrator,
+            patch(
+                'src.collaboration_orchestrator.intelligent_conflict_resolver.IntelligentConflictResolver.create',
+                new_callable=AsyncMock,
+            ) as mock_create_conflict_resolver,
+        ):
             mock_orchestrator_instance = AsyncMock()
             mock_create_orchestrator.return_value = mock_orchestrator_instance
             mock_orchestrator_instance.active_plans = {}
@@ -620,8 +644,16 @@ class TestSystemHealthEndpoints:
     @pytest.mark.asyncio
     async def test_get_system_metrics(self, client):
         """Test system metrics retrieval."""
-        with patch('src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create', new_callable=AsyncMock) as mock_create_orchestrator,
-             patch('src.collaboration_orchestrator.intelligent_conflict_resolver.IntelligentConflictResolver.create', new_callable=AsyncMock) as mock_create_conflict_resolver:
+        with (
+            patch(
+                'src.collaboration_orchestrator.multi_developer_orchestrator.MultiDeveloperOrchestrator.create',
+                new_callable=AsyncMock,
+            ) as mock_create_orchestrator,
+            patch(
+                'src.collaboration_orchestrator.intelligent_conflict_resolver.IntelligentConflictResolver.create',
+                new_callable=AsyncMock,
+            ) as mock_create_conflict_resolver,
+        ):
             mock_orchestrator_instance = AsyncMock()
             mock_create_orchestrator.return_value = mock_orchestrator_instance
             mock_orchestrator_instance.active_plans = {"plan_1": {}, "plan_2": {}}

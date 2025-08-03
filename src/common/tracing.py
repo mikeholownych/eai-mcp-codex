@@ -393,6 +393,7 @@ def traced(operation_name: str = None, attributes: Dict[str, Any] = None):
             else:
                 return sync_wrapper
         return sync_wrapper
+
     
     return decorator
 
@@ -514,3 +515,4 @@ def instrument_service(app = None) -> None:
     manager.instrument_httpx()
     manager.instrument_database()
     manager.instrument_requests()
+

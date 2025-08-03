@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from src.common.logging import get_logger
 
 from .models import (
@@ -20,13 +20,18 @@ from .message_broker import A2AMessageBroker
 
 router = APIRouter()
 logger = get_logger("a2a_communication")
-broker = A2AMessageBroker()
+
+
+def get_broker(request: Request) -> A2AMessageBroker:
+    return request.app.state.broker
 
 
 @router.post("/messages/send")
-async def send_message(message: A2AMessage) -> dict:
+async def send_message(
+    message: A2AMessage, broker: A2AMessageBroker = Depends(get_broker)
+) -> dict:
     """Send an A2A message."""
-    success = broker.send_message(message)
+    success = await broker.send_message(message)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to send message")
 
@@ -35,16 +40,20 @@ async def send_message(message: A2AMessage) -> dict:
 
 @router.get("/messages/{agent_id}")
 async def get_messages(
-    agent_id: str, limit: int = Query(10, ge=1, le=100)
+    agent_id: str,
+    limit: int = Query(10, ge=1, le=100),
+    broker: A2AMessageBroker = Depends(get_broker),
 ) -> List[A2AMessage]:
     """Get messages for an agent."""
-    return broker.get_messages(agent_id, limit)
+    return await broker.get_messages(agent_id, limit)
 
 
 @router.post("/agents/register")
-async def register_agent(registration: AgentRegistration) -> dict:
+async def register_agent(
+    registration: AgentRegistration, broker: A2AMessageBroker = Depends(get_broker)
+) -> dict:
     """Register an agent."""
-    success = broker.register_agent(registration)
+    success = await broker.register_agent(registration)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to register agent")
 
@@ -52,9 +61,11 @@ async def register_agent(registration: AgentRegistration) -> dict:
 
 
 @router.delete("/agents/{agent_id}")
-async def unregister_agent(agent_id: str) -> dict:
+async def unregister_agent(
+    agent_id: str, broker: A2AMessageBroker = Depends(get_broker)
+) -> dict:
     """Unregister an agent."""
-    success = broker.unregister_agent(agent_id)
+    success = await broker.unregister_agent(agent_id)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to unregister agent")
 
@@ -62,15 +73,19 @@ async def unregister_agent(agent_id: str) -> dict:
 
 
 @router.get("/agents/type/{agent_type}")
-async def get_agents_by_type(agent_type: str) -> List[str]:
+async def get_agents_by_type(
+    agent_type: str, broker: A2AMessageBroker = Depends(get_broker)
+) -> List[str]:
     """Get agents by type."""
-    return broker.get_agents_by_type(agent_type)
+    return await broker.get_agents_by_type(agent_type)
 
 
 @router.get("/agents/{agent_id}")
-async def get_agent(agent_id: str) -> AgentRegistration:
+async def get_agent(
+    agent_id: str, broker: A2AMessageBroker = Depends(get_broker)
+) -> AgentRegistration:
     """Get agent information."""
-    agent = broker.get_agent(agent_id)
+    agent = await broker.get_agent(agent_id)
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
 
@@ -78,9 +93,11 @@ async def get_agent(agent_id: str) -> AgentRegistration:
 
 
 @router.put("/agents/{agent_id}/status")
-async def update_agent_status(agent_id: str, status: AgentStatus) -> dict:
+async def update_agent_status(
+    agent_id: str, status: AgentStatus, broker: A2AMessageBroker = Depends(get_broker)
+) -> dict:
     """Update agent status."""
-    success = broker.update_agent_status(agent_id, status)
+    success = await broker.update_agent_status(agent_id, status)
     if not success:
         raise HTTPException(status_code=404, detail="Agent not found")
 
@@ -88,9 +105,11 @@ async def update_agent_status(agent_id: str, status: AgentStatus) -> dict:
 
 
 @router.post("/agents/{agent_id}/heartbeat")
-async def agent_heartbeat(agent_id: str) -> dict:
+async def agent_heartbeat(
+    agent_id: str, broker: A2AMessageBroker = Depends(get_broker)
+) -> dict:
     """Agent heartbeat to maintain registration."""
-    success = broker.update_agent_status(agent_id, AgentStatus.AVAILABLE)
+    success = await broker.update_agent_status(agent_id, AgentStatus.AVAILABLE)
     if not success:
         raise HTTPException(status_code=404, detail="Agent not found")
 
@@ -99,19 +118,23 @@ async def agent_heartbeat(agent_id: str) -> dict:
 
 @router.get("/conversations/{conversation_id}/history")
 async def get_conversation_history(
-    conversation_id: UUID, limit: int = Query(50, ge=1, le=200)
+    conversation_id: UUID,
+    limit: int = Query(50, ge=1, le=200),
+    broker: A2AMessageBroker = Depends(get_broker),
 ) -> List[A2AMessage]:
     """Get conversation message history."""
-    return broker.get_conversation_history(conversation_id, limit)
+    return await broker.get_conversation_history(conversation_id, limit)
 
 
 @router.post("/collaborations/request")
-async def request_collaboration(request: CollaborationRequest) -> dict:
+async def request_collaboration(
+    request: CollaborationRequest, broker: A2AMessageBroker = Depends(get_broker)
+) -> dict:
     """Request collaboration from available agents."""
     # Find agents with required capabilities
     available_agents = []
     for capability in request.required_capabilities:
-        agents = broker.get_agents_by_type(capability)
+        agents = await broker.get_agents_by_type(capability)
         available_agents.extend(agents)
 
     # Remove duplicates and limit to max_agents
@@ -139,7 +162,7 @@ async def request_collaboration(request: CollaborationRequest) -> dict:
     sent_count = 0
     for agent_id in unique_agents:
         collaboration_message.recipient_agent_id = agent_id
-        if broker.send_message(collaboration_message):
+        if await broker.send_message(collaboration_message):
             sent_count += 1
 
     return {
@@ -150,7 +173,9 @@ async def request_collaboration(request: CollaborationRequest) -> dict:
 
 
 @router.post("/consensus/create")
-async def create_consensus_item(item: ConsensusItem) -> dict:
+async def create_consensus_item(
+    item: ConsensusItem, broker: A2AMessageBroker = Depends(get_broker)
+) -> dict:
     """Create a consensus item for agent voting."""
     # Send consensus request to all participating agents
     consensus_message = A2AMessage(
@@ -170,13 +195,13 @@ async def create_consensus_item(item: ConsensusItem) -> dict:
     )
 
     # Broadcast to all active agents for now
-    broker.send_message(consensus_message)
+    await broker.send_message(consensus_message)
 
     return {"item_id": str(item.item_id), "status": "consensus_requested"}
 
 
 @router.get("/system/stats")
-async def get_system_stats() -> dict:
+async def get_system_stats(broker: A2AMessageBroker = Depends(get_broker)) -> dict:
     """Get A2A system statistics."""
     try:
         # Count active agents by type
@@ -185,7 +210,7 @@ async def get_system_stats() -> dict:
         total_agents = 0
 
         for agent_type in agent_types:
-            count = len(broker.get_agents_by_type(agent_type))
+            count = len(await broker.get_agents_by_type(agent_type))
             agent_counts[agent_type] = count
             total_agents += count
 
@@ -201,7 +226,7 @@ async def get_system_stats() -> dict:
 
 
 @router.post("/system/cleanup")
-async def cleanup_system() -> dict:
+def cleanup_system(broker: A2AMessageBroker = Depends(get_broker)) -> dict:
     """Clean up expired messages and inactive agents."""
     cleaned_count = broker.cleanup_expired_messages()
     return {"cleaned_items": cleaned_count, "timestamp": datetime.utcnow()}
