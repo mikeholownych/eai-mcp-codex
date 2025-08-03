@@ -1,0 +1,644 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "System Overview Dashboard",
+    "tags": ["system-overview", "system-health", "resource-usage", "service-status"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "avg_over_time(up[5m]) * 100",
+            "legendFormat": "System Availability %",
+            "refId": "A"
+          },
+          {
+            "expr": "system_health_score * 100",
+            "legendFormat": "System Health Score %",
+            "refId": "B"
+          },
+          {
+            "expr": "system_performance_score * 100",
+            "legendFormat": "System Performance Score %",
+            "refId": "C"
+          },
+          {
+            "expr": "system_reliability_score * 100",
+            "legendFormat": "System Reliability Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Service Status",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "up{job=\"model-router\"}",
+            "legendFormat": "Model Router",
+            "refId": "A"
+          },
+          {
+            "expr": "up{job=\"plan-management\"}",
+            "legendFormat": "Plan Management",
+            "refId": "B"
+          },
+          {
+            "expr": "up{job=\"git-worktree-manager\"}",
+            "legendFormat": "Git Worktree Manager",
+            "refId": "C"
+          },
+          {
+            "expr": "up{job=\"workflow-orchestrator\"}",
+            "legendFormat": "Workflow Orchestrator",
+            "refId": "D"
+          },
+          {
+            "expr": "up{job=\"verification-feedback\"}",
+            "legendFormat": "Verification Feedback",
+            "refId": "E"
+          },
+          {
+            "expr": "up{job=\"frontend\"}",
+            "legendFormat": "Frontend",
+            "refId": "F"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "green", "value": 1 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Model Router" },
+              "properties": [
+                { "id": "mappings", "value": [
+                  { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                  { "options": { "1": { "text": "UP", "color": "green" } } }
+                ]}
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Plan Management" },
+              "properties": [
+                { "id": "mappings", "value": [
+                  { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                  { "options": { "1": { "text": "UP", "color": "green" } } }
+                ]}
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Git Worktree Manager" },
+              "properties": [
+                { "id": "mappings", "value": [
+                  { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                  { "options": { "1": { "text": "UP", "color": "green" } } }
+                ]}
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Workflow Orchestrator" },
+              "properties": [
+                { "id": "mappings", "value": [
+                  { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                  { "options": { "1": { "text": "UP", "color": "green" } } }
+                ]}
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Verification Feedback" },
+              "properties": [
+                { "id": "mappings", "value": [
+                  { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                  { "options": { "1": { "text": "UP", "color": "green" } } }
+                ]}
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Frontend" },
+              "properties": [
+                { "id": "mappings", "value": [
+                  { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                  { "options": { "1": { "text": "UP", "color": "green" } } }
+                ]}
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "CPU Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU Usage - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"iowait\"}[5m])) * 100)",
+            "legendFormat": "IO Wait - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "avg by(instance) (irate(node_cpu_seconds_total{mode=\"system\"}[5m])) * 100",
+            "legendFormat": "System CPU - {{instance}}",
+            "refId": "C"
+          },
+          {
+            "expr": "avg by(instance) (irate(node_cpu_seconds_total{mode=\"user\"}[5m])) * 100",
+            "legendFormat": "User CPU - {{instance}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "CPU Usage %",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 95,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "Memory Usage - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "(node_memory_Buffers_bytes / node_memory_MemTotal_bytes) * 100",
+            "legendFormat": "Buffers - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "(node_memory_Cached_bytes / node_memory_MemTotal_bytes) * 100",
+            "legendFormat": "Cached - {{instance}}",
+            "refId": "C"
+          },
+          {
+            "expr": "(node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes) / node_memory_SwapTotal_bytes * 100",
+            "legendFormat": "Swap Usage - {{instance}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Memory Usage %",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 95,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Disk Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes)) * 100",
+            "legendFormat": "Disk Usage - {{instance}}:{{mountpoint}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_disk_io_time_seconds_total[5m])",
+            "legendFormat": "Disk IO Time - {{instance}}:{{device}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(node_disk_read_bytes_total[5m])",
+            "legendFormat": "Disk Read - {{instance}}:{{device}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(node_disk_written_bytes_total[5m])",
+            "legendFormat": "Disk Write - {{instance}}:{{device}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Disk Usage % / IO Time / Read/Write Bytes",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 95,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Network Traffic",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m])",
+            "legendFormat": "Network Receive - {{instance}}:{{device}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m])",
+            "legendFormat": "Network Transmit - {{instance}}:{{device}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(node_network_receive_packets_total[5m])",
+            "legendFormat": "Receive Packets - {{instance}}:{{device}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(node_network_transmit_packets_total[5m])",
+            "legendFormat": "Transmit Packets - {{instance}}:{{device}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Network Bytes/sec / Packets/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Container Resource Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes / 1024 / 1024",
+            "legendFormat": "Memory Usage (MB) - {{name}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(container_cpu_usage_seconds_total[5m]) * 100",
+            "legendFormat": "CPU Usage (%) - {{name}}",
+            "refId": "B"
+          },
+          {
+            "expr": "container_fs_usage_bytes / 1024 / 1024",
+            "legendFormat": "FS Usage (MB) - {{name}}",
+            "refId": "C"
+          },
+          {
+            "expr": "container_network_receive_bytes_total",
+            "legendFormat": "Network Receive (bytes) - {{name}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB / % / Bytes",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 95,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Service Response Times",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"model-router\"}[5m]))",
+            "legendFormat": "Model Router P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"model-router\"}[5m]))",
+            "legendFormat": "Model Router P95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"plan-management\"}[5m]))",
+            "legendFormat": "Plan Management P50",
+            "refId": "C"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"plan-management\"}[5m]))",
+            "legendFormat": "Plan Management P95",
+            "refId": "D"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"workflow-orchestrator\"}[5m]))",
+            "legendFormat": "Workflow Orchestrator P50",
+            "refId": "E"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"workflow-orchestrator\"}[5m]))",
+            "legendFormat": "Workflow Orchestrator P95",
+            "refId": "F"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Response Time (s)",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 2,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 5,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "System Load Average",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+        "targets": [
+          {
+            "expr": "node_load1",
+            "legendFormat": "Load 1m - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "node_load5",
+            "legendFormat": "Load 5m - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "node_load15",
+            "legendFormat": "Load 15m - {{instance}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Load Average",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 5,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Process Count",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 40 },
+        "targets": [
+          {
+            "expr": "node_procs_running",
+            "legendFormat": "Running Processes - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "node_procs_blocked",
+            "legendFormat": "Blocked Processes - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "node_procs_total",
+            "legendFormat": "Total Processes - {{instance}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Process Count",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "System Alerts",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 48 },
+        "targets": [
+          {
+            "expr": "ALERTS{alertstate=\"firing\"}",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "job": true
+              },
+              "indexByName": {
+                "alertname": 0,
+                "severity": 1,
+                "alertstate": 2,
+                "description": 3
+              },
+              "renameByName": {
+                "alertname": "Alert Name",
+                "severity": "Severity",
+                "alertstate": "State",
+                "description": "Description"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Severity" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": null },
+                      { "color": "yellow", "value": "warning" },
+                      { "color": "red", "value": "critical" }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(up, instance)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "job",
+          "type": "query",
+          "query": "label_values(up, job)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "device",
+          "type": "query",
+          "query": "label_values(node_disk_io_time_seconds_total, device)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "mountpoint",
+          "type": "query",
+          "query": "label_values(node_filesystem_avail_bytes, mountpoint)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "System Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*System.*|.*Node.*|.*Host.*|.*CPU.*|.*Memory.*|.*Disk.*|.*Network.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "System Alert: {{alertname}}"
+        },
+        {
+          "name": "Service Down",
+          "datasource": "Prometheus",
+          "expr": "up == 0",
+          "iconColor": "red",
+          "titleFormat": "Service Down: {{job}} on {{instance}}"
+        },
+        {
+          "name": "High CPU Usage",
+          "datasource": "Prometheus",
+          "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100) > 80",
+          "iconColor": "orange",
+          "titleFormat": "High CPU Usage: {{instance}}"
+        },
+        {
+          "name": "High Memory Usage",
+          "datasource": "Prometheus",
+          "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80",
+          "iconColor": "orange",
+          "titleFormat": "High Memory Usage: {{instance}}"
+        },
+        {
+          "name": "High Disk Usage",
+          "datasource": "Prometheus",
+          "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes)) * 100 > 80",
+          "iconColor": "orange",
+          "titleFormat": "High Disk Usage: {{instance}}:{{mountpoint}}"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "dashboardVersions": {
+    "frontend-performance-dashboard.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "Frontend performance monitoring dashboard with web vitals and asset serving metrics",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "Node Exporter", "Nginx Exporter"],
+      "tags": ["frontend", "performance", "web-vitals", "nextjs"]
+    },
+    "rabbitmq-dashboard.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "RabbitMQ message broker monitoring dashboard with queue metrics and A2A communication patterns",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "RabbitMQ Exporter"],
+      "tags": ["rabbitmq", "messaging", "agents", "a2a-communication"]
+    },
+    "mcp-overview.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "MCP system overview dashboard with comprehensive system health metrics",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "Node Exporter", "Container Exporter"],
+      "tags": ["mcp", "overview", "system-health", "monitoring"]
+    },
+    "service-metrics.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "Service metrics dashboard with detailed performance metrics for all MCP services",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "Node Exporter", "Application Metrics"],
+      "tags": ["services", "metrics", "performance", "mcp"]
+    },
+    "workflow-analytics.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "Workflow analytics dashboard with execution metrics and agent coordination patterns",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "Workflow Metrics", "Agent Metrics"],
+      "tags": ["workflow", "analytics", "agents", "coordination"]
+    },
+    "infrastructure-dashboard.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "Infrastructure dashboard with Kubernetes resources, container metrics, and node performance",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "Kubernetes Metrics", "Node Exporter", "Container Exporter"],
+      "tags": ["infrastructure", "kubernetes", "containers", "nodes"]
+    },
+    "database-dashboard.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "Database dashboard with PostgreSQL metrics, query performance, and connection pooling",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "PostgreSQL Exporter"],
+      "tags": ["database", "postgresql", "query-performance", "connections"]
+    },
+    "redis-dashboard.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "Redis dashboard with cache performance, memory usage, and hit rates",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "Redis Exporter"],
+      "tags": ["redis", "cache", "memory", "performance"]
+    },
+    "network-dashboard.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "Network dashboard with traffic analysis, latency, and connection metrics",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "Node Exporter", "Network Metrics"],
+      "tags": ["network", "traffic", "latency", "connections"]
+    },
+    "alerting-dashboard.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "Alerting dashboard with active alerts, alert history, and notification status",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "Alertmanager"],
+      "tags": ["alerting", "alerts", "notifications", "monitoring"]
+    },
+    "slo-dashboard.json": {
+      "version": "1.0.0",
+      "lastUpdated": "2025-08-02T16:43:23Z",
+      "description": "SLO dashboard with service level objectives, error budgets, and compliance monitoring",
+      "author": "Grafana Dashboard Generator",
+      "dependencies": ["Prometheus", "SLO Metrics"],
+      "tags": ["slo", "service-level-objectives", "error-budgets", "compliance"]
+    }
+  },
+  "versioningStrategy": {
+    "autoIncrement": true,
+    "versionFormat": "semantic",
+    "changelogEnabled": true,
+    "backupEnabled": true,
+    "backupRetentionDays": 30
+  },
+  "deploymentConfig": {
+    "environment": "production",
+    "autoDeploy": true,
+    "validationEnabled": true,
+    "rollbackEnabled": true,
+    "notificationEnabled": true
+  }
+}

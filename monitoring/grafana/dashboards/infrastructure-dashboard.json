@@ -1,0 +1,659 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Infrastructure Dashboard",
+    "tags": ["infrastructure", "kubernetes-resources", "container-metrics", "node-performance"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Infrastructure Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "count(kube_node_info)",
+            "legendFormat": "Total Nodes",
+            "refId": "A"
+          },
+          {
+            "expr": "count(kube_pod_info)",
+            "legendFormat": "Total Pods",
+            "refId": "B"
+          },
+          {
+            "expr": "count(kube_deployment_labels)",
+            "legendFormat": "Total Deployments",
+            "refId": "C"
+          },
+          {
+            "expr": "infrastructure_health_score * 100",
+            "legendFormat": "Infrastructure Health %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Node Performance",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU Usage % - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "Memory Usage % - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes)) * 100",
+            "legendFormat": "Disk Usage % - {{instance}}:{{mountpoint}}",
+            "refId": "C"
+          },
+          {
+            "expr": "node_load5",
+            "legendFormat": "Load 5m - {{instance}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Usage % / Load",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 95,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Container Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes / 1024 / 1024",
+            "legendFormat": "Memory Usage MB - {{pod}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(container_cpu_usage_seconds_total[5m]) * 100",
+            "legendFormat": "CPU Usage % - {{pod}}",
+            "refId": "B"
+          },
+          {
+            "expr": "container_fs_usage_bytes / 1024 / 1024",
+            "legendFormat": "Disk Usage MB - {{pod}}",
+            "refId": "C"
+          },
+          {
+            "expr": "container_network_receive_bytes_total / 1024 / 1024",
+            "legendFormat": "Network RX MB - {{pod}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB / %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 95,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Kubernetes Resources",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "count(kube_pod_status_phase{phase=\"Running\"})",
+            "legendFormat": "Running Pods",
+            "refId": "A"
+          },
+          {
+            "expr": "count(kube_pod_status_phase{phase=\"Pending\"})",
+            "legendFormat": "Pending Pods",
+            "refId": "B"
+          },
+          {
+            "expr": "count(kube_pod_status_phase{phase=\"Failed\"})",
+            "legendFormat": "Failed Pods",
+            "refId": "C"
+          },
+          {
+            "expr": "count(kube_pod_container_status_waiting)",
+            "legendFormat": "Waiting Containers",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 5 },
+                { "color": "red", "value": 10 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Pod Resource Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "kube_pod_container_resource_requests_memory_bytes / 1024 / 1024",
+            "legendFormat": "Memory Request MB - {{pod}}",
+            "refId": "A"
+          },
+          {
+            "expr": "kube_pod_container_resource_requests_cpu_cores",
+            "legendFormat": "CPU Request Cores - {{pod}}",
+            "refId": "B"
+          },
+          {
+            "expr": "kube_pod_container_resource_limits_memory_bytes / 1024 / 1024",
+            "legendFormat": "Memory Limit MB - {{pod}}",
+            "refId": "C"
+          },
+          {
+            "expr": "kube_pod_container_resource_limits_cpu_cores",
+            "legendFormat": "CPU Limit Cores - {{pod}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB / Cores",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Node Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "count(kube_pod_info) by (node)",
+            "legendFormat": "{{node}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Infrastructure Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "infrastructure_health_score",
+            "legendFormat": "Health Score - {{health_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "infrastructure_efficiency_score",
+            "legendFormat": "Efficiency Score - {{efficiency_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "infrastructure_reliability_score",
+            "legendFormat": "Reliability Score - {{reliability_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "infrastructure_scalability_score",
+            "legendFormat": "Scalability Score - {{scalability_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Infrastructure Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "{{instance}}",
+            "refId": "CPU",
+            "format": "table"
+          },
+          {
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "{{instance}}",
+            "refId": "Memory",
+            "format": "table"
+          },
+          {
+            "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes)) * 100",
+            "legendFormat": "{{instance}}:{{mountpoint}}",
+            "refId": "Disk",
+            "format": "table"
+          },
+          {
+            "expr": "count(kube_pod_info) by (node)",
+            "legendFormat": "{{node}}",
+            "refId": "Pods",
+            "format": "table"
+          },
+          {
+            "expr": "infrastructure_health_score",
+            "legendFormat": "{{health_type}}",
+            "refId": "Health",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "instance": 0,
+                "node": 1,
+                "mountpoint": 2,
+                "health_type": 3,
+                "Value #CPU": 4,
+                "Value #Memory": 5,
+                "Value #Disk": 6,
+                "Value #Pods": 7,
+                "Value #Health": 8
+              },
+              "renameByName": {
+                "instance": "Instance",
+                "node": "Node",
+                "mountpoint": "Mount Point",
+                "health_type": "Health Type",
+                "Value #CPU": "CPU Usage %",
+                "Value #Memory": "Memory Usage %",
+                "Value #Disk": "Disk Usage %",
+                "Value #Pods": "Pod Count",
+                "Value #Health": "Health Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*Usage %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 80 },
+                      { "color": "red", "value": 95 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Health Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Infrastructure Health Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((100 - (avg_over_time(100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100))[1h])) * 25) - ((100 - (avg_over_time((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100)[1h])) * 25) - ((100 - (avg_over_time((1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes)) * 100)[1h])) * 25) - ((100 - (avg_over_time(infrastructure_health_score * 100)[1h])) * 25))",
+            "legendFormat": "Infrastructure Health Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Infrastructure Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)[24h])",
+            "legendFormat": "Avg CPU Usage % (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100[24h])",
+            "legendFormat": "Avg Memory Usage % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time((1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes)) * 100[24h])",
+            "legendFormat": "Avg Disk Usage % (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(infrastructure_health_score * 100[24h])",
+            "legendFormat": "Avg Health Score % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Usage % / Health %",
+            "min": 0,
+            "max": 100
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Network Traffic",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(container_network_receive_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "Network RX MB/s - {{pod}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(container_network_transmit_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "Network TX MB/s - {{pod}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(container_network_receive_packets_total[5m])",
+            "legendFormat": "Network RX Packets/s - {{pod}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(container_network_transmit_packets_total[5m])",
+            "legendFormat": "Network TX Packets/s - {{pod}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB/s / Packets/s",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Infrastructure Optimization",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(infrastructure_optimization_events_total[5m])",
+            "legendFormat": "Optimization Events/sec - {{optimization_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "infrastructure_optimization_success_rate * 100",
+            "legendFormat": "Optimization Success Rate % - {{optimization_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "infrastructure_optimization_improvement_score",
+            "legendFormat": "Optimization Improvement - {{optimization_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "infrastructure_optimization_efficiency_score",
+            "legendFormat": "Optimization Efficiency - {{optimization_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Improvement Score / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(node_cpu_seconds_total, instance)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "node",
+          "type": "query",
+          "query": "label_values(kube_pod_info, node)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "pod",
+          "type": "query",
+          "query": "label_values(container_memory_usage_bytes, pod)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "health_type",
+          "type": "query",
+          "query": "label_values(infrastructure_health_score, health_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "efficiency_type",
+          "type": "query",
+          "query": "label_values(infrastructure_efficiency_score, efficiency_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "reliability_type",
+          "type": "query",
+          "query": "label_values(infrastructure_reliability_score, reliability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "scalability_type",
+          "type": "query",
+          "query": "label_values(infrastructure_scalability_score, scalability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "optimization_type",
+          "type": "query",
+          "query": "label_values(infrastructure_optimization_events_total, optimization_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Infrastructure Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Infrastructure.*|.*Kubernetes.*|.*Container.*|.*Node.*Performance.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Infrastructure Alert: {{alertname}}"
+        },
+        {
+          "name": "High CPU Usage",
+          "datasource": "Prometheus",
+          "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100) > 80",
+          "iconColor": "orange",
+          "titleFormat": "High CPU Usage: {{instance}}"
+        },
+        {
+          "name": "High Memory Usage",
+          "datasource": "Prometheus",
+          "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80",
+          "iconColor": "orange",
+          "titleFormat": "High Memory Usage: {{instance}}"
+        },
+        {
+          "name": "High Disk Usage",
+          "datasource": "Prometheus",
+          "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes)) * 100 > 80",
+          "iconColor": "orange",
+          "titleFormat": "High Disk Usage: {{instance}}:{{mountpoint}}"
+        },
+        {
+          "name": "Failed Pods",
+          "datasource": "Prometheus",
+          "expr": "count(kube_pod_status_phase{phase=\"Failed\"}) > 0",
+          "iconColor": "orange",
+          "titleFormat": "Failed Pods Detected"
+        }
+      ]
+    }
+  }
+}

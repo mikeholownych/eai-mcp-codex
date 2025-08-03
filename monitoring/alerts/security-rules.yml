@@ -1,0 +1,680 @@
+# Security Alerting Rules
+# Comprehensive monitoring for authentication, authorization, and security events
+
+groups:
+  - name: authentication_alerts
+    rules:
+      # Authentication Failures
+      - alert: HighAuthenticationFailures
+        expr: rate(authentication_failures_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "High authentication failures detected"
+          description: "Authentication failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/high-auth-failures"
+          
+      - alert: CriticalAuthenticationFailures
+        expr: rate(authentication_failures_total[5m]) > 50
+        for: 2m
+        labels:
+          severity: critical
+          service: authentication
+          category: security
+        annotations:
+          summary: "Critical authentication failures detected"
+          description: "Authentication failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/critical-auth-failures"
+          
+      - alert: BruteForceAttackDetected
+        expr: rate(authentication_failures_total{username=~".*"}[5m]) > 20
+        for: 2m
+        labels:
+          severity: critical
+          service: authentication
+          category: security
+        annotations:
+          summary: "Brute force attack detected"
+          description: "Brute force attack against user {{ $labels.username }} with {{ $value }} attempts per second"
+          runbook_url: "https://docs.example.com/runbooks/brute-force-attack"
+          
+      - alert: MultipleFailedLogins
+        expr: sum by (source_ip) (rate(authentication_failures_total[5m])) > 15
+        for: 2m
+        labels:
+          severity: critical
+          service: authentication
+          category: security
+        annotations:
+          summary: "Multiple failed logins from single IP"
+          description: "Multiple failed login attempts from IP {{ $labels.source_ip }}"
+          runbook_url: "https://docs.example.com/runbooks/multiple-failed-logins"
+      
+      # Authentication Success
+      - alert: UnusualAuthenticationSuccess
+        expr: rate(authentication_success_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "Unusual authentication success rate"
+          description: "Authentication success rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/unusual-auth-success"
+          
+      - alert: AuthenticationFromUnusualLocation
+        expr: authentication_success_location_unusual > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "Authentication from unusual location"
+          description: "Authentication from unusual location {{ $labels.location }}"
+          runbook_url: "https://docs.example.com/runbooks/auth-unusual-location"
+          
+      - alert: AuthenticationFromUnusualDevice
+        expr: authentication_success_device_unusual > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "Authentication from unusual device"
+          description: "Authentication from unusual device {{ $labels.device }}"
+          runbook_url: "https://docs.example.com/runbooks/auth-unusual-device"
+      
+      # Session Management
+      - alert: HighSessionCreationRate
+        expr: rate(session_creation_total[5m]) > 50
+        for: 5m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "High session creation rate"
+          description: "Session creation rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/high-session-creation"
+          
+      - alert: HighSessionTerminationRate
+        expr: rate(session_termination_total[5m]) > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "High session termination rate"
+          description: "Session termination rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/high-session-termination"
+          
+      - alert: LongLivedSessions
+        expr: session_duration_seconds > 86400
+        for: 5m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "Long lived sessions detected"
+          description: "Session duration is {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.example.com/runbooks/long-lived-sessions"
+      
+      # Token Management
+      - alert: HighTokenRefreshRate
+        expr: rate(token_refresh_total[5m]) > 20
+        for: 5m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "High token refresh rate"
+          description: "Token refresh rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/high-token-refresh"
+          
+      - alert: TokenExpirationImminent
+        expr: token_expiration_seconds < 300
+        for: 5m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "Token expiration imminent"
+          description: "Token expires in {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.example.com/runbooks/token-expiration-imminent"
+          
+      - alert: InvalidTokenUsage
+        expr: rate(invalid_token_usage_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: authentication
+          category: security
+        annotations:
+          summary: "Invalid token usage detected"
+          description: "Invalid token usage rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/invalid-token-usage"
+
+  - name: authorization_alerts
+    rules:
+      # Authorization Failures
+      - alert: HighAuthorizationFailures
+        expr: rate(authorization_failures_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: authorization
+          category: security
+        annotations:
+          summary: "High authorization failures detected"
+          description: "Authorization failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/high-authz-failures"
+          
+      - alert: CriticalAuthorizationFailures
+        expr: rate(authorization_failures_total[5m]) > 30
+        for: 2m
+        labels:
+          severity: critical
+          service: authorization
+          category: security
+        annotations:
+          summary: "Critical authorization failures detected"
+          description: "Authorization failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/critical-authz-failures"
+          
+      - alert: PrivilegeEscalationAttempt
+        expr: rate(privilege_escalation_attempts_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: authorization
+          category: security
+        annotations:
+          summary: "Privilege escalation attempt detected"
+          description: "Privilege escalation attempt by {{ $labels.user }}"
+          runbook_url: "https://docs.example.com/runbooks/privilege-escalation"
+          
+      - alert: UnauthorizedAccessAttempt
+        expr: rate(unauthorized_access_attempts_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: authorization
+          category: security
+        annotations:
+          summary: "Unauthorized access attempt detected"
+          description: "Unauthorized access attempt rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/unauthorized-access"
+      
+      # Role and Permission Changes
+      - alert: FrequentRoleChanges
+        expr: rate(role_changes_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: authorization
+          category: security
+        annotations:
+          summary: "Frequent role changes detected"
+          description: "Role change rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/frequent-role-changes"
+          
+      - alert: PermissionElevation
+        expr: permission_elevation_events > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: authorization
+          category: security
+        annotations:
+          summary: "Permission elevation detected"
+          description: "Permission elevation for user {{ $labels.user }}"
+          runbook_url: "https://docs.example.com/runbooks/permission-elevation"
+          
+      - alert: AdminAccountModification
+        expr: admin_account_modifications > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: authorization
+          category: security
+        annotations:
+          summary: "Admin account modification detected"
+          description: "Admin account {{ $labels.account }} was modified"
+          runbook_url: "https://docs.example.com/runbooks/admin-account-modification"
+      
+      # Resource Access
+      - alert: UnusualResourceAccess
+        expr: rate(unusual_resource_access_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: authorization
+          category: security
+        annotations:
+          summary: "Unusual resource access detected"
+          description: "Unusual resource access rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/unusual-resource-access"
+          
+      - alert: SensitiveDataAccess
+        expr: rate(sensitive_data_access_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: authorization
+          category: security
+        annotations:
+          summary: "Sensitive data access detected"
+          description: "Sensitive data access rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/sensitive-data-access"
+          
+      - alert: BulkDataAccess
+        expr: rate(bulk_data_access_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: authorization
+          category: security
+        annotations:
+          summary: "Bulk data access detected"
+          description: "Bulk data access rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/bulk-data-access"
+
+  - name: network_security_alerts
+    rules:
+      # Network Attacks
+      - alert: DDoSAttackDetected
+        expr: rate(network_connections_total[5m]) > 1000
+        for: 2m
+        labels:
+          severity: critical
+          service: network
+          category: security
+        annotations:
+          summary: "DDoS attack detected"
+          description: "Network connection rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/ddos-attack"
+          
+      - alert: PortScanDetected
+        expr: rate(port_scan_attempts_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: network
+          category: security
+        annotations:
+          summary: "Port scan detected"
+          description: "Port scan attempt rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/port-scan"
+          
+      - alert: SuspiciousNetworkTraffic
+        expr: rate(suspicious_network_traffic_total[5m]) > 50
+        for: 5m
+        labels:
+          severity: warning
+          service: network
+          category: security
+        annotations:
+          summary: "Suspicious network traffic detected"
+          description: "Suspicious network traffic rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/suspicious-network-traffic"
+      
+      # SSL/TLS Issues
+      - alert: SSLCertificateExpiring
+        expr: ssl_certificate_expires_in_seconds < 86400 * 7
+        for: 0m
+        labels:
+          severity: warning
+          service: network
+          category: security
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate expires in {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.example.com/runbooks/ssl-certificate-expiring"
+          
+      - alert: SSLCertificateExpired
+        expr: ssl_certificate_expires_in_seconds < 0
+        for: 0m
+        labels:
+          severity: critical
+          service: network
+          category: security
+        annotations:
+          summary: "SSL certificate expired"
+          description: "SSL certificate has expired"
+          runbook_url: "https://docs.example.com/runbooks/ssl-certificate-expired"
+          
+      - alert: WeakSSLCipher
+        expr: ssl_weak_cipher_detected > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: network
+          category: security
+        annotations:
+          summary: "Weak SSL cipher detected"
+          description: "Weak SSL cipher {{ $labels.cipher }} detected"
+          runbook_url: "https://docs.example.com/runbooks/weak-ssl-cipher"
+      
+      # Firewall and IPS
+      - alert: FirewallBlockedConnections
+        expr: rate(firewall_blocked_connections_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: network
+          category: security
+        annotations:
+          summary: "Firewall blocked connections detected"
+          description: "Firewall blocked connection rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/firewall-blocked"
+          
+      - alert: IPSAlertTriggered
+        expr: rate(intrusion_prevention_alerts_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: network
+          category: security
+        annotations:
+          summary: "IPS alert triggered"
+          description: "IPS alert rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/ips-alert"
+          
+      - alert: MaliciousIPDetected
+        expr: rate(malicious_ip_connections_total[5m]) > 1
+        for: 0m
+        labels:
+          severity: critical
+          service: network
+          category: security
+        annotations:
+          summary: "Malicious IP detected"
+          description: "Connection from malicious IP {{ $labels.ip }}"
+          runbook_url: "https://docs.example.com/runbooks/malicious-ip"
+
+  - name: application_security_alerts
+    rules:
+      # Injection Attacks
+      - alert: SQLInjectionAttempt
+        expr: rate(sql_injection_attempts_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: application
+          category: security
+        annotations:
+          summary: "SQL injection attempt detected"
+          description: "SQL injection attempt from {{ $labels.source_ip }}"
+          runbook_url: "https://docs.example.com/runbooks/sql-injection"
+          
+      - alert: XSSAttempt
+        expr: rate(xss_attempts_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: application
+          category: security
+        annotations:
+          summary: "XSS attempt detected"
+          description: "XSS attempt from {{ $labels.source_ip }}"
+          runbook_url: "https://docs.example.com/runbooks/xss-attempt"
+          
+      - alert: CSRFAttempt
+        expr: rate(csrf_attempts_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: application
+          category: security
+        annotations:
+          summary: "CSRF attempt detected"
+          description: "CSRF attempt from {{ $labels.source_ip }}"
+          runbook_url: "https://docs.example.com/runbooks/csrf-attempt"
+      
+      # File Security
+      - alert: FileUploadAttack
+        expr: rate(malicious_file_uploads_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: application
+          category: security
+        annotations:
+          summary: "File upload attack detected"
+          description: "Malicious file upload from {{ $labels.source_ip }}"
+          runbook_url: "https://docs.example.com/runbooks/file-upload-attack"
+          
+      - alert: DirectoryTraversalAttempt
+        expr: rate(directory_traversal_attempts_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: application
+          category: security
+        annotations:
+          summary: "Directory traversal attempt detected"
+          description: "Directory traversal attempt from {{ $labels.source_ip }}"
+          runbook_url: "https://docs.example.com/runbooks/directory-traversal"
+          
+      - alert: FileTamperingDetected
+        expr: rate(file_tampering_events_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: application
+          category: security
+        annotations:
+          summary: "File tampering detected"
+          description: "File tampering detected on {{ $labels.file_path }}"
+          runbook_url: "https://docs.example.com/runbooks/file-tampering"
+      
+      # API Security
+      - alert: APIAbuseDetected
+        expr: rate(api_abuse_events_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: application
+          category: security
+        annotations:
+          summary: "API abuse detected"
+          description: "API abuse rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/api-abuse"
+          
+      - alert: APILimitExceeded
+        expr: rate(api_rate_limit_exceeded_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: application
+          category: security
+        annotations:
+          summary: "API rate limit exceeded"
+          description: "API rate limit exceeded rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/api-limit-exceeded"
+          
+      - alert: UnusualAPIUsage
+        expr: rate(unusual_api_usage_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: application
+          category: security
+        annotations:
+          summary: "Unusual API usage detected"
+          description: "Unusual API usage rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/unusual-api-usage"
+
+  - name: system_security_alerts
+    rules:
+      # System Integrity
+      - alert: SystemFileModified
+        expr: rate(system_file_modifications_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+          category: security
+        annotations:
+          summary: "System file modifications detected"
+          description: "System file modification rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/system-file-modified"
+          
+      - alert: RootkitDetected
+        expr: rootkit_detection_events > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: system
+          category: security
+        annotations:
+          summary: "Rootkit detected"
+          description: "Rootkit detected on {{ $labels.hostname }}"
+          runbook_url: "https://docs.example.com/runbooks/rootkit-detected"
+          
+      - alert: MalwareDetected
+        expr: malware_detection_events > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: system
+          category: security
+        annotations:
+          summary: "Malware detected"
+          description: "Malware detected on {{ $labels.hostname }}"
+          runbook_url: "https://docs.example.com/runbooks/malware-detected"
+      
+      # User Activity
+      - alert: SuspiciousUserActivity
+        expr: rate(suspicious_user_activity_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+          category: security
+        annotations:
+          summary: "Suspicious user activity detected"
+          description: "Suspicious user activity rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/suspicious-user-activity"
+          
+      - alert: MultipleFailedLoginAttempts
+        expr: sum by (username) (rate(failed_login_attempts_total[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+          category: security
+        annotations:
+          summary: "Multiple failed login attempts"
+          description: "Multiple failed login attempts for user {{ $labels.username }}"
+          runbook_url: "https://docs.example.com/runbooks/multiple-failed-logins"
+          
+      - alert: AccountLockout
+        expr: rate(account_lockouts_total[5m]) > 1
+        for: 0m
+        labels:
+          severity: warning
+          service: system
+          category: security
+        annotations:
+          summary: "Account lockout detected"
+          description: "Account {{ $labels.username }} has been locked out"
+          runbook_url: "https://docs.example.com/runbooks/account-lockout"
+      
+      # Audit Events
+      - alert: AuditLogFailure
+        expr: audit_log_failures_total > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: system
+          category: security
+        annotations:
+          summary: "Audit log failure detected"
+          description: "Audit log failure on {{ $labels.hostname }}"
+          runbook_url: "https://docs.example.com/runbooks/audit-log-failure"
+          
+      - alert: AuditLogTampering
+        expr: rate(audit_log_tampering_events_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: system
+          category: security
+        annotations:
+          summary: "Audit log tampering detected"
+          description: "Audit log tampering detected on {{ $labels.hostname }}"
+          runbook_url: "https://docs.example.com/runbooks/audit-log-tampering"
+          
+      - alert: SecurityPolicyViolation
+        expr: rate(security_policy_violations_total[5m]) > 1
+        for: 0m
+        labels:
+          severity: warning
+          service: system
+          category: security
+        annotations:
+          summary: "Security policy violation detected"
+          description: "Security policy violation: {{ $labels.violation_type }}"
+          runbook_url: "https://docs.example.com/runbooks/security-policy-violation"
+
+  - name: security_cross_service_alerts
+    rules:
+      # Overall Security Health
+      - alert: SecurityEventsSpike
+        expr: sum(rate(security_events_total[5m])) > 100
+        for: 2m
+        labels:
+          severity: critical
+          service: security
+          category: overview
+        annotations:
+          summary: "Security events spike detected"
+          description: "Security event rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/security-events-spike"
+          
+      - alert: CriticalSecurityEvents
+        expr: sum(rate(critical_security_events_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: critical
+          service: security
+          category: overview
+        annotations:
+          summary: "Critical security events detected"
+          description: "Critical security event rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/critical-security-events"
+          
+      - alert: SecurityPostureDegraded
+        expr: security_posture_score < 70
+        for: 5m
+        labels:
+          severity: warning
+          service: security
+          category: overview
+        annotations:
+          summary: "Security posture degraded"
+          description: "Security posture score is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/security-posture-degraded"
+          
+      - alert: SecurityBreachDetected
+        expr: security_breach_events > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: security
+          category: overview
+        annotations:
+          summary: "Security breach detected"
+          description: "Security breach detected: {{ $labels.breach_type }}"
+          runbook_url: "https://docs.example.com/runbooks/security-breach"

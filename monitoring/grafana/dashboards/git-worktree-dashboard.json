@@ -1,0 +1,695 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Git Worktree Dashboard",
+    "tags": ["git-worktree", "git-operations", "worktree-management", "merge-operations", "cleanup-activities"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Git Worktree Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(git_worktree_operations_total[5m]))",
+            "legendFormat": "Git Operations/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "git_worktree_success_rate * 100",
+            "legendFormat": "Git Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "git_worktree_average_duration",
+            "legendFormat": "Avg Git Duration",
+            "refId": "C"
+          },
+          {
+            "expr": "git_worktree_performance_score * 100",
+            "legendFormat": "Git Performance Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Git Operations",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(git_worktree_git_operations_events_total[5m])",
+            "legendFormat": "Git Events/sec - {{git_operation_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "git_worktree_git_operations_success_rate * 100",
+            "legendFormat": "Git Success Rate % - {{git_operation_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "git_worktree_git_operations_average_time",
+            "legendFormat": "Avg Git Time - {{git_operation_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "git_worktree_git_operations_efficiency_score",
+            "legendFormat": "Git Efficiency - {{git_operation_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Worktree Management",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(git_worktree_worktree_management_events_total[5m])",
+            "legendFormat": "Worktree Events/sec - {{worktree_operation_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "git_worktree_worktree_management_success_rate * 100",
+            "legendFormat": "Worktree Success Rate % - {{worktree_operation_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "git_worktree_worktree_management_average_time",
+            "legendFormat": "Avg Worktree Time - {{worktree_operation_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "git_worktree_worktree_management_effectiveness_score",
+            "legendFormat": "Worktree Effectiveness - {{worktree_operation_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Effectiveness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Merge Operations",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(git_worktree_merge_operations_events_total[5m])",
+            "legendFormat": "Merge Events/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "git_worktree_merge_operations_success_rate * 100",
+            "legendFormat": "Merge Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "git_worktree_merge_operations_average_time",
+            "legendFormat": "Avg Merge Time",
+            "refId": "C"
+          },
+          {
+            "expr": "git_worktree_merge_operations_conflict_rate * 100",
+            "legendFormat": "Merge Conflict Rate %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Cleanup Activities",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(git_worktree_cleanup_activities_events_total[5m])",
+            "legendFormat": "Cleanup Events/sec - {{cleanup_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "git_worktree_cleanup_activities_success_rate * 100",
+            "legendFormat": "Cleanup Success Rate % - {{cleanup_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "git_worktree_cleanup_activities_average_time",
+            "legendFormat": "Avg Cleanup Time - {{cleanup_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "git_worktree_cleanup_activities_efficiency_score",
+            "legendFormat": "Cleanup Efficiency - {{cleanup_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Git Operation Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(git_worktree_git_operations_events_total[5m])",
+            "legendFormat": "{{git_operation_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Git Worktree Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "git_worktree_performance_score",
+            "legendFormat": "Performance Score - {{performance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "git_worktree_efficiency_score",
+            "legendFormat": "Efficiency Score - {{efficiency_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "git_worktree_reliability_score",
+            "legendFormat": "Reliability Score - {{reliability_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "git_worktree_scalability_score",
+            "legendFormat": "Scalability Score - {{scalability_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Git Worktree Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "rate(git_worktree_git_operations_events_total[5m])",
+            "legendFormat": "{{git_operation_type}}",
+            "refId": "Git",
+            "format": "table"
+          },
+          {
+            "expr": "rate(git_worktree_worktree_management_events_total[5m])",
+            "legendFormat": "{{worktree_operation_type}}",
+            "refId": "Worktree",
+            "format": "table"
+          },
+          {
+            "expr": "git_worktree_success_rate * 100",
+            "legendFormat": "{{git_operation_type}}",
+            "refId": "Success",
+            "format": "table"
+          },
+          {
+            "expr": "git_worktree_average_duration",
+            "legendFormat": "{{git_operation_type}}",
+            "refId": "Duration",
+            "format": "table"
+          },
+          {
+            "expr": "git_worktree_performance_score",
+            "legendFormat": "{{performance_type}}",
+            "refId": "Performance",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "git_operation_type": 0,
+                "worktree_operation_type": 1,
+                "performance_type": 2,
+                "Value #Git": 3,
+                "Value #Worktree": 4,
+                "Value #Success": 5,
+                "Value #Duration": 6,
+                "Value #Performance": 7
+              },
+              "renameByName": {
+                "git_operation_type": "Git Operation Type",
+                "worktree_operation_type": "Worktree Operation Type",
+                "performance_type": "Performance Type",
+                "Value #Git": "Git Events/sec",
+                "Value #Worktree": "Worktree Events/sec",
+                "Value #Success": "Success Rate %",
+                "Value #Duration": "Avg Duration",
+                "Value #Performance": "Performance Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Success Rate %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Performance Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Git Worktree Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - git_worktree_success_rate) * 100 * 30) - (git_worktree_average_duration * 20) - ((1 - git_worktree_git_operations_success_rate) * 100 * 25) - ((1 - git_worktree_worktree_management_success_rate) * 100 * 25))",
+            "legendFormat": "Git Worktree Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Git Worktree Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(sum(rate(git_worktree_operations_total[5m]))[24h])",
+            "legendFormat": "Avg Operations/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(git_worktree_success_rate * 100[24h])",
+            "legendFormat": "Avg Success Rate % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(git_worktree_average_duration[24h])",
+            "legendFormat": "Avg Duration (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(git_worktree_performance_score * 100[24h])",
+            "legendFormat": "Avg Performance Score % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations/sec / Success Rate % / Duration / Performance %",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Repository Management",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(git_worktree_repository_management_events_total[5m])",
+            "legendFormat": "Repository Events/sec - {{repository_operation_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "git_worktree_repository_management_success_rate * 100",
+            "legendFormat": "Repository Success Rate % - {{repository_operation_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "git_worktree_repository_management_average_time",
+            "legendFormat": "Avg Repository Time - {{repository_operation_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "git_worktree_repository_management_efficiency_score",
+            "legendFormat": "Repository Efficiency - {{repository_operation_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Git Optimization",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(git_worktree_optimization_events_total[5m])",
+            "legendFormat": "Optimization Events/sec - {{optimization_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "git_worktree_optimization_success_rate * 100",
+            "legendFormat": "Optimization Success Rate % - {{optimization_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "git_worktree_optimization_improvement_score",
+            "legendFormat": "Optimization Improvement - {{optimization_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "git_worktree_optimization_efficiency_score",
+            "legendFormat": "Optimization Efficiency - {{optimization_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Improvement Score / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "git_operation_type",
+          "type": "query",
+          "query": "label_values(git_worktree_git_operations_events_total, git_operation_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "worktree_operation_type",
+          "type": "query",
+          "query": "label_values(git_worktree_worktree_management_events_total, worktree_operation_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "cleanup_type",
+          "type": "query",
+          "query": "label_values(git_worktree_cleanup_activities_events_total, cleanup_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "performance_type",
+          "type": "query",
+          "query": "label_values(git_worktree_performance_score, performance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "efficiency_type",
+          "type": "query",
+          "query": "label_values(git_worktree_efficiency_score, efficiency_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "reliability_type",
+          "type": "query",
+          "query": "label_values(git_worktree_reliability_score, reliability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "scalability_type",
+          "type": "query",
+          "query": "label_values(git_worktree_scalability_score, scalability_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "repository_operation_type",
+          "type": "query",
+          "query": "label_values(git_worktree_repository_management_events_total, repository_operation_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "optimization_type",
+          "type": "query",
+          "query": "label_values(git_worktree_optimization_events_total, optimization_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Git Worktree Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Git.*Worktree.*|.*Git.*Operations.*|.*Worktree.*Management.*|.*Merge.*Operations.*|.*Cleanup.*Activities.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Git Worktree Alert: {{alertname}}"
+        },
+        {
+          "name": "Low Git Success Rate",
+          "datasource": "Prometheus",
+          "expr": "git_worktree_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Git Success Rate: {{git_operation_type}}"
+        },
+        {
+          "name": "Low Worktree Success Rate",
+          "datasource": "Prometheus",
+          "expr": "git_worktree_worktree_management_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Worktree Success Rate: {{worktree_operation_type}}"
+        },
+        {
+          "name": "High Merge Conflict Rate",
+          "datasource": "Prometheus",
+          "expr": "git_worktree_merge_operations_conflict_rate * 100 > 30",
+          "iconColor": "orange",
+          "titleFormat": "High Merge Conflict Rate"
+        },
+        {
+          "name": "Low Cleanup Success Rate",
+          "datasource": "Prometheus",
+          "expr": "git_worktree_cleanup_activities_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Cleanup Success Rate: {{cleanup_type}}"
+        }
+      ]
+    }
+  }
+}

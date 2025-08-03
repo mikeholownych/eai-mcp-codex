@@ -1,0 +1,627 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Database Dashboard",
+    "tags": ["database", "postgresql-metrics", "query-performance", "connection-pooling"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Database Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "pg_up * 100",
+            "legendFormat": "Database Availability %",
+            "refId": "A"
+          },
+          {
+            "expr": "pg_stat_database_numbackends",
+            "legendFormat": "Active Connections",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(pg_stat_database_xact_commit[5m]) + rate(pg_stat_database_xact_rollback[5m])",
+            "legendFormat": "Transactions/sec",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(pg_stat_database_tup_returned[5m]) + rate(pg_stat_database_tup_fetched[5m])",
+            "legendFormat": "Queries/sec",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Database Availability %" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Query Performance",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(pg_stat_database_tup_returned[5m])",
+            "legendFormat": "Rows Returned/sec - {{datname}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(pg_stat_database_tup_fetched[5m])",
+            "legendFormat": "Rows Fetched/sec - {{datname}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(pg_stat_database_tup_inserted[5m])",
+            "legendFormat": "Rows Inserted/sec - {{datname}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(pg_stat_database_tup_updated[5m])",
+            "legendFormat": "Rows Updated/sec - {{datname}}",
+            "refId": "D"
+          },
+          {
+            "expr": "rate(pg_stat_database_tup_deleted[5m])",
+            "legendFormat": "Rows Deleted/sec - {{datname}}",
+            "refId": "E"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Rows/sec",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1000,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 5000,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Connection Pooling",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends",
+            "legendFormat": "Active Connections - {{datname}}",
+            "refId": "A"
+          },
+          {
+            "expr": "pg_settings_max_connections",
+            "legendFormat": "Max Connections - {{datname}}",
+            "refId": "B"
+          },
+          {
+            "expr": "(pg_stat_database_numbackends / pg_settings_max_connections) * 100",
+            "legendFormat": "Connection Usage % - {{datname}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Connections / Usage %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 95,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Transaction Statistics",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(pg_stat_database_xact_commit[5m])",
+            "legendFormat": "Commits/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(pg_stat_database_xact_rollback[5m])",
+            "legendFormat": "Rollbacks/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(pg_stat_database_xact_rollback[5m]) / (rate(pg_stat_database_xact_commit[5m]) + rate(pg_stat_database_xact_rollback[5m])) * 100",
+            "legendFormat": "Rollback Rate %",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(pg_stat_database_deadlocks[5m])",
+            "legendFormat": "Deadlocks/sec",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 5 },
+                { "color": "red", "value": 10 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Database Size",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "pg_database_size_bytes / 1024 / 1024 / 1024",
+            "legendFormat": "Database Size GB - {{datname}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(pg_stat_database_blks_hit[5m])",
+            "legendFormat": "Cache Hits/sec - {{datname}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(pg_stat_database_blks_read[5m])",
+            "legendFormat": "Cache Misses/sec - {{datname}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "GB / Hits/sec / Misses/sec",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 100,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 500,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Cache Hit Ratio",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(pg_stat_database_blks_hit[5m])",
+            "legendFormat": "Cache Hits",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(pg_stat_database_blks_read[5m])",
+            "legendFormat": "Cache Misses",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Query Duration",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(pg_stat_statements_total_time_seconds_bucket[5m]))",
+            "legendFormat": "P50 Query Duration - {{datname}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(pg_stat_statements_total_time_seconds_bucket[5m]))",
+            "legendFormat": "P95 Query Duration - {{datname}}",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(pg_stat_statements_total_time_seconds_bucket[5m]))",
+            "legendFormat": "P99 Query Duration - {{datname}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Duration (s)",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 5,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Database Performance by Database",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "pg_up",
+            "legendFormat": "{{datname}}",
+            "refId": "Status",
+            "format": "table"
+          },
+          {
+            "expr": "pg_stat_database_numbackends",
+            "legendFormat": "{{datname}}",
+            "refId": "Connections",
+            "format": "table"
+          },
+          {
+            "expr": "rate(pg_stat_database_xact_commit[5m]) + rate(pg_stat_database_xact_rollback[5m])",
+            "legendFormat": "{{datname}}",
+            "refId": "Transactions",
+            "format": "table"
+          },
+          {
+            "expr": "rate(pg_stat_database_tup_returned[5m]) + rate(pg_stat_database_tup_fetched[5m])",
+            "legendFormat": "{{datname}}",
+            "refId": "Queries",
+            "format": "table"
+          },
+          {
+            "expr": "pg_database_size_bytes / 1024 / 1024 / 1024",
+            "legendFormat": "{{datname}}",
+            "refId": "Size",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "instance": true,
+                "job": true
+              },
+              "indexByName": {
+                "datname": 0,
+                "Value #Status": 1,
+                "Value #Connections": 2,
+                "Value #Transactions": 3,
+                "Value #Queries": 4,
+                "Value #Size": 5
+              },
+              "renameByName": {
+                "datname": "Database",
+                "Value #Status": "Status",
+                "Value #Connections": "Connections",
+                "Value #Transactions": "Transactions/sec",
+                "Value #Queries": "Queries/sec",
+                "Value #Size": "Size (GB)"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Status" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "green", "value": 1 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Connections" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 80 },
+                      { "color": "red", "value": 95 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Database Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - pg_up) * 100 * 30) - (((pg_stat_database_numbackends / pg_settings_max_connections) * 100 * 25) - ((rate(pg_stat_database_xact_rollback[5m]) / (rate(pg_stat_database_xact_commit[5m]) + rate(pg_stat_database_xact_rollback[5m])) * 100 * 20) - ((1 - (rate(pg_stat_database_blks_hit[5m]) / (rate(pg_stat_database_blks_hit[5m]) + rate(pg_stat_database_blks_read[5m])))) * 100 * 15) - ((histogram_quantile(0.95, rate(pg_stat_statements_total_time_seconds_bucket[5m])) * 10)",
+            "legendFormat": "Database Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Table Statistics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "pg_stat_user_tables_seq_scan",
+            "legendFormat": "Sequential Scans - {{relname}}",
+            "refId": "A"
+          },
+          {
+            "expr": "pg_stat_user_tables_idx_scan",
+            "legendFormat": "Index Scans - {{relname}}",
+            "refId": "B"
+          },
+          {
+            "expr": "pg_stat_user_tables_n_tup_ins",
+            "legendFormat": "Inserts - {{relname}}",
+            "refId": "C"
+          },
+          {
+            "expr": "pg_stat_user_tables_n_tup_upd",
+            "legendFormat": "Updates - {{relname}}",
+            "refId": "D"
+          },
+          {
+            "expr": "pg_stat_user_tables_n_tup_del",
+            "legendFormat": "Deletes - {{relname}}",
+            "refId": "E"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1000,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 5000,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Lock Statistics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "pg_locks_count",
+            "legendFormat": "Locks - {{locktype}}",
+            "refId": "A"
+          },
+          {
+            "expr": "pg_locks_count{mode=\"ExclusiveLock\"}",
+            "legendFormat": "Exclusive Locks - {{locktype}}",
+            "refId": "B"
+          },
+          {
+            "expr": "pg_stat_database_deadlocks",
+            "legendFormat": "Deadlocks - {{datname}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Locks",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 10,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Database Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "avg_over_time(rate(pg_stat_database_xact_commit[5m])[24h])",
+            "legendFormat": "Avg Commits/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(pg_stat_database_numbackends[24h])",
+            "legendFormat": "Avg Connections (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(pg_database_size_bytes / 1024 / 1024 / 1024[24h])",
+            "legendFormat": "Avg Size GB (24h)",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Commits/sec / Connections / Size GB",
+            "min": 0
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "datname",
+          "type": "query",
+          "query": "label_values(pg_stat_database, datname)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "relname",
+          "type": "query",
+          "query": "label_values(pg_stat_user_tables, relname)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "locktype",
+          "type": "query",
+          "query": "label_values(pg_locks_count, locktype)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Database Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*PostgreSQL.*|.*Database.*|.*PG.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Database Alert: {{alertname}}"
+        },
+        {
+          "name": "High Connection Usage",
+          "datasource": "Prometheus",
+          "expr": "(pg_stat_database_numbackends / pg_settings_max_connections) * 100 > 80",
+          "iconColor": "orange",
+          "titleFormat": "High Connection Usage: {{datname}}"
+        },
+        {
+          "name": "High Rollback Rate",
+          "datasource": "Prometheus",
+          "expr": "rate(pg_stat_database_xact_rollback[5m]) / (rate(pg_stat_database_xact_commit[5m]) + rate(pg_stat_database_xact_rollback[5m])) * 100 > 10",
+          "iconColor": "orange",
+          "titleFormat": "High Rollback Rate: {{datname}}"
+        },
+        {
+          "name": "Low Cache Hit Ratio",
+          "datasource": "Prometheus",
+          "expr": "rate(pg_stat_database_blks_hit[5m]) / (rate(pg_stat_database_blks_hit[5m]) + rate(pg_stat_database_blks_read[5m])) * 100 < 90",
+          "iconColor": "orange",
+          "titleFormat": "Low Cache Hit Ratio: {{datname}}"
+        }
+      ]
+    }
+  }
+}

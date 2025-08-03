@@ -1,0 +1,17 @@
+{
+  "_id": "mcp-logs-dashboard",
+  "_type": "dashboard",
+  "_source": {
+    "title": "MCP Logs Analysis Dashboard",
+    "description": "Comprehensive dashboard for MCP log analysis, monitoring, and troubleshooting",
+    "hits": 0,
+    "description": "",
+    "panelsJSON": "[{\"id\":\"LOGS_OVERVIEW\",\"panelIndex\":1,\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":6},\"type\":\"visualization\",\"version\":\"7.15.0\"},{\"id\":\"ERROR_RATE\",\"panelIndex\":2,\"gridData\":{\"x\":0,\"y\":6,\"w\":8,\"h\":8},\"type\":\"visualization\",\"version\":\"7.15.0\"},{\"id\":\"PERFORMANCE_METRICS\",\"panelIndex\":3,\"gridData\":{\"x\":8,\"y\":6,\"w\":8,\"h\":8},\"type\":\"visualization\",\"version\":\"7.15.0\"},{\"id\":\"SECURITY_EVENTS\",\"panelIndex\":4,\"gridData\":{\"x\":16,\"y\":6,\"w\":8,\"h\":8},\"type\":\"visualization\",\"version\":\"7.15.0\"},{\"id\":\"SERVICE_HEALTH\",\"panelIndex\":5,\"gridData\":{\"x\":0,\"y\":14,\"w\":12,\"h\":8},\"type\":\"visualization\",\"version\":\"7.15.0\"},{\"id\":\"LOG_VOLUME\",\"panelIndex\":6,\"gridData\":{\"x\":12,\"y\":14,\"w\":12,\"h\":8},\"type\":\"visualization\",\"version\":\"7.15.0\"},{\"id\":\"RECENT_ERRORS\",\"panelIndex\":7,\"gridData\":{\"x\":0,\"y\":22,\"w\":12,\"h\":10},\"type\":\"search\",\"version\":\"7.15.0\"},{\"id\":\"RECENT_SECURITY_EVENTS\",\"panelIndex\":8,\"gridData\":{\"x\":12,\"y\":22,\"w\":12,\"h\":10},\"type\":\"search\",\"version\":\"7.15.0\"},{\"id\":\"TRACE_ANALYSIS\",\"panelIndex\":9,\"gridData\":{\"x\":0,\"y\":32,\"w\":12,\"h\":8},\"type\":\"visualization\",\"version\":\"7.15.0\"},{\"id\":\"ALERT_SUMMARY\",\"panelIndex\":10,\"gridData\":{\"x\":12,\"y\":32,\"w\":12,\"h\":8},\"type\":\"visualization\",\"version\":\"7.15.0\"}]",
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"hidePanelTitles\":false,\"darkTheme\":false}",
+    "timeRestore": true,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+    },
+    "version": "7.15.0"
+  }
+}

@@ -1,0 +1,197 @@
+# Log-Based Alerting Rules for Prometheus
+# Alert rules based on log metrics and patterns
+
+groups:
+  - name: log_alerts
+    rules:
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: rate(mcp_error_logs_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: critical
+          category: errors
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors per second over the last 5 minutes"
+          runbook_url: "https://docs.mcp.ai/runbooks/high-error-rate"
+
+      # Critical error alert
+      - alert: CriticalErrorDetected
+        expr: rate(mcp_critical_logs_total[1m]) > 1
+        for: 1m
+        labels:
+          severity: critical
+          category: errors
+        annotations:
+          summary: "Critical errors detected"
+          description: "Critical error rate is {{ $value }} errors per second over the last 1 minute"
+          runbook_url: "https://docs.mcp.ai/runbooks/critical-errors"
+
+      # Security event alert
+      - alert: SecurityEventDetected
+        expr: rate(mcp_security_logs_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Security events detected"
+          description: "Security event rate is {{ $value }} events per second over the last 5 minutes"
+          runbook_url: "https://docs.mcp.ai/runbooks/security-events"
+
+      # High severity security alert
+      - alert: HighSeveritySecurityEvent
+        expr: mcp_security_severity_high_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "High severity security event detected"
+          description: "High severity security event detected, immediate investigation required"
+          runbook_url: "https://docs.mcp.ai/runbooks/high-severity-security"
+
+      # Performance degradation alert
+      - alert: PerformanceDegradation
+        expr: histogram_quantile(0.95, rate(mcp_response_time_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "Performance degradation detected"
+          description: "95th percentile response time is {{ $value }} seconds over the last 5 minutes"
+          runbook_url: "https://docs.mcp.ai/runbooks/performance-degradation"
+
+      # High memory usage alert
+      - alert: HighMemoryUsage
+        expr: mcp_memory_usage_bytes / mcp_memory_total_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% of total available memory"
+          runbook_url: "https://docs.mcp.ai/runbooks/high-memory-usage"
+
+      # High CPU usage alert
+      - alert: HighCPUUsage
+        expr: mcp_cpu_usage_percent > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% over the last 5 minutes"
+          runbook_url: "https://docs.mcp.ai/runbooks/high-cpu-usage"
+
+      # Service unavailable alert
+      - alert: ServiceUnavailable
+        expr: up{job=~"mcp-.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "Service unavailable"
+          description: "Service {{ $labels.instance }} is unavailable"
+          runbook_url: "https://docs.mcp.ai/runbooks/service-unavailable"
+
+      # Log processing backlog alert
+      - alert: LogProcessingBacklog
+        expr: fluentd_buffer_queue_length > 1000
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "Log processing backlog detected"
+          description: "Fluentd buffer queue length is {{ $value }}"
+          runbook_url: "https://docs.mcp.ai/runbooks/log-backlog"
+
+      # Elasticsearch cluster health alert
+      - alert: ElasticsearchClusterHealth
+        expr: elasticsearch_cluster_health_status{color="red"} == 1
+        for: 1m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Elasticsearch cluster health is red"
+          description: "Elasticsearch cluster health status is red"
+          runbook_url: "https://docs.mcp.ai/runbooks/elasticsearch-health"
+
+      # Disk space alert
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "Low disk space detected"
+          description: "Disk space is {{ $value }}% available on {{ $labels.instance }}"
+          runbook_url: "https://docs.mcp.ai/runbooks/disk-space"
+
+      # Log volume spike alert
+      - alert: LogVolumeSpike
+        expr: rate(mcp_logs_total[5m]) > 100
+        for: 2m
+        labels:
+          severity: warning
+          category: volume
+        annotations:
+          summary: "Log volume spike detected"
+          description: "Log volume is {{ $value }} logs per second over the last 5 minutes"
+          runbook_url: "https://docs.mcp.ai/runbooks/log-volume-spike"
+
+      # Anomaly detection alert
+      - alert: LogAnomalyDetected
+        expr: mcp_log_anomaly_score > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: anomaly
+        annotations:
+          summary: "Log anomaly detected"
+          description: "Log anomaly score is {{ $value }}"
+          runbook_url: "https://docs.mcp.ai/runbooks/log-anomaly"
+
+      # Compliance violation alert
+      - alert: ComplianceViolation
+        expr: mcp_compliance_violations_total > 0
+        for: 1m
+        labels:
+          severity: warning
+          category: compliance
+        annotations:
+          summary: "Compliance violation detected"
+          description: "Compliance violation detected, review required"
+          runbook_url: "https://docs.mcp.ai/runbooks/compliance-violation"
+
+      # Audit event alert
+      - alert: AuditEventDetected
+        expr: mcp_audit_logs_total > 0
+        for: 1m
+        labels:
+          severity: info
+          category: audit
+        annotations:
+          summary: "Audit event detected"
+          description: "Audit event detected for compliance tracking"
+          runbook_url: "https://docs.mcp.ai/runbooks/audit-event"
+
+      # Trace correlation alert
+      - alert: TraceCorrelationIssue
+        expr: mcp_trace_correlation_errors_total > 0
+        for: 5m
+        labels:
+          severity: warning
+          category: tracing
+        annotations:
+          summary: "Trace correlation issue detected"
+          description: "Trace correlation errors detected, may impact observability"
+          runbook_url: "https://docs.mcp.ai/runbooks/trace-correlation"

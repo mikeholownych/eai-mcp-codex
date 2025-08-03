@@ -1,0 +1,91 @@
+{
+  "_id": "TRACE_ANALYSIS",
+  "_type": "visualization",
+  "_source": {
+    "title": "Trace Analysis",
+    "type": "data_table",
+    "params": {
+      "perPage": 10,
+      "showPartialRows": false,
+      "showMetricsAtAllLevels": false,
+      "sort": {
+        "columnIndex": null,
+        "direction": null
+      },
+      "showTotal": false,
+      "totalFunc": "sum",
+      "percentageCol": ""
+    },
+    "aggs": [
+      {
+        "id": "1",
+        "enabled": true,
+        "type": "count",
+        "schema": "metric",
+        "params": {
+          "customLabel": "Trace Count"
+        }
+      },
+      {
+        "id": "2",
+        "enabled": true,
+        "type": "avg",
+        "schema": "metric",
+        "params": {
+          "field": "duration_ms",
+          "customLabel": "Avg Duration"
+        }
+      },
+      {
+        "id": "3",
+        "enabled": true,
+        "type": "max",
+        "schema": "metric",
+        "params": {
+          "field": "duration_ms",
+          "customLabel": "Max Duration"
+        }
+      },
+      {
+        "id": "4",
+        "enabled": true,
+        "type": "terms",
+        "schema": "bucket",
+        "params": {
+          "field": "trace_id",
+          "size": 10,
+          "order": "desc",
+          "orderBy": "1",
+          "customLabel": "Trace ID"
+        }
+      },
+      {
+        "id": "5",
+        "enabled": true,
+        "type": "terms",
+        "schema": "bucket",
+        "params": {
+          "field": "service_name",
+          "size": 5,
+          "order": "desc",
+          "orderBy": "1",
+          "customLabel": "Service Name"
+        }
+      },
+      {
+        "id": "6",
+        "enabled": true,
+        "type": "terms",
+        "schema": "bucket",
+        "params": {
+          "field": "operation",
+          "size": 5,
+          "order": "desc",
+          "orderBy": "1",
+          "customLabel": "Operation"
+        }
+      }
+    ],
+    "listeners": {}
+  }
+}

@@ -1,0 +1,603 @@
+# Database Alerting Rules
+# Comprehensive monitoring for PostgreSQL and Redis databases
+
+groups:
+  - name: postgres_alerts
+    rules:
+      # Availability
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgres
+          category: availability
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/postgres-down"
+          
+      - alert: PostgreSQLUnhealthy
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgres
+          category: availability
+        annotations:
+          summary: "PostgreSQL is unhealthy"
+          description: "PostgreSQL health check failed on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/postgres-unhealthy"
+      
+      # Connections
+      - alert: PostgreSQLHighConnections
+        expr: sum(pg_stat_database_numbackends) / pg_settings_max_connections * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: connections
+        annotations:
+          summary: "PostgreSQL high connection usage"
+          description: "PostgreSQL connection usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/postgres-high-connections"
+          
+      - alert: PostgreSQLCriticalConnections
+        expr: sum(pg_stat_database_numbackends) / pg_settings_max_connections * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+          category: connections
+        annotations:
+          summary: "PostgreSQL critical connection usage"
+          description: "PostgreSQL connection usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/postgres-critical-connections"
+          
+      - alert: PostgreSQLConnectionErrors
+        expr: rate(pg_stat_database_xact_rollback[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: connections
+        annotations:
+          summary: "PostgreSQL connection errors detected"
+          description: "PostgreSQL transaction rollback rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/postgres-connection-errors"
+      
+      # Performance
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_database_calls_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: performance
+        annotations:
+          summary: "PostgreSQL slow queries detected"
+          description: "PostgreSQL query rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/postgres-slow-queries"
+          
+      - alert: PostgreSQLHighResponseTime
+        expr: histogram_quantile(0.95, rate(pg_stat_database_calls_total[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: performance
+        annotations:
+          summary: "PostgreSQL high response time"
+          description: "95th percentile PostgreSQL response time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/postgres-high-response-time"
+          
+      - alert: PostgreSQLCriticalResponseTime
+        expr: histogram_quantile(0.95, rate(pg_stat_database_calls_total[5m])) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+          category: performance
+        annotations:
+          summary: "PostgreSQL critical response time"
+          description: "95th percentile PostgreSQL response time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/postgres-critical-response-time"
+      
+      # Locks
+      - alert: PostgreSQLHighLocks
+        expr: pg_locks_count > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: locks
+        annotations:
+          summary: "PostgreSQL high lock count"
+          description: "PostgreSQL has {{ $value }} active locks"
+          runbook_url: "https://docs.example.com/runbooks/postgres-high-locks"
+          
+      - alert: PostgreSQLBlockedQueries
+        expr: pg_stat_database_blocked_queries > 10
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+          category: locks
+        annotations:
+          summary: "PostgreSQL blocked queries detected"
+          description: "PostgreSQL has {{ $value }} blocked queries"
+          runbook_url: "https://docs.example.com/runbooks/postgres-blocked-queries"
+      
+      # Replication
+      - alert: PostgreSQLReplicationLag
+        expr: pg_stat_replication_lag > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: replication
+        annotations:
+          summary: "PostgreSQL replication lag detected"
+          description: "PostgreSQL replication lag is {{ $value }} seconds"
+          runbook_url: "https://docs.example.com/runbooks/postgres-replication-lag"
+          
+      - alert: PostgreSQLCriticalReplicationLag
+        expr: pg_stat_replication_lag > 300
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+          category: replication
+        annotations:
+          summary: "PostgreSQL critical replication lag"
+          description: "PostgreSQL replication lag is {{ $value }} seconds"
+          runbook_url: "https://docs.example.com/runbooks/postgres-critical-replication-lag"
+          
+      - alert: PostgreSQLReplicationDown
+        expr: pg_stat_replication == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgres
+          category: replication
+        annotations:
+          summary: "PostgreSQL replication is down"
+          description: "PostgreSQL replication is not working"
+          runbook_url: "https://docs.example.com/runbooks/postgres-replication-down"
+      
+      # Storage
+      - alert: PostgreSQLHighDiskUsage
+        expr: (1 - (pg_database_size_bytes / pg_database_size_limit_bytes)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: storage
+        annotations:
+          summary: "PostgreSQL high disk usage"
+          description: "PostgreSQL disk usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/postgres-high-disk-usage"
+          
+      - alert: PostgreSQLCriticalDiskUsage
+        expr: (1 - (pg_database_size_bytes / pg_database_size_limit_bytes)) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+          category: storage
+        annotations:
+          summary: "PostgreSQL critical disk usage"
+          description: "PostgreSQL disk usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/postgres-critical-disk-usage"
+          
+      - alert: PostgreSQLTableBloat
+        expr: pg_stat_table_bloat_ratio > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: storage
+        annotations:
+          summary: "PostgreSQL table bloat detected"
+          description: "PostgreSQL table bloat ratio is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/postgres-table-bloat"
+      
+      # Memory
+      - alert: PostgreSQLHighMemoryUsage
+        expr: pg_stat_activity_memory_usage / pg_settings_shared_buffers * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: memory
+        annotations:
+          summary: "PostgreSQL high memory usage"
+          description: "PostgreSQL memory usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/postgres-high-memory-usage"
+          
+      - alert: PostgreSQLCriticalMemoryUsage
+        expr: pg_stat_activity_memory_usage / pg_settings_shared_buffers * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+          category: memory
+        annotations:
+          summary: "PostgreSQL critical memory usage"
+          description: "PostgreSQL memory usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/postgres-critical-memory-usage"
+      
+      # WAL
+      - alert: PostgreSQLHighWALUsage
+        expr: pg_stat_wal_usage / pg_settings_max_wal_size * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: wal
+        annotations:
+          summary: "PostgreSQL high WAL usage"
+          description: "PostgreSQL WAL usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/postgres-high-wal-usage"
+          
+      - alert: PostgreSQLCriticalWALUsage
+        expr: pg_stat_wal_usage / pg_settings_max_wal_size * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+          category: wal
+        annotations:
+          summary: "PostgreSQL critical WAL usage"
+          description: "PostgreSQL WAL usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/postgres-critical-wal-usage"
+      
+      # Vacuum
+      - alert: PostgreSQLVacuumNeeded
+        expr: pg_stat_table_dead_tuples > 1000000
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+          category: maintenance
+        annotations:
+          summary: "PostgreSQL vacuum needed"
+          description: "PostgreSQL has {{ $value }} dead tuples"
+          runbook_url: "https://docs.example.com/runbooks/postgres-vacuum-needed"
+          
+      - alert: PostgreSQLAutovacuumDisabled
+        expr: pg_settings_autovacuum == 'off'
+        for: 0m
+        labels:
+          severity: warning
+          service: postgres
+          category: maintenance
+        annotations:
+          summary: "PostgreSQL autovacuum is disabled"
+          description: "PostgreSQL autovacuum is disabled"
+          runbook_url: "https://docs.example.com/runbooks/postgres-autovacuum-disabled"
+
+  - name: redis_alerts
+    rules:
+      # Availability
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+          category: availability
+        annotations:
+          summary: "Redis is down"
+          description: "Redis on {{ $labels.instance }} is not responding"
+          runbook_url: "https://docs.example.com/runbooks/redis-down"
+          
+      - alert: RedisUnhealthy
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+          category: availability
+        annotations:
+          summary: "Redis is unhealthy"
+          description: "Redis health check failed on {{ $labels.instance }}"
+          runbook_url: "https://docs.example.com/runbooks/redis-unhealthy"
+      
+      # Connections
+      - alert: RedisHighConnections
+        expr: redis_connected_clients / redis_config_maxclients * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: connections
+        annotations:
+          summary: "Redis high connection usage"
+          description: "Redis connection usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/redis-high-connections"
+          
+      - alert: RedisCriticalConnections
+        expr: redis_connected_clients / redis_config_maxclients * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          service: redis
+          category: connections
+        annotations:
+          summary: "Redis critical connection usage"
+          description: "Redis connection usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/redis-critical-connections"
+      
+      # Memory
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: memory
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/redis-high-memory-usage"
+          
+      - alert: RedisCriticalMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          service: redis
+          category: memory
+        annotations:
+          summary: "Redis critical memory usage"
+          description: "Redis memory usage is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/redis-critical-memory-usage"
+          
+      - alert: RedisMemoryFragmentation
+        expr: redis_memory_fragmentation_ratio > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: memory
+        annotations:
+          summary: "Redis memory fragmentation detected"
+          description: "Redis memory fragmentation ratio is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/redis-memory-fragmentation"
+          
+      - alert: RedisCriticalMemoryFragmentation
+        expr: redis_memory_fragmentation_ratio > 2.0
+        for: 2m
+        labels:
+          severity: critical
+          service: redis
+          category: memory
+        annotations:
+          summary: "Redis critical memory fragmentation"
+          description: "Redis memory fragmentation ratio is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/redis-critical-memory-fragmentation"
+      
+      # Performance
+      - alert: RedisSlowCommands
+        expr: rate(redis_slowlog_length[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: performance
+        annotations:
+          summary: "Redis slow commands detected"
+          description: "Redis slowlog length is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/redis-slow-commands"
+          
+      - alert: RedisHighResponseTime
+        expr: histogram_quantile(0.95, rate(redis_command_duration_seconds_bucket[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: performance
+        annotations:
+          summary: "Redis high response time"
+          description: "95th percentile Redis response time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/redis-high-response-time"
+          
+      - alert: RedisCriticalResponseTime
+        expr: histogram_quantile(0.95, rate(redis_command_duration_seconds_bucket[5m])) > 0.5
+        for: 2m
+        labels:
+          severity: critical
+          service: redis
+          category: performance
+        annotations:
+          summary: "Redis critical response time"
+          description: "95th percentile Redis response time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/redis-critical-response-time"
+      
+      # Persistence
+      - alert: RedisPersistenceFailing
+        expr: redis_last_bgsave_status != "ok"
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+          category: persistence
+        annotations:
+          summary: "Redis persistence failing"
+          description: "Redis last BGSAVE status is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/redis-persistence-failing"
+          
+      - alert: RedisRDBChangesSinceLastSave
+        expr: redis_rdb_changes_since_last_save > 1000000
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: persistence
+        annotations:
+          summary: "Redis RDB changes since last save"
+          description: "Redis has {{ $value }} changes since last save"
+          runbook_url: "https://docs.example.com/runbooks/redis-rdb-changes"
+      
+      # Replication
+      - alert: RedisReplicationLag
+        expr: redis_master_last_io_seconds_ago > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: replication
+        annotations:
+          summary: "Redis replication lag detected"
+          description: "Redis replication lag is {{ $value }} seconds"
+          runbook_url: "https://docs.example.com/runbooks/redis-replication-lag"
+          
+      - alert: RedisCriticalReplicationLag
+        expr: redis_master_last_io_seconds_ago > 300
+        for: 2m
+        labels:
+          severity: critical
+          service: redis
+          category: replication
+        annotations:
+          summary: "Redis critical replication lag"
+          description: "Redis replication lag is {{ $value }} seconds"
+          runbook_url: "https://docs.example.com/runbooks/redis-critical-replication-lag"
+          
+      - alert: RedisReplicationDown
+        expr: redis_connected_slaves == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+          category: replication
+        annotations:
+          summary: "Redis replication is down"
+          description: "Redis has no connected slaves"
+          runbook_url: "https://docs.example.com/runbooks/redis-replication-down"
+      
+      # Keyspace
+      - alert: RedisKeyspaceExhausted
+        expr: redis_keyspace_hits / (redis_keyspace_hits + redis_keyspace_misses) < 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: keyspace
+        annotations:
+          summary: "Redis keyspace exhausted"
+          description: "Redis keyspace hit ratio is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/redis-keyspace-exhausted"
+          
+      - alert: RedisEvictedKeys
+        expr: rate(redis_evicted_keys_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: keyspace
+        annotations:
+          summary: "Redis evicted keys detected"
+          description: "Redis evicted keys rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/redis-evicted-keys"
+          
+      - alert: RedisExpiredKeys
+        expr: rate(redis_expired_keys_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+          category: keyspace
+        annotations:
+          summary: "Redis expired keys detected"
+          description: "Redis expired keys rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/redis-expired-keys"
+      
+      # Cluster
+      - alert: RedisClusterDown
+        expr: redis_cluster_state != "ok"
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+          category: cluster
+        annotations:
+          summary: "Redis cluster is down"
+          description: "Redis cluster state is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/redis-cluster-down"
+          
+      - alert: RedisClusterSlotsUncovered
+        expr: redis_cluster_slots_uncovered > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+          category: cluster
+        annotations:
+          summary: "Redis cluster slots uncovered"
+          description: "Redis cluster has {{ $value }} uncovered slots"
+          runbook_url: "https://docs.example.com/runbooks/redis-cluster-slots-uncovered"
+          
+      - alert: RedisClusterNodeDown
+        expr: redis_cluster_nodes_down > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+          category: cluster
+        annotations:
+          summary: "Redis cluster node down"
+          description: "Redis cluster has {{ $value }} nodes down"
+          runbook_url: "https://docs.example.com/runbooks/redis-cluster-node-down"
+
+  - name: database_cross_service_alerts
+    rules:
+      # Overall Database Health
+      - alert: DatabaseServicesDown
+        expr: count(up{job=~"postgres|redis"} == 0) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+          category: availability
+        annotations:
+          summary: "Database services are down"
+          description: "{{ $value }} database services are down"
+          runbook_url: "https://docs.example.com/runbooks/database-services-down"
+          
+      - alert: DatabaseHighErrorRate
+        expr: sum(rate(http_requests_total{job=~"postgres|redis", status=~"4..|5.."}[5m])) / sum(rate(http_requests_total{job=~"postgres|redis"}[5m])) * 100 > 10
+        for: 2m
+        labels:
+          severity: critical
+          service: database
+          category: errors
+        annotations:
+          summary: "Database high error rate"
+          description: "Overall database error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/database-high-error-rate"
+          
+      - alert: DatabaseResourceExhaustion
+        expr: (sum(process_resident_memory_bytes{job=~"postgres|redis"}) / 1024 / 1024 / 1024) > 8
+        for: 5m
+        labels:
+          severity: critical
+          service: database
+          category: resources
+        annotations:
+          summary: "Database resource exhaustion"
+          description: "Total database memory usage is {{ $value }}GB"
+          runbook_url: "https://docs.example.com/runbooks/database-resource-exhaustion"
+          
+      - alert: DatabaseSlowPerformance
+        expr: (histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~"postgres|redis"}[5m])) > 2)
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+          category: performance
+        annotations:
+          summary: "Database slow performance"
+          description: "Database response time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/database-slow-performance"

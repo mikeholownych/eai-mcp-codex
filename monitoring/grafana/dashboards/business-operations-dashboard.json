@@ -1,0 +1,681 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Business Operations Dashboard",
+    "tags": ["business-operations", "workflow-metrics", "agent-collaboration", "business-process-monitoring"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Business Operations Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(business_operations_total[5m]))",
+            "legendFormat": "Business Operations/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "business_operations_success_rate * 100",
+            "legendFormat": "Operations Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "business_operations_average_duration",
+            "legendFormat": "Avg Operation Duration",
+            "refId": "C"
+          },
+          {
+            "expr": "business_operations_performance_score * 100",
+            "legendFormat": "Business Performance Score %",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Workflow Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(workflow_execution_events_total[5m])",
+            "legendFormat": "Workflow Executions/sec - {{workflow_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "workflow_execution_success_rate * 100",
+            "legendFormat": "Workflow Success Rate % - {{workflow_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "workflow_execution_average_time",
+            "legendFormat": "Avg Workflow Time - {{workflow_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "workflow_execution_efficiency_score",
+            "legendFormat": "Workflow Efficiency - {{workflow_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Executions/sec / Success Rate % / Time / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Agent Collaboration",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(agent_collaboration_events_total[5m])",
+            "legendFormat": "Collaboration Events/sec - {{collaboration_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "agent_collaboration_success_rate * 100",
+            "legendFormat": "Collaboration Success Rate % - {{collaboration_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "agent_collaboration_average_time",
+            "legendFormat": "Avg Collaboration Time - {{collaboration_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "agent_collaboration_effectiveness_score",
+            "legendFormat": "Collaboration Effectiveness - {{collaboration_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Effectiveness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Business Process Monitoring",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(business_process_events_total[5m])",
+            "legendFormat": "Process Events/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "business_process_success_rate * 100",
+            "legendFormat": "Process Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "business_process_average_time",
+            "legendFormat": "Avg Process Time",
+            "refId": "C"
+          },
+          {
+            "expr": "business_process_efficiency_score",
+            "legendFormat": "Process Efficiency",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byRegexp", "options": ".*%" },
+              "properties": [
+                { "id": "unit", "value": "percent" }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "title": "Consensus Building",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(consensus_building_events_total[5m])",
+            "legendFormat": "Consensus Events/sec - {{consensus_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "consensus_building_success_rate * 100",
+            "legendFormat": "Consensus Success Rate % - {{consensus_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "consensus_building_average_time",
+            "legendFormat": "Avg Consensus Time - {{consensus_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "consensus_building_effectiveness_score",
+            "legendFormat": "Consensus Effectiveness - {{consensus_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Time / Effectiveness Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Business Operations Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(business_operations_total[5m])",
+            "legendFormat": "{{operation_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Business Operations Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "business_operations_performance_score",
+            "legendFormat": "Performance Score - {{performance_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "business_operations_efficiency_score",
+            "legendFormat": "Efficiency Score - {{performance_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "business_operations_reliability_score",
+            "legendFormat": "Reliability Score - {{performance_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "business_operations_scalability_score",
+            "legendFormat": "Scalability Score - {{performance_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Business Operations Details",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "rate(business_operations_total[5m])",
+            "legendFormat": "{{operation_type}}",
+            "refId": "Operations",
+            "format": "table"
+          },
+          {
+            "expr": "rate(workflow_execution_events_total[5m])",
+            "legendFormat": "{{workflow_type}}",
+            "refId": "Workflows",
+            "format": "table"
+          },
+          {
+            "expr": "rate(agent_collaboration_events_total[5m])",
+            "legendFormat": "{{collaboration_type}}",
+            "refId": "Collaboration",
+            "format": "table"
+          },
+          {
+            "expr": "business_operations_success_rate * 100",
+            "legendFormat": "{{operation_type}}",
+            "refId": "Success",
+            "format": "table"
+          },
+          {
+            "expr": "business_operations_performance_score",
+            "legendFormat": "{{performance_type}}",
+            "refId": "Performance",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true
+              },
+              "indexByName": {
+                "operation_type": 0,
+                "workflow_type": 1,
+                "collaboration_type": 2,
+                "performance_type": 3,
+                "Value #Operations": 4,
+                "Value #Workflows": 5,
+                "Value #Collaboration": 6,
+                "Value #Success": 7,
+                "Value #Performance": 8
+              },
+              "renameByName": {
+                "operation_type": "Operation Type",
+                "workflow_type": "Workflow Type",
+                "collaboration_type": "Collaboration Type",
+                "performance_type": "Performance Type",
+                "Value #Operations": "Operations/sec",
+                "Value #Workflows": "Workflows/sec",
+                "Value #Collaboration": "Collaboration Events/sec",
+                "Value #Success": "Success Rate %",
+                "Value #Performance": "Performance Score"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Success Rate %" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "Performance Score" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "yellow", "value": 70 },
+                      { "color": "green", "value": 90 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Business Operations Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - business_operations_success_rate) * 100 * 30) - (business_operations_average_duration * 20) - ((1 - business_operations_performance_score) * 100 * 25) - ((1 - agent_collaboration_success_rate) * 100 * 25))",
+            "legendFormat": "Business Operations Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Business Operations Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "avg_over_time(sum(rate(business_operations_total[5m]))[24h])",
+            "legendFormat": "Avg Operations/sec (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(business_operations_success_rate * 100[24h])",
+            "legendFormat": "Avg Success Rate % (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(business_operations_average_duration[24h])",
+            "legendFormat": "Avg Duration (24h)",
+            "refId": "C"
+          },
+          {
+            "expr": "avg_over_time(business_operations_performance_score * 100[24h])",
+            "legendFormat": "Avg Performance Score % (24h)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Operations/sec / Success Rate % / Duration / Performance %",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Business Value Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(business_value_events_total[5m])",
+            "legendFormat": "Value Events/sec - {{value_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "business_value_generation_rate",
+            "legendFormat": "Value Generation Rate - {{value_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "business_value_efficiency_score",
+            "legendFormat": "Value Efficiency - {{value_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "business_value_impact_score",
+            "legendFormat": "Value Impact - {{value_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Generation Rate / Efficiency Score / Impact Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Business Process Optimization",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(business_process_optimization_events_total[5m])",
+            "legendFormat": "Optimization Events/sec - {{optimization_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "business_process_optimization_success_rate * 100",
+            "legendFormat": "Optimization Success Rate % - {{optimization_type}}",
+            "refId": "B"
+          },
+          {
+            "expr": "business_process_optimization_improvement_score",
+            "legendFormat": "Optimization Improvement - {{optimization_type}}",
+            "refId": "C"
+          },
+          {
+            "expr": "business_process_optimization_efficiency_score",
+            "legendFormat": "Optimization Efficiency - {{optimization_type}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Events/sec / Success Rate % / Improvement Score / Efficiency Score",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "op": "lt"
+          },
+          {
+            "value": 50,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "operation_type",
+          "type": "query",
+          "query": "label_values(business_operations_total, operation_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "workflow_type",
+          "type": "query",
+          "query": "label_values(workflow_execution_events_total, workflow_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "collaboration_type",
+          "type": "query",
+          "query": "label_values(agent_collaboration_events_total, collaboration_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "consensus_type",
+          "type": "query",
+          "query": "label_values(consensus_building_events_total, consensus_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "performance_type",
+          "type": "query",
+          "query": "label_values(business_operations_performance_score, performance_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "value_type",
+          "type": "query",
+          "query": "label_values(business_value_events_total, value_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "optimization_type",
+          "type": "query",
+          "query": "label_values(business_process_optimization_events_total, optimization_type)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Business Operations Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Business.*Operations.*|.*Workflow.*Metrics.*|.*Agent.*Collaboration.*|.*Business.*Process.*Monitoring.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Business Operations Alert: {{alertname}}"
+        },
+        {
+          "name": "Low Business Success Rate",
+          "datasource": "Prometheus",
+          "expr": "business_operations_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Business Success Rate: {{operation_type}}"
+        },
+        {
+          "name": "Low Workflow Success Rate",
+          "datasource": "Prometheus",
+          "expr": "workflow_execution_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Workflow Success Rate: {{workflow_type}}"
+        },
+        {
+          "name": "Low Collaboration Success Rate",
+          "datasource": "Prometheus",
+          "expr": "agent_collaboration_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Collaboration Success Rate: {{collaboration_type}}"
+        },
+        {
+          "name": "Low Consensus Success Rate",
+          "datasource": "Prometheus",
+          "expr": "consensus_building_success_rate * 100 < 70",
+          "iconColor": "orange",
+          "titleFormat": "Low Consensus Success Rate: {{consensus_type}}"
+        }
+      ]
+    }
+  }
+}

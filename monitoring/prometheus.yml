@@ -6,6 +6,15 @@ global:
 rule_files:
   - "alerts/rules.yml"
   - "alerts/frontend-slo-rules.yml"
+  - "alerts/prometheus-frontend-rules.yml"
+  - "alerts/system-health-rules.yml"
+  - "alerts/mcp-services-rules.yml"
+  - "alerts/database-rules.yml"
+  - "alerts/infrastructure-rules.yml"
+  - "alerts/security-rules.yml"
+  - "alerts/business-rules.yml"
+  - "alerts/slo-rules.yml"
+  - "alerts/error-budget-rules.yml"
 
 alerting:
   alertmanagers:

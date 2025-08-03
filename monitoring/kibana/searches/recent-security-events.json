@@ -1,0 +1,32 @@
+{
+  "_id": "RECENT_SECURITY_EVENTS",
+  "_type": "search",
+  "_source": {
+    "title": "Recent Security Events",
+    "description": "Recent security events for monitoring",
+    "hits": 0,
+    "columns": [
+      "@timestamp",
+      "service_name",
+      "security_category",
+      "security_severity",
+      "message",
+      "user_id",
+      "ip_address",
+      "threat_indicators"
+    ],
+    "sort": [
+      {
+        "@timestamp": {
+          "order": "desc",
+          "unmapped_type": "date"
+        }
+      }
+    ],
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"is_security_event:true\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "indexPattern": "mcp-logs-*"
+  }
+}

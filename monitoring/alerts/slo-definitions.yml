@@ -1,0 +1,584 @@
+# SLO Definitions for Critical Services
+# Comprehensive Service Level Objectives for all MCP services
+
+groups:
+  - name: slo_definitions
+    rules:
+      # MCP Services SLO Definitions
+      - record: slo:mcp_services_availability_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{job="mcp-services", status!~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{job="mcp-services"}[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "mcp-services"
+          target: "99.9"
+          
+      - record: slo:mcp_services_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{job="mcp-services", le="0.5"}[5m])) /
+              sum(rate(http_request_duration_seconds_count{job="mcp-services"}[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "mcp-services"
+          target: "95"
+          
+      - record: slo:mcp_services_error_rate_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{job="mcp-services", status=~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{job="mcp-services"}[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "mcp-services"
+          target: "1"
+          
+      - record: slo:mcp_services_throughput_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{job="mcp-services"}[5m])) /
+            100
+          ) * 100
+        labels:
+          slo: "throughput"
+          service: "mcp-services"
+          target: "90"
+          
+      # Model Router SLO Definitions
+      - record: slo:model_router_availability_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="model-router:8001", status!~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="model-router:8001"}[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "model-router"
+          target: "99.9"
+          
+      - record: slo:model_router_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{instance="model-router:8001", le="1.0"}[5m])) /
+              sum(rate(http_request_duration_seconds_count{instance="model-router:8001"}[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "model-router"
+          target: "95"
+          
+      - record: slo:model_router_error_rate_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="model-router:8001", status=~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="model-router:8001"}[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "model-router"
+          target: "1"
+          
+      - record: slo:model_router_model_selection_accuracy_percentage
+        expr: |
+          (
+            sum(rate(model_router_selection_success_total[5m])) /
+            sum(rate(model_router_selection_total[5m]))
+          ) * 100
+        labels:
+          slo: "model_selection_accuracy"
+          service: "model-router"
+          target: "98"
+          
+      # Plan Management SLO Definitions
+      - record: slo:plan_management_availability_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="plan-management:8002", status!~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="plan-management:8002"}[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "plan-management"
+          target: "99.9"
+          
+      - record: slo:plan_management_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{instance="plan-management:8002", le="2.0"}[5m])) /
+              sum(rate(http_request_duration_seconds_count{instance="plan-management:8002"}[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "plan-management"
+          target: "95"
+          
+      - record: slo:plan_management_error_rate_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="plan-management:8002", status=~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="plan-management:8002"}[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "plan-management"
+          target: "1"
+          
+      - record: slo:plan_management_plan_creation_success_percentage
+        expr: |
+          (
+            sum(rate(plan_creation_success_total[5m])) /
+            sum(rate(plan_creation_total[5m]))
+          ) * 100
+        labels:
+          slo: "plan_creation_success"
+          service: "plan-management"
+          target: "99"
+          
+      # Git Worktree Manager SLO Definitions
+      - record: slo:git_worktree_availability_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="git-worktree-manager:8003", status!~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="git-worktree-manager:8003"}[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "git-worktree-manager"
+          target: "99.9"
+          
+      - record: slo:git_worktree_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{instance="git-worktree-manager:8003", le="5.0"}[5m])) /
+              sum(rate(http_request_duration_seconds_count{instance="git-worktree-manager:8003"}[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "git-worktree-manager"
+          target: "95"
+          
+      - record: slo:git_worktree_error_rate_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="git-worktree-manager:8003", status=~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="git-worktree-manager:8003"}[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "git-worktree-manager"
+          target: "1"
+          
+      - record: slo:git_worktree_operation_success_percentage
+        expr: |
+          (
+            sum(rate(git_operation_success_total[5m])) /
+            sum(rate(git_operation_total[5m]))
+          ) * 100
+        labels:
+          slo: "operation_success"
+          service: "git-worktree-manager"
+          target: "99"
+          
+      # Workflow Orchestrator SLO Definitions
+      - record: slo:workflow_orchestrator_availability_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="workflow-orchestrator:8004", status!~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="workflow-orchestrator:8004"}[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "workflow-orchestrator"
+          target: "99.9"
+          
+      - record: slo:workflow_orchestrator_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{instance="workflow-orchestrator:8004", le="3.0"}[5m])) /
+              sum(rate(http_request_duration_seconds_count{instance="workflow-orchestrator:8004"}[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "workflow-orchestrator"
+          target: "95"
+          
+      - record: slo:workflow_orchestrator_error_rate_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="workflow-orchestrator:8004", status=~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="workflow-orchestrator:8004"}[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "workflow-orchestrator"
+          target: "1"
+          
+      - record: slo:workflow_orchestrator_workflow_success_percentage
+        expr: |
+          (
+            sum(rate(workflow_success_total[5m])) /
+            sum(rate(workflow_total[5m]))
+          ) * 100
+        labels:
+          slo: "workflow_success"
+          service: "workflow-orchestrator"
+          target: "98"
+          
+      # Verification Feedback SLO Definitions
+      - record: slo:verification_feedback_availability_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="verification-feedback:8005", status!~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="verification-feedback:8005"}[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "verification-feedback"
+          target: "99.9"
+          
+      - record: slo:verification_feedback_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{instance="verification-feedback:8005", le="2.0"}[5m])) /
+              sum(rate(http_request_duration_seconds_count{instance="verification-feedback:8005"}[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "verification-feedback"
+          target: "95"
+          
+      - record: slo:verification_feedback_error_rate_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{instance="verification-feedback:8005", status=~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{instance="verification-feedback:8005"}[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "verification-feedback"
+          target: "1"
+          
+      - record: slo:verification_feedback_verification_accuracy_percentage
+        expr: |
+          (
+            sum(rate(verification_success_total[5m])) /
+            sum(rate(verification_total[5m]))
+          ) * 100
+        labels:
+          slo: "verification_accuracy"
+          service: "verification-feedback"
+          target: "95"
+          
+      # Frontend SLO Definitions
+      - record: slo:frontend_availability_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{job="frontend", status!~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{job="frontend"}[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "frontend"
+          target: "99.9"
+          
+      - record: slo:frontend_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{job="frontend", le="2.5"}[5m])) /
+              sum(rate(http_request_duration_seconds_count{job="frontend"}[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "frontend"
+          target: "95"
+          
+      - record: slo:frontend_error_rate_percentage
+        expr: |
+          (
+            sum(rate(http_requests_total{job="frontend", status=~"4..|5.."}[5m])) /
+            sum(rate(http_requests_total{job="frontend"}[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "frontend"
+          target: "1"
+          
+      - record: slo:frontend_user_experience_percentage
+        expr: |
+          (
+            sum(rate(user_satisfaction_events_total{rating="good"}[5m])) /
+            sum(rate(user_satisfaction_events_total[5m]))
+          ) * 100
+        labels:
+          slo: "user_experience"
+          service: "frontend"
+          target: "90"
+          
+      # Database SLO Definitions
+      - record: slo:database_availability_percentage
+        expr: |
+          (
+            sum(rate(database_queries_success_total[5m])) /
+            sum(rate(database_queries_total[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "database"
+          target: "99.9"
+          
+      - record: slo:database_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(database_query_duration_seconds_bucket{le="0.1"}[5m])) /
+              sum(rate(database_query_duration_seconds_count[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "database"
+          target: "95"
+          
+      - record: slo:database_error_rate_percentage
+        expr: |
+          (
+            sum(rate(database_errors_total[5m])) /
+            sum(rate(database_queries_total[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "database"
+          target: "0.1"
+          
+      - record: slo:database_connection_success_percentage
+        expr: |
+          (
+            sum(rate(database_connection_success_total[5m])) /
+            sum(rate(database_connection_attempts_total[5m]))
+          ) * 100
+        labels:
+          slo: "connection_success"
+          service: "database"
+          target: "99.9"
+          
+      # Infrastructure SLO Definitions
+      - record: slo:infrastructure_availability_percentage
+        expr: |
+          (
+            sum(up{job=~"kubernetes-.*|etcd|kube-.*"}) /
+            count(up{job=~"kubernetes-.*|etcd|kube-.*"})
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "infrastructure"
+          target: "99.9"
+          
+      - record: slo:infrastructure_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(container_cpu_usage_seconds_total[5m])) /
+              sum(container_spec_cpu_shares[5m])
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "infrastructure"
+          target: "95"
+          
+      - record: slo:infrastructure_error_rate_percentage
+        expr: |
+          (
+            sum(rate(container_restarts_total[5m])) /
+            sum(container_spec_memory_limit_bytes[5m])
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "infrastructure"
+          target: "1"
+          
+      - record: slo:infrastructure_resource_utilization_percentage
+        expr: |
+          (
+            sum(container_memory_usage_bytes[5m]) /
+            sum(container_spec_memory_limit_bytes[5m])
+          ) * 100
+        labels:
+          slo: "resource_utilization"
+          service: "infrastructure"
+          target: "80"
+          
+      # Security SLO Definitions
+      - record: slo:security_availability_percentage
+        expr: |
+          (
+            sum(rate(authentication_success_total[5m])) /
+            sum(rate(authentication_attempts_total[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "security"
+          target: "99.9"
+          
+      - record: slo:security_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(authorization_latency_seconds_bucket{le="0.1"}[5m])) /
+              sum(rate(authorization_latency_seconds_count[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "security"
+          target: "95"
+          
+      - record: slo:security_error_rate_percentage
+        expr: |
+          (
+            sum(rate(security_violations_total[5m])) /
+            sum(rate(security_events_total[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "security"
+          target: "0.1"
+          
+      - record: slo:security_compliance_percentage
+        expr: |
+          (
+            sum(rate(compliance_checks_passed_total[5m])) /
+            sum(rate(compliance_checks_total[5m]))
+          ) * 100
+        labels:
+          slo: "compliance"
+          service: "security"
+          target: "99"
+          
+      # Business Process SLO Definitions
+      - record: slo:business_process_availability_percentage
+        expr: |
+          (
+            sum(rate(business_process_success_total[5m])) /
+            sum(rate(business_process_total[5m]))
+          ) * 100
+        labels:
+          slo: "availability"
+          service: "business-process"
+          target: "99.9"
+          
+      - record: slo:business_process_latency_percentage
+        expr: |
+          (
+            1 - (
+              sum(rate(business_process_duration_seconds_bucket{le="30"}[5m])) /
+              sum(rate(business_process_duration_seconds_count[5m]))
+            )
+          ) * 100
+        labels:
+          slo: "latency"
+          service: "business-process"
+          target: "95"
+          
+      - record: slo:business_process_error_rate_percentage
+        expr: |
+          (
+            sum(rate(business_process_errors_total[5m])) /
+            sum(rate(business_process_total[5m]))
+          ) * 100
+        labels:
+          slo: "error_rate"
+          service: "business-process"
+          target: "1"
+          
+      - record: slo:business_process_quality_percentage
+        expr: |
+          (
+            sum(rate(quality_checks_passed_total[5m])) /
+            sum(rate(quality_checks_total[5m]))
+          ) * 100
+        labels:
+          slo: "quality"
+          service: "business-process"
+          target: "95"
+
+  - name: slo_composite_scores
+    rules:
+      # Overall System SLO Score
+      - record: slo:overall_system_score
+        expr: |
+          (
+            avg(slo:mcp_services_availability_percentage) * 0.2 +
+            avg(slo:frontend_availability_percentage) * 0.2 +
+            avg(slo:database_availability_percentage) * 0.2 +
+            avg(slo:infrastructure_availability_percentage) * 0.2 +
+            avg(slo:security_availability_percentage) * 0.1 +
+            avg(slo:business_process_availability_percentage) * 0.1
+          )
+        labels:
+          slo: "overall_system_score"
+          service: "system"
+          target: "95"
+          
+      # Service Category Scores
+      - record: slo:application_services_score
+        expr: |
+          (
+            avg(slo:mcp_services_availability_percentage) * 0.4 +
+            avg(slo:frontend_availability_percentage) * 0.3 +
+            avg(slo:business_process_availability_percentage) * 0.3
+          )
+        labels:
+          slo: "application_services_score"
+          service: "application"
+          target: "95"
+          
+      - record: slo:infrastructure_services_score
+        expr: |
+          (
+            avg(slo:database_availability_percentage) * 0.5 +
+            avg(slo:infrastructure_availability_percentage) * 0.3 +
+            avg(slo:security_availability_percentage) * 0.2
+          )
+        labels:
+          slo: "infrastructure_services_score"
+          service: "infrastructure"
+          target: "95"
+          
+      # Trend Analysis
+      - record: slo:availability_trend_24h
+        expr: avg_over_time(slo:mcp_services_availability_percentage[24h])
+        labels:
+          slo: "availability_trend"
+          service: "mcp-services"
+          
+      - record: slo:latency_trend_24h
+        expr: avg_over_time(slo:mcp_services_latency_percentage[24h])
+        labels:
+          slo: "latency_trend"
+          service: "mcp-services"
+          
+      - record: slo:error_rate_trend_24h
+        expr: avg_over_time(slo:mcp_services_error_rate_percentage[24h])
+        labels:
+          slo: "error_rate_trend"
+          service: "mcp-services"
