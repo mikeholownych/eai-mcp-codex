@@ -66,3 +66,4 @@ logs/**
 cloudflare-tunnel/credentials.json
 o/**
 .claude
+logs/
