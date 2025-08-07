@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 
 export async function GET() {
   const healthData = {
@@ -16,15 +16,15 @@ export async function GET() {
     dependencies: {
       next: 'healthy',
       node: process.version,
-    }
-  };
+    },
+  }
 
   return NextResponse.json(healthData, {
     status: 200,
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
+      Pragma: 'no-cache',
+      Expires: '0',
     },
-  });
+  })
 }

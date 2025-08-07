@@ -148,7 +148,7 @@ export class StaffApiService {
       items: response.data.users,
       total: response.data.total,
       page: response.data.page,
-      per_page: response.data.per_page
+      per_page: response.data.per_page,
     }
   }
 
@@ -196,7 +196,7 @@ export class StaffApiService {
       items: response.data.tickets,
       total: response.data.total,
       page: response.data.page,
-      per_page: response.data.per_page
+      per_page: response.data.per_page,
     }
   }
 
@@ -226,11 +226,17 @@ export class StaffApiService {
   }
 
   static async updateTicketPriority(id: string, priority: string): Promise<StaffResponse> {
-    const response = await api.patch(`${STAFF_API_BASE}/tickets/${id}/priority?new_priority=${priority}`)
+    const response = await api.patch(
+      `${STAFF_API_BASE}/tickets/${id}/priority?new_priority=${priority}`,
+    )
     return response.data
   }
 
-  static async getTicketStats(): Promise<{ total_tickets: number; by_status: Record<string, number>; avg_response_time: number }> {
+  static async getTicketStats(): Promise<{
+    total_tickets: number
+    by_status: Record<string, number>
+    avg_response_time: number
+  }> {
     const response = await api.get(`${STAFF_API_BASE}/tickets/stats`)
     return response.data
   }
@@ -242,21 +248,22 @@ export function useStaffApi() {
 }
 
 // Error handling helper
-export function handleStaffApiError(error: { response?: { data?: { message?: string } }; status?: number; message?: string }): string {
-  if (error.response?.data?.message) {
-    return error.response.data.message
+export function handleStaffApiError(error: unknown): string {
+  const apiError = error as { response?: { data?: { message?: string }, status?: number }, message?: string }
+  if (apiError.response?.data?.message) {
+    return apiError.response.data.message
   }
-  if (error.response?.status === 401) {
+  if (apiError.response?.status === 401) {
     return 'Unauthorized access. Please check your permissions.'
   }
-  if (error.response?.status === 403) {
+  if (apiError.response?.status === 403) {
     return 'Forbidden. You do not have permission to perform this action.'
   }
-  if (error.response?.status === 404) {
+  if (apiError.response?.status === 404) {
     return 'Resource not found.'
   }
-  if (error.response?.status >= 500) {
+  if (apiError.response?.status && apiError.response.status >= 500) {
     return 'Server error. Please try again later.'
   }
-  return error.message || 'An unexpected error occurred.'
+  return apiError.message || 'An unexpected error occurred.'
 }

@@ -26,14 +26,49 @@ import {
 
 const navigation = [
   { name: 'Dashboard', href: '/staff', icon: HomeIcon, roles: ['admin', 'manager', 'support'] },
-  { name: 'User Management', href: '/staff/users', icon: UserGroupIcon, roles: ['admin', 'manager'] },
-  { name: 'Support Tickets', href: '/staff/tickets', icon: LifebuoyIcon, roles: ['admin', 'manager', 'support'] },
-  { name: 'Financial Suite', href: '/staff/finance', icon: CreditCardIcon, roles: ['admin', 'cfo', 'finance'] },
-  { name: 'Blog Management', href: '/staff/blog', icon: DocumentTextIcon, roles: ['admin', 'manager', 'content'] },
-  { name: 'Video Library', href: '/staff/videos', icon: VideoCameraIcon, roles: ['admin', 'manager', 'content'] },
-  { name: 'System Health', href: '/staff/system', icon: ExclamationTriangleIcon, roles: ['admin', 'manager'] },
+  {
+    name: 'User Management',
+    href: '/staff/users',
+    icon: UserGroupIcon,
+    roles: ['admin', 'manager'],
+  },
+  {
+    name: 'Support Tickets',
+    href: '/staff/tickets',
+    icon: LifebuoyIcon,
+    roles: ['admin', 'manager', 'support'],
+  },
+  {
+    name: 'Financial Suite',
+    href: '/staff/finance',
+    icon: CreditCardIcon,
+    roles: ['admin', 'cfo', 'finance'],
+  },
+  {
+    name: 'Blog Management',
+    href: '/staff/blog',
+    icon: DocumentTextIcon,
+    roles: ['admin', 'manager', 'content'],
+  },
+  {
+    name: 'Video Library',
+    href: '/staff/videos',
+    icon: VideoCameraIcon,
+    roles: ['admin', 'manager', 'content'],
+  },
+  {
+    name: 'System Health',
+    href: '/staff/system',
+    icon: ExclamationTriangleIcon,
+    roles: ['admin', 'manager'],
+  },
   { name: 'Security Center', href: '/staff/security', icon: ShieldCheckIcon, roles: ['admin'] },
-  { name: 'Staff Chat', href: '/staff/chat', icon: ChatBubbleBottomCenterTextIcon, roles: ['admin', 'manager', 'support'] },
+  {
+    name: 'Staff Chat',
+    href: '/staff/chat',
+    icon: ChatBubbleBottomCenterTextIcon,
+    roles: ['admin', 'manager', 'support'],
+  },
   { name: 'Settings', href: '/staff/settings', icon: CogIcon, roles: ['admin', 'manager'] },
 ]
 
@@ -56,9 +91,7 @@ function StaffContent({ children }: { children: React.ReactNode }) {
   }
 
   // Filter navigation items based on user role
-  const filteredNavigation = navigation.filter(item => 
-    item.roles.includes(user.role)
-  )
+  const filteredNavigation = navigation.filter(item => item.roles.includes(user.role))
 
   const ROLE_BADGE_COLORS: Record<string, string> = {
     admin: 'bg-red-500/10 text-red-400',
@@ -110,10 +143,10 @@ function StaffContent({ children }: { children: React.ReactNode }) {
 
           {/* Navigation */}
           <nav className="mt-8 flex-1 px-2 pb-4 space-y-1">
-            {filteredNavigation.map((item) => {
+            {filteredNavigation.map(item => {
               const Icon = item.icon
               const isActive = pathname === item.href
-              
+
               return (
                 <Link
                   key={item.name}
@@ -147,7 +180,9 @@ function StaffContent({ children }: { children: React.ReactNode }) {
                     {user?.name || 'Staff User'}
                   </p>
                   <div className="flex items-center mt-1">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRoleBadgeColor(user.role)}`}
+                    >
                       {user.role.toUpperCase()}
                     </span>
                   </div>
@@ -170,7 +205,10 @@ function StaffContent({ children }: { children: React.ReactNode }) {
       {/* Mobile menu */}
       <div className={`lg:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 flex z-40">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setMobileMenuOpen(false)} />
+          <div
+            className="fixed inset-0 bg-gray-600 bg-opacity-75"
+            onClick={() => setMobileMenuOpen(false)}
+          />
           <div className="relative flex-1 flex flex-col max-w-xs w-full bg-slate-800">
             <div className="absolute top-0 right-0 -mr-12 pt-2">
               <button
@@ -191,10 +229,10 @@ function StaffContent({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
               <nav className="mt-5 px-2 space-y-1">
-                {filteredNavigation.map((item) => {
+                {filteredNavigation.map(item => {
                   const Icon = item.icon
                   const isActive = pathname === item.href
-                  
+
                   return (
                     <Link
                       key={item.name}
@@ -220,7 +258,9 @@ function StaffContent({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className="ml-3">
                   <p className="text-base font-medium text-white">{user?.name || 'Staff User'}</p>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRoleBadgeColor(user.role)}`}
+                  >
                     {user.role.toUpperCase()}
                   </span>
                 </div>
@@ -240,23 +280,25 @@ function StaffContent({ children }: { children: React.ReactNode }) {
           >
             <Bars3Icon className="h-6 w-6" />
           </button>
-          
+
           <div className="flex-1 px-4 flex justify-between items-center">
             <div className="flex-1" />
-            
+
             <div className="ml-4 flex items-center md:ml-6 space-x-4">
               {/* Notifications */}
               <button className="p-2 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors relative">
                 <BellIcon className="h-6 w-6" />
                 <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500"></span>
               </button>
-              
+
               {/* User menu */}
               <div className="relative ml-3">
                 <button className="flex items-center text-sm text-gray-400 hover:text-white transition-colors">
                   <UserCircleIcon className="w-8 h-8" />
                   <span className="ml-2 hidden md:block">{user?.name}</span>
-                  <span className={`ml-2 hidden md:inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
+                  <span
+                    className={`ml-2 hidden md:inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRoleBadgeColor(user.role)}`}
+                  >
                     {user.role.toUpperCase()}
                   </span>
                 </button>
@@ -268,9 +310,7 @@ function StaffContent({ children }: { children: React.ReactNode }) {
         {/* Page content */}
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
           <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              {children}
-            </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">{children}</div>
           </div>
         </main>
       </div>
@@ -278,11 +318,7 @@ function StaffContent({ children }: { children: React.ReactNode }) {
   )
 }
 
-export default function StaffLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function StaffLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <StaffContent>{children}</StaffContent>

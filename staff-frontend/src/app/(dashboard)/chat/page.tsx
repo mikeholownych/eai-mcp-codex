@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
-import { modelApi } from '@/lib/api'
+import React, { useState, useRef, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { modelApi } from "@/lib/api";
 import {
   PaperAirplaneIcon,
   SparklesIcon,
@@ -13,157 +13,167 @@ import {
   ClipboardDocumentIcon,
   TrashIcon,
   ArrowPathIcon,
-} from '@heroicons/react/24/outline'
+} from "@heroicons/react/24/outline";
 
 interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-  type?: 'text' | 'code' | 'suggestion'
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+  type?: "text" | "code" | "suggestion";
 }
 
 const suggestionPrompts = [
-  'Explain how React hooks work',
-  'Write a Python function to sort an array',
-  'Help me debug this JavaScript code',
-  'Create a REST API endpoint in Node.js',
-  'Optimize this SQL query for performance',
-  'Design a database schema for an e-commerce app',
-]
+  "Explain how React hooks work",
+  "Write a Python function to sort an array",
+  "Help me debug this JavaScript code",
+  "Create a REST API endpoint in Node.js",
+  "Optimize this SQL query for performance",
+  "Design a database schema for an e-commerce app",
+];
 
 // Default model options as fallback
 const defaultModelOptions = [
-  { value: 'claude-3.7-sonnet', label: 'Claude 3.7 Sonnet (Recommended)' },
-  { value: 'claude-o3', label: 'Claude O3 (Advanced)' },
-  { value: 'claude-sonnet-4', label: 'Claude Sonnet 4 (Latest)' },
-]
+  { value: "claude-3.7-sonnet", label: "Claude 3.7 Sonnet (Recommended)" },
+  { value: "claude-o3", label: "Claude O3 (Advanced)" },
+  { value: "claude-sonnet-4", label: "Claude Sonnet 4 (Latest)" },
+];
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [inputMessage, setInputMessage] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
-  const [selectedModel, setSelectedModel] = useState('claude-3.7-sonnet')
-  const [modelOptions, setModelOptions] = useState(defaultModelOptions)
-  const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { user } = useAuth()
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("claude-3.7-sonnet");
+  const [modelOptions, setModelOptions] = useState(defaultModelOptions);
+  const [connectionStatus, setConnectionStatus] = useState<
+    "unknown" | "connected" | "disconnected"
+  >("unknown");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   // Load available models and test connection on mount
   useEffect(() => {
     const initializeChat = async () => {
       try {
         // Test Claude connection
-        const connectionTest = await modelApi.testClaudeConnection()
-        setConnectionStatus(connectionTest.success && connectionTest.data?.claude_api_connected ? 'connected' : 'disconnected')
+        const connectionTest = await modelApi.testClaudeConnection();
+        setConnectionStatus(
+          connectionTest.success && connectionTest.data?.status === "connected"
+            ? "connected"
+            : "disconnected",
+        );
 
         // Load available models
-        const modelsResponse = await modelApi.getAvailableModels()
+        const modelsResponse = await modelApi.getAvailableModels();
         if (modelsResponse.success && modelsResponse.data) {
-          const dynamicModelOptions = Object.keys(modelsResponse.data).map((modelName) => {
-            const modelInfo = modelsResponse.data[modelName]
+          const dynamicModelOptions = modelsResponse.data.map((model) => {
             return {
-              value: modelName,
-              label: `${modelName} (${modelInfo.use_cases?.join(', ') || 'General Purpose'})`
-            }
-          })
-          
+              value: model.id,
+              label: `${model.name} (${model.description || "General Purpose"})`,
+            };
+          });
+
           if (dynamicModelOptions.length > 0) {
-            setModelOptions(dynamicModelOptions)
+            setModelOptions(dynamicModelOptions);
             // Set first available model as default if current selection not available
-            if (!dynamicModelOptions.find(m => m.value === selectedModel)) {
-              setSelectedModel(dynamicModelOptions[0].value)
+            if (!dynamicModelOptions.find((m) => m.value === selectedModel)) {
+              setSelectedModel(dynamicModelOptions[0].value);
             }
           }
         }
       } catch (error) {
-        console.error('Failed to initialize chat:', error)
-        setConnectionStatus('disconnected')
+        console.error("Failed to initialize chat:", error);
+        setConnectionStatus("disconnected");
         // Keep default model options on error
       }
-    }
+    };
 
-    initializeChat()
-  }, [selectedModel])
+    initializeChat();
+  }, [selectedModel]);
 
   const handleSendMessage = async (content?: string) => {
-    const messageContent = content || inputMessage.trim()
-    if (!messageContent) return
+    const messageContent = content || inputMessage.trim();
+    if (!messageContent) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      role: 'user',
+      role: "user",
       content: messageContent,
       timestamp: new Date(),
-      type: 'text',
-    }
+      type: "text",
+    };
 
-    setMessages(prev => [...prev, userMessage])
-    setInputMessage('')
-    setIsTyping(true)
+    setMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
+    setIsTyping(true);
 
     try {
       // Call real AI model through model-router service
       const response = await modelApi.routeRequest(messageContent, {
         model: selectedModel,
-        taskType: messageContent.toLowerCase().includes('code') ? 'code_generation' : 'general',
+        taskType: messageContent.toLowerCase().includes("code")
+          ? "code_generation"
+          : "general",
         temperature: 0.7,
         maxTokens: 4096,
         context: {
           conversation_history: messages.slice(-5), // Send last 5 messages for context
-          user_preferences: { model: selectedModel }
-        }
-      })
+          user_preferences: { model: selectedModel },
+        },
+      });
 
       if (response.success && response.data) {
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: response.data.result || response.data.content || 'I received your message but couldn\'t generate a response.',
+          role: "assistant",
+          content:
+            response.data.response ||
+            "I received your message but couldn't generate a response.",
           timestamp: new Date(),
-          type: messageContent.toLowerCase().includes('code') ? 'code' : 'text',
-        }
-        
-        setMessages(prev => [...prev, aiMessage])
+          type: messageContent.toLowerCase().includes("code") ? "code" : "text",
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
       } else {
         // Fallback message if API call succeeds but no proper response
         const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: 'I apologize, but I encountered an issue generating a response. Please try again.',
+          role: "assistant",
+          content:
+            "I apologize, but I encountered an issue generating a response. Please try again.",
           timestamp: new Date(),
-          type: 'text',
-        }
-        setMessages(prev => [...prev, errorMessage])
+          type: "text",
+        };
+        setMessages((prev) => [...prev, errorMessage]);
       }
     } catch (error) {
-      console.error('Error calling model API:', error)
-      
+      console.error("Error calling model API:", error);
+
       // Fallback to mock response if API fails
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        role: 'assistant',
+        role: "assistant",
         content: generateAIResponse(messageContent),
         timestamp: new Date(),
-        type: messageContent.toLowerCase().includes('code') ? 'code' : 'text',
-      }
-      
-      setMessages(prev => [...prev, aiMessage])
+        type: messageContent.toLowerCase().includes("code") ? "code" : "text",
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
     } finally {
-      setIsTyping(false)
+      setIsTyping(false);
     }
-  }
+  };
 
   const generateAIResponse = (prompt: string): string => {
-    if (prompt.toLowerCase().includes('react')) {
+    if (prompt.toLowerCase().includes("react")) {
       return `Great question about React! Here's a comprehensive explanation:
 
 React hooks are functions that let you use state and other React features in functional components. They were introduced in React 16.8 as a way to write components without classes.
@@ -193,10 +203,10 @@ function UserProfile({ userId }) {
 }
 \`\`\`
 
-Would you like me to explain any specific hook in more detail?`
+Would you like me to explain any specific hook in more detail?`;
     }
 
-    if (prompt.toLowerCase().includes('python')) {
+    if (prompt.toLowerCase().includes("python")) {
       return `Here's a Python function to sort an array using different algorithms:
 
 \`\`\`python
@@ -226,7 +236,7 @@ print("Sorted (quicksort):", quicksort(numbers))
 print("Sorted (built-in):", sort_array_builtin(numbers))
 \`\`\`
 
-The quicksort algorithm is generally efficient for most datasets. Would you like me to explain other sorting algorithms or help with a specific use case?`
+The quicksort algorithm is generally efficient for most datasets. Would you like me to explain other sorting algorithms or help with a specific use case?`;
     }
 
     return `I understand you're asking about "${prompt}". I'm here to help with coding questions, debugging, architecture decisions, and technical explanations.
@@ -238,23 +248,23 @@ Here are some ways I can assist:
 • **Architecture**: Design system architectures and database schemas
 • **Learning**: Explain concepts, frameworks, and technologies
 
-Feel free to share your code or ask specific technical questions!`
-  }
+Feel free to share your code or ask specific technical questions!`;
+  };
 
   const handleClearChat = () => {
-    setMessages([])
-  }
+    setMessages([]);
+  };
 
   const handleCopyMessage = (content: string) => {
-    navigator.clipboard.writeText(content)
+    navigator.clipboard.writeText(content);
     // You could add a toast notification here
-  }
+  };
 
   const formatMessageContent = (content: string) => {
     // Simple code block detection and formatting
-    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g
-    const parts = content.split(codeBlockRegex)
-    
+    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+    const parts = content.split(codeBlockRegex);
+
     return parts.map((part, index) => {
       if (index % 3 === 2) {
         // This is code content
@@ -266,20 +276,20 @@ Feel free to share your code or ask specific technical questions!`
               </pre>
             </div>
           </div>
-        )
+        );
       } else if (index % 3 === 1) {
         // This is the language identifier, skip it
-        return null
+        return null;
       } else {
         // This is regular text
         return (
           <div key={index} className="whitespace-pre-wrap">
             {part}
           </div>
-        )
+        );
       }
-    })
-  }
+    });
+  };
 
   return (
     <div className="h-full flex flex-col space-y-6">
@@ -287,31 +297,37 @@ Feel free to share your code or ask specific technical questions!`
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">AI Assistant</h1>
-          <p className="text-gray-400">Get instant help with coding, debugging, and technical questions</p>
+          <p className="text-gray-400">
+            Get instant help with coding, debugging, and technical questions
+          </p>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           {/* Connection Status Indicator */}
           <div className="flex items-center space-x-2">
-            <div 
+            <div
               className={`w-2 h-2 rounded-full ${
-                connectionStatus === 'connected' ? 'bg-green-500' : 
-                connectionStatus === 'disconnected' ? 'bg-red-500' : 
-                'bg-yellow-500'
+                connectionStatus === "connected"
+                  ? "bg-green-500"
+                  : connectionStatus === "disconnected"
+                    ? "bg-red-500"
+                    : "bg-yellow-500"
               }`}
             />
             <span className="text-xs text-gray-400">
-              {connectionStatus === 'connected' ? 'AI Connected' : 
-               connectionStatus === 'disconnected' ? 'AI Offline' : 
-               'Connecting...'}
+              {connectionStatus === "connected"
+                ? "AI Connected"
+                : connectionStatus === "disconnected"
+                  ? "AI Offline"
+                  : "Connecting..."}
             </span>
           </div>
-          
+
           <select
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
             className="bg-slate-700 text-white text-sm rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 min-w-[200px]"
-            disabled={connectionStatus === 'disconnected'}
+            disabled={connectionStatus === "disconnected"}
           >
             {modelOptions.map((model) => (
               <option key={model.value} value={model.value}>
@@ -319,7 +335,7 @@ Feel free to share your code or ask specific technical questions!`
               </option>
             ))}
           </select>
-          
+
           <Button variant="outline" size="sm" onClick={handleClearChat}>
             <TrashIcon className="h-4 w-4 mr-2" />
             Clear Chat
@@ -341,7 +357,7 @@ Feel free to share your code or ask specific technical questions!`
                 <p className="text-gray-400 mb-6">
                   Ask questions, get code help, or explore technical concepts
                 </p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
                   {suggestionPrompts.map((prompt, index) => (
                     <button
@@ -361,12 +377,14 @@ Feel free to share your code or ask specific technical questions!`
               messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className={`flex max-w-4xl ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div
+                    className={`flex max-w-4xl ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+                  >
                     {/* Avatar */}
                     <div className="flex-shrink-0">
-                      {message.role === 'user' ? (
+                      {message.role === "user" ? (
                         <UserCircleIcon className="h-8 w-8 text-gray-400" />
                       ) : (
                         <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
@@ -374,30 +392,34 @@ Feel free to share your code or ask specific technical questions!`
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Message Content */}
-                    <div className={`mx-3 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+                    <div
+                      className={`mx-3 ${message.role === "user" ? "text-right" : "text-left"}`}
+                    >
                       <div className="flex items-center space-x-2 mb-1">
                         <span className="text-sm font-medium text-gray-300">
-                          {message.role === 'user' ? user?.name || 'You' : 'AI Assistant'}
+                          {message.role === "user"
+                            ? user?.name || "You"
+                            : "AI Assistant"}
                         </span>
                         <span className="text-xs text-gray-500">
                           {message.timestamp.toLocaleTimeString()}
                         </span>
                       </div>
-                      
+
                       <div
                         className={`p-4 rounded-lg ${
-                          message.role === 'user'
-                            ? 'bg-orange-500/10 border border-orange-500/20 text-white'
-                            : 'bg-slate-700/50 border border-slate-600 text-gray-200'
+                          message.role === "user"
+                            ? "bg-orange-500/10 border border-orange-500/20 text-white"
+                            : "bg-slate-700/50 border border-slate-600 text-gray-200"
                         }`}
                       >
                         <div className="text-sm">
                           {formatMessageContent(message.content)}
                         </div>
-                        
-                        {message.role === 'assistant' && (
+
+                        {message.role === "assistant" && (
                           <div className="flex items-center justify-end mt-3 pt-3 border-t border-slate-600 space-x-2">
                             <button
                               onClick={() => handleCopyMessage(message.content)}
@@ -407,7 +429,11 @@ Feel free to share your code or ask specific technical questions!`
                               <ClipboardDocumentIcon className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleSendMessage(`Explain this in more detail: ${message.content.substring(0, 50)}...`)}
+                              onClick={() =>
+                                handleSendMessage(
+                                  `Explain this in more detail: ${message.content.substring(0, 50)}...`,
+                                )
+                              }
                               className="p-1 text-gray-400 hover:text-white transition-colors"
                               title="Ask for more details"
                             >
@@ -421,7 +447,7 @@ Feel free to share your code or ask specific technical questions!`
                 </div>
               ))
             )}
-            
+
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex justify-start">
@@ -433,18 +459,24 @@ Feel free to share your code or ask specific technical questions!`
                     <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
-          
+
           {/* Input Area */}
           <div className="border-t border-slate-600 p-4">
             <div className="flex items-end space-x-3">
@@ -453,9 +485,9 @@ Feel free to share your code or ask specific technical questions!`
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault()
-                      handleSendMessage()
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
                     }
                   }}
                   placeholder="Ask me anything about code, debugging, or technical concepts..."
@@ -463,25 +495,36 @@ Feel free to share your code or ask specific technical questions!`
                   rows={3}
                 />
               </div>
-              
+
               <Button
                 variant="primary"
                 onClick={() => handleSendMessage()}
-                disabled={!inputMessage.trim() || isTyping || connectionStatus === 'disconnected'}
+                disabled={
+                  !inputMessage.trim() ||
+                  isTyping ||
+                  connectionStatus === "disconnected"
+                }
                 className="px-4 py-3"
-                title={connectionStatus === 'disconnected' ? 'AI service is offline' : ''}
+                title={
+                  connectionStatus === "disconnected"
+                    ? "AI service is offline"
+                    : ""
+                }
               >
                 <PaperAirplaneIcon className="h-5 w-5" />
               </Button>
             </div>
-            
+
             <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
               <span>Press Enter to send, Shift+Enter for new line</span>
-              <span>Model: {modelOptions.find(m => m.value === selectedModel)?.label}</span>
+              <span>
+                Model:{" "}
+                {modelOptions.find((m) => m.value === selectedModel)?.label}
+              </span>
             </div>
           </div>
         </Card>
       </div>
     </div>
-  )
+  );
 }

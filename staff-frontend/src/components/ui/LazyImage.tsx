@@ -1,71 +1,71 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 
 interface LazyImageProps {
-  src: string
-  alt: string
-  className?: string
-  width?: number
-  height?: number
-  blurDataURL?: string
-  priority?: boolean
-  onLoad?: () => void
-  onError?: () => void
+  src: string;
+  alt: string;
+  className?: string;
+  width?: number;
+  height?: number;
+  blurDataURL?: string;
+  priority?: boolean;
+  onLoad?: () => void;
+  onError?: () => void;
 }
 
 export default function LazyImage({
   src,
   alt,
-  className = '',
+  className = "",
   width,
   height,
   blurDataURL,
   priority = false,
   onLoad,
-  onError
+  onError,
 }: LazyImageProps) {
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [isInView, setIsInView] = useState(priority)
-  const [hasError, setHasError] = useState(false)
-  const imgRef = useRef<HTMLImageElement>(null)
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(priority);
+  const [hasError, setHasError] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    if (priority) return
+    if (priority) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsInView(true)
-          observer.disconnect()
+          setIsInView(true);
+          observer.disconnect();
         }
       },
       {
         threshold: 0.1,
-        rootMargin: '50px'
-      }
-    )
+        rootMargin: "50px",
+      },
+    );
 
     if (imgRef.current) {
-      observer.observe(imgRef.current)
+      observer.observe(imgRef.current);
     }
 
-    return () => observer.disconnect()
-  }, [priority])
+    return () => observer.disconnect();
+  }, [priority]);
 
   const handleLoad = () => {
-    setIsLoaded(true)
-    onLoad?.()
-  }
+    setIsLoaded(true);
+    onLoad?.();
+  };
 
   const handleError = () => {
-    setHasError(true)
-    onError?.()
-  }
+    setHasError(true);
+    onError?.();
+  };
 
   return (
-    <div 
+    <div
       className={`relative overflow-hidden ${className}`}
       style={{ width, height }}
     >
@@ -77,10 +77,10 @@ export default function LazyImage({
         transition={{ duration: 0.3 }}
         style={{
           backgroundImage: blurDataURL ? `url(${blurDataURL})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          filter: 'blur(5px)',
-          transform: 'scale(1.1)'
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(5px)",
+          transform: "scale(1.1)",
         }}
       />
 
@@ -96,7 +96,7 @@ export default function LazyImage({
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoaded ? 1 : 0 }}
           transition={{ duration: 0.3 }}
-          loading={priority ? 'eager' : 'lazy'}
+          loading={priority ? "eager" : "lazy"}
           decoding="async"
         />
       )}
@@ -111,5 +111,5 @@ export default function LazyImage({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -4,17 +4,17 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { SystemHealth } from '@/types'
-import { 
-  StaffApiService, 
-  User, 
-  Ticket, 
-  SystemStats, 
-  DashboardData, 
+import {
+  StaffApiService,
+  User,
+  Ticket,
+  SystemStats,
+  DashboardData,
   handleStaffApiError,
   UserCreate,
   UserUpdate,
   TicketCreate,
-  TicketUpdate
+  TicketUpdate,
 } from '../lib/staffApi'
 
 // Dashboard Hook
@@ -248,7 +248,7 @@ export function useUserActions() {
     activateUser,
     loading,
     error,
-    clearError: () => setError(null)
+    clearError: () => setError(null),
   }
 }
 
@@ -406,13 +406,17 @@ export function useTicketActions() {
     updateTicketPriority,
     loading,
     error,
-    clearError: () => setError(null)
+    clearError: () => setError(null),
   }
 }
 
 // Ticket Stats Hook
 export function useTicketStats() {
-  const [stats, setStats] = useState<{ total_tickets: number; by_status: Record<string, number>; avg_response_time: number } | null>(null)
+  const [stats, setStats] = useState<{
+    total_tickets: number
+    by_status: Record<string, number>
+    avg_response_time: number
+  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 

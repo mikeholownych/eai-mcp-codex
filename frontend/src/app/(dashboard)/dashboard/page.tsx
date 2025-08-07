@@ -114,7 +114,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((item) => {
+        {stats.map(item => {
           const Icon = item.icon
           return (
             <Card key={item.name} className="p-6">
@@ -124,18 +124,12 @@ export default function DashboardPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
-                      {item.name}
-                    </dt>
+                    <dt className="text-sm font-medium text-gray-400 truncate">{item.name}</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-white">
-                        {item.value}
-                      </div>
+                      <div className="text-2xl font-semibold text-white">{item.value}</div>
                       <div
                         className={`ml-2 flex items-baseline text-sm font-semibold ${
-                          item.changeType === 'increase'
-                            ? 'text-green-400'
-                            : 'text-red-400'
+                          item.changeType === 'increase' ? 'text-green-400' : 'text-red-400'
                         }`}
                       >
                         {item.changeType === 'increase' ? (
@@ -161,12 +155,17 @@ export default function DashboardPage() {
       <div>
         <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {quickActions.map((action) => {
+          {quickActions.map(action => {
             const Icon = action.icon
             return (
-              <Card key={action.name} className="p-6 hover:bg-slate-700/50 transition-colors cursor-pointer">
+              <Card
+                key={action.name}
+                className="p-6 hover:bg-slate-700/50 transition-colors cursor-pointer"
+              >
                 <div className="flex items-center">
-                  <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-r ${action.color} rounded-lg flex items-center justify-center`}>
+                  <div
+                    className={`flex-shrink-0 w-12 h-12 bg-gradient-to-r ${action.color} rounded-lg flex items-center justify-center`}
+                  >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
@@ -208,13 +207,9 @@ export default function DashboardPage() {
                           <div className="min-w-0 flex-1">
                             <div>
                               <div className="text-sm">
-                                <span className="font-medium text-white">
-                                  {item.title}
-                                </span>
+                                <span className="font-medium text-white">{item.title}</span>
                               </div>
-                              <p className="mt-0.5 text-sm text-gray-400">
-                                {item.description}
-                              </p>
+                              <p className="mt-0.5 text-sm text-gray-400">{item.description}</p>
                             </div>
                             <div className="mt-2 text-sm text-gray-500">
                               <div className="flex items-center">

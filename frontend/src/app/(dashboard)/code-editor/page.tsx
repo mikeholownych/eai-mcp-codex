@@ -46,7 +46,7 @@ console.log('Fibonacci sequence:');
 for (let i = 0; i < 10; i++) {
   console.log(\`F(\${i}) = \${fibonacci(i)}\`);
 }`,
-  
+
   typescript: `// TypeScript Example
 interface User {
   id: number;
@@ -126,7 +126,14 @@ export default function CodeEditorPage() {
   const [output, setOutput] = useState('')
   const [showAIPanel, setShowAIPanel] = useState(false)
   const [aiPrompt, setAiPrompt] = useState('')
-  const editorRef = useRef(null)
+  type EditorRef = {
+    getValue: () => string;
+    setValue: (value: string) => void;
+    focus: () => void;
+    updateOptions?: (options: Record<string, unknown>) => void;
+  };
+
+  const editorRef = useRef<EditorRef | null>(null)
 
   const handleLanguageChange = (newLanguage: string) => {
     setLanguage(newLanguage)
@@ -136,37 +143,55 @@ export default function CodeEditorPage() {
   const handleRunCode = async () => {
     setIsRunning(true)
     setOutput('Running code...')
-    
+
     // Simulate code execution
     setTimeout(() => {
-      setOutput(`Code executed successfully!\nLanguage: ${language}\nLines: ${code.split('\n').length}`)
+      setOutput(
+        `Code executed successfully!\nLanguage: ${language}\nLines: ${code.split('\n').length}`,
+      )
       setIsRunning(false)
     }, 2000)
   }
 
   const handleAIAssist = async () => {
     if (!aiPrompt.trim()) return
-    
+
     setOutput('AI is analyzing your request...')
-    
+
     // Simulate AI response
     setTimeout(() => {
-      setOutput(`AI Suggestion: Based on your prompt "${aiPrompt}", here are some recommendations:\n\n1. Consider using more descriptive variable names\n2. Add error handling for edge cases\n3. Consider performance optimizations\n4. Add unit tests for your functions`)
+      setOutput(
+        `AI Suggestion: Based on your prompt "${aiPrompt}", here are some recommendations:\n\n1. Consider using more descriptive variable names\n2. Add error handling for edge cases\n3. Consider performance optimizations\n4. Add unit tests for your functions`,
+      )
       setAiPrompt('')
     }, 2000)
   }
 
-  const handleEditorDidMount = (editor: { getValue: () => string; setValue: (value: string) => void; focus: () => void }) => {
-    editorRef.current = editor
+  const handleEditorDidMount = (editor: unknown) => {
+    const typedEditor = editor as {
+      getValue: () => string;
+      setValue: (value: string) => void;
+      focus: () => void;
+      updateOptions?: (options: Record<string, unknown>) => void;
+    };
     
-    // Configure editor options
-    editor.updateOptions({
-      theme: 'vs-dark',
-      fontSize: 14,
-      minimap: { enabled: true },
-      wordWrap: 'on',
-      automaticLayout: true,
-    })
+    editorRef.current = {
+      getValue: () => typedEditor.getValue(),
+      setValue: (value: string) => typedEditor.setValue(value),
+      focus: () => typedEditor.focus(),
+      updateOptions: (options: Record<string, unknown>) => typedEditor.updateOptions?.(options)
+    };
+
+    // Configure editor options if updateOptions exists
+    if (typedEditor.updateOptions) {
+      typedEditor.updateOptions({
+        theme: 'vs-dark',
+        fontSize: 14,
+        minimap: { enabled: true },
+        wordWrap: 'on',
+        automaticLayout: true,
+      });
+    }
   }
 
   return (
@@ -177,7 +202,7 @@ export default function CodeEditorPage() {
           <h1 className="text-2xl font-bold text-white">Code Editor</h1>
           <p className="text-gray-400">Write, edit, and test your code with AI assistance</p>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           <Button variant="outline" size="sm">
             <FolderOpenIcon className="h-4 w-4 mr-2" />
@@ -198,10 +223,10 @@ export default function CodeEditorPage() {
             <div className="relative">
               <select
                 value={language}
-                onChange={(e) => handleLanguageChange(e.target.value)}
+                onChange={e => handleLanguageChange(e.target.value)}
                 className="bg-slate-700 text-white text-sm rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               >
-                {languages.map((lang) => (
+                {languages.map(lang => (
                   <option key={lang.value} value={lang.value}>
                     {lang.label}
                   </option>
@@ -216,15 +241,11 @@ export default function CodeEditorPage() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowAIPanel(!showAIPanel)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setShowAIPanel(!showAIPanel)}>
               <SparklesIcon className="h-4 w-4 mr-2" />
               AI Assistant
             </Button>
-            
+
             <Button
               variant="primary"
               size="sm"
@@ -249,7 +270,7 @@ export default function CodeEditorPage() {
                 height="100%"
                 language={language}
                 value={code}
-                onChange={(value) => setCode(value || '')}
+                onChange={value => setCode(value || '')}
                 onMount={handleEditorDidMount}
                 theme="vs-dark"
                 options={{
@@ -284,7 +305,7 @@ export default function CodeEditorPage() {
                   ×
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -292,12 +313,12 @@ export default function CodeEditorPage() {
                   </label>
                   <textarea
                     value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
+                    onChange={e => setAiPrompt(e.target.value)}
                     placeholder="e.g., Optimize this code, explain this function, add error handling..."
                     className="w-full h-20 bg-slate-700 text-white text-sm rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
                   />
                 </div>
-                
+
                 <Button
                   variant="primary"
                   size="sm"
@@ -308,7 +329,7 @@ export default function CodeEditorPage() {
                   <SparklesIcon className="h-4 w-4 mr-2" />
                   Get AI Help
                 </Button>
-                
+
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium text-gray-300">Quick Actions:</h4>
                   <div className="space-y-1">
@@ -350,7 +371,7 @@ export default function CodeEditorPage() {
             </Button>
           </div>
         </div>
-        
+
         <div className="bg-slate-800 rounded-lg p-4 h-32 overflow-y-auto">
           <pre className="text-sm text-gray-300 whitespace-pre-wrap">
             {output || 'No output yet. Run your code to see results here.'}

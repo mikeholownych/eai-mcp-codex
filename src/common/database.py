@@ -46,7 +46,20 @@ def deserialize_datetime(dt: Optional[datetime]) -> Optional[datetime]:
 
 class DatabaseManager:
     def __init__(self, db_name: str):
-        self.db_name = db_name
+        logger.info(f"DatabaseManager initialized with db_name: {db_name}")
+        
+        # For workflow orchestrator, always use environment variables
+        if db_name.startswith('postgresql://'):
+            logger.info("DSN detected, extracting database name and using environment variables")
+            # Extract database name from DSN
+            import urllib.parse as urlparse
+            parsed = urlparse.urlparse(db_name)
+            self.db_name = parsed.path.lstrip('/')
+            if not self.db_name:
+                self.db_name = "workflow_orchestrator"
+        else:
+            self.db_name = db_name
+            
         self.dsn = self._get_dsn()
         self._pool: Optional[Any] = None  # Use Any for _pool type hint
 
@@ -55,12 +68,36 @@ class DatabaseManager:
             logger.info(f"Using dummy DSN for in-memory testing for {self.db_name}")
             return "sqlite:///:memory:"  # Dummy DSN
 
-        user = os.getenv(f"{self.db_name.upper()}_DB_USER", "mcp_user")
-        password = os.getenv(f"{self.db_name.upper()}_DB_PASSWORD", "mcp_password")
-        host = os.getenv(f"{self.db_name.upper()}_DB_HOST", "localhost")
-        port = os.getenv(f"{self.db_name.upper()}_DB_PORT", "5432")
-        db = os.getenv(f"{self.db_name.upper()}_DB_NAME", self.db_name)
-        return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+        # Try environment variables with DB_NAME prefix first (for workflow orchestrator)
+        user = os.getenv(f"{self.db_name.upper()}_DB_USER")
+        password = os.getenv(f"{self.db_name.upper()}_DB_PASSWORD")
+        host = os.getenv(f"{self.db_name.upper()}_DB_HOST")
+        port = os.getenv(f"{self.db_name.upper()}_DB_PORT")
+        db = os.getenv(f"{self.db_name.upper()}_DB_NAME")
+        
+        # If not found, try generic MCP variables (for other services)
+        if not user:
+            user = os.getenv("MCP_DB_USER", "mcp_user")
+        if not password:
+            password = os.getenv("MCP_DB_PASSWORD", "mcp_password")
+        if not host:
+            host = os.getenv("MCP_DB_HOST", "postgres")
+        if not port:
+            port = os.getenv("MCP_DB_PORT", "5432")
+        if not db:
+            db = self.db_name
+        
+        # Log the values being used
+        logger.info(f"Database connection for {self.db_name}:")
+        logger.info(f"  User: {user}")
+        logger.info(f"  Host: {host}")
+        logger.info(f"  Port: {port}")
+        logger.info(f"  Database: {db}")
+        
+        dsn = f"postgresql://{user}:{password}@{host}:{port}/{db}"
+        logger.info(f"  DSN: {dsn}")
+        
+        return dsn
 
     async def connect(self):
         if os.getenv("TESTING_MODE") == "true":
@@ -70,7 +107,22 @@ class DatabaseManager:
 
         if self._pool is None:
             try:
-                self._pool = await asyncpg.create_pool(self.dsn)
+                # Parse the DSN to get connection parameters
+                import urllib.parse as urlparse
+                parsed = urlparse.urlparse(self.dsn)
+                
+                # Create connection pool with explicit server settings
+                self._pool = await asyncpg.create_pool(
+                    host=parsed.hostname,
+                    port=parsed.port,
+                    user=parsed.username,
+                    password=parsed.password,
+                    database=parsed.path.lstrip('/'),
+                    timeout=10,
+                    command_timeout=10,
+                    min_size=1,
+                    max_size=10
+                )
                 logger.info(f"Successfully connected to database: {self.db_name}")
             except Exception as e:
                 logger.error(f"Failed to create PostgreSQL connection pool: {e}")

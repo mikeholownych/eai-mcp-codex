@@ -1,21 +1,43 @@
-# Sandbox environment for running isolated tasks
-FROM python:3.11-slim AS sandbox
+# =====================================
+# SANDBOX ENVIRONMENT FOR ISOLATED TASKS
+# =====================================
+FROM mcp-base AS base
 
-# Install minimal system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+ENV HOME=/home/sandbox
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash sandbox
+# ---------- Dependencies Stage ----------
+FROM base as deps
+
+WORKDIR /app
+
+USER root
+
+# Copy requirements if it exists, otherwise create minimal one
+COPY requirements.txt* ./
+RUN if [ ! -f requirements.txt ]; then \
+        echo "fastapi>=0.68.0\nuvicorn[standard]>=0.15.0\npydantic>=1.8.0" > requirements.txt; \
+    fi && \
+    pip install --no-cache-dir -r requirements.txt
+
+# ---------- Final Runtime Stage ----------
+FROM base AS sandbox
+
+# Create secure sandbox user
+USER root
+RUN groupadd --system --gid 1001 sandbox && \
+    useradd --system --uid 1001 --gid 1001 --create-home --shell /bin/bash sandbox
+
+# Set working directory and permissions
 WORKDIR /home/sandbox
 
-# Install Python dependencies as root
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+# Copy dependencies
+COPY --from=deps /usr/local/lib/python*/site-packages /usr/local/lib/python*/site-packages
+COPY --from=deps /usr/local/bin /usr/local/bin
 
-# Drop privileges for runtime
+RUN chown -R sandbox:sandbox /home/sandbox
+
+# Drop to sandbox user
 USER sandbox
 
+# Default command
 CMD ["python", "-c", "print('sandbox ready')"]

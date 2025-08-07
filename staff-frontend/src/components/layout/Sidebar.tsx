@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
+import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   HomeIcon,
   CodeBracketIcon,
@@ -18,63 +18,77 @@ import {
   ChartBarIcon,
   UsersIcon,
   CogIcon,
-} from '@heroicons/react/24/outline'
+} from "@heroicons/react/24/outline";
 
 interface SidebarItem {
-  name: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  badge?: string
-  children?: SidebarItem[]
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+  children?: SidebarItem[];
 }
 
 interface SidebarProps {
-  role?: string
-  plan?: string
+  role?: string;
+  plan?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' }) => {
-  const [collapsed, setCollapsed] = useState(false)
-  const pathname = usePathname()
+const Sidebar: React.FC<SidebarProps> = ({
+  role = "customer",
+  plan = "standard",
+}) => {
+  const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
 
   const customerItems: SidebarItem[] = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Code Editor', href: '/editor', icon: CodeBracketIcon },
-    { name: 'AI Assistant', href: '/chat', icon: ChatBubbleLeftRightIcon },
-    { name: 'Video Library', href: '/videos', icon: PlayIcon },
-    { name: 'Documentation', href: '/docs', icon: DocumentTextIcon },
-    { name: 'Billing', href: '/billing', icon: CreditCardIcon },
-    { name: 'Support', href: '/support', icon: LifebuoyIcon },
-    { name: 'Profile', href: '/profile', icon: UserIcon },
-  ]
+    { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
+    { name: "Code Editor", href: "/editor", icon: CodeBracketIcon },
+    { name: "AI Assistant", href: "/chat", icon: ChatBubbleLeftRightIcon },
+    { name: "Video Library", href: "/videos", icon: PlayIcon },
+    { name: "Documentation", href: "/docs", icon: DocumentTextIcon },
+    { name: "Billing", href: "/billing", icon: CreditCardIcon },
+    { name: "Support", href: "/support", icon: LifebuoyIcon },
+    { name: "Profile", href: "/profile", icon: UserIcon },
+  ];
 
   const staffItems: SidebarItem[] = [
-    { name: 'Overview', href: '/staff', icon: HomeIcon },
-    { name: 'Analytics', href: '/staff/analytics', icon: ChartBarIcon },
-    { name: 'Customers', href: '/staff/customers', icon: UsersIcon },
-    { name: 'Support', href: '/staff/support', icon: LifebuoyIcon },
-    { name: 'Content', href: '/staff/content', icon: DocumentTextIcon, children: [
-      { name: 'Blog Posts', href: '/staff/content/blog', icon: DocumentTextIcon },
-      { name: 'Videos', href: '/staff/content/videos', icon: PlayIcon },
-    ]},
-    { name: 'Billing', href: '/staff/billing', icon: CreditCardIcon },
-    { name: 'Settings', href: '/staff/settings', icon: CogIcon },
-  ]
+    { name: "Overview", href: "/staff", icon: HomeIcon },
+    { name: "Analytics", href: "/staff/analytics", icon: ChartBarIcon },
+    { name: "Customers", href: "/staff/customers", icon: UsersIcon },
+    { name: "Support", href: "/staff/support", icon: LifebuoyIcon },
+    {
+      name: "Content",
+      href: "/staff/content",
+      icon: DocumentTextIcon,
+      children: [
+        {
+          name: "Blog Posts",
+          href: "/staff/content/blog",
+          icon: DocumentTextIcon,
+        },
+        { name: "Videos", href: "/staff/content/videos", icon: PlayIcon },
+      ],
+    },
+    { name: "Billing", href: "/staff/billing", icon: CreditCardIcon },
+    { name: "Settings", href: "/staff/settings", icon: CogIcon },
+  ];
 
-  const items = role === 'customer' ? customerItems : staffItems
+  const items = role === "customer" ? customerItems : staffItems;
 
   const isActive = (href: string) => {
-    if (href === '/dashboard' || href === '/staff') {
-      return pathname === href
+    if (href === "/dashboard" || href === "/staff") {
+      return pathname === href;
     }
-    return pathname.startsWith(href)
-  }
+    return pathname.startsWith(href);
+  };
 
   return (
-    <div className={cn(
-      'h-screen bg-dark-900 border-r border-dark-700 flex flex-col transition-all duration-300',
-      collapsed ? 'w-16' : 'w-64'
-    )}>
+    <div
+      className={cn(
+        "h-screen bg-dark-900 border-r border-dark-700 flex flex-col transition-all duration-300",
+        collapsed ? "w-16" : "w-64",
+      )}
+    >
       {/* Header */}
       <div className="p-4 border-b border-dark-700">
         <div className="flex items-center justify-between">
@@ -109,16 +123,18 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
             <Link
               href={item.href}
               className={cn(
-                'flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group',
+                "flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group",
                 isActive(item.href)
-                  ? 'bg-primary-500 text-white shadow-glow'
-                  : 'text-gray-300 hover:text-white hover:bg-dark-700'
+                  ? "bg-primary-500 text-white shadow-glow"
+                  : "text-gray-300 hover:text-white hover:bg-dark-700",
               )}
             >
-              <item.icon className={cn(
-                'flex-shrink-0 w-5 h-5',
-                collapsed ? 'mx-auto' : 'mr-3'
-              )} />
+              <item.icon
+                className={cn(
+                  "flex-shrink-0 w-5 h-5",
+                  collapsed ? "mx-auto" : "mr-3",
+                )}
+              />
               {!collapsed && (
                 <>
                   <span className="flex-1">{item.name}</span>
@@ -139,10 +155,10 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
                     key={child.name}
                     href={child.href}
                     className={cn(
-                      'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                      "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                       isActive(child.href)
-                        ? 'text-primary-400 bg-dark-700'
-                        : 'text-gray-400 hover:text-white hover:bg-dark-700'
+                        ? "text-primary-400 bg-dark-700"
+                        : "text-gray-400 hover:text-white hover:bg-dark-700",
                     )}
                   >
                     <child.icon className="w-4 h-4 mr-2" />
@@ -163,14 +179,16 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
               <UserIcon className="w-4 h-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">John Doe</p>
+              <p className="text-sm font-medium text-white truncate">
+                John Doe
+              </p>
               <p className="text-xs text-gray-400 capitalize">{plan} Plan</p>
             </div>
           </div>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

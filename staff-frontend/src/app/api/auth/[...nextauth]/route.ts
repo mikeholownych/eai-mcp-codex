@@ -1,35 +1,35 @@
-import NextAuth from 'next-auth'
-import type { NextAuthOptions } from 'next-auth'
-import GoogleProvider from 'next-auth/providers/google'
-import GitHubProvider from 'next-auth/providers/github'
-import CredentialsProvider from 'next-auth/providers/credentials'
+import NextAuth from "next-auth";
+import type { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
 
-declare module 'next-auth' {
+declare module "next-auth" {
   interface Session {
     user: {
-      id: string
-      email: string
-      name: string
-      image?: string
-      role: string
-      tenantId: string
-    }
+      id: string;
+      email: string;
+      name: string;
+      image?: string;
+      role: string;
+      tenantId: string;
+    };
   }
 
   interface User {
-    id: string
-    email: string
-    name: string
-    image?: string
-    role: string
-    tenantId: string
+    id: string;
+    email: string;
+    name: string;
+    image?: string;
+    role: string;
+    tenantId: string;
   }
 }
 
-declare module 'next-auth/jwt' {
+declare module "next-auth/jwt" {
   interface JWT {
-    role: string
-    tenantId: string
+    role: string;
+    tenantId: string;
   }
 }
 
@@ -44,36 +44,39 @@ const authOptions: NextAuthOptions = {
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
     CredentialsProvider({
-      id: 'credentials',
-      name: 'credentials',
+      id: "credentials",
+      name: "credentials",
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          return null;
         }
 
         try {
           // Call your backend API for credentials login
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: credentials.email,
+                password: credentials.password,
+              }),
             },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-          })
+          );
 
           if (!response.ok) {
-            return null
+            return null;
           }
 
-          const data = await response.json()
-          
+          const data = await response.json();
+
           if (data.success && data.data.user) {
             return {
               id: data.data.user.id,
@@ -82,93 +85,95 @@ const authOptions: NextAuthOptions = {
               image: data.data.user.avatar,
               role: data.data.user.role,
               tenantId: data.data.user.tenantId,
-            }
+            };
           }
 
-          return null
+          return null;
         } catch (error) {
-          console.error('Auth error:', error)
-          return null
+          console.error("Auth error:", error);
+          return null;
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider === 'google' || account?.provider === 'github') {
+      if (account?.provider === "google" || account?.provider === "github") {
         try {
           // Register/login user with OAuth provider
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/oauth`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                provider: account.provider,
+                providerId: account.providerAccountId,
+                email: user.email,
+                name: user.name,
+                image: user.image,
+              }),
             },
-            body: JSON.stringify({
-              provider: account.provider,
-              providerId: account.providerAccountId,
-              email: user.email,
-              name: user.name,
-              image: user.image,
-            }),
-          })
+          );
 
           if (!response.ok) {
-            return false
+            return false;
           }
 
-          const data = await response.json()
-          
+          const data = await response.json();
+
           if (data.success && data.data.user) {
             // Update user object with backend data
-            user.id = data.data.user.id
-            user.role = data.data.user.role
-            user.tenantId = data.data.user.tenantId
-            return true
+            user.id = data.data.user.id;
+            user.role = data.data.user.role;
+            user.tenantId = data.data.user.tenantId;
+            return true;
           }
 
-          return false
+          return false;
         } catch (error) {
-          console.error('OAuth sign in error:', error)
-          return false
+          console.error("OAuth sign in error:", error);
+          return false;
         }
       }
 
-      return true
+      return true;
     },
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role
-        token.tenantId = user.tenantId
+        token.role = user.role;
+        token.tenantId = user.tenantId;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub!
-        session.user.role = token.role
-        session.user.tenantId = token.tenantId
+        session.user.id = token.sub!;
+        session.user.role = token.role;
+        session.user.tenantId = token.tenantId;
       }
-      return session
+      return session;
     },
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs
-      if (url.startsWith('/')) return `${baseUrl}${url}`
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
       // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
-    }
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
   },
   pages: {
-    signIn: '/login',
-    signUp: '/register',
-    error: '/auth/error',
+    signIn: "/login",
+    error: "/auth/error",
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
+};
 
-const handler = NextAuth(authOptions)
+const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };

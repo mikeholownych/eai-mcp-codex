@@ -20,7 +20,7 @@
       "label": "Main dashboard on desktop"
     },
     {
-      "src": "/screenshots/mobile-1.png", 
+      "src": "/screenshots/mobile-1.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
@@ -36,7 +36,7 @@
     },
     {
       "src": "/icons/icon-96x96.png",
-      "sizes": "96x96", 
+      "sizes": "96x96",
       "type": "image/png",
       "purpose": "any"
     },

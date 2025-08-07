@@ -10,43 +10,47 @@ const blogPosts = [
   {
     id: 1,
     title: 'Introducing Multi-Agent Code Generation',
-    excerpt: 'Discover how our revolutionary multi-agent system transforms the way code is generated, reviewed, and deployed in enterprise environments.',
+    excerpt:
+      'Discover how our revolutionary multi-agent system transforms the way code is generated, reviewed, and deployed in enterprise environments.',
     author: 'Dr. Sarah Chen',
     date: '2024-07-25',
     category: 'AI Innovation',
     readTime: '8 min read',
-    image: '/api/placeholder/400/200'
+    image: '/api/placeholder/400/200',
   },
   {
     id: 2,
     title: 'Security-First AI: Building Trust in Automated Code Generation',
-    excerpt: 'Learn about our comprehensive security framework that ensures every line of AI-generated code meets enterprise security standards.',
+    excerpt:
+      'Learn about our comprehensive security framework that ensures every line of AI-generated code meets enterprise security standards.',
     author: 'Michael Rodriguez',
     date: '2024-07-20',
     category: 'Security',
     readTime: '12 min read',
-    image: '/api/placeholder/400/200'
+    image: '/api/placeholder/400/200',
   },
   {
     id: 3,
     title: 'The Future of Developer Productivity with AI Agents',
-    excerpt: 'Explore how AI agents are reshaping software development workflows and what this means for developer productivity in 2024.',
+    excerpt:
+      'Explore how AI agents are reshaping software development workflows and what this means for developer productivity in 2024.',
     author: 'Alex Thompson',
     date: '2024-07-15',
     category: 'Productivity',
     readTime: '6 min read',
-    image: '/api/placeholder/400/200'
+    image: '/api/placeholder/400/200',
   },
   {
     id: 4,
     title: 'Enterprise AI Adoption: Lessons from Early Implementers',
-    excerpt: 'Real-world case studies and insights from companies successfully implementing AI-driven development practices.',
+    excerpt:
+      'Real-world case studies and insights from companies successfully implementing AI-driven development practices.',
     author: 'Jennifer Park',
     date: '2024-07-12',
     category: 'Case Studies',
     readTime: '10 min read',
-    image: '/api/placeholder/400/200'
-  }
+    image: '/api/placeholder/400/200',
+  },
 ]
 
 export default function BlogPage() {
@@ -57,7 +61,10 @@ export default function BlogPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center text-slate-300 hover:text-white transition-colors">
+              <Link
+                href="/"
+                className="flex items-center text-slate-300 hover:text-white transition-colors"
+              >
                 <ArrowLeftIcon className="w-5 h-5 mr-2" />
                 Back to Home
               </Link>
@@ -79,7 +86,8 @@ export default function BlogPage() {
             AI Insights & Innovation
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Stay up-to-date with the latest in AI-driven development, security best practices, and industry insights.
+            Stay up-to-date with the latest in AI-driven development, security best practices, and
+            industry insights.
           </p>
         </div>
 
@@ -106,12 +114,8 @@ export default function BlogPage() {
                   {blogPosts[0].date}
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-4">
-                {blogPosts[0].title}
-              </h2>
-              <p className="text-gray-400 mb-6">
-                {blogPosts[0].excerpt}
-              </p>
+              <h2 className="text-2xl font-bold text-white mb-4">{blogPosts[0].title}</h2>
+              <p className="text-gray-400 mb-6">{blogPosts[0].excerpt}</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <UserIcon className="w-4 h-4 text-gray-400" />
@@ -129,7 +133,7 @@ export default function BlogPage() {
 
         {/* Blog Posts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {blogPosts.slice(1).map((post) => (
+          {blogPosts.slice(1).map(post => (
             <Card key={post.id} hover>
               <div className="h-48 bg-gradient-to-br from-slate-700 to-slate-800 rounded-t-xl flex items-center justify-center mb-6">
                 <div className="text-center">
@@ -139,7 +143,7 @@ export default function BlogPage() {
                   <p className="text-slate-300 text-sm">{post.category}</p>
                 </div>
               </div>
-              
+
               <Card.Content>
                 <div className="flex items-center space-x-4 mb-3">
                   <div className="flex items-center text-gray-400 text-sm">
@@ -149,15 +153,11 @@ export default function BlogPage() {
                   <span className="text-gray-500">•</span>
                   <span className="text-gray-400 text-sm">{post.readTime}</span>
                 </div>
-                
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  {post.title}
-                </h3>
-                
-                <p className="text-gray-400 mb-4 line-clamp-3">
-                  {post.excerpt}
-                </p>
-                
+
+                <h3 className="text-xl font-semibold text-white mb-3">{post.title}</h3>
+
+                <p className="text-gray-400 mb-4 line-clamp-3">{post.excerpt}</p>
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <UserIcon className="w-4 h-4 text-gray-400" />
@@ -175,11 +175,10 @@ export default function BlogPage() {
         {/* Newsletter Subscription */}
         <Card className="mt-12">
           <Card.Content className="text-center py-12">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Stay Informed
-            </h3>
+            <h3 className="text-2xl font-bold text-white mb-4">Stay Informed</h3>
             <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-              Subscribe to our newsletter for the latest insights on AI development, security best practices, and industry trends.
+              Subscribe to our newsletter for the latest insights on AI development, security best
+              practices, and industry trends.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
               <input
@@ -187,9 +186,7 @@ export default function BlogPage() {
                 placeholder="Enter your email"
                 className="flex-1 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
-              <Button variant="secondary">
-                Subscribe
-              </Button>
+              <Button variant="secondary">Subscribe</Button>
             </div>
           </Card.Content>
         </Card>

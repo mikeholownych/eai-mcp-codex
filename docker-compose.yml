@@ -376,12 +376,21 @@ services:
       dockerfile: docker/workflow-orchestrator.Dockerfile
     # container_name: mcp-workflow-orchestrator
     restart: unless-stopped
+    volumes:
+      - ./src:/app/src  # Mount source code for development
+      - ./logs/workflow-orchestrator:/app/logs
+      - ./config:/app/config:ro
     environment:
       - REDIS_URL=redis://redis:6379
       - CONSUL_URL=http://consul:8500
       - SERVICE_NAME=workflow-orchestrator
       - SERVICE_PORT=8004
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/workflow_orchestrator_db
+      - WORKFLOW_ORCHESTRATOR_DB_HOST=postgres
+      - WORKFLOW_ORCHESTRATOR_DB_PORT=5432
+      - WORKFLOW_ORCHESTRATOR_DB_NAME=workflow_orchestrator_db
+      - WORKFLOW_ORCHESTRATOR_DB_USER=mcp_user
+      - WORKFLOW_ORCHESTRATOR_DB_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}
       - MODEL_ROUTER_URL=http://model-router:8001
       - PLAN_MANAGEMENT_URL=http://plan-management:8002
       - GIT_WORKTREE_URL=http://git-worktree-manager:8003
@@ -402,9 +411,6 @@ services:
         condition: service_healthy
       model-router:
         condition: service_healthy
-    volumes:
-      - ./logs/workflow-orchestrator:/app/logs
-      - ./config:/app/config:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
       interval: 30s
@@ -1066,6 +1072,8 @@ services:
     image: grafana/loki:2.9.0
     container_name: mcp-loki
     restart: unless-stopped
+    depends_on:
+      - consul
     ports:
       - "3100:3100"
     volumes:

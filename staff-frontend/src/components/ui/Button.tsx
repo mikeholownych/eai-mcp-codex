@@ -1,26 +1,44 @@
-'use client'
+"use client";
 
-import React, { forwardRef } from 'react'
-import { cn } from '@/lib/utils'
-import { ButtonProps } from '@/types'
+import React, { forwardRef } from "react";
+import { cn } from "@/lib/utils";
+import { ButtonProps } from "@/types";
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', disabled = false, loading = false, children, onClick, className, ...props }, ref) => {
-    const baseClasses = 'inline-flex items-center justify-center font-medium focus-ring disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200'
-    
+  (
+    {
+      variant = "primary",
+      size = "md",
+      disabled = false,
+      loading = false,
+      children,
+      onClick,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    const baseClasses =
+      "inline-flex items-center justify-center font-medium focus-ring disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200";
+
     const variants = {
-      primary: 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95 shadow-sm',
-      secondary: 'bg-orange-600 text-white hover:bg-orange-700 active:scale-95 shadow-sm',
-      outline: 'border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white active:scale-95',
-      ghost: 'text-slate-300 hover:text-white hover:bg-slate-800 active:scale-95',
-      danger: 'bg-red-500 text-white hover:bg-red-600 active:scale-95 shadow-sm',
-    }
-    
+      primary:
+        "bg-blue-600 text-white hover:bg-blue-700 active:scale-95 shadow-sm",
+      secondary:
+        "bg-orange-600 text-white hover:bg-orange-700 active:scale-95 shadow-sm",
+      outline:
+        "border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white active:scale-95",
+      ghost:
+        "text-slate-300 hover:text-white hover:bg-slate-800 active:scale-95",
+      danger:
+        "bg-red-500 text-white hover:bg-red-600 active:scale-95 shadow-sm",
+    };
+
     const sizes = {
-      sm: 'px-3 py-1.5 text-sm rounded-md',
-      md: 'px-4 py-2 text-base rounded-md',
-      lg: 'px-6 py-3 text-base rounded-md',
-    }
+      sm: "px-3 py-1.5 text-sm rounded-md",
+      md: "px-4 py-2 text-base rounded-md",
+      lg: "px-6 py-3 text-base rounded-md",
+    };
 
     return (
       <button
@@ -29,8 +47,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           baseClasses,
           variants[variant],
           sizes[size],
-          loading && 'cursor-wait',
-          className
+          loading && "cursor-wait",
+          className,
         )}
         disabled={disabled || loading}
         onClick={onClick}
@@ -60,10 +78,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {children}
       </button>
-    )
-  }
-)
+    );
+  },
+);
 
-Button.displayName = 'Button'
+Button.displayName = "Button";
 
-export default Button
+export default Button;

@@ -58,7 +58,7 @@ class VerificationFeedbackSettings(BaseServiceSettings):
 class A2ACommunicationSettings(BaseServiceSettings):
     """A2A communication specific settings."""
 
-    message_broker_url: str = "redis://localhost:6379/0"
+    message_broker_url: str = "redis://redis:6379/0"
     channel_prefix: str = "a2a:"
     service_name: str = "a2a-communication"
     service_port: int = 8010
@@ -125,8 +125,8 @@ class GlobalSettings(BaseSettings):
     log_level: str = "INFO"
     jwt_secret: str = os.getenv("JWT_SECRET") or secrets.token_urlsafe(32)
     database_url: str = "sqlite:///data/mcp_global.db"  # For global data if any
-    redis_url: str = "redis://localhost:6379"
-    consul_url: str = "http://localhost:8500"
+    redis_url: str = "redis://redis:6379"
+    consul_url: str = "http://consult:8500"
     anthropic_api_key: Optional[str] = None
 
     model_config = SettingsConfigDict(

@@ -14,7 +14,10 @@ export default function DemoPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center text-slate-300 hover:text-white transition-colors">
+              <Link
+                href="/"
+                className="flex items-center text-slate-300 hover:text-white transition-colors"
+              >
                 <ArrowLeftIcon className="w-5 h-5 mr-2" />
                 Back to Home
               </Link>
@@ -32,11 +35,10 @@ export default function DemoPage() {
       {/* Demo Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Interactive Demo
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Interactive Demo</h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Experience the power of our AI-driven development platform. See how our agents collaborate to generate production-ready code.
+            Experience the power of our AI-driven development platform. See how our agents
+            collaborate to generate production-ready code.
           </p>
         </div>
 
@@ -50,8 +52,8 @@ export default function DemoPage() {
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 mb-4">
-                Watch our AI agents collaborate in real-time to generate complex applications, 
-                from React components to full-stack APIs.
+                Watch our AI agents collaborate in real-time to generate complex applications, from
+                React components to full-stack APIs.
               </p>
               <Button variant="secondary" className="w-full">
                 Start Interactive Demo
@@ -70,8 +72,8 @@ export default function DemoPage() {
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 mb-4">
-                See how multiple specialized agents work together: security audits, 
-                code reviews, performance optimization, and more.
+                See how multiple specialized agents work together: security audits, code reviews,
+                performance optimization, and more.
               </p>
               <Button variant="outline" className="w-full">
                 View Agent Network
@@ -90,19 +92,16 @@ export default function DemoPage() {
                 <PlayIcon className="w-12 h-12 text-white" />
               </div>
               <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
-                Our interactive demo is currently in development. It will showcase real-time agent collaboration, 
-                code generation workflows, and the full power of our MCP Agent Network.
+                Our interactive demo is currently in development. It will showcase real-time agent
+                collaboration, code generation workflows, and the full power of our MCP Agent
+                Network.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/register">
-                  <Button variant="secondary">
-                    Get Early Access
-                  </Button>
+                  <Button variant="secondary">Get Early Access</Button>
                 </Link>
                 <Link href="/contact">
-                  <Button variant="outline">
-                    Request Demo Call
-                  </Button>
+                  <Button variant="outline">Request Demo Call</Button>
                 </Link>
               </div>
             </div>
@@ -117,7 +116,8 @@ export default function DemoPage() {
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 text-sm">
-                Watch multiple AI agents work together on complex coding tasks with live updates and progress tracking.
+                Watch multiple AI agents work together on complex coding tasks with live updates and
+                progress tracking.
               </p>
             </Card.Content>
           </Card>
@@ -128,7 +128,8 @@ export default function DemoPage() {
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 text-sm">
-                See automated security reviews, vulnerability scanning, and compliance checks in action.
+                See automated security reviews, vulnerability scanning, and compliance checks in
+                action.
               </p>
             </Card.Content>
           </Card>
@@ -139,7 +140,8 @@ export default function DemoPage() {
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 text-sm">
-                Experience how our platform generates enterprise-grade code with proper testing and documentation.
+                Experience how our platform generates enterprise-grade code with proper testing and
+                documentation.
               </p>
             </Card.Content>
           </Card>

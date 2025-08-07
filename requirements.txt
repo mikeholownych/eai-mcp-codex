@@ -33,3 +33,4 @@ opentelemetry-instrumentation-psycopg2>=0.41b0
 opentelemetry-instrumentation-redis>=0.41b0
 opentelemetry-instrumentation-sqlalchemy>=0.41b0
 pika>=1.3.0
+structlog>=23.0.0

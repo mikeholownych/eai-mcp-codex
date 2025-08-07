@@ -81,10 +81,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
           {/* Navigation */}
           <nav className="mt-8 flex-1 px-2 pb-4 space-y-1">
-            {navigation.map((item) => {
+            {navigation.map(item => {
               const Icon = item.icon
               const isActive = pathname === item.href
-              
+
               return (
                 <Link
                   key={item.name}
@@ -114,12 +114,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               </div>
               {!sidebarCollapsed && (
                 <div className="ml-3 flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">
-                    {user?.name || 'User'}
-                  </p>
-                  <p className="text-xs text-gray-400 truncate">
-                    {user?.email}
-                  </p>
+                  <p className="text-sm font-medium text-white truncate">{user?.name || 'User'}</p>
+                  <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                 </div>
               )}
             </div>
@@ -139,7 +135,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       {/* Mobile menu */}
       <div className={`lg:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 flex z-40">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setMobileMenuOpen(false)} />
+          <div
+            className="fixed inset-0 bg-gray-600 bg-opacity-75"
+            onClick={() => setMobileMenuOpen(false)}
+          />
           <div className="relative flex-1 flex flex-col max-w-xs w-full bg-slate-800">
             <div className="absolute top-0 right-0 -mr-12 pt-2">
               <button
@@ -160,10 +159,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
               <nav className="mt-5 px-2 space-y-1">
-                {navigation.map((item) => {
+                {navigation.map(item => {
                   const Icon = item.icon
                   const isActive = pathname === item.href
-                  
+
                   return (
                     <Link
                       key={item.name}
@@ -207,16 +206,16 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           >
             <Bars3Icon className="h-6 w-6" />
           </button>
-          
+
           <div className="flex-1 px-4 flex justify-between items-center">
             <div className="flex-1" />
-            
+
             <div className="ml-4 flex items-center md:ml-6 space-x-4">
               {/* Notifications */}
               <button className="p-2 text-gray-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors">
                 <BellIcon className="h-6 w-6" />
               </button>
-              
+
               {/* User menu */}
               <div className="relative ml-3">
                 <button className="flex items-center text-sm text-gray-400 hover:text-white transition-colors">
@@ -231,9 +230,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         {/* Page content */}
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
           <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              {children}
-            </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">{children}</div>
           </div>
         </main>
       </div>
@@ -241,11 +238,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   )
 }
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <DashboardContent>{children}</DashboardContent>

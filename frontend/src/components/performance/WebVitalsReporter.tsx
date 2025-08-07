@@ -16,7 +16,7 @@ export default function WebVitalsReporter() {
 
     // Import web-vitals dynamically
     const loadVitals = async () => {
-      const { onFCP, onLCP, onCLS, onFID, onTTFB, onINP } = await import('web-vitals')
+      const { onFCP, onLCP, onCLS, onTTFB, onINP } = await import('web-vitals')
       const vitalsHandler = (metric: WebVital) => {
         // Send to analytics endpoint
         if (typeof fetch !== 'undefined') {
@@ -29,8 +29,8 @@ export default function WebVitalsReporter() {
               id: metric.id,
               url: window.location.href,
               userAgent: navigator.userAgent,
-              timestamp: Date.now()
-            })
+              timestamp: Date.now(),
+            }),
           }).catch(() => {
             // Ignore analytics errors
           })
@@ -45,8 +45,8 @@ export default function WebVitalsReporter() {
               value: metric.value,
               id: metric.id,
               url: window.location.href,
-              timestamp: Date.now()
-            }
+              timestamp: Date.now(),
+            },
           })
         }
 
@@ -57,15 +57,14 @@ export default function WebVitalsReporter() {
       }
 
       // Track all Core Web Vitals
-      onFCP(vitalsHandler)  // First Contentful Paint
-      onLCP(vitalsHandler)  // Largest Contentful Paint
-      onCLS(vitalsHandler)  // Cumulative Layout Shift
-      onFID(vitalsHandler)  // First Input Delay
+      onFCP(vitalsHandler) // First Contentful Paint
+      onLCP(vitalsHandler) // Largest Contentful Paint
+      onCLS(vitalsHandler) // Cumulative Layout Shift
       onTTFB(vitalsHandler) // Time to First Byte
-      onINP(vitalsHandler)  // Interaction to Next Paint
+      onINP(vitalsHandler) // Interaction to Next Paint
     }
 
-    loadVitals().catch((error) => {
+    loadVitals().catch(error => {
       console.warn('Failed to load web-vitals library:', error)
     })
   }, [])
@@ -75,25 +74,28 @@ export default function WebVitalsReporter() {
     if (typeof window === 'undefined') return
 
     const trackPerformance = () => {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
-      
+      const navigation = performance.getEntriesByType(
+        'navigation',
+      )[0] as PerformanceNavigationTiming
+
       if (navigation) {
         const metrics = {
           // Navigation timing
-          domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+          domContentLoaded:
+            navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
           loadComplete: navigation.loadEventEnd - navigation.loadEventStart,
-          
+
           // Connection timing
           dnsLookup: navigation.domainLookupEnd - navigation.domainLookupStart,
           tcpConnect: navigation.connectEnd - navigation.connectStart,
-          
+
           // Request/Response timing
           requestTime: navigation.responseStart - navigation.requestStart,
           responseTime: navigation.responseEnd - navigation.responseStart,
-          
+
           // Critical rendering path
           domInteractive: navigation.domInteractive - navigation.fetchStart,
-          domComplete: navigation.domComplete - navigation.fetchStart
+          domComplete: navigation.domComplete - navigation.fetchStart,
         }
 
         // Send custom metrics
@@ -105,8 +107,8 @@ export default function WebVitalsReporter() {
               ...metrics,
               url: window.location.href,
               userAgent: navigator.userAgent,
-              timestamp: Date.now()
-            })
+              timestamp: Date.now(),
+            }),
           }).catch(() => {
             // Ignore analytics errors
           })
@@ -130,17 +132,19 @@ export default function WebVitalsReporter() {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const observer = new PerformanceObserver((list) => {
+    const observer = new PerformanceObserver(list => {
       const entries = list.getEntries()
-      
-      entries.forEach((entry) => {
+
+      entries.forEach(entry => {
         if (entry.entryType === 'resource') {
           const resource = entry as PerformanceResourceTiming
-          
+
           // Track slow resources (>1s)
           if (resource.duration > 1000) {
-            console.warn(`Slow resource detected: ${resource.name} (${Math.round(resource.duration)}ms)`)
-            
+            console.warn(
+              `Slow resource detected: ${resource.name} (${Math.round(resource.duration)}ms)`,
+            )
+
             if (typeof fetch !== 'undefined') {
               fetch('/api/analytics/slow-resources', {
                 method: 'POST',
@@ -151,8 +155,8 @@ export default function WebVitalsReporter() {
                   size: resource.transferSize,
                   type: resource.initiatorType,
                   page: window.location.href,
-                  timestamp: Date.now()
-                })
+                  timestamp: Date.now(),
+                }),
               }).catch(() => {
                 // Ignore analytics errors
               })

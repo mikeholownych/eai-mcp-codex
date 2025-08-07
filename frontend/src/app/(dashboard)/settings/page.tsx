@@ -20,7 +20,7 @@ export default function SettingsPage() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('profile')
   const [isLoading, setIsLoading] = useState(false)
-  
+
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -125,14 +125,14 @@ export default function SettingsPage() {
           <Input
             label="Full Name"
             value={profileData.name}
-            onChange={(value) => setProfileData(prev => ({ ...prev, name: value }))}
+            onChange={value => setProfileData(prev => ({ ...prev, name: value }))}
             required
           />
           <Input
             label="Email Address"
             type="email"
             value={profileData.email}
-            onChange={(value) => setProfileData(prev => ({ ...prev, email: value }))}
+            onChange={value => setProfileData(prev => ({ ...prev, email: value }))}
             required
           />
         </div>
@@ -140,16 +140,14 @@ export default function SettingsPage() {
         <Input
           label="Company (Optional)"
           value={profileData.company}
-          onChange={(value) => setProfileData(prev => ({ ...prev, company: value }))}
+          onChange={value => setProfileData(prev => ({ ...prev, company: value }))}
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Bio
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Bio</label>
           <textarea
             value={profileData.bio}
-            onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+            onChange={e => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
             placeholder="Tell us about yourself..."
             className="w-full h-24 bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
           />
@@ -178,21 +176,21 @@ export default function SettingsPage() {
             label="Current Password"
             type="password"
             value={passwordData.currentPassword}
-            onChange={(value) => setPasswordData(prev => ({ ...prev, currentPassword: value }))}
+            onChange={value => setPasswordData(prev => ({ ...prev, currentPassword: value }))}
             required
           />
           <Input
             label="New Password"
             type="password"
             value={passwordData.newPassword}
-            onChange={(value) => setPasswordData(prev => ({ ...prev, newPassword: value }))}
+            onChange={value => setPasswordData(prev => ({ ...prev, newPassword: value }))}
             required
           />
           <Input
             label="Confirm New Password"
             type="password"
             value={passwordData.confirmPassword}
-            onChange={(value) => setPasswordData(prev => ({ ...prev, confirmPassword: value }))}
+            onChange={value => setPasswordData(prev => ({ ...prev, confirmPassword: value }))}
             required
           />
           <div className="flex justify-end">
@@ -210,9 +208,7 @@ export default function SettingsPage() {
             <p className="text-gray-300">Add an extra layer of security to your account</p>
             <p className="text-sm text-gray-400">Status: Not enabled</p>
           </div>
-          <Button variant="outline">
-            Enable 2FA
-          </Button>
+          <Button variant="outline">Enable 2FA</Button>
         </div>
       </Card>
 
@@ -224,7 +220,9 @@ export default function SettingsPage() {
               <p className="text-white">Current Session</p>
               <p className="text-sm text-gray-400">Chrome on macOS • San Francisco, CA</p>
             </div>
-            <span className="bg-green-500/10 text-green-400 px-2 py-1 rounded text-xs">Current</span>
+            <span className="bg-green-500/10 text-green-400 px-2 py-1 rounded text-xs">
+              Current
+            </span>
           </div>
           <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
             <div>
@@ -278,7 +276,7 @@ export default function SettingsPage() {
             </div>
           ))}
         </div>
-        
+
         <div className="pt-6 border-t border-slate-600">
           <Button variant="primary" onClick={handleSaveNotifications} loading={isLoading}>
             Save Preferences
@@ -301,7 +299,7 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-gray-300 mb-2">Theme</label>
             <select
               value={preferences.theme}
-              onChange={(e) => setPreferences(prev => ({ ...prev, theme: e.target.value }))}
+              onChange={e => setPreferences(prev => ({ ...prev, theme: e.target.value }))}
               className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             >
               <option value="dark">Dark</option>
@@ -314,7 +312,7 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-gray-300 mb-2">Language</label>
             <select
               value={preferences.language}
-              onChange={(e) => setPreferences(prev => ({ ...prev, language: e.target.value }))}
+              onChange={e => setPreferences(prev => ({ ...prev, language: e.target.value }))}
               className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             >
               <option value="en">English</option>
@@ -328,7 +326,7 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
             <select
               value={preferences.timezone}
-              onChange={(e) => setPreferences(prev => ({ ...prev, timezone: e.target.value }))}
+              onChange={e => setPreferences(prev => ({ ...prev, timezone: e.target.value }))}
               className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             >
               <option value="UTC">UTC</option>
@@ -343,7 +341,7 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-gray-300 mb-2">Date Format</label>
             <select
               value={preferences.dateFormat}
-              onChange={(e) => setPreferences(prev => ({ ...prev, dateFormat: e.target.value }))}
+              onChange={e => setPreferences(prev => ({ ...prev, dateFormat: e.target.value }))}
               className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             >
               <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -382,26 +380,46 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg border border-slate-600">
             <div>
               <p className="text-white font-medium">Production Key</p>
-              <p className="text-sm text-gray-400 font-mono">sk_prod_••••••••••••••••••••••••••••••••</p>
-              <p className="text-xs text-gray-500 mt-1">Created on Jan 15, 2024 • Last used 2 hours ago</p>
+              <p className="text-sm text-gray-400 font-mono">
+                sk_prod_••••••••••••••••••••••••••••••••
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Created on Jan 15, 2024 • Last used 2 hours ago
+              </p>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">Copy</Button>
-              <Button variant="outline" size="sm">Regenerate</Button>
-              <Button variant="outline" size="sm">Delete</Button>
+              <Button variant="outline" size="sm">
+                Copy
+              </Button>
+              <Button variant="outline" size="sm">
+                Regenerate
+              </Button>
+              <Button variant="outline" size="sm">
+                Delete
+              </Button>
             </div>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg border border-slate-600">
             <div>
               <p className="text-white font-medium">Development Key</p>
-              <p className="text-sm text-gray-400 font-mono">sk_dev_••••••••••••••••••••••••••••••••</p>
-              <p className="text-xs text-gray-500 mt-1">Created on Jan 10, 2024 • Last used 1 day ago</p>
+              <p className="text-sm text-gray-400 font-mono">
+                sk_dev_••••••••••••••••••••••••••••••••
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Created on Jan 10, 2024 • Last used 1 day ago
+              </p>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">Copy</Button>
-              <Button variant="outline" size="sm">Regenerate</Button>
-              <Button variant="outline" size="sm">Delete</Button>
+              <Button variant="outline" size="sm">
+                Copy
+              </Button>
+              <Button variant="outline" size="sm">
+                Regenerate
+              </Button>
+              <Button variant="outline" size="sm">
+                Delete
+              </Button>
             </div>
           </div>
         </div>
@@ -422,8 +440,7 @@ export default function SettingsPage() {
           Delete Account
         </h3>
         <p className="text-gray-400 mb-4">
-          Once you delete your account, there is no going back. Please be certain.
-          This action will:
+          Once you delete your account, there is no going back. Please be certain. This action will:
         </p>
         <ul className="text-sm text-gray-400 mb-6 space-y-1 ml-4">
           <li>• Delete all your projects and code</li>
@@ -439,7 +456,7 @@ export default function SettingsPage() {
     </div>
   )
 
-  const tabContentMap: Record<string, () => JSX.Element> = {
+  const tabContentMap: Record<string, () => React.JSX.Element> = {
     profile: renderProfileTab,
     security: renderSecurityTab,
     notifications: renderNotificationsTab,
@@ -463,7 +480,7 @@ export default function SettingsPage() {
         {/* Sidebar */}
         <div className="lg:col-span-1">
           <nav className="space-y-1">
-            {tabs.map((tab) => {
+            {tabs.map(tab => {
               const Icon = tab.icon
               return (
                 <button
@@ -485,9 +502,7 @@ export default function SettingsPage() {
 
         {/* Content */}
         <div className="mt-6 lg:mt-0 lg:col-span-3">
-          <Card className="p-6">
-            {renderTabContent()}
-          </Card>
+          <Card className="p-6">{renderTabContent()}</Card>
         </div>
       </div>
     </div>

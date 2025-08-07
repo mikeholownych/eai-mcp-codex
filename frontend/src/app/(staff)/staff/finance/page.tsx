@@ -25,27 +25,27 @@ const mockFinancialData = {
     mrr: 204167,
     ltv: 8420,
     churn_rate: 3.2,
-    growth_rate: 15.8
+    growth_rate: 15.8,
   },
   current_month: {
     revenue: 218500,
     expenses: 156200,
     profit: 62300,
     invoices_sent: 847,
-    payments_received: 791
+    payments_received: 791,
   },
   quarterly_summary: {
     q1_revenue: 612000,
     q2_revenue: 658000,
     q3_revenue: 704000,
-    q4_projected: 756000
+    q4_projected: 756000,
   },
   pending_items: {
     outstanding_invoices: 15,
     overdue_payments: 3,
     pending_refunds: 2,
-    tax_filings_due: 1
-  }
+    tax_filings_due: 1,
+  },
 }
 
 const mockRecentTransactions = [
@@ -56,7 +56,7 @@ const mockRecentTransactions = [
     amount: 2400,
     status: 'paid',
     date: '2024-01-15',
-    plan: 'Enterprise'
+    plan: 'Enterprise',
   },
   {
     id: 'REF-2024-000056',
@@ -65,7 +65,7 @@ const mockRecentTransactions = [
     amount: -480,
     status: 'processed',
     date: '2024-01-14',
-    plan: 'Professional'
+    plan: 'Professional',
   },
   {
     id: 'INV-2024-001235',
@@ -74,8 +74,8 @@ const mockRecentTransactions = [
     amount: 960,
     status: 'pending',
     date: '2024-01-13',
-    plan: 'Professional'
-  }
+    plan: 'Professional',
+  },
 ]
 
 const STATUS_COLORS: Record<string, string> = {
@@ -85,18 +85,16 @@ const STATUS_COLORS: Record<string, string> = {
   overdue: 'bg-red-500/10 text-red-400',
 }
 
-const TYPE_ICONS: Record<string, JSX.Element> = {
+const TYPE_ICONS: Record<string, React.JSX.Element> = {
   invoice: <DocumentTextIcon className="h-4 w-4" />,
   refund: <ArrowTrendingDownIcon className="h-4 w-4" />,
   payment: <CreditCardIcon className="h-4 w-4" />,
   default: <CurrencyDollarIcon className="h-4 w-4" />,
 }
 
-const getStatusColor = (status: string) =>
-  STATUS_COLORS[status] ?? 'bg-gray-500/10 text-gray-400'
+const getStatusColor = (status: string) => STATUS_COLORS[status] ?? 'bg-gray-500/10 text-gray-400'
 
-const getTypeIcon = (type: string) =>
-  TYPE_ICONS[type] ?? TYPE_ICONS.default
+const getTypeIcon = (type: string) => TYPE_ICONS[type] ?? TYPE_ICONS.default
 
 export default function FinancialSuite() {
   const { user } = useAuth()
@@ -119,7 +117,7 @@ export default function FinancialSuite() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-CA', {
       style: 'currency',
-      currency: 'CAD'
+      currency: 'CAD',
     }).format(amount)
   }
 
@@ -137,11 +135,11 @@ export default function FinancialSuite() {
             Revenue analytics, invoicing, tax exports, and financial reporting
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <select
             value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
+            onChange={e => setSelectedPeriod(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             <option value="current_month">Current Month</option>
@@ -149,11 +147,8 @@ export default function FinancialSuite() {
             <option value="quarterly">Quarterly</option>
             <option value="yearly">Yearly</option>
           </select>
-          
-          <Button
-            variant="primary"
-            onClick={() => setShowExportModal(true)}
-          >
+
+          <Button variant="primary" onClick={() => setShowExportModal(true)}>
             <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
             Export Reports
           </Button>
@@ -247,45 +242,33 @@ export default function FinancialSuite() {
             <ClipboardDocumentListIcon className="h-6 w-6 mr-2 text-orange-400" />
             Quick Actions
           </h2>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              className="p-4 h-auto flex-col items-start space-y-2"
-            >
+            <Button variant="outline" className="p-4 h-auto flex-col items-start space-y-2">
               <DocumentTextIcon className="h-6 w-6 text-blue-400" />
               <div className="text-left">
                 <div className="font-medium text-white">Generate Invoice</div>
                 <div className="text-sm text-gray-400">Create new customer invoice</div>
               </div>
             </Button>
-            
-            <Button
-              variant="outline"
-              className="p-4 h-auto flex-col items-start space-y-2"
-            >
+
+            <Button variant="outline" className="p-4 h-auto flex-col items-start space-y-2">
               <CalculatorIcon className="h-6 w-6 text-green-400" />
               <div className="text-left">
                 <div className="font-medium text-white">CRA Tax Export</div>
                 <div className="text-sm text-gray-400">Export for tax filing</div>
               </div>
             </Button>
-            
-            <Button
-              variant="outline"
-              className="p-4 h-auto flex-col items-start space-y-2"
-            >
+
+            <Button variant="outline" className="p-4 h-auto flex-col items-start space-y-2">
               <ChartBarIcon className="h-6 w-6 text-purple-400" />
               <div className="text-left">
                 <div className="font-medium text-white">Financial Report</div>
                 <div className="text-sm text-gray-400">Generate detailed report</div>
               </div>
             </Button>
-            
-            <Button
-              variant="outline"
-              className="p-4 h-auto flex-col items-start space-y-2"
-            >
+
+            <Button variant="outline" className="p-4 h-auto flex-col items-start space-y-2">
               <CreditCardIcon className="h-6 w-6 text-yellow-400" />
               <div className="text-left">
                 <div className="font-medium text-white">Payroll Integration</div>
@@ -300,7 +283,7 @@ export default function FinancialSuite() {
             <ExclamationTriangleIcon className="h-6 w-6 mr-2 text-yellow-400" />
             Pending Items
           </h2>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
               <div className="flex items-center space-x-3">
@@ -311,11 +294,13 @@ export default function FinancialSuite() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-semibold text-white">{mockFinancialData.pending_items.outstanding_invoices}</div>
+                <div className="text-lg font-semibold text-white">
+                  {mockFinancialData.pending_items.outstanding_invoices}
+                </div>
                 <div className="text-xs text-gray-400">invoices</div>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
               <div className="flex items-center space-x-3">
                 <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />
@@ -325,11 +310,13 @@ export default function FinancialSuite() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-semibold text-red-400">{mockFinancialData.pending_items.overdue_payments}</div>
+                <div className="text-lg font-semibold text-red-400">
+                  {mockFinancialData.pending_items.overdue_payments}
+                </div>
                 <div className="text-xs text-gray-400">overdue</div>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
               <div className="flex items-center space-x-3">
                 <ArrowTrendingDownIcon className="h-5 w-5 text-yellow-400" />
@@ -339,11 +326,13 @@ export default function FinancialSuite() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-semibold text-yellow-400">{mockFinancialData.pending_items.pending_refunds}</div>
+                <div className="text-lg font-semibold text-yellow-400">
+                  {mockFinancialData.pending_items.pending_refunds}
+                </div>
                 <div className="text-xs text-gray-400">refunds</div>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
               <div className="flex items-center space-x-3">
                 <CalendarDaysIcon className="h-5 w-5 text-orange-400" />
@@ -353,7 +342,9 @@ export default function FinancialSuite() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-semibold text-orange-400">{mockFinancialData.pending_items.tax_filings_due}</div>
+                <div className="text-lg font-semibold text-orange-400">
+                  {mockFinancialData.pending_items.tax_filings_due}
+                </div>
                 <div className="text-xs text-gray-400">due</div>
               </div>
             </div>
@@ -372,7 +363,7 @@ export default function FinancialSuite() {
             View All
           </Button>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-slate-700/50">
@@ -385,13 +376,11 @@ export default function FinancialSuite() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
-              {mockRecentTransactions.map((transaction) => (
+              {mockRecentTransactions.map(transaction => (
                 <tr key={transaction.id} className="hover:bg-slate-700/30">
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0">
-                        {getTypeIcon(transaction.type)}
-                      </div>
+                      <div className="flex-shrink-0">{getTypeIcon(transaction.type)}</div>
                       <div>
                         <div className="text-sm font-medium text-white">{transaction.id}</div>
                         <div className="text-xs text-gray-400 capitalize">{transaction.type}</div>
@@ -403,19 +392,23 @@ export default function FinancialSuite() {
                     <div className="text-xs text-gray-400">{transaction.plan}</div>
                   </td>
                   <td className="py-4 px-4">
-                    <div className={`text-sm font-medium ${
-                      transaction.amount < 0 ? 'text-red-400' : 'text-green-400'
-                    }`}>
+                    <div
+                      className={`text-sm font-medium ${
+                        transaction.amount < 0 ? 'text-red-400' : 'text-green-400'
+                      }`}
+                    >
                       {formatCurrency(Math.abs(transaction.amount))}
                     </div>
                   </td>
                   <td className="py-4 px-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}
+                    >
                       {transaction.status}
                     </span>
                   </td>
                   <td className="py-4 px-4">
-                    <div className="text-sm text-gray-400">  
+                    <div className="text-sm text-gray-400">
                       {new Date(transaction.date).toLocaleDateString()}
                     </div>
                   </td>
@@ -432,25 +425,23 @@ export default function FinancialSuite() {
           <ChartBarIcon className="h-6 w-6 mr-2 text-blue-400" />
           Quarterly Revenue Performance
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {Object.entries(mockFinancialData.quarterly_summary).map(([quarter, revenue]) => {
             const isProjected = quarter.includes('projected')
             return (
               <div key={quarter} className="text-center">
-                <div className={`text-2xl font-bold mb-2 ${
-                  isProjected ? 'text-gray-400' : 'text-white'
-                }`}>
+                <div
+                  className={`text-2xl font-bold mb-2 ${
+                    isProjected ? 'text-gray-400' : 'text-white'
+                  }`}
+                >
                   {formatCurrency(revenue)}
                 </div>
                 <div className="text-sm text-gray-400 uppercase tracking-wide">
                   {quarter.replace('_', ' ')}
                 </div>
-                {isProjected && (
-                  <div className="text-xs text-yellow-400 mt-1">
-                    Projected
-                  </div>
-                )}
+                {isProjected && <div className="text-xs text-yellow-400 mt-1">Projected</div>}
               </div>
             )
           })}
@@ -461,14 +452,10 @@ export default function FinancialSuite() {
       {showExportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-slate-800 p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Export Financial Reports
-            </h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Export Financial Reports</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Report Type
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Report Type</label>
                 <select className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600">
                   <option>Revenue Summary</option>
                   <option>Tax Export (CRA)</option>
@@ -477,9 +464,7 @@ export default function FinancialSuite() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Format
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Format</label>
                 <select className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600">
                   <option>PDF</option>
                   <option>CSV</option>
@@ -488,15 +473,15 @@ export default function FinancialSuite() {
                 </select>
               </div>
               <div className="flex space-x-3 mt-6">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex-1"
                   onClick={() => setShowExportModal(false)}
                 >
                   Cancel
                 </Button>
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   className="flex-1"
                   onClick={() => {
                     // Handle export

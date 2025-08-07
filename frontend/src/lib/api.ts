@@ -1,5 +1,15 @@
 import axios, { AxiosInstance } from 'axios'
-import { ApiResponse, User, ChatSession, SupportTicket, Subscription, ModelRouteResponse, AvailableModel, ModelStats } from '@/types'
+import {
+  ApiResponse,
+  User,
+  ChatSession,
+  SupportTicket,
+  Subscription,
+  ModelRouteResponse,
+  AvailableModel,
+  ModelStats,
+  Invoice,
+} from '@/types'
 import { API_CONFIG } from './config'
 
 class ApiClient {
@@ -19,25 +29,25 @@ class ApiClient {
 
     // Request interceptor to add auth token
     this.client.interceptors.request.use(
-      (config) => {
+      config => {
         const token = this.getAuthToken()
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
         return config
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error),
     )
 
     // Response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      response => response,
+      error => {
         if (error.response?.status === 401) {
           this.handleUnauthorized()
         }
         return Promise.reject(error)
-      }
+      },
     )
   }
 
@@ -56,7 +66,10 @@ class ApiClient {
   }
 
   // Auth endpoints
-  async login(email: string, password: string): Promise<ApiResponse<{ user: User; token: string }>> {
+  async login(
+    email: string,
+    password: string,
+  ): Promise<ApiResponse<{ user: User; token: string }>> {
     const response = await this.client.post('/api/auth/login', { email, password })
     return response.data
   }
@@ -82,15 +95,18 @@ class ApiClient {
   }
 
   // Model Router endpoints - Updated to match backend API
-  async routeRequest(prompt: string, options?: {
-    model?: string
-    temperature?: number
-    maxTokens?: number
-    taskType?: string
-    priority?: string
-    systemPrompt?: string
-    context?: Record<string, unknown>
-  }): Promise<ApiResponse<ModelRouteResponse>> {
+  async routeRequest(
+    prompt: string,
+    options?: {
+      model?: string
+      temperature?: number
+      maxTokens?: number
+      taskType?: string
+      priority?: string
+      systemPrompt?: string
+      context?: Record<string, unknown>
+    },
+  ): Promise<ApiResponse<ModelRouteResponse>> {
     const requestId = Date.now().toString()
     const response = await this.client.post('/model/route', {
       text: prompt,
@@ -130,12 +146,18 @@ class ApiClient {
     return response.data
   }
 
-  async getPlans(): Promise<ApiResponse<Array<{ id: string; title: string; description: string; status: string }>>> {
+  async getPlans(): Promise<
+    ApiResponse<Array<{ id: string; title: string; description: string; status: string }>>
+  > {
     const response = await this.client.get('/api/plans')
     return response.data
   }
 
-  async getPlan(id: string): Promise<ApiResponse<{ id: string; title: string; description: string; requirements: string[] }>> {
+  async getPlan(
+    id: string,
+  ): Promise<
+    ApiResponse<{ id: string; title: string; description: string; requirements: string[] }>
+  > {
     const response = await this.client.get(`/api/plans/${id}`)
     return response.data
   }
@@ -150,7 +172,9 @@ class ApiClient {
     return response.data
   }
 
-  async getWorktrees(): Promise<ApiResponse<Array<{ id: string; repository: string; branch: string; name: string }>>> {
+  async getWorktrees(): Promise<
+    ApiResponse<Array<{ id: string; repository: string; branch: string; name: string }>>
+  > {
     const response = await this.client.get('/api/git/list')
     return response.data
   }
@@ -165,12 +189,16 @@ class ApiClient {
     return response.data
   }
 
-  async executeWorkflow(id: string): Promise<ApiResponse<{ id: string; status: string; result: unknown }>> {
+  async executeWorkflow(
+    id: string,
+  ): Promise<ApiResponse<{ id: string; status: string; result: unknown }>> {
     const response = await this.client.post(`/api/workflows/${id}/execute`)
     return response.data
   }
 
-  async getWorkflows(): Promise<ApiResponse<Array<{ id: string; name: string; description: string; status: string }>>> {
+  async getWorkflows(): Promise<
+    ApiResponse<Array<{ id: string; name: string; description: string; status: string }>>
+  > {
     const response = await this.client.get('/api/workflows')
     return response.data
   }
@@ -186,7 +214,9 @@ class ApiClient {
     return response.data
   }
 
-  async getFeedback(): Promise<ApiResponse<Array<{ id: string; type: string; title: string; status: string }>>> {
+  async getFeedback(): Promise<
+    ApiResponse<Array<{ id: string; type: string; title: string; status: string }>>
+  > {
     const response = await this.client.get('/api/feedback/list')
     return response.data
   }
@@ -202,7 +232,10 @@ class ApiClient {
     return response.data
   }
 
-  async sendChatMessage(sessionId: string, message: string): Promise<ApiResponse<{ id: string; content: string; role: string; timestamp: Date }>> {
+  async sendChatMessage(
+    sessionId: string,
+    message: string,
+  ): Promise<ApiResponse<{ id: string; content: string; role: string; timestamp: Date }>> {
     const response = await this.client.post(`/api/chat/sessions/${sessionId}/messages`, {
       content: message,
     })
@@ -224,7 +257,10 @@ class ApiClient {
     return response.data
   }
 
-  async updateTicket(id: string, data: Partial<SupportTicket>): Promise<ApiResponse<SupportTicket>> {
+  async updateTicket(
+    id: string,
+    data: Partial<SupportTicket>,
+  ): Promise<ApiResponse<SupportTicket>> {
     const response = await this.client.patch(`/api/support/tickets/${id}`, data)
     return response.data
   }
@@ -253,23 +289,31 @@ class ApiClient {
   }
 
   // Video Library endpoints
-  async getVideos(): Promise<ApiResponse<Array<{ id: string; title: string; description: string; duration: number }>>> {
+  async getVideos(): Promise<
+    ApiResponse<Array<{ id: string; title: string; description: string; duration: number }>>
+  > {
     const response = await this.client.get('/api/videos')
     return response.data
   }
 
-  async getVideo(id: string): Promise<ApiResponse<{ id: string; title: string; description: string; url: string }>> {
+  async getVideo(
+    id: string,
+  ): Promise<ApiResponse<{ id: string; title: string; description: string; url: string }>> {
     const response = await this.client.get(`/api/videos/${id}`)
     return response.data
   }
 
   // Analytics endpoints
-  async getAnalytics(timeRange: string): Promise<ApiResponse<{ metrics: Array<{ metric: string; value: number; change: number }> }>> {
+  async getAnalytics(
+    timeRange: string,
+  ): Promise<ApiResponse<{ metrics: Array<{ metric: string; value: number; change: number }> }>> {
     const response = await this.client.get(`/api/analytics?range=${timeRange}`)
     return response.data
   }
 
-  async getDashboardStats(): Promise<ApiResponse<{ users: number; subscriptions: number; revenue: number }>> {
+  async getDashboardStats(): Promise<
+    ApiResponse<{ users: number; subscriptions: number; revenue: number }>
+  > {
     const response = await this.client.get('/api/analytics/dashboard')
     return response.data
   }
@@ -281,7 +325,9 @@ class ApiClient {
   }
 
   // System status
-  async getSystemStatus(): Promise<ApiResponse<{ status: string; services: Record<string, string> }>> {
+  async getSystemStatus(): Promise<
+    ApiResponse<{ status: string; services: Record<string, string> }>
+  > {
     const response = await this.client.get('/status')
     return response.data
   }

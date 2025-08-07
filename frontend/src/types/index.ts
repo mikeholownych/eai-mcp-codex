@@ -30,16 +30,16 @@ export interface UserPreferences {
   }
 }
 
-export type UserRole = 
-  | 'superadmin' 
-  | 'admin' 
-  | 'marketing' 
-  | 'sales' 
-  | 'billing' 
-  | 'support' 
-  | 'tech' 
-  | 'finance' 
-  | 'legal' 
+export type UserRole =
+  | 'superadmin'
+  | 'admin'
+  | 'marketing'
+  | 'sales'
+  | 'billing'
+  | 'support'
+  | 'tech'
+  | 'finance'
+  | 'legal'
   | 'customer'
 
 export type UserPlan = 'free' | 'standard' | 'pro' | 'enterprise'
@@ -261,6 +261,7 @@ export interface ButtonProps {
   className?: string
   type?: 'button' | 'submit' | 'reset'
   title?: string
+  href?: string
 }
 
 export interface InputProps {
@@ -391,11 +392,14 @@ export interface ModelStats {
   failed_requests: number
   average_response_time: number
   tokens_used: number
-  model_usage: Record<string, {
-    requests: number
-    tokens: number
-    avg_response_time: number
-  }>
+  model_usage: Record<
+    string,
+    {
+      requests: number
+      tokens: number
+      avg_response_time: number
+    }
+  >
 }
 
 // System Health Types

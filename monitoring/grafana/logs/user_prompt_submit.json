@@ -1,9 +1,0 @@
-[
-  {
-    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
-    "hook_event_name": "UserPromptSubmit",
-    "prompt": "tempo container is restarting. Many grafana dashboards are still not provisioning. There's no data in the dashboards that have been provisioned. Do NOT claim that investor demonstration is ready, when there are things that are not working."
-  }
-]

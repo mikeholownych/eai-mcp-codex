@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import React from 'react'
-import Link from 'next/link'
-import { PlayIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
-import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
+import React from "react";
+import Link from "next/link";
+import { PlayIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 
 export default function DemoPage() {
   return (
@@ -14,7 +14,10 @@ export default function DemoPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center text-slate-300 hover:text-white transition-colors">
+              <Link
+                href="/"
+                className="flex items-center text-slate-300 hover:text-white transition-colors"
+              >
                 <ArrowLeftIcon className="w-5 h-5 mr-2" />
                 Back to Home
               </Link>
@@ -23,7 +26,9 @@ export default function DemoPage() {
               <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">AI</span>
               </div>
-              <span className="text-xl font-bold text-white">Ethical AI Insider</span>
+              <span className="text-xl font-bold text-white">
+                Ethical AI Insider
+              </span>
             </div>
           </div>
         </div>
@@ -36,7 +41,8 @@ export default function DemoPage() {
             Interactive Demo
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Experience the power of our AI-driven development platform. See how our agents collaborate to generate production-ready code.
+            Experience the power of our AI-driven development platform. See how
+            our agents collaborate to generate production-ready code.
           </p>
         </div>
 
@@ -45,13 +51,15 @@ export default function DemoPage() {
             <Card.Header>
               <div className="flex items-center space-x-3">
                 <PlayIcon className="w-8 h-8 text-purple-400" />
-                <h3 className="text-xl font-semibold text-white">Live Code Generation</h3>
+                <h3 className="text-xl font-semibold text-white">
+                  Live Code Generation
+                </h3>
               </div>
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 mb-4">
-                Watch our AI agents collaborate in real-time to generate complex applications, 
-                from React components to full-stack APIs.
+                Watch our AI agents collaborate in real-time to generate complex
+                applications, from React components to full-stack APIs.
               </p>
               <Button variant="secondary" className="w-full">
                 Start Interactive Demo
@@ -65,13 +73,15 @@ export default function DemoPage() {
                 <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">AI</span>
                 </div>
-                <h3 className="text-xl font-semibold text-white">Agent Collaboration</h3>
+                <h3 className="text-xl font-semibold text-white">
+                  Agent Collaboration
+                </h3>
               </div>
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 mb-4">
-                See how multiple specialized agents work together: security audits, 
-                code reviews, performance optimization, and more.
+                See how multiple specialized agents work together: security
+                audits, code reviews, performance optimization, and more.
               </p>
               <Button variant="outline" className="w-full">
                 View Agent Network
@@ -82,7 +92,9 @@ export default function DemoPage() {
 
         <Card className="mb-8">
           <Card.Header>
-            <h3 className="text-2xl font-semibold text-white text-center">Coming Soon</h3>
+            <h3 className="text-2xl font-semibold text-white text-center">
+              Coming Soon
+            </h3>
           </Card.Header>
           <Card.Content>
             <div className="text-center">
@@ -90,19 +102,16 @@ export default function DemoPage() {
                 <PlayIcon className="w-12 h-12 text-white" />
               </div>
               <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
-                Our interactive demo is currently in development. It will showcase real-time agent collaboration, 
-                code generation workflows, and the full power of our MCP Agent Network.
+                Our interactive demo is currently in development. It will
+                showcase real-time agent collaboration, code generation
+                workflows, and the full power of our MCP Agent Network.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/register">
-                  <Button variant="secondary">
-                    Get Early Access
-                  </Button>
+                  <Button variant="secondary">Get Early Access</Button>
                 </Link>
                 <Link href="/contact">
-                  <Button variant="outline">
-                    Request Demo Call
-                  </Button>
+                  <Button variant="outline">Request Demo Call</Button>
                 </Link>
               </div>
             </div>
@@ -113,38 +122,47 @@ export default function DemoPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <Card.Header>
-              <h4 className="text-lg font-semibold text-white">Real-time Collaboration</h4>
+              <h4 className="text-lg font-semibold text-white">
+                Real-time Collaboration
+              </h4>
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 text-sm">
-                Watch multiple AI agents work together on complex coding tasks with live updates and progress tracking.
+                Watch multiple AI agents work together on complex coding tasks
+                with live updates and progress tracking.
               </p>
             </Card.Content>
           </Card>
 
           <Card>
             <Card.Header>
-              <h4 className="text-lg font-semibold text-white">Security Validation</h4>
+              <h4 className="text-lg font-semibold text-white">
+                Security Validation
+              </h4>
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 text-sm">
-                See automated security reviews, vulnerability scanning, and compliance checks in action.
+                See automated security reviews, vulnerability scanning, and
+                compliance checks in action.
               </p>
             </Card.Content>
           </Card>
 
           <Card>
             <Card.Header>
-              <h4 className="text-lg font-semibold text-white">Production Ready</h4>
+              <h4 className="text-lg font-semibold text-white">
+                Production Ready
+              </h4>
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 text-sm">
-                Experience how our platform generates enterprise-grade code with proper testing and documentation.
+                Experience how our platform generates enterprise-grade code with
+                proper testing and documentation.
               </p>
             </Card.Content>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }

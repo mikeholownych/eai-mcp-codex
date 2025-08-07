@@ -48,7 +48,7 @@ const authOptions: NextAuthOptions = {
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -73,7 +73,7 @@ const authOptions: NextAuthOptions = {
           }
 
           const data = await response.json()
-          
+
           if (data.success && data.data.user) {
             return {
               id: data.data.user.id,
@@ -90,8 +90,8 @@ const authOptions: NextAuthOptions = {
           console.error('Auth error:', error)
           return null
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async signIn({ user, account }) {
@@ -117,7 +117,7 @@ const authOptions: NextAuthOptions = {
           }
 
           const data = await response.json()
-          
+
           if (data.success && data.data.user) {
             // Update user object with backend data
             user.id = data.data.user.id
@@ -156,11 +156,10 @@ const authOptions: NextAuthOptions = {
       // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
       return baseUrl
-    }
+    },
   },
   pages: {
     signIn: '/login',
-    signUp: '/register',
     error: '/auth/error',
   },
   session: {

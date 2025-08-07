@@ -14,6 +14,7 @@ from src.common.database import (
     serialize_datetime,
     deserialize_datetime,
 )
+
 from .models import (
     Workflow,
     WorkflowStep,
@@ -29,19 +30,66 @@ from .config import settings
 
 logger = get_logger("workflow_orchestrator")
 
+# Debug: Check if DatabaseManager is imported correctly
+logger.info(f"DatabaseManager imported: {DatabaseManager}")
+
 
 class WorkflowOrchestrator:
     """Core business logic for workflow orchestration."""
 
-    def __init__(self, dsn: str = settings.database_url):
-        self.db_manager = DatabaseManager(dsn)
-        self.dsn = dsn
+    def __init__(self, db_name: str = "workflow_orchestrator"):
+        logger.info(f"WorkflowOrchestrator.__init__ called with db_name: {db_name}")
+        
+        # Ensure db_name is just the database name, not a DSN
+        if db_name.startswith('postgresql://'):
+            logger.info(f"Extracting database name from DSN: {db_name}")
+            # Extract database name from DSN
+            import urllib.parse as urlparse
+            parsed = urlparse.urlparse(db_name)
+            db_name = parsed.path.lstrip('/')
+            if not db_name:
+                db_name = "workflow_orchestrator"
+            logger.info(f"Extracted database name: {db_name}")
+        
+        self.db_manager = DatabaseManager(db_name)
+        self.dsn = self.db_manager.dsn
         self.service_endpoints = {
-            "model_router": "http://localhost:8001",
-            "plan_management": "http://localhost:8002",
-            "git_worktree": "http://localhost:8003",
-            "verification": "http://localhost:8005",  # Corrected port
-            "feedback": "http://localhost:8005",  # Corrected port
+            "model_router": "http://model-router:8001",
+            "plan_management": "http://plan-management:8002",
+            "git_worktree": "http://git-worktree-manager:8003",
+            "verification": "http://verification-feedback:8005",
+            "feedback": "http://verification-feedback:8005",
+        }
+        
+        # Define HTTP methods for common endpoint patterns
+        self.endpoint_methods = {
+            # Health check endpoints - GET
+            "/health": "GET",
+            "/api/health": "GET",
+            
+            # Model router endpoints
+            "/models": "GET",
+            "/route": "POST",
+            "/chat": "POST",
+            
+            # Plan management endpoints
+            "/plans": "GET",
+            "/plans/create": "POST",
+            "/tasks": "GET",
+            "/tasks/create": "POST",
+            
+            # Git worktree endpoints
+            "/repositories": "GET",
+            "/repositories/create": "POST",
+            "/worktrees": "GET",
+            "/worktrees/create": "POST",
+            
+            # Verification endpoints
+            "/verify": "POST",
+            "/feedback": "POST",
+            "/analyze": "POST",
+            
+            # Default to POST for endpoints with data, GET for simple queries
         }
 
     async def initialize_database(self):
@@ -448,9 +496,26 @@ class WorkflowOrchestrator:
 
             start_time = datetime.utcnow()
 
+            # Determine HTTP method based on endpoint pattern
+            http_method = "POST"  # Default method
+            for endpoint_pattern, method in self.endpoint_methods.items():
+                if step.endpoint.startswith(endpoint_pattern) or step.endpoint.endswith(endpoint_pattern):
+                    http_method = method
+                    break
+            
+            # Special handling for common patterns
+            if step.endpoint.startswith("/health") or step.endpoint.startswith("/api/health"):
+                http_method = "GET"
+            elif step.endpoint.startswith("/verify") or step.endpoint.startswith("/feedback"):
+                http_method = "POST"
+            elif step.endpoint.startswith("/models") or step.endpoint.startswith("/plans"):
+                http_method = "GET"
+            elif step.endpoint.endswith("/create") or step.endpoint.endswith("/route"):
+                http_method = "POST"
+
             timeout = httpx.Timeout(step.timeout_seconds)
             async with httpx.AsyncClient(timeout=timeout) as client:
-                if step.endpoint.startswith("/"):
+                if http_method == "POST":
                     # POST request with parameters as JSON body
                     response = await client.post(full_url, json=merged_params)
                 else:
@@ -799,7 +864,8 @@ async def get_orchestrator() -> WorkflowOrchestrator:
     """Get singleton WorkflowOrchestrator instance."""
     global _orchestrator
     if _orchestrator is None:
-        _orchestrator = WorkflowOrchestrator()
+        # Always use just the database name, not a DSN
+        _orchestrator = WorkflowOrchestrator("workflow_orchestrator")
         await _orchestrator.initialize_database()
     return _orchestrator
 

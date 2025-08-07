@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { useUsers, useUserActions } from '@/hooks/useStaff'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
-import { useRouter } from 'next/navigation'
-import { debug } from '@/lib/utils'
-import { getUserStatusColor, getUserStatusIcon } from '@/lib/statusHelpers'
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUsers, useUserActions } from "@/hooks/useStaff";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
+import { debug } from "@/lib/utils";
+import { getUserStatusColor, getUserStatusIcon } from "@/lib/statusHelpers";
 import {
   UserGroupIcon,
   PlusIcon,
@@ -19,60 +19,66 @@ import {
   CheckCircleIcon,
   EyeIcon,
   UserCircleIcon,
-} from '@heroicons/react/24/outline'
-
+} from "@heroicons/react/24/outline";
 
 const roleColors: Record<string, string> = {
-  admin: 'bg-red-500/10 text-red-400',
-  manager: 'bg-blue-500/10 text-blue-400',
-  support: 'bg-green-500/10 text-green-400',
-  content: 'bg-purple-500/10 text-purple-400',
-  customer: 'bg-gray-500/10 text-gray-400',
-}
+  admin: "bg-red-500/10 text-red-400",
+  manager: "bg-blue-500/10 text-blue-400",
+  support: "bg-green-500/10 text-green-400",
+  content: "bg-purple-500/10 text-purple-400",
+  customer: "bg-gray-500/10 text-gray-400",
+};
 
-const getRoleColor = (role: string) => roleColors[role] ?? 'bg-gray-500/10 text-gray-400'
-
+const getRoleColor = (role: string) =>
+  roleColors[role] ?? "bg-gray-500/10 text-gray-400";
 
 export default function UserManagement() {
-  const { user: currentUser } = useAuth()
-  const router = useRouter()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedRole, setSelectedRole] = useState<string>('all')
-  const [selectedStatus, setSelectedStatus] = useState<string>('all')
-    const currentPage = 1
+  const { user: currentUser } = useAuth();
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const currentPage = 1;
   const [userStats, setUserStats] = useState({
     total: 0,
     active: 0,
     staff: 0,
-    suspended: 0
-  })
+    suspended: 0,
+  });
 
   // Build filters for API call
   const filters = {
     page: currentPage,
     per_page: 20,
-    role: selectedRole === 'all' ? undefined : selectedRole,
-    status: selectedStatus === 'all' ? undefined : selectedStatus,
-    search: searchTerm || undefined
-  }
+    role: selectedRole === "all" ? undefined : selectedRole,
+    status: selectedStatus === "all" ? undefined : selectedStatus,
+    search: searchTerm || undefined,
+  };
 
-  const { users, total, loading, error, refetch } = useUsers(filters)
-  const { suspendUser, activateUser, deleteUser, loading: actionLoading } = useUserActions()
+  const { users, total, loading, error, refetch } = useUsers(filters);
+  const {
+    suspendUser,
+    activateUser,
+    deleteUser,
+    loading: actionLoading,
+  } = useUserActions();
 
   // Update stats when users change
   useEffect(() => {
     if (users) {
       setUserStats({
         total: total,
-        active: users.filter(u => u.status === 'active').length,
-        staff: users.filter(u => ['admin', 'manager', 'support', 'content'].includes(u.role)).length,
-        suspended: users.filter(u => u.status === 'suspended').length
-      })
+        active: users.filter((u) => u.status === "active").length,
+        staff: users.filter((u) =>
+          ["admin", "manager", "support", "content"].includes(u.role),
+        ).length,
+        suspended: users.filter((u) => u.status === "suspended").length,
+      });
     }
-  }, [users, total])
+  }, [users, total]);
 
   // Check if user has permission to manage users
-  if (!currentUser || !['admin', 'manager'].includes(currentUser.role)) {
+  if (!currentUser || !["admin", "manager"].includes(currentUser.role)) {
     return (
       <div className="text-center py-12">
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
@@ -81,7 +87,7 @@ export default function UserManagement() {
           You don&apos;t have permission to access user management.
         </p>
       </div>
-    )
+    );
   }
 
   if (loading) {
@@ -89,61 +95,68 @@ export default function UserManagement() {
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="text-center py-12">
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
-        <h3 className="mt-2 text-sm font-medium text-white">Error Loading Users</h3>
+        <h3 className="mt-2 text-sm font-medium text-white">
+          Error Loading Users
+        </h3>
         <p className="mt-1 text-sm text-gray-400">{error}</p>
         <Button variant="outline" className="mt-4" onClick={refetch}>
           Try Again
         </Button>
       </div>
-    )
+    );
   }
 
   const handleCreateUser = () => {
-    setShowCreateModal(true)
-  }
+    debug("Create user clicked", {});
+    alert("Create user functionality would be implemented here");
+  };
 
   const handleEditUser = (userId: string) => {
-    debug('Edit user', { userId })
-    router.push(`/staff/users?edit=${userId}`)
-  }
+    debug("Edit user", { userId });
+    router.push(`/staff/users?edit=${userId}`);
+  };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      return
+    if (
+      !confirm(
+        "Are you sure you want to delete this user? This action cannot be undone.",
+      )
+    ) {
+      return;
     }
-    
+
     try {
-      await deleteUser(userId)
-      refetch() // Refresh the users list
+      await deleteUser(userId);
+      refetch(); // Refresh the users list
     } catch (error) {
-      debug('Failed to delete user', error)
-      alert('Failed to delete user')
+      debug("Failed to delete user", error);
+      alert("Failed to delete user");
     }
-  }
+  };
 
   const handleSuspendUser = async (userId: string) => {
-    const user = users.find(u => u.id === userId)
-    if (!user) return
+    const user = users.find((u) => u.id === userId);
+    if (!user) return;
 
     try {
-      if (user.status === 'suspended') {
-        await activateUser(userId)
+      if (user.status === "suspended") {
+        await activateUser(userId);
       } else {
-        await suspendUser(userId)
+        await suspendUser(userId);
       }
-      refetch() // Refresh the users list
+      refetch(); // Refresh the users list
     } catch (error) {
-      debug('Failed to update user status', error)
-      alert('Failed to update user status')
+      debug("Failed to update user status", error);
+      alert("Failed to update user status");
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -153,7 +166,7 @@ export default function UserManagement() {
           <h1 className="text-2xl font-bold text-white">User Management</h1>
           <p className="text-gray-400">Manage users, roles, and permissions</p>
         </div>
-        
+
         <Button variant="primary" onClick={handleCreateUser}>
           <PlusIcon className="h-4 w-4 mr-2" />
           Create User
@@ -169,7 +182,9 @@ export default function UserManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Total Users</p>
-              <p className="text-2xl font-semibold text-white">{userStats.total.toLocaleString()}</p>
+              <p className="text-2xl font-semibold text-white">
+                {userStats.total.toLocaleString()}
+              </p>
             </div>
           </div>
         </Card>
@@ -181,7 +196,9 @@ export default function UserManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Active Users</p>
-              <p className="text-2xl font-semibold text-white">{userStats.active.toLocaleString()}</p>
+              <p className="text-2xl font-semibold text-white">
+                {userStats.active.toLocaleString()}
+              </p>
             </div>
           </div>
         </Card>
@@ -193,7 +210,9 @@ export default function UserManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Staff Members</p>
-              <p className="text-2xl font-semibold text-white">{userStats.staff.toLocaleString()}</p>
+              <p className="text-2xl font-semibold text-white">
+                {userStats.staff.toLocaleString()}
+              </p>
             </div>
           </div>
         </Card>
@@ -205,7 +224,9 @@ export default function UserManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Suspended</p>
-              <p className="text-2xl font-semibold text-white">{userStats.suspended.toLocaleString()}</p>
+              <p className="text-2xl font-semibold text-white">
+                {userStats.suspended.toLocaleString()}
+              </p>
             </div>
           </div>
         </Card>
@@ -261,12 +282,24 @@ export default function UserManagement() {
           <table className="w-full">
             <thead className="bg-slate-700/50">
               <tr>
-                <th className="text-left py-3 px-6 font-medium text-gray-300">User</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-300">Role</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-300">Status</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-300">Plan</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-300">Last Active</th>
-                <th className="text-left py-3 px-6 font-medium text-gray-300">Actions</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">
+                  User
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">
+                  Role
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">
+                  Status
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">
+                  Plan
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">
+                  Last Active
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
@@ -276,18 +309,26 @@ export default function UserManagement() {
                     <div className="flex items-center">
                       <UserCircleIcon className="h-8 w-8 text-gray-400 mr-3" />
                       <div>
-                        <div className="text-sm font-medium text-white">{user.name}</div>
-                        <div className="text-sm text-gray-400">{user.email}</div>
+                        <div className="text-sm font-medium text-white">
+                          {user.name}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}
+                    >
                       {user.role.toUpperCase()}
                     </span>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getUserStatusColor(user.status)}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getUserStatusColor(user.status)}`}
+                    >
                       {getUserStatusIcon(user.status)}
                       <span className="ml-1">{user.status}</span>
                     </span>
@@ -297,7 +338,9 @@ export default function UserManagement() {
                   </td>
                   <td className="py-4 px-6">
                     <span className="text-sm text-gray-400">
-                      {user.last_active ? new Date(user.last_active).toLocaleDateString() : 'Never'}
+                      {user.last_active
+                        ? new Date(user.last_active).toLocaleDateString()
+                        : "Never"}
                     </span>
                   </td>
                   <td className="py-4 px-6">
@@ -318,12 +361,16 @@ export default function UserManagement() {
                       >
                         <PencilIcon className="h-4 w-4" />
                       </button>
-                      {currentUser.role === 'admin' && (
+                      {currentUser.role === "admin" && (
                         <>
                           <button
                             onClick={() => handleSuspendUser(user.id)}
                             className="p-1 text-gray-400 hover:text-orange-400 transition-colors"
-                            title={user.status === 'suspended' ? 'Activate User' : 'Suspend User'}
+                            title={
+                              user.status === "suspended"
+                                ? "Activate User"
+                                : "Suspend User"
+                            }
                             disabled={actionLoading}
                           >
                             <ExclamationTriangleIcon className="h-4 w-4" />
@@ -350,7 +397,9 @@ export default function UserManagement() {
       {users.length === 0 && !loading && (
         <Card className="p-12 text-center">
           <UserGroupIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">No users found</h3>
+          <h3 className="text-lg font-medium text-white mb-2">
+            No users found
+          </h3>
           <p className="text-gray-400 mb-6">
             Try adjusting your search criteria or create a new user.
           </p>
@@ -363,5 +412,5 @@ export default function UserManagement() {
 
       {/* Pagination could be added here */}
     </div>
-  )
+  );
 }

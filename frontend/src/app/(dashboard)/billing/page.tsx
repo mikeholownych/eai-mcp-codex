@@ -119,7 +119,7 @@ export default function BillingPage() {
 
   const handlePlanChange = async (planId: string) => {
     setIsChangingPlan(true)
-    
+
     // Simulate plan change
     setTimeout(() => {
       setCurrentPlan(planId)
@@ -134,7 +134,9 @@ export default function BillingPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Billing & Subscription</h1>
-        <p className="text-gray-400">Manage your subscription, payment methods, and billing history</p>
+        <p className="text-gray-400">
+          Manage your subscription, payment methods, and billing history
+        </p>
       </div>
 
       {/* Current Plan Overview */}
@@ -148,7 +150,9 @@ export default function BillingPage() {
               <h3 className="text-lg font-semibold text-white">Current Plan</h3>
               <p className="text-2xl font-bold text-green-400">{currentPlanDetails?.name}</p>
               <p className="text-sm text-gray-400">
-                {currentPlanDetails?.price ? `$${currentPlanDetails.price}/${currentPlanDetails.interval}` : 'Custom pricing'}
+                {currentPlanDetails?.price
+                  ? `$${currentPlanDetails.price}/${currentPlanDetails.interval}`
+                  : 'Custom pricing'}
               </p>
             </div>
           </div>
@@ -197,7 +201,7 @@ export default function BillingPage() {
               />
             </div>
           </div>
-          
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-300">Storage</span>
@@ -210,7 +214,7 @@ export default function BillingPage() {
               />
             </div>
           </div>
-          
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-300">Bandwidth</span>
@@ -230,15 +234,15 @@ export default function BillingPage() {
       <div>
         <h2 className="text-xl font-semibold text-white mb-6">Available Plans</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {plans.map((plan) => (
+          {plans.map(plan => (
             <Card
               key={plan.id}
               className={`p-6 relative ${
                 plan.id === currentPlan
                   ? 'ring-2 ring-orange-500 bg-orange-500/5'
                   : plan.popular
-                  ? 'ring-2 ring-blue-500'
-                  : ''
+                    ? 'ring-2 ring-blue-500'
+                    : ''
               }`}
             >
               {plan.popular && (
@@ -248,7 +252,7 @@ export default function BillingPage() {
                   </span>
                 </div>
               )}
-              
+
               {plan.id === currentPlan && (
                 <div className="absolute -top-3 right-4">
                   <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
@@ -287,7 +291,11 @@ export default function BillingPage() {
                 loading={isChangingPlan}
                 onClick={() => plan.id !== currentPlan && handlePlanChange(plan.id)}
               >
-                {plan.id === currentPlan ? 'Current Plan' : plan.price ? 'Upgrade' : 'Contact Sales'}
+                {plan.id === currentPlan
+                  ? 'Current Plan'
+                  : plan.price
+                    ? 'Upgrade'
+                    : 'Contact Sales'}
               </Button>
             </Card>
           ))}
@@ -305,21 +313,17 @@ export default function BillingPage() {
         </div>
 
         <div className="space-y-4">
-          {paymentMethods.map((method) => (
+          {paymentMethods.map(method => (
             <div
               key={method.id}
               className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg border border-slate-600"
             >
               <div className="flex items-center">
                 <div className="w-10 h-6 bg-slate-600 rounded mr-3 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white uppercase">
-                    {method.brand}
-                  </span>
+                  <span className="text-xs font-bold text-white uppercase">{method.brand}</span>
                 </div>
                 <div>
-                  <p className="text-white font-medium">
-                    •••• •••• •••• {method.last4}
-                  </p>
+                  <p className="text-white font-medium">•••• •••• •••• {method.last4}</p>
                   <p className="text-sm text-gray-400">Expires {method.expiry}</p>
                 </div>
                 {method.isDefault && (
@@ -328,7 +332,7 @@ export default function BillingPage() {
                   </span>
                 )}
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Button variant="outline" size="sm">
                   Edit
@@ -364,7 +368,7 @@ export default function BillingPage() {
               </tr>
             </thead>
             <tbody>
-              {billingHistory.map((item) => (
+              {billingHistory.map(item => (
                 <tr key={item.id} className="border-b border-slate-700">
                   <td className="py-3 px-4 text-gray-300">
                     {new Date(item.date).toLocaleDateString()}
@@ -372,11 +376,13 @@ export default function BillingPage() {
                   <td className="py-3 px-4 text-gray-300">{item.description}</td>
                   <td className="py-3 px-4 text-white font-medium">${item.amount}</td>
                   <td className="py-3 px-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      item.status === 'paid'
-                        ? 'bg-green-500/10 text-green-400'
-                        : 'bg-red-500/10 text-red-400'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        item.status === 'paid'
+                          ? 'bg-green-500/10 text-green-400'
+                          : 'bg-red-500/10 text-red-400'
+                      }`}
+                    >
                       {item.status === 'paid' ? (
                         <CheckCircleIcon className="h-3 w-3 mr-1" />
                       ) : (

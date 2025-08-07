@@ -1,40 +1,51 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { PlayIcon, PauseIcon, CodeBracketIcon, SparklesIcon, CheckIcon } from '@heroicons/react/24/outline'
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  PlayIcon,
+  PauseIcon,
+  CodeBracketIcon,
+  SparklesIcon,
+  CheckIcon,
+} from "@heroicons/react/24/outline";
 
 interface InteractiveDemoProps {
-  isOpen?: boolean
-  onClose?: () => void
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ isOpen = false, onClose }) => {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [currentStep, setCurrentStep] = useState(0)
-  const [code, setCode] = useState('')
-  const [isGenerating, setIsGenerating] = useState(false)
+const InteractiveDemo: React.FC<InteractiveDemoProps> = ({
+  isOpen = false,
+  onClose,
+}) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [code, setCode] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const demoSteps = useMemo(() => [
-    {
-      title: "Describe Your Idea",
-      description: "Simply describe what you want to build in natural language",
-      code: `// Just describe what you want:
-"Create a React component with a button that shows a counter and changes color when clicked"`
-    },
-    {
-      title: "AI Analysis",
-      description: "Our agents analyze your requirements and create a plan",
-      code: `// AI agents are working together...
+  const demoSteps = useMemo(
+    () => [
+      {
+        title: "Describe Your Idea",
+        description:
+          "Simply describe what you want to build in natural language",
+        code: `// Just describe what you want:
+"Create a React component with a button that shows a counter and changes color when clicked"`,
+      },
+      {
+        title: "AI Analysis",
+        description: "Our agents analyze your requirements and create a plan",
+        code: `// AI agents are working together...
 🤖 Planner Agent: Breaking down requirements
 🔧 Developer Agent: Designing component structure
 🎨 UI Agent: Planning responsive design
-🔒 Security Agent: Reviewing best practices`
-    },
-    {
-      title: "Code Generation",
-      description: "Production-ready code is generated with best practices",
-      code: `import React, { useState } from 'react'
+🔒 Security Agent: Reviewing best practices`,
+      },
+      {
+        title: "Code Generation",
+        description: "Production-ready code is generated with best practices",
+        code: `import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 
 interface CounterButtonProps {
@@ -73,75 +84,80 @@ const CounterButton: React.FC<CounterButtonProps> = ({
   )
 }
 
-export default CounterButton`
-    },
-    {
-      title: "Review & Deploy",
-      description: "Code is reviewed, tested, and ready for production",
-      code: `✅ Code Quality: 95/100
+export default CounterButton`,
+      },
+      {
+        title: "Review & Deploy",
+        description: "Code is reviewed, tested, and ready for production",
+        code: `✅ Code Quality: 95/100
 ✅ Security Scan: Passed
 ✅ Performance: Optimized
 ✅ Accessibility: WCAG 2.1 compliant
 ✅ Tests: Auto-generated
 ✅ Documentation: Complete
 
-// Ready to deploy! 🚀`
-    }
-  ], [])
+// Ready to deploy! 🚀`,
+      },
+    ],
+    [],
+  );
 
   useEffect(() => {
     if (isOpen && currentStep < demoSteps.length) {
-      const timer = setTimeout(() => {
-        if (currentStep < demoSteps.length - 1) {
-          setCurrentStep(currentStep + 1)
-        } else {
-          setIsPlaying(false)
-        }
-      }, isPlaying ? 3000 : 10000)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(
+        () => {
+          if (currentStep < demoSteps.length - 1) {
+            setCurrentStep(currentStep + 1);
+          } else {
+            setIsPlaying(false);
+          }
+        },
+        isPlaying ? 3000 : 10000,
+      );
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, currentStep, isPlaying, demoSteps.length])
+  }, [isOpen, currentStep, isPlaying, demoSteps.length]);
 
   useEffect(() => {
     if (isOpen) {
-      setCode(demoSteps[0].code)
-      setCurrentStep(0)
-      setIsPlaying(true)
+      setCode(demoSteps[0].code);
+      setCurrentStep(0);
+      setIsPlaying(true);
     }
-  }, [isOpen, demoSteps])
+  }, [isOpen, demoSteps]);
 
   useEffect(() => {
     if (currentStep < demoSteps.length) {
-      setIsGenerating(true)
-      const targetCode = demoSteps[currentStep].code
-      
+      setIsGenerating(true);
+      const targetCode = demoSteps[currentStep].code;
+
       // Simulate typing effect
-      let i = 0
+      let i = 0;
       const typeCode = () => {
         if (i <= targetCode.length) {
-          setCode(targetCode.substring(0, i))
-          i++
-          setTimeout(typeCode, 20)
+          setCode(targetCode.substring(0, i));
+          i++;
+          setTimeout(typeCode, 20);
         } else {
-          setIsGenerating(false)
+          setIsGenerating(false);
         }
-      }
-      
-      setCode('')
-      typeCode()
+      };
+
+      setCode("");
+      typeCode();
     }
-  }, [currentStep, demoSteps])
+  }, [currentStep, demoSteps]);
 
   const handlePlayPause = () => {
-    setIsPlaying(!isPlaying)
-  }
+    setIsPlaying(!isPlaying);
+  };
 
   const handleReset = () => {
-    setCurrentStep(0)
-    setIsPlaying(true)
-  }
+    setCurrentStep(0);
+    setIsPlaying(true);
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
@@ -167,8 +183,12 @@ export default CounterButton`
                   <CodeBracketIcon className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">Live Code Generation Demo</h3>
-                  <p className="text-purple-100">Watch AI agents create code in real-time</p>
+                  <h3 className="text-xl font-bold text-white">
+                    Live Code Generation Demo
+                  </h3>
+                  <p className="text-purple-100">
+                    Watch AI agents create code in real-time
+                  </p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -201,14 +221,20 @@ export default CounterButton`
           {/* Progress Bar */}
           <div className="bg-slate-800 p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-400">Step {currentStep + 1} of {demoSteps.length}</span>
-              <span className="text-sm text-gray-400">{Math.round(((currentStep + 1) / demoSteps.length) * 100)}%</span>
+              <span className="text-sm text-gray-400">
+                Step {currentStep + 1} of {demoSteps.length}
+              </span>
+              <span className="text-sm text-gray-400">
+                {Math.round(((currentStep + 1) / demoSteps.length) * 100)}%
+              </span>
             </div>
             <div className="w-full bg-slate-700 rounded-full h-2">
               <motion.div
                 className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: `${((currentStep + 1) / demoSteps.length) * 100}%` }}
+                animate={{
+                  width: `${((currentStep + 1) / demoSteps.length) * 100}%`,
+                }}
                 transition={{ duration: 0.5 }}
               />
             </div>
@@ -232,13 +258,17 @@ export default CounterButton`
                   <motion.div
                     key={index}
                     className={`flex items-center space-x-3 p-3 rounded-lg transition-all ${
-                      index === currentStep ? 'bg-purple-500/20 border border-purple-500/50' : 'bg-slate-800/50'
+                      index === currentStep
+                        ? "bg-purple-500/20 border border-purple-500/50"
+                        : "bg-slate-800/50"
                     }`}
                     animate={{ scale: index === currentStep ? 1.02 : 1 }}
                   >
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      index === currentStep ? 'bg-purple-500' : 'bg-slate-700'
-                    }`}>
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        index === currentStep ? "bg-purple-500" : "bg-slate-700"
+                      }`}
+                    >
                       {index < currentStep ? (
                         <CheckIcon className="w-4 h-4 text-white" />
                       ) : (
@@ -246,8 +276,12 @@ export default CounterButton`
                       )}
                     </div>
                     <div>
-                      <h5 className="text-sm font-medium text-white">{step.title}</h5>
-                      <p className="text-xs text-gray-400">{step.description}</p>
+                      <h5 className="text-sm font-medium text-white">
+                        {step.title}
+                      </h5>
+                      <p className="text-xs text-gray-400">
+                        {step.description}
+                      </p>
                     </div>
                   </motion.div>
                 ))}
@@ -279,7 +313,9 @@ export default CounterButton`
           <div className="bg-slate-800 border-t border-slate-700 p-4">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-400">
-                {currentStep === demoSteps.length - 1 ? "Demo complete! Ready to try it yourself?" : "Auto-playing demo..."}
+                {currentStep === demoSteps.length - 1
+                  ? "Demo complete! Ready to try it yourself?"
+                  : "Auto-playing demo..."}
               </div>
               <div className="flex space-x-3">
                 <button
@@ -290,7 +326,11 @@ export default CounterButton`
                   Previous
                 </button>
                 <button
-                  onClick={() => setCurrentStep(Math.min(demoSteps.length - 1, currentStep + 1))}
+                  onClick={() =>
+                    setCurrentStep(
+                      Math.min(demoSteps.length - 1, currentStep + 1),
+                    )
+                  }
                   disabled={currentStep === demoSteps.length - 1}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -302,7 +342,7 @@ export default CounterButton`
         </motion.div>
       </motion.div>
     </AnimatePresence>
-  )
-}
+  );
+};
 
-export default InteractiveDemo
+export default InteractiveDemo;

@@ -1,136 +1,140 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  XMarkIcon, 
-  ChevronLeftIcon, 
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  XMarkIcon,
+  ChevronLeftIcon,
   ChevronRightIcon,
   PlayIcon,
   CodeBracketIcon,
   CpuChipIcon,
   ShieldCheckIcon,
-  CommandLineIcon
-} from '@heroicons/react/24/outline'
-import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
+  CommandLineIcon,
+} from "@heroicons/react/24/outline";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 
 interface TourStep {
-  id: string
-  title: string
-  description: string
-  icon: React.ComponentType<{ className?: string }>
-  image: string
-  features: string[]
-  color: string
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  image: string;
+  features: string[];
+  color: string;
 }
 
 const tourSteps: TourStep[] = [
   {
-    id: 'agent-network',
-    title: 'AI Agent Network',
-    description: 'Watch multiple specialized AI agents collaborate in real-time to solve complex coding challenges.',
+    id: "agent-network",
+    title: "AI Agent Network",
+    description:
+      "Watch multiple specialized AI agents collaborate in real-time to solve complex coding challenges.",
     icon: CpuChipIcon,
-    image: '/demo/agent-network.png',
+    image: "/demo/agent-network.png",
     features: [
-      'Claude O3 & Sonnet 4 integration',
-      'Multi-agent collaboration',
-      'Real-time code review',
-      'Automated testing'
+      "Claude O3 & Sonnet 4 integration",
+      "Multi-agent collaboration",
+      "Real-time code review",
+      "Automated testing",
     ],
-    color: 'from-purple-400 to-pink-400'
+    color: "from-purple-400 to-pink-400",
   },
   {
-    id: 'code-generation',
-    title: 'Smart Code Generation',
-    description: 'Transform ideas into production-ready code with context-aware AI that understands your patterns.',
+    id: "code-generation",
+    title: "Smart Code Generation",
+    description:
+      "Transform ideas into production-ready code with context-aware AI that understands your patterns.",
     icon: CodeBracketIcon,
-    image: '/demo/code-generation.png',
+    image: "/demo/code-generation.png",
     features: [
-      'Natural language to code',
-      'Pattern recognition',
-      'Best practices enforcement',
-      'Multi-language support'
+      "Natural language to code",
+      "Pattern recognition",
+      "Best practices enforcement",
+      "Multi-language support",
     ],
-    color: 'from-blue-400 to-cyan-400'
+    color: "from-blue-400 to-cyan-400",
   },
   {
-    id: 'security',
-    title: 'Enterprise Security',
-    description: 'SOC 2 compliant platform with advanced security controls and comprehensive audit logging.',
+    id: "security",
+    title: "Enterprise Security",
+    description:
+      "SOC 2 compliant platform with advanced security controls and comprehensive audit logging.",
     icon: ShieldCheckIcon,
-    image: '/demo/security.png',
+    image: "/demo/security.png",
     features: [
-      'JWT tenant isolation',
-      'Row-level security',
-      'Audit logging',
-      'RBAC controls'
+      "JWT tenant isolation",
+      "Row-level security",
+      "Audit logging",
+      "RBAC controls",
     ],
-    color: 'from-green-400 to-emerald-400'
+    color: "from-green-400 to-emerald-400",
   },
   {
-    id: 'integrations',
-    title: 'DevTool Integrations',
-    description: 'Seamlessly integrate with your existing workflow through popular development tools.',
+    id: "integrations",
+    title: "DevTool Integrations",
+    description:
+      "Seamlessly integrate with your existing workflow through popular development tools.",
     icon: CommandLineIcon,
-    image: '/demo/integrations.png',
+    image: "/demo/integrations.png",
     features: [
-      'GitHub integration',
-      'VS Code extension',
-      'CI/CD pipelines',
-      'Slack notifications'
+      "GitHub integration",
+      "VS Code extension",
+      "CI/CD pipelines",
+      "Slack notifications",
     ],
-    color: 'from-orange-400 to-red-400'
-  }
-]
+    color: "from-orange-400 to-red-400",
+  },
+];
 
 interface ProductTourProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const nextStep = () => {
-    setCurrentStep((prev) => (prev + 1) % tourSteps.length)
-  }
+    setCurrentStep((prev) => (prev + 1) % tourSteps.length);
+  };
 
   const prevStep = () => {
-    setCurrentStep((prev) => (prev - 1 + tourSteps.length) % tourSteps.length)
-  }
+    setCurrentStep((prev) => (prev - 1 + tourSteps.length) % tourSteps.length);
+  };
 
   const goToStep = (index: number) => {
-    setCurrentStep(index)
-  }
+    setCurrentStep(index);
+  };
 
   const handleBulletClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement
-    if (target.matches('button[data-index]')) {
-      const index = Number(target.getAttribute('data-index'))
-      goToStep(index)
+    const target = e.target as HTMLElement;
+    if (target.matches("button[data-index]")) {
+      const index = Number(target.getAttribute("data-index"));
+      goToStep(index);
     }
-  }
+  };
 
   const startDemo = () => {
-    setIsPlaying(true)
+    setIsPlaying(true);
     // Auto-advance through steps
     const interval = setInterval(() => {
       setCurrentStep((prev) => {
-        const nextIndex = prev + 1
+        const nextIndex = prev + 1;
         if (nextIndex >= tourSteps.length) {
-          clearInterval(interval)
-          setIsPlaying(false)
-          return 0
+          clearInterval(interval);
+          setIsPlaying(false);
+          return 0;
         }
-        return nextIndex
-      })
-    }, 4000)
-  }
+        return nextIndex;
+      });
+    }, 4000);
+  };
 
-  const currentTourStep = tourSteps[currentStep]
-  const IconComponent = currentTourStep.icon
+  const currentTourStep = tourSteps[currentStep];
+  const IconComponent = currentTourStep.icon;
 
   return (
     <AnimatePresence>
@@ -163,7 +167,9 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                 <div className="space-y-6">
                   {/* Header */}
                   <div className="flex items-center space-x-4">
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-4 shadow-lg`}>
+                    <div
+                      className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-4 shadow-lg`}
+                    >
                       <IconComponent className="w-8 h-8 text-white" />
                     </div>
                     <div>
@@ -178,7 +184,9 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
 
                   {/* Features */}
                   <div className="space-y-3">
-                    <h3 className="text-xl font-semibold text-white">Key Features:</h3>
+                    <h3 className="text-xl font-semibold text-white">
+                      Key Features:
+                    </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {currentTourStep.features.map((feature, index) => (
                         <motion.div
@@ -188,7 +196,9 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                           transition={{ delay: index * 0.1 }}
                           className="flex items-center space-x-3 p-3 rounded-lg bg-slate-800/50"
                         >
-                          <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentTourStep.color}`} />
+                          <div
+                            className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentTourStep.color}`}
+                          />
                           <span className="text-gray-300">{feature}</span>
                         </motion.div>
                       ))}
@@ -204,8 +214,8 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                           data-index={index}
                           className={`w-3 h-3 rounded-full transition-all ${
                             index === currentStep
-                              ? 'bg-purple-500 scale-125'
-                              : 'bg-slate-600 hover:bg-slate-500'
+                              ? "bg-purple-500 scale-125"
+                              : "bg-slate-600 hover:bg-slate-500"
                           }`}
                         />
                       ))}
@@ -260,7 +270,9 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                     {/* Placeholder for demo image/video */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center space-y-4">
-                        <div className={`w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-6 shadow-xl`}>
+                        <div
+                          className={`w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-6 shadow-xl`}
+                        >
                           <IconComponent className="w-12 h-12 text-white" />
                         </div>
                         <div>
@@ -275,7 +287,9 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                     </div>
 
                     {/* Animated Border */}
-                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${currentTourStep.color} opacity-20 animate-pulse`} />
+                    <div
+                      className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${currentTourStep.color} opacity-20 animate-pulse`}
+                    />
                   </motion.div>
 
                   {/* Progress Indicator */}
@@ -299,11 +313,15 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                     </p>
                   </div>
                   <div className="flex space-x-4">
-                    <Button variant="outline" size="sm" className="border-slate-600">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-slate-600"
+                    >
                       Learn More
                     </Button>
-                    <Button 
-                      variant="secondary" 
+                    <Button
+                      variant="secondary"
                       size="sm"
                       className="bg-gradient-to-r from-purple-600 to-pink-600"
                     >
@@ -317,5 +335,5 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }

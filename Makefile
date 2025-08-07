@@ -66,6 +66,7 @@ prod-update: ## Update production environment
 base: ## Build base image
 	@echo "🔨 Building Base Image..."
 	docker build -t base -f docker/base.Dockerfile .
+        docker tag base mcp-base
 
 build: base ## Build all services
 	@echo "🔨 Building all services..."

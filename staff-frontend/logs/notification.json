@@ -1,77 +1,21 @@
 [
   {
-    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "session_id": "b10b9b94-b5e1-4511-aca2-e7d7fca595d6",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/b10b9b94-b5e1-4511-aca2-e7d7fca595d6.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/staff-frontend",
     "hook_event_name": "Notification",
     "message": "Claude is waiting for your input"
   },
   {
-    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
-    "hook_event_name": "Notification",
-    "message": "Claude needs your permission to use Bash"
-  },
-  {
-    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
-    "hook_event_name": "Notification",
-    "message": "Claude needs your permission to use Bash"
-  },
-  {
-    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "session_id": "b10b9b94-b5e1-4511-aca2-e7d7fca595d6",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/b10b9b94-b5e1-4511-aca2-e7d7fca595d6.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/staff-frontend",
     "hook_event_name": "Notification",
     "message": "Claude is waiting for your input"
   },
   {
-    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
-    "hook_event_name": "Notification",
-    "message": "Claude needs your permission to use Bash"
-  },
-  {
-    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
-    "hook_event_name": "Notification",
-    "message": "Claude is waiting for your input"
-  },
-  {
-    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
-    "hook_event_name": "Notification",
-    "message": "Claude is waiting for your input"
-  },
-  {
-    "session_id": "283159d6-bac8-41c4-a2b7-8fcbde0198c9",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/283159d6-bac8-41c4-a2b7-8fcbde0198c9.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
-    "hook_event_name": "Notification",
-    "message": "Claude is waiting for your input"
-  },
-  {
-    "session_id": "50ae73bb-fb52-4aa2-b7f9-e2639a32b3cd",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/50ae73bb-fb52-4aa2-b7f9-e2639a32b3cd.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
-    "hook_event_name": "Notification",
-    "message": "Claude is waiting for your input"
-  },
-  {
-    "session_id": "623aeebc-0f99-4a16-b1a9-86a063d621dd",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack/623aeebc-0f99-4a16-b1a9-86a063d621dd.jsonl",
-    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
-    "hook_event_name": "Notification",
-    "message": "Claude is waiting for your input"
-  },
-  {
-    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
-    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "session_id": "b10b9b94-b5e1-4511-aca2-e7d7fca595d6",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/b10b9b94-b5e1-4511-aca2-e7d7fca595d6.jsonl",
     "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/staff-frontend",
     "hook_event_name": "Notification",
     "message": "Claude is waiting for your input"

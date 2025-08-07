@@ -53,10 +53,15 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
     { name: 'Analytics', href: '/staff/analytics', icon: ChartBarIcon },
     { name: 'Customers', href: '/staff/customers', icon: UsersIcon },
     { name: 'Support', href: '/staff/support', icon: LifebuoyIcon },
-    { name: 'Content', href: '/staff/content', icon: DocumentTextIcon, children: [
-      { name: 'Blog Posts', href: '/staff/content/blog', icon: DocumentTextIcon },
-      { name: 'Videos', href: '/staff/content/videos', icon: PlayIcon },
-    ]},
+    {
+      name: 'Content',
+      href: '/staff/content',
+      icon: DocumentTextIcon,
+      children: [
+        { name: 'Blog Posts', href: '/staff/content/blog', icon: DocumentTextIcon },
+        { name: 'Videos', href: '/staff/content/videos', icon: PlayIcon },
+      ],
+    },
     { name: 'Billing', href: '/staff/billing', icon: CreditCardIcon },
     { name: 'Settings', href: '/staff/settings', icon: CogIcon },
   ]
@@ -64,6 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
   const items = role === 'customer' ? customerItems : staffItems
 
   const isActive = (href: string) => {
+    if (!pathname) return false
     if (href === '/dashboard' || href === '/staff') {
       return pathname === href
     }
@@ -71,10 +77,12 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
   }
 
   return (
-    <div className={cn(
-      'h-screen bg-dark-900 border-r border-dark-700 flex flex-col transition-all duration-300',
-      collapsed ? 'w-16' : 'w-64'
-    )}>
+    <div
+      className={cn(
+        'h-screen bg-dark-900 border-r border-dark-700 flex flex-col transition-all duration-300',
+        collapsed ? 'w-16' : 'w-64',
+      )}
+    >
       {/* Header */}
       <div className="p-4 border-b border-dark-700">
         <div className="flex items-center justify-between">
@@ -104,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-        {items.map((item) => (
+        {items.map(item => (
           <div key={item.name}>
             <Link
               href={item.href}
@@ -112,13 +120,10 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
                 'flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group',
                 isActive(item.href)
                   ? 'bg-primary-500 text-white shadow-glow'
-                  : 'text-gray-300 hover:text-white hover:bg-dark-700'
+                  : 'text-gray-300 hover:text-white hover:bg-dark-700',
               )}
             >
-              <item.icon className={cn(
-                'flex-shrink-0 w-5 h-5',
-                collapsed ? 'mx-auto' : 'mr-3'
-              )} />
+              <item.icon className={cn('flex-shrink-0 w-5 h-5', collapsed ? 'mx-auto' : 'mr-3')} />
               {!collapsed && (
                 <>
                   <span className="flex-1">{item.name}</span>
@@ -134,7 +139,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
             {/* Sub-items */}
             {item.children && !collapsed && isActive(item.href) && (
               <div className="mt-2 ml-4 space-y-1">
-                {item.children.map((child) => (
+                {item.children.map(child => (
                   <Link
                     key={child.name}
                     href={child.href}
@@ -142,7 +147,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' 
                       'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                       isActive(child.href)
                         ? 'text-primary-400 bg-dark-700'
-                        : 'text-gray-400 hover:text-white hover:bg-dark-700'
+                        : 'text-gray-400 hover:text-white hover:bg-dark-700',
                     )}
                   >
                     <child.icon className="w-4 h-4 mr-2" />

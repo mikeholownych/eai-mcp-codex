@@ -1,12 +1,12 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { useTickets, useTicketActions, useTicketStats } from '@/hooks/useStaff'
-import { Ticket } from '@/lib/staffApi'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
-import { debug } from '@/lib/utils'
+import React, { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTickets, useTicketActions, useTicketStats } from "@/hooks/useStaff";
+import { Ticket } from "@/lib/staffApi";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { debug } from "@/lib/utils";
 import {
   LifebuoyIcon,
   MagnifyingGlassIcon,
@@ -17,57 +17,89 @@ import {
   TagIcon,
   ChatBubbleBottomCenterTextIcon,
   ArrowRightIcon,
-} from '@heroicons/react/24/outline'
-
+} from "@heroicons/react/24/outline";
 
 const priorityColors: Record<string, string> = {
-  urgent: 'bg-red-500/10 text-red-400 border-red-500/20',
-  high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  medium: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  low: 'bg-green-500/10 text-green-400 border-green-500/20',
-}
+  urgent: "bg-red-500/10 text-red-400 border-red-500/20",
+  high: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+  medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  low: "bg-green-500/10 text-green-400 border-green-500/20",
+};
 
 const getPriorityColor = (priority: string) =>
-  priorityColors[priority] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+  priorityColors[priority] ?? "bg-gray-500/10 text-gray-400 border-gray-500/20";
 
+const statusColors: Record<string, string> = {
+  open: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  "in-progress": "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  waiting: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  resolved: "bg-green-500/10 text-green-400 border-green-500/20",
+  closed: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+};
+
+const getTicketStatusColor = (status: string) =>
+  statusColors[status] ?? "bg-gray-500/10 text-gray-400 border-gray-500/20";
+
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case "open":
+      return <ClockIcon className="h-3 w-3" />;
+    case "in-progress":
+      return <ArrowRightIcon className="h-3 w-3" />;
+    case "waiting":
+      return <ExclamationTriangleIcon className="h-3 w-3" />;
+    case "resolved":
+      return <CheckCircleIcon className="h-3 w-3" />;
+    case "closed":
+      return <CheckCircleIcon className="h-3 w-3" />;
+    default:
+      return <ClockIcon className="h-3 w-3" />;
+  }
+};
 
 const categories = [
-  'All Categories',
-  'API',
-  'Billing',
-  'Performance',
-  'Bug Report',
-  'Feature Request',
-  'Account',
-  'Security',
-  'General'
-]
+  "All Categories",
+  "API",
+  "Billing",
+  "Performance",
+  "Bug Report",
+  "Feature Request",
+  "Account",
+  "Security",
+  "General",
+];
 
 export default function StaffTicketManagement() {
-  const { user } = useAuth()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState<string>('all')
-  const [selectedPriority, setSelectedPriority] = useState<string>('all')
-  const [selectedCategory, setSelectedCategory] = useState<string>('All Categories')
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
-  const currentPage = 1
+  const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedPriority, setSelectedPriority] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>("All Categories");
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const currentPage = 1;
 
   // Build filters for API call
   const filters = {
     page: currentPage,
     per_page: 20,
-    status: selectedStatus === 'all' ? undefined : selectedStatus,
-    priority: selectedPriority === 'all' ? undefined : selectedPriority,
-    category: selectedCategory === 'All Categories' ? undefined : selectedCategory,
-    search: searchTerm || undefined
-  }
+    status: selectedStatus === "all" ? undefined : selectedStatus,
+    priority: selectedPriority === "all" ? undefined : selectedPriority,
+    category:
+      selectedCategory === "All Categories" ? undefined : selectedCategory,
+    search: searchTerm || undefined,
+  };
 
-  const { tickets, total, loading, error, refetch } = useTickets(filters)
-  const { stats: ticketStats, loading: statsLoading } = useTicketStats()
-  const { assignTicket, updateTicketStatus, loading: actionLoading } = useTicketActions()
+  const { tickets, total, loading, error, refetch } = useTickets(filters);
+  const { stats: ticketStats, loading: statsLoading } = useTicketStats();
+  const {
+    assignTicket,
+    updateTicketStatus,
+    loading: actionLoading,
+  } = useTicketActions();
 
   // Check if user has permission to view tickets
-  if (!user || !['admin', 'manager', 'support'].includes(user.role)) {
+  if (!user || !["admin", "manager", "support"].includes(user.role)) {
     return (
       <div className="text-center py-12">
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
@@ -76,7 +108,7 @@ export default function StaffTicketManagement() {
           You don&apos;t have permission to access support tickets.
         </p>
       </div>
-    )
+    );
   }
 
   if (loading) {
@@ -84,67 +116,79 @@ export default function StaffTicketManagement() {
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="text-center py-12">
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
-        <h3 className="mt-2 text-sm font-medium text-white">Error Loading Tickets</h3>
+        <h3 className="mt-2 text-sm font-medium text-white">
+          Error Loading Tickets
+        </h3>
         <p className="mt-1 text-sm text-gray-400">{error}</p>
         <Button variant="outline" className="mt-4" onClick={refetch}>
           Try Again
         </Button>
       </div>
-    )
+    );
   }
 
   const handleAssignTicket = async (ticketId: string, assignTo: string) => {
     try {
-      await assignTicket(ticketId, assignTo)
-      refetch() // Refresh the tickets list
+      await assignTicket(ticketId, assignTo);
+      refetch(); // Refresh the tickets list
     } catch (error) {
-      debug('Failed to assign ticket', error)
-      alert('Failed to assign ticket')
+      debug("Failed to assign ticket", error);
+      alert("Failed to assign ticket");
     }
-  }
+  };
 
   const handleUpdateStatus = async (ticketId: string, newStatus: string) => {
     try {
-      await updateTicketStatus(ticketId, newStatus)
-      refetch() // Refresh the tickets list
+      await updateTicketStatus(ticketId, newStatus);
+      refetch(); // Refresh the tickets list
       if (selectedTicket && selectedTicket.id === ticketId) {
         // Update the selected ticket status for immediate UI feedback
-        setSelectedTicket({ ...selectedTicket, status: newStatus as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed' })
+        setSelectedTicket({
+          ...selectedTicket,
+          status: newStatus as
+            | "open"
+            | "in-progress"
+            | "waiting-customer"
+            | "resolved"
+            | "closed",
+        });
       }
     } catch (error) {
-      debug('Failed to update ticket status', error)
-      alert('Failed to update ticket status')
+      debug("Failed to update ticket status", error);
+      alert("Failed to update ticket status");
     }
-  }
+  };
 
-  
   const handleViewTicket = (ticket: Ticket) => {
-    setSelectedTicket(ticket)
-  }
+    setSelectedTicket(ticket);
+  };
 
   if (selectedTicket) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={() => setSelectedTicket(null)}
-          >
+          <Button variant="outline" onClick={() => setSelectedTicket(null)}>
             ← Back to Tickets
           </Button>
           <div className="flex items-center space-x-3">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTicketStatusColor(selectedTicket.status)}`}>
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTicketStatusColor(selectedTicket.status)}`}
+            >
               {getStatusIcon(selectedTicket.status)}
-              <span className="ml-1">{selectedTicket.status.replace('-', ' ').toUpperCase()}</span>
+              <span className="ml-1">
+                {selectedTicket.status.replace("-", " ").toUpperCase()}
+              </span>
             </span>
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getPriorityColor(selectedTicket.priority)}`}>
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getPriorityColor(selectedTicket.priority)}`}
+            >
               {selectedTicket.priority.toUpperCase()}
             </span>
           </div>
@@ -153,34 +197,50 @@ export default function StaffTicketManagement() {
         <Card className="p-6">
           <div className="space-y-6">
             <div>
-              <h1 className="text-2xl font-bold text-white mb-2">{selectedTicket.title}</h1>
+              <h1 className="text-2xl font-bold text-white mb-2">
+                {selectedTicket.title}
+              </h1>
               <p className="text-gray-400">{selectedTicket.id}</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <div className="bg-slate-700/50 rounded-lg p-4 mb-6">
-                  <h3 className="text-sm font-medium text-gray-300 mb-2">Description</h3>
+                  <h3 className="text-sm font-medium text-gray-300 mb-2">
+                    Description
+                  </h3>
                   <p className="text-white">{selectedTicket.description}</p>
                 </div>
 
                 <div className="bg-slate-700/50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-300 mb-4">Conversation</h3>
+                  <h3 className="text-sm font-medium text-gray-300 mb-4">
+                    Conversation
+                  </h3>
                   <div className="space-y-4">
                     <div className="flex items-start space-x-3">
                       <UserCircleIcon className="h-8 w-8 text-gray-400 mt-1" />
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-sm font-medium text-white">{selectedTicket.customer.name}</span>
-                          <span className="text-xs text-gray-500">Customer</span>
-                          <span className="text-xs text-gray-500">{new Date(selectedTicket.created_at).toLocaleString()}</span>
+                          <span className="text-sm font-medium text-white">
+                            {selectedTicket.customer.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            Customer
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(
+                              selectedTicket.created_at,
+                            ).toLocaleString()}
+                          </span>
                         </div>
                         <div className="bg-slate-600 rounded-lg p-3">
-                          <p className="text-sm text-white">{selectedTicket.description}</p>
+                          <p className="text-sm text-white">
+                            {selectedTicket.description}
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="text-center text-sm text-gray-500">
                       {selectedTicket.message_count - 1} more messages...
                     </div>
@@ -190,13 +250,19 @@ export default function StaffTicketManagement() {
 
               <div className="lg:col-span-1">
                 <Card className="p-4">
-                  <h3 className="text-sm font-medium text-gray-300 mb-4">Ticket Details</h3>
+                  <h3 className="text-sm font-medium text-gray-300 mb-4">
+                    Ticket Details
+                  </h3>
                   <div className="space-y-4">
                     <div>
                       <label className="text-xs text-gray-400">Customer</label>
                       <div className="mt-1">
-                        <p className="text-sm text-white">{selectedTicket.customer.name}</p>
-                        <p className="text-xs text-gray-400">{selectedTicket.customer.email}</p>
+                        <p className="text-sm text-white">
+                          {selectedTicket.customer.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {selectedTicket.customer.email}
+                        </p>
                         <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-500/10 text-blue-400 mt-1">
                           {selectedTicket.customer.plan}
                         </span>
@@ -207,29 +273,49 @@ export default function StaffTicketManagement() {
                       <label className="text-xs text-gray-400">Category</label>
                       <div className="flex items-center mt-1">
                         <TagIcon className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-white">{selectedTicket.category}</span>
+                        <span className="text-sm text-white">
+                          {selectedTicket.category}
+                        </span>
                       </div>
                     </div>
 
                     <div>
-                      <label className="text-xs text-gray-400">Assigned To</label>
-                      <p className="text-sm text-white mt-1">{selectedTicket.assigned_to || 'Unassigned'}</p>
+                      <label className="text-xs text-gray-400">
+                        Assigned To
+                      </label>
+                      <p className="text-sm text-white mt-1">
+                        {selectedTicket.assigned_to || "Unassigned"}
+                      </p>
                     </div>
 
                     <div>
                       <label className="text-xs text-gray-400">Created</label>
-                      <p className="text-sm text-white mt-1">{new Date(selectedTicket.created_at).toLocaleDateString()}</p>
+                      <p className="text-sm text-white mt-1">
+                        {new Date(
+                          selectedTicket.created_at,
+                        ).toLocaleDateString()}
+                      </p>
                     </div>
 
                     <div>
-                      <label className="text-xs text-gray-400">Last Updated</label>
-                      <p className="text-sm text-white mt-1">{new Date(selectedTicket.updated_at).toLocaleDateString()}</p>
+                      <label className="text-xs text-gray-400">
+                        Last Updated
+                      </label>
+                      <p className="text-sm text-white mt-1">
+                        {new Date(
+                          selectedTicket.updated_at,
+                        ).toLocaleDateString()}
+                      </p>
                     </div>
 
                     {selectedTicket.response_time && (
                       <div>
-                        <label className="text-xs text-gray-400">Response Time</label>
-                        <p className="text-sm text-white mt-1">{selectedTicket.response_time}h</p>
+                        <label className="text-xs text-gray-400">
+                          Response Time
+                        </label>
+                        <p className="text-sm text-white mt-1">
+                          {selectedTicket.response_time}h
+                        </p>
                       </div>
                     )}
                   </div>
@@ -238,28 +324,38 @@ export default function StaffTicketManagement() {
                     <Button variant="primary" size="sm" className="w-full">
                       Reply to Customer
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="w-full"
                       disabled={actionLoading}
                       onClick={() => {
-                        const nextStatus = selectedTicket.status === 'open' ? 'in-progress' : 
-                                          selectedTicket.status === 'in-progress' ? 'resolved' :
-                                          selectedTicket.status === 'resolved' ? 'closed' : 'open'
-                        handleUpdateStatus(selectedTicket.id, nextStatus)
+                        const nextStatus =
+                          selectedTicket.status === "open"
+                            ? "in-progress"
+                            : selectedTicket.status === "in-progress"
+                              ? "resolved"
+                              : selectedTicket.status === "resolved"
+                                ? "closed"
+                                : "open";
+                        handleUpdateStatus(selectedTicket.id, nextStatus);
                       }}
                     >
-                      {actionLoading ? 'Updating...' : 'Update Status'}
+                      {actionLoading ? "Updating..." : "Update Status"}
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="w-full"
                       disabled={actionLoading}
-                      onClick={() => handleAssignTicket(selectedTicket.id, user?.name || 'Current User')}
+                      onClick={() =>
+                        handleAssignTicket(
+                          selectedTicket.id,
+                          user?.name || "Current User",
+                        )
+                      }
                     >
-                      {actionLoading ? 'Assigning...' : 'Assign to Me'}
+                      {actionLoading ? "Assigning..." : "Assign to Me"}
                     </Button>
                   </div>
                 </Card>
@@ -268,7 +364,7 @@ export default function StaffTicketManagement() {
           </div>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -276,7 +372,9 @@ export default function StaffTicketManagement() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Support Tickets</h1>
-        <p className="text-gray-400">Manage and respond to customer support requests</p>
+        <p className="text-gray-400">
+          Manage and respond to customer support requests
+        </p>
       </div>
 
       {/* Stats Cards */}
@@ -289,7 +387,7 @@ export default function StaffTicketManagement() {
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Total Tickets</p>
               <p className="text-2xl font-semibold text-white">
-                {statsLoading ? '-' : (ticketStats?.total_tickets || 0)}
+                {statsLoading ? "-" : ticketStats?.total_tickets || 0}
               </p>
             </div>
           </div>
@@ -303,7 +401,7 @@ export default function StaffTicketManagement() {
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Open Tickets</p>
               <p className="text-2xl font-semibold text-white">
-                {statsLoading ? '-' : (ticketStats?.by_status?.open || 0)}
+                {statsLoading ? "-" : ticketStats?.by_status?.open || 0}
               </p>
             </div>
           </div>
@@ -317,7 +415,9 @@ export default function StaffTicketManagement() {
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">In Progress</p>
               <p className="text-2xl font-semibold text-white">
-                {statsLoading ? '-' : (ticketStats?.by_status?.['in-progress'] || 0)}
+                {statsLoading
+                  ? "-"
+                  : ticketStats?.by_status?.["in-progress"] || 0}
               </p>
             </div>
           </div>
@@ -331,7 +431,9 @@ export default function StaffTicketManagement() {
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Avg Response</p>
               <p className="text-2xl font-semibold text-white">
-                {statsLoading ? '-' : `${(ticketStats?.avg_response_time || 0).toFixed(1)}h`}
+                {statsLoading
+                  ? "-"
+                  : `${(ticketStats?.avg_response_time || 0).toFixed(1)}h`}
               </p>
             </div>
           </div>
@@ -383,7 +485,9 @@ export default function StaffTicketManagement() {
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             {categories.map((category) => (
-              <option key={category} value={category}>{category}</option>
+              <option key={category} value={category}>
+                {category}
+              </option>
             ))}
           </select>
 
@@ -396,22 +500,36 @@ export default function StaffTicketManagement() {
       {/* Tickets List */}
       <div className="space-y-4">
         {tickets.map((ticket) => (
-          <Card key={ticket.id} className="p-6 hover:bg-slate-700/30 transition-colors cursor-pointer" onClick={() => handleViewTicket(ticket)}>
+          <Card
+            key={ticket.id}
+            className="p-6 hover:bg-slate-700/30 transition-colors cursor-pointer"
+            onClick={() => handleViewTicket(ticket)}
+          >
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
-                  <h3 className="text-lg font-semibold text-white">{ticket.title}</h3>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTicketStatusColor(ticket.status)}`}>
-                    {getTicketStatusIcon(ticket.status)}
-                    <span className="ml-1">{ticket.status.replace('-', ' ')}</span>
+                  <h3 className="text-lg font-semibold text-white">
+                    {ticket.title}
+                  </h3>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTicketStatusColor(ticket.status)}`}
+                  >
+                    {getStatusIcon(ticket.status)}
+                    <span className="ml-1">
+                      {ticket.status.replace("-", " ")}
+                    </span>
                   </span>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(ticket.priority)}`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(ticket.priority)}`}
+                  >
                     {ticket.priority.toUpperCase()}
                   </span>
                 </div>
-                
-                <p className="text-gray-400 mb-3 line-clamp-2">{ticket.description}</p>
-                
+
+                <p className="text-gray-400 mb-3 line-clamp-2">
+                  {ticket.description}
+                </p>
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-500">
                   <div className="flex items-center">
                     <UserCircleIcon className="h-4 w-4 mr-1" />
@@ -423,7 +541,9 @@ export default function StaffTicketManagement() {
                   </div>
                   <div className="flex items-center">
                     <ClockIcon className="h-4 w-4 mr-1" />
-                    <span>{new Date(ticket.created_at).toLocaleDateString()}</span>
+                    <span>
+                      {new Date(ticket.created_at).toLocaleDateString()}
+                    </span>
                   </div>
                   <div className="flex items-center">
                     <ChatBubbleBottomCenterTextIcon className="h-4 w-4 mr-1" />
@@ -431,7 +551,7 @@ export default function StaffTicketManagement() {
                   </div>
                 </div>
               </div>
-              
+
               <ArrowRightIcon className="h-5 w-5 text-gray-400 ml-4" />
             </div>
           </Card>
@@ -441,12 +561,14 @@ export default function StaffTicketManagement() {
       {tickets.length === 0 && !loading && (
         <Card className="p-12 text-center">
           <LifebuoyIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">No tickets found</h3>
+          <h3 className="text-lg font-medium text-white mb-2">
+            No tickets found
+          </h3>
           <p className="text-gray-400">
             No support tickets match your current filters.
           </p>
         </Card>
       )}
     </div>
-  )
+  );
 }

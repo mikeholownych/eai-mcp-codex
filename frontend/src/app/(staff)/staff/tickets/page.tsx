@@ -7,6 +7,7 @@ import { Ticket } from '@/lib/staffApi'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { debug } from '@/lib/utils'
+import { getTicketStatusColor, getTicketStatusIcon } from '@/lib/statusHelpers'
 import {
   LifebuoyIcon,
   MagnifyingGlassIcon,
@@ -19,7 +20,6 @@ import {
   ArrowRightIcon,
 } from '@heroicons/react/24/outline'
 
-
 const priorityColors: Record<string, string> = {
   urgent: 'bg-red-500/10 text-red-400 border-red-500/20',
   high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
@@ -30,7 +30,6 @@ const priorityColors: Record<string, string> = {
 const getPriorityColor = (priority: string) =>
   priorityColors[priority] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
 
-
 const categories = [
   'All Categories',
   'API',
@@ -40,7 +39,7 @@ const categories = [
   'Feature Request',
   'Account',
   'Security',
-  'General'
+  'General',
 ]
 
 export default function StaffTicketManagement() {
@@ -59,7 +58,7 @@ export default function StaffTicketManagement() {
     status: selectedStatus === 'all' ? undefined : selectedStatus,
     priority: selectedPriority === 'all' ? undefined : selectedPriority,
     category: selectedCategory === 'All Categories' ? undefined : selectedCategory,
-    search: searchTerm || undefined
+    search: searchTerm || undefined,
   }
 
   const { tickets, total, loading, error, refetch } = useTickets(filters)
@@ -116,7 +115,10 @@ export default function StaffTicketManagement() {
       refetch() // Refresh the tickets list
       if (selectedTicket && selectedTicket.id === ticketId) {
         // Update the selected ticket status for immediate UI feedback
-        setSelectedTicket({ ...selectedTicket, status: newStatus as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed' })
+        setSelectedTicket({
+          ...selectedTicket,
+          status: newStatus as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed',
+        })
       }
     } catch (error) {
       debug('Failed to update ticket status', error)
@@ -124,7 +126,6 @@ export default function StaffTicketManagement() {
     }
   }
 
-  
   const handleViewTicket = (ticket: Ticket) => {
     setSelectedTicket(ticket)
   }
@@ -133,18 +134,19 @@ export default function StaffTicketManagement() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={() => setSelectedTicket(null)}
-          >
+          <Button variant="outline" onClick={() => setSelectedTicket(null)}>
             ← Back to Tickets
           </Button>
           <div className="flex items-center space-x-3">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTicketStatusColor(selectedTicket.status)}`}>
-              {getStatusIcon(selectedTicket.status)}
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTicketStatusColor(selectedTicket.status)}`}
+            >
+              {getTicketStatusIcon(selectedTicket.status)}
               <span className="ml-1">{selectedTicket.status.replace('-', ' ').toUpperCase()}</span>
             </span>
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getPriorityColor(selectedTicket.priority)}`}>
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getPriorityColor(selectedTicket.priority)}`}
+            >
               {selectedTicket.priority.toUpperCase()}
             </span>
           </div>
@@ -171,16 +173,20 @@ export default function StaffTicketManagement() {
                       <UserCircleIcon className="h-8 w-8 text-gray-400 mt-1" />
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-sm font-medium text-white">{selectedTicket.customer.name}</span>
+                          <span className="text-sm font-medium text-white">
+                            {selectedTicket.customer.name}
+                          </span>
                           <span className="text-xs text-gray-500">Customer</span>
-                          <span className="text-xs text-gray-500">{new Date(selectedTicket.created_at).toLocaleString()}</span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(selectedTicket.created_at).toLocaleString()}
+                          </span>
                         </div>
                         <div className="bg-slate-600 rounded-lg p-3">
                           <p className="text-sm text-white">{selectedTicket.description}</p>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="text-center text-sm text-gray-500">
                       {selectedTicket.message_count - 1} more messages...
                     </div>
@@ -213,17 +219,23 @@ export default function StaffTicketManagement() {
 
                     <div>
                       <label className="text-xs text-gray-400">Assigned To</label>
-                      <p className="text-sm text-white mt-1">{selectedTicket.assigned_to || 'Unassigned'}</p>
+                      <p className="text-sm text-white mt-1">
+                        {selectedTicket.assigned_to || 'Unassigned'}
+                      </p>
                     </div>
 
                     <div>
                       <label className="text-xs text-gray-400">Created</label>
-                      <p className="text-sm text-white mt-1">{new Date(selectedTicket.created_at).toLocaleDateString()}</p>
+                      <p className="text-sm text-white mt-1">
+                        {new Date(selectedTicket.created_at).toLocaleDateString()}
+                      </p>
                     </div>
 
                     <div>
                       <label className="text-xs text-gray-400">Last Updated</label>
-                      <p className="text-sm text-white mt-1">{new Date(selectedTicket.updated_at).toLocaleDateString()}</p>
+                      <p className="text-sm text-white mt-1">
+                        {new Date(selectedTicket.updated_at).toLocaleDateString()}
+                      </p>
                     </div>
 
                     {selectedTicket.response_time && (
@@ -238,26 +250,33 @@ export default function StaffTicketManagement() {
                     <Button variant="primary" size="sm" className="w-full">
                       Reply to Customer
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="w-full"
                       disabled={actionLoading}
                       onClick={() => {
-                        const nextStatus = selectedTicket.status === 'open' ? 'in-progress' : 
-                                          selectedTicket.status === 'in-progress' ? 'resolved' :
-                                          selectedTicket.status === 'resolved' ? 'closed' : 'open'
+                        const nextStatus =
+                          selectedTicket.status === 'open'
+                            ? 'in-progress'
+                            : selectedTicket.status === 'in-progress'
+                              ? 'resolved'
+                              : selectedTicket.status === 'resolved'
+                                ? 'closed'
+                                : 'open'
                         handleUpdateStatus(selectedTicket.id, nextStatus)
                       }}
                     >
                       {actionLoading ? 'Updating...' : 'Update Status'}
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="w-full"
                       disabled={actionLoading}
-                      onClick={() => handleAssignTicket(selectedTicket.id, user?.name || 'Current User')}
+                      onClick={() =>
+                        handleAssignTicket(selectedTicket.id, user?.name || 'Current User')
+                      }
                     >
                       {actionLoading ? 'Assigning...' : 'Assign to Me'}
                     </Button>
@@ -289,7 +308,7 @@ export default function StaffTicketManagement() {
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Total Tickets</p>
               <p className="text-2xl font-semibold text-white">
-                {statsLoading ? '-' : (ticketStats?.total_tickets || 0)}
+                {statsLoading ? '-' : ticketStats?.total_tickets || 0}
               </p>
             </div>
           </div>
@@ -303,7 +322,7 @@ export default function StaffTicketManagement() {
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Open Tickets</p>
               <p className="text-2xl font-semibold text-white">
-                {statsLoading ? '-' : (ticketStats?.by_status?.open || 0)}
+                {statsLoading ? '-' : ticketStats?.by_status?.open || 0}
               </p>
             </div>
           </div>
@@ -317,7 +336,7 @@ export default function StaffTicketManagement() {
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">In Progress</p>
               <p className="text-2xl font-semibold text-white">
-                {statsLoading ? '-' : (ticketStats?.by_status?.['in-progress'] || 0)}
+                {statsLoading ? '-' : ticketStats?.by_status?.['in-progress'] || 0}
               </p>
             </div>
           </div>
@@ -347,14 +366,14 @@ export default function StaffTicketManagement() {
               type="text"
               placeholder="Search tickets..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="w-full pl-10 bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             />
           </div>
 
           <select
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
+            onChange={e => setSelectedStatus(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             <option value="all">All Status</option>
@@ -367,7 +386,7 @@ export default function StaffTicketManagement() {
 
           <select
             value={selectedPriority}
-            onChange={(e) => setSelectedPriority(e.target.value)}
+            onChange={e => setSelectedPriority(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             <option value="all">All Priority</option>
@@ -379,11 +398,13 @@ export default function StaffTicketManagement() {
 
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={e => setSelectedCategory(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
-            {categories.map((category) => (
-              <option key={category} value={category}>{category}</option>
+            {categories.map(category => (
+              <option key={category} value={category}>
+                {category}
+              </option>
             ))}
           </select>
 
@@ -395,23 +416,31 @@ export default function StaffTicketManagement() {
 
       {/* Tickets List */}
       <div className="space-y-4">
-        {tickets.map((ticket) => (
-          <Card key={ticket.id} className="p-6 hover:bg-slate-700/30 transition-colors cursor-pointer" onClick={() => handleViewTicket(ticket)}>
+        {tickets.map(ticket => (
+          <Card
+            key={ticket.id}
+            className="p-6 hover:bg-slate-700/30 transition-colors cursor-pointer"
+            onClick={() => handleViewTicket(ticket)}
+          >
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
                   <h3 className="text-lg font-semibold text-white">{ticket.title}</h3>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTicketStatusColor(ticket.status)}`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTicketStatusColor(ticket.status)}`}
+                  >
                     {getTicketStatusIcon(ticket.status)}
                     <span className="ml-1">{ticket.status.replace('-', ' ')}</span>
                   </span>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(ticket.priority)}`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(ticket.priority)}`}
+                  >
                     {ticket.priority.toUpperCase()}
                   </span>
                 </div>
-                
+
                 <p className="text-gray-400 mb-3 line-clamp-2">{ticket.description}</p>
-                
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-500">
                   <div className="flex items-center">
                     <UserCircleIcon className="h-4 w-4 mr-1" />
@@ -431,7 +460,7 @@ export default function StaffTicketManagement() {
                   </div>
                 </div>
               </div>
-              
+
               <ArrowRightIcon className="h-5 w-5 text-gray-400 ml-4" />
             </div>
           </Card>
@@ -442,9 +471,7 @@ export default function StaffTicketManagement() {
         <Card className="p-12 text-center">
           <LifebuoyIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-white mb-2">No tickets found</h3>
-          <p className="text-gray-400">
-            No support tickets match your current filters.
-          </p>
+          <p className="text-gray-400">No support tickets match your current filters.</p>
         </Card>
       )}
     </div>

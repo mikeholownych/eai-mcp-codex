@@ -2,7 +2,13 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { PlayIcon, PauseIcon, CodeBracketIcon, SparklesIcon, CheckIcon } from '@heroicons/react/24/outline'
+import {
+  PlayIcon,
+  PauseIcon,
+  CodeBracketIcon,
+  SparklesIcon,
+  CheckIcon,
+} from '@heroicons/react/24/outline'
 
 interface InteractiveDemoProps {
   isOpen?: boolean
@@ -15,26 +21,27 @@ const InteractiveDemo: React.FC<InteractiveDemoProps> = ({ isOpen = false, onClo
   const [code, setCode] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
 
-  const demoSteps = useMemo(() => [
-    {
-      title: "Describe Your Idea",
-      description: "Simply describe what you want to build in natural language",
-      code: `// Just describe what you want:
-"Create a React component with a button that shows a counter and changes color when clicked"`
-    },
-    {
-      title: "AI Analysis",
-      description: "Our agents analyze your requirements and create a plan",
-      code: `// AI agents are working together...
+  const demoSteps = useMemo(
+    () => [
+      {
+        title: 'Describe Your Idea',
+        description: 'Simply describe what you want to build in natural language',
+        code: `// Just describe what you want:
+"Create a React component with a button that shows a counter and changes color when clicked"`,
+      },
+      {
+        title: 'AI Analysis',
+        description: 'Our agents analyze your requirements and create a plan',
+        code: `// AI agents are working together...
 🤖 Planner Agent: Breaking down requirements
 🔧 Developer Agent: Designing component structure
 🎨 UI Agent: Planning responsive design
-🔒 Security Agent: Reviewing best practices`
-    },
-    {
-      title: "Code Generation",
-      description: "Production-ready code is generated with best practices",
-      code: `import React, { useState } from 'react'
+🔒 Security Agent: Reviewing best practices`,
+      },
+      {
+        title: 'Code Generation',
+        description: 'Production-ready code is generated with best practices',
+        code: `import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 
 interface CounterButtonProps {
@@ -73,31 +80,36 @@ const CounterButton: React.FC<CounterButtonProps> = ({
   )
 }
 
-export default CounterButton`
-    },
-    {
-      title: "Review & Deploy",
-      description: "Code is reviewed, tested, and ready for production",
-      code: `✅ Code Quality: 95/100
+export default CounterButton`,
+      },
+      {
+        title: 'Review & Deploy',
+        description: 'Code is reviewed, tested, and ready for production',
+        code: `✅ Code Quality: 95/100
 ✅ Security Scan: Passed
 ✅ Performance: Optimized
 ✅ Accessibility: WCAG 2.1 compliant
 ✅ Tests: Auto-generated
 ✅ Documentation: Complete
 
-// Ready to deploy! 🚀`
-    }
-  ], [])
+// Ready to deploy! 🚀`,
+      },
+    ],
+    [],
+  )
 
   useEffect(() => {
     if (isOpen && currentStep < demoSteps.length) {
-      const timer = setTimeout(() => {
-        if (currentStep < demoSteps.length - 1) {
-          setCurrentStep(currentStep + 1)
-        } else {
-          setIsPlaying(false)
-        }
-      }, isPlaying ? 3000 : 10000)
+      const timer = setTimeout(
+        () => {
+          if (currentStep < demoSteps.length - 1) {
+            setCurrentStep(currentStep + 1)
+          } else {
+            setIsPlaying(false)
+          }
+        },
+        isPlaying ? 3000 : 10000,
+      )
       return () => clearTimeout(timer)
     }
   }, [isOpen, currentStep, isPlaying, demoSteps.length])
@@ -114,7 +126,7 @@ export default CounterButton`
     if (currentStep < demoSteps.length) {
       setIsGenerating(true)
       const targetCode = demoSteps[currentStep].code
-      
+
       // Simulate typing effect
       let i = 0
       const typeCode = () => {
@@ -126,7 +138,7 @@ export default CounterButton`
           setIsGenerating(false)
         }
       }
-      
+
       setCode('')
       typeCode()
     }
@@ -157,7 +169,7 @@ export default CounterButton`
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           className="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6">
@@ -201,8 +213,12 @@ export default CounterButton`
           {/* Progress Bar */}
           <div className="bg-slate-800 p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-400">Step {currentStep + 1} of {demoSteps.length}</span>
-              <span className="text-sm text-gray-400">{Math.round(((currentStep + 1) / demoSteps.length) * 100)}%</span>
+              <span className="text-sm text-gray-400">
+                Step {currentStep + 1} of {demoSteps.length}
+              </span>
+              <span className="text-sm text-gray-400">
+                {Math.round(((currentStep + 1) / demoSteps.length) * 100)}%
+              </span>
             </div>
             <div className="w-full bg-slate-700 rounded-full h-2">
               <motion.div
@@ -222,9 +238,7 @@ export default CounterButton`
                 <h4 className="text-lg font-semibold text-white mb-2">
                   {demoSteps[currentStep]?.title}
                 </h4>
-                <p className="text-gray-300">
-                  {demoSteps[currentStep]?.description}
-                </p>
+                <p className="text-gray-300">{demoSteps[currentStep]?.description}</p>
               </div>
 
               <div className="space-y-3">
@@ -232,13 +246,17 @@ export default CounterButton`
                   <motion.div
                     key={index}
                     className={`flex items-center space-x-3 p-3 rounded-lg transition-all ${
-                      index === currentStep ? 'bg-purple-500/20 border border-purple-500/50' : 'bg-slate-800/50'
+                      index === currentStep
+                        ? 'bg-purple-500/20 border border-purple-500/50'
+                        : 'bg-slate-800/50'
                     }`}
                     animate={{ scale: index === currentStep ? 1.02 : 1 }}
                   >
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      index === currentStep ? 'bg-purple-500' : 'bg-slate-700'
-                    }`}>
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        index === currentStep ? 'bg-purple-500' : 'bg-slate-700'
+                      }`}
+                    >
                       {index < currentStep ? (
                         <CheckIcon className="w-4 h-4 text-white" />
                       ) : (
@@ -279,7 +297,9 @@ export default CounterButton`
           <div className="bg-slate-800 border-t border-slate-700 p-4">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-400">
-                {currentStep === demoSteps.length - 1 ? "Demo complete! Ready to try it yourself?" : "Auto-playing demo..."}
+                {currentStep === demoSteps.length - 1
+                  ? 'Demo complete! Ready to try it yourself?'
+                  : 'Auto-playing demo...'}
               </div>
               <div className="flex space-x-3">
                 <button

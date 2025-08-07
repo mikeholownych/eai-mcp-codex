@@ -45,7 +45,9 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState(false)
   const [selectedModel, setSelectedModel] = useState('claude-3.7-sonnet')
   const [modelOptions, setModelOptions] = useState(defaultModelOptions)
-  const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown')
+  const [connectionStatus, setConnectionStatus] = useState<
+    'unknown' | 'connected' | 'disconnected'
+  >('unknown')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
 
@@ -63,19 +65,25 @@ export default function ChatPage() {
       try {
         // Test Claude connection
         const connectionTest = await modelApi.testClaudeConnection()
-        setConnectionStatus(connectionTest.success && connectionTest.data?.claude_api_connected ? 'connected' : 'disconnected')
+        const isClaudeConnected =
+          connectionTest.success &&
+          typeof connectionTest.data === 'object' &&
+          'claude_api_connected' in connectionTest.data &&
+          connectionTest.data.claude_api_connected === true
+
+        setConnectionStatus(isClaudeConnected ? 'connected' : 'disconnected')
 
         // Load available models
         const modelsResponse = await modelApi.getAvailableModels()
         if (modelsResponse.success && modelsResponse.data) {
-          const dynamicModelOptions = Object.keys(modelsResponse.data).map((modelName) => {
-            const modelInfo = modelsResponse.data[modelName]
+          const modelData = modelsResponse.data
+          const dynamicModelOptions = modelData.map(modelInfo => {
             return {
-              value: modelName,
-              label: `${modelName} (${modelInfo.use_cases?.join(', ') || 'General Purpose'})`
+              value: modelInfo.id,
+              label: `${modelInfo.name} (${modelInfo.description || 'General Purpose'})`,
             }
           })
-          
+
           if (dynamicModelOptions.length > 0) {
             setModelOptions(dynamicModelOptions)
             // Set first available model as default if current selection not available
@@ -119,26 +127,28 @@ export default function ChatPage() {
         maxTokens: 4096,
         context: {
           conversation_history: messages.slice(-5), // Send last 5 messages for context
-          user_preferences: { model: selectedModel }
-        }
+          user_preferences: { model: selectedModel },
+        },
       })
 
       if (response.success && response.data) {
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: response.data.result || response.data.content || 'I received your message but couldn\'t generate a response.',
+          content:
+            response.data.response || "I received your message but couldn't generate a response.",
           timestamp: new Date(),
           type: messageContent.toLowerCase().includes('code') ? 'code' : 'text',
         }
-        
+
         setMessages(prev => [...prev, aiMessage])
       } else {
         // Fallback message if API call succeeds but no proper response
         const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: 'I apologize, but I encountered an issue generating a response. Please try again.',
+          content:
+            'I apologize, but I encountered an issue generating a response. Please try again.',
           timestamp: new Date(),
           type: 'text',
         }
@@ -146,7 +156,7 @@ export default function ChatPage() {
       }
     } catch (error) {
       console.error('Error calling model API:', error)
-      
+
       // Fallback to mock response if API fails
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -155,7 +165,7 @@ export default function ChatPage() {
         timestamp: new Date(),
         type: messageContent.toLowerCase().includes('code') ? 'code' : 'text',
       }
-      
+
       setMessages(prev => [...prev, aiMessage])
     } finally {
       setIsTyping(false)
@@ -254,7 +264,7 @@ Feel free to share your code or ask specific technical questions!`
     // Simple code block detection and formatting
     const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g
     const parts = content.split(codeBlockRegex)
-    
+
     return parts.map((part, index) => {
       if (index % 3 === 2) {
         // This is code content
@@ -287,39 +297,45 @@ Feel free to share your code or ask specific technical questions!`
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">AI Assistant</h1>
-          <p className="text-gray-400">Get instant help with coding, debugging, and technical questions</p>
+          <p className="text-gray-400">
+            Get instant help with coding, debugging, and technical questions
+          </p>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           {/* Connection Status Indicator */}
           <div className="flex items-center space-x-2">
-            <div 
+            <div
               className={`w-2 h-2 rounded-full ${
-                connectionStatus === 'connected' ? 'bg-green-500' : 
-                connectionStatus === 'disconnected' ? 'bg-red-500' : 
-                'bg-yellow-500'
+                connectionStatus === 'connected'
+                  ? 'bg-green-500'
+                  : connectionStatus === 'disconnected'
+                    ? 'bg-red-500'
+                    : 'bg-yellow-500'
               }`}
             />
             <span className="text-xs text-gray-400">
-              {connectionStatus === 'connected' ? 'AI Connected' : 
-               connectionStatus === 'disconnected' ? 'AI Offline' : 
-               'Connecting...'}
+              {connectionStatus === 'connected'
+                ? 'AI Connected'
+                : connectionStatus === 'disconnected'
+                  ? 'AI Offline'
+                  : 'Connecting...'}
             </span>
           </div>
-          
+
           <select
             value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
+            onChange={e => setSelectedModel(e.target.value)}
             className="bg-slate-700 text-white text-sm rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 min-w-[200px]"
             disabled={connectionStatus === 'disconnected'}
           >
-            {modelOptions.map((model) => (
+            {modelOptions.map(model => (
               <option key={model.value} value={model.value}>
                 {model.label}
               </option>
             ))}
           </select>
-          
+
           <Button variant="outline" size="sm" onClick={handleClearChat}>
             <TrashIcon className="h-4 w-4 mr-2" />
             Clear Chat
@@ -341,7 +357,7 @@ Feel free to share your code or ask specific technical questions!`
                 <p className="text-gray-400 mb-6">
                   Ask questions, get code help, or explore technical concepts
                 </p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
                   {suggestionPrompts.map((prompt, index) => (
                     <button
@@ -358,12 +374,14 @@ Feel free to share your code or ask specific technical questions!`
                 </div>
               </div>
             ) : (
-              messages.map((message) => (
+              messages.map(message => (
                 <div
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`flex max-w-4xl ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div
+                    className={`flex max-w-4xl ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                  >
                     {/* Avatar */}
                     <div className="flex-shrink-0">
                       {message.role === 'user' ? (
@@ -374,7 +392,7 @@ Feel free to share your code or ask specific technical questions!`
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Message Content */}
                     <div className={`mx-3 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
                       <div className="flex items-center space-x-2 mb-1">
@@ -385,7 +403,7 @@ Feel free to share your code or ask specific technical questions!`
                           {message.timestamp.toLocaleTimeString()}
                         </span>
                       </div>
-                      
+
                       <div
                         className={`p-4 rounded-lg ${
                           message.role === 'user'
@@ -393,10 +411,8 @@ Feel free to share your code or ask specific technical questions!`
                             : 'bg-slate-700/50 border border-slate-600 text-gray-200'
                         }`}
                       >
-                        <div className="text-sm">
-                          {formatMessageContent(message.content)}
-                        </div>
-                        
+                        <div className="text-sm">{formatMessageContent(message.content)}</div>
+
                         {message.role === 'assistant' && (
                           <div className="flex items-center justify-end mt-3 pt-3 border-t border-slate-600 space-x-2">
                             <button
@@ -407,7 +423,11 @@ Feel free to share your code or ask specific technical questions!`
                               <ClipboardDocumentIcon className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleSendMessage(`Explain this in more detail: ${message.content.substring(0, 50)}...`)}
+                              onClick={() =>
+                                handleSendMessage(
+                                  `Explain this in more detail: ${message.content.substring(0, 50)}...`,
+                                )
+                              }
                               className="p-1 text-gray-400 hover:text-white transition-colors"
                               title="Ask for more details"
                             >
@@ -421,7 +441,7 @@ Feel free to share your code or ask specific technical questions!`
                 </div>
               ))
             )}
-            
+
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex justify-start">
@@ -433,26 +453,32 @@ Feel free to share your code or ask specific technical questions!`
                     <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: '0.1s' }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: '0.2s' }}
+                        ></div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
-          
+
           {/* Input Area */}
           <div className="border-t border-slate-600 p-4">
             <div className="flex items-end space-x-3">
               <div className="flex-1">
                 <textarea
                   value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyDown={(e) => {
+                  onChange={e => setInputMessage(e.target.value)}
+                  onKeyDown={e => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault()
                       handleSendMessage()
@@ -463,7 +489,7 @@ Feel free to share your code or ask specific technical questions!`
                   rows={3}
                 />
               </div>
-              
+
               <Button
                 variant="primary"
                 onClick={() => handleSendMessage()}
@@ -474,7 +500,7 @@ Feel free to share your code or ask specific technical questions!`
                 <PaperAirplaneIcon className="h-5 w-5" />
               </Button>
             </div>
-            
+
             <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
               <span>Press Enter to send, Shift+Enter for new line</span>
               <span>Model: {modelOptions.find(m => m.value === selectedModel)?.label}</span>
