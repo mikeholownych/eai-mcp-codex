@@ -12,7 +12,7 @@ asyncpg
 types-requests
 types-PyYAML
 psutil>=5.9.0
-jwt
+PyJWT>=2.0.0
 httpx
 numpy
 alembic

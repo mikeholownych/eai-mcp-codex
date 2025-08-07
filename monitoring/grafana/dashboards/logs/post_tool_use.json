@@ -1,0 +1,115 @@
+[
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "mv /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards/logs /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/log-backup",
+      "description": "Move logs directory out of dashboards volume mount"
+    },
+    "tool_response": {
+      "stdout": "",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "docker restart mcp-grafana",
+      "description": "Restart Grafana to reload clean dashboards"
+    },
+    "tool_response": {
+      "stdout": "mcp-grafana",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "sleep 10 && docker logs mcp-grafana --tail 5",
+      "description": "Check Grafana provisioning status"
+    },
+    "tool_response": {
+      "stdout": "logger=live t=2025-08-03T19:10:48.186868652Z level=info msg=\"Initialized channel handler\" channel=grafana/dashboard/uid/tempo-tracing address=grafana/dashboard/uid/tempo-tracing\nlogger=context userId=1 orgId=1 uname=admin t=2025-08-03T19:10:48.265775166Z level=info msg=\"Request Completed\" method=GET path=/api/live/ws status=-1 remote_addr=76.70.77.96 time_ms=8 duration=8.302378ms size=0 referer= handler=/api/live/ws status_source=server\nlogger=provisioning.dashboard type=file name=default t=2025-08-03T19:10:56.250836721Z level=error msg=\"failed to load dashboard from \" file=/etc/grafana/provisioning/dashboards/logs/pre_compact.json error=\"Dashboard title cannot be empty\"\nlogger=provisioning.dashboard type=file name=default t=2025-08-03T19:10:56.25102763Z level=error msg=\"failed to load dashboard from \" file=/etc/grafana/provisioning/dashboards/logs/pre_tool_use.json error=\"Dashboard title cannot be empty\"\nlogger=provisioning.dashboard type=file name=default t=2025-08-03T19:10:56.255082586Z level=error msg=\"failed to load dashboard from \" file=/etc/grafana/provisioning/dashboards/logs/post_tool_use.json error=\"Dashboard title cannot be empty\"",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "LS",
+    "tool_input": {
+      "path": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards"
+    },
+    "tool_response": "- /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards/\n  - dashboard.yml\n  - logs/\n    - post_tool_use.json\n    - pre_compact.json\n    - pre_tool_use.json\n  - loki-logs-dashboard.json\n  - mcp-overview.json\n  - service-metrics.json\n  - tempo-tracing-dashboard.json\n  - workflow-analytics.json\n"
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "mkdir -p /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards-clean",
+      "description": "Create clean dashboards directory"
+    },
+    "tool_response": {
+      "stdout": "",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "cp /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards/*.json /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards-clean/",
+      "description": "Copy only dashboard JSON files"
+    },
+    "tool_response": {
+      "stdout": "",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "cp /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards/dashboard.yml /opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards-clean/",
+      "description": "Copy dashboard configuration"
+    },
+    "tool_response": {
+      "stdout": "",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  }
+]

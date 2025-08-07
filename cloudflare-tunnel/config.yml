@@ -21,7 +21,7 @@ ingress:
 
   # Staff Frontend domain - Staff portal application (port 3001)
   - hostname: staff.ethical-ai-insider.com
-    service: http://mcp-staff-frontend:3000
+    service: http://staff-frontend:3001
     originRequest:
       connectTimeout: 30s
       tlsTimeout: 30s

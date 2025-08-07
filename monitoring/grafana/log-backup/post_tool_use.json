@@ -1,0 +1,36 @@
+[
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "find /opt/Tmux-Orchestrator -name \"docker-compose*.yml\" -type f",
+      "description": "Find docker-compose files"
+    },
+    "tool_response": {
+      "stdout": "/opt/Tmux-Orchestrator/llm-stack/docker-compose.integrated.yml\n/opt/Tmux-Orchestrator/llm-stack/docker-compose.override.yml\n/opt/Tmux-Orchestrator/llm-stack/docker-compose.hardware-optimized.yml\n/opt/Tmux-Orchestrator/llm-stack/rag-agent/docker-compose.tunnel.yml\n/opt/Tmux-Orchestrator/llm-stack/rag-agent/docker-compose.override.yml\n/opt/Tmux-Orchestrator/llm-stack/rag-agent/docker-compose.yml\n/opt/Tmux-Orchestrator/llm-stack/rag-agent/docker-compose.prod.yml\n/opt/Tmux-Orchestrator/llm-stack/monitoring/docker-compose.yml\n/opt/Tmux-Orchestrator/llm-stack/docker-compose.yml",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  },
+  {
+    "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+      "command": "grep -A 10 -B 5 \"grafana\" /opt/Tmux-Orchestrator/llm-stack/rag-agent/docker-compose.yml",
+      "description": "Check Grafana configuration in docker-compose"
+    },
+    "tool_response": {
+      "stdout": "    environment:\n      # Core PostgreSQL Configuration\n      - POSTGRES_DB=mcp_database\n      - POSTGRES_USER=mcp_user\n      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}\n      - POSTGRES_MULTIPLE_DATABASES=plan_management_db,git_worktree_db,workflow_orchestrator_db,verification_feedback_db,staff_db,grafana_db,auth_db,multi_developer_orchestrator_db\n      \n      # Performance & Corruption Prevention\n      - POSTGRES_INITDB_ARGS=--data-checksums\n      - POSTGRESQL_SHARED_PRELOAD_LIBRARIES=pg_stat_statements\n      - POSTGRESQL_LOG_CHECKPOINTS=on\n      - POSTGRESQL_LOG_CONNECTIONS=on\n      - POSTGRESQL_LOG_DISCONNECTIONS=on\n      - POSTGRESQL_LOG_LOCK_WAITS=on\n      - POSTGRESQL_LOG_STATEMENT=all\n      - POSTGRESQL_CHECKPOINT_SEGMENTS=32\n--\n      - '--web.enable-lifecycle'\n    networks:\n      - mcp-network\n\n  # Metrics Visualization\n  grafana:\n    image: grafana/grafana:latest\n    container_name: mcp-grafana\n    restart: unless-stopped\n    ports:\n      - \"3005:3000\"\n    environment:\n      # Database Configuration for Persistence\n      - GF_DATABASE_TYPE=postgres\n      - GF_DATABASE_HOST=postgres:5432\n      - GF_DATABASE_NAME=grafana_db\n      - GF_DATABASE_USER=mcp_user\n      - GF_DATABASE_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}\n      - GF_DATABASE_SSL_MODE=disable\n      - GF_DATABASE_MAX_IDLE_CONN=2\n      - GF_DATABASE_MAX_OPEN_CONN=5\n      - GF_DATABASE_CONN_MAX_LIFETIME=14400\n      \n      # Security Configuration\n      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}\n      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}\n--\n      - GF_USERS_ALLOW_SIGN_UP=false\n      - GF_USERS_AUTO_ASSIGN_ORG=true\n      - GF_USERS_AUTO_ASSIGN_ORG_ROLE=Viewer\n      \n      # Persistence Configuration\n      - GF_PATHS_DATA=/var/lib/grafana\n      - GF_PATHS_LOGS=/var/lib/grafana/logs\n      - GF_PATHS_PLUGINS=/var/lib/grafana/plugins\n      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning\n      \n      # Performance & Reliability\n      - GF_LOG_LEVEL=info\n      - GF_LOG_MODE=console,file\n      - GF_DATABASE_LOG_QUERIES=false\n      - GF_FEATURE_TOGGLES_ENABLE=publicDashboards\n      \n      # Domain Configuration\n      - GF_SERVER_DOMAIN=grafana.ethical-ai-insider.com\n      - GF_SERVER_ROOT_URL=https://grafana.ethical-ai-insider.com\n      - GF_SERVER_SERVE_FROM_SUB_PATH=false\n    volumes:\n      - grafana_data:/var/lib/grafana\n      - grafana_logs:/var/lib/grafana/logs\n      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro\n      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro\n      - ./monitoring/grafana/init:/docker-entrypoint-initdb.d:ro\n    depends_on:\n      postgres:\n        condition: service_healthy\n      prometheus:\n        condition: service_started\n    healthcheck:\n      test: [\"CMD-SHELL\", \"curl -f http://localhost:3000/api/health || exit 1\"]\n      interval: 30s\n      timeout: 10s\n      retries: 5\n--\n          memory: 256M\n          cpus: '0.25'\n\n  # Log Aggregation - Loki (Grafana Stack)\n  loki:\n    image: grafana/loki:2.9.0\n    container_name: mcp-loki\n    restart: unless-stopped\n    ports:\n      - \"3100:3100\"\n    volumes:\n      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro\n      - loki_data:/loki\n    command: -config.file=/etc/loki/local-config.yaml\n    healthcheck:\n      test: [\"CMD-SHELL\", \"wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1\"]\n--\n          memory: 256M\n          cpus: '0.25'\n\n  # Distributed Tracing - Tempo (Grafana Stack)\n  tempo:\n    image: grafana/tempo:2.2.0\n    container_name: mcp-tempo\n    restart: unless-stopped\n    ports:\n      - \"3200:3200\"   # Tempo HTTP\n      - \"14268:14268\" # Jaeger HTTP\n      - \"4317:4317\"   # OTLP gRPC\n      - \"4318:4318\"   # OTLP HTTP\n    volumes:\n      - ./monitoring/tempo-config.yml:/etc/tempo.yaml:ro\n      - tempo_data:/tmp/tempo\n--\n          memory: 256M\n          cpus: '0.25'\n\n  # Log Shipping to Loki - Promtail\n  promtail:\n    image: grafana/promtail:2.9.0\n    container_name: mcp-promtail\n    restart: unless-stopped\n    volumes:\n      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml:ro\n      - ./logs:/var/log/mcp:ro\n      - /var/lib/docker/containers:/var/lib/docker/containers:ro\n      - /var/run/docker.sock:/var/run/docker.sock:ro\n    command: -config.file=/etc/promtail/config.yml\n    depends_on:\n      loki:\n--\n    driver: local\n  git_repositories:\n    driver: local\n  prometheus_data:\n    driver: local\n  grafana_data:\n    driver: local\n  grafana_logs:\n    driver: local\n  loki_data:\n    driver: local\n  tempo_data:\n    driver: local\n  elasticsearch_data:\n    driver: local",
+      "stderr": "",
+      "interrupted": false,
+      "isImage": false
+    }
+  }
+]

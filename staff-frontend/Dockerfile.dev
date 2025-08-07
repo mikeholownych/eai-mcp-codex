@@ -1,0 +1,37 @@
+# Emergency Development Dockerfile for Frontend Crisis
+FROM node:20-alpine
+
+# Install system dependencies
+RUN apk add --no-cache libc6-compat dumb-init curl
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install ALL dependencies (including devDependencies for Next.js CLI)
+RUN npm ci && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Create next user for security
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    chown -R nextjs:nodejs /app
+
+# Switch to non-root user
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+
+# Default command for development
+CMD ["npm", "run", "dev"]

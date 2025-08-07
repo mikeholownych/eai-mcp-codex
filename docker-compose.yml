@@ -880,7 +880,9 @@ services:
     ports:
       - "3002:3000"
     volumes:
-      - ./frontend/.next:/app/.next
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -901,7 +903,7 @@ services:
   # Staff Frontend React/Next.js Application
   staff-frontend:
     build:
-      context: ./frontend
+      context: ./staff-frontend
       dockerfile: Dockerfile.dev
     container_name: mcp-staff-frontend
     restart: unless-stopped
@@ -910,9 +912,11 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost/api/staff
       - PORT=3001
     ports:
-      - "3001:3001"
+      - "3004:3001"
     volumes:
-      - ./frontend/.next:/app/.next
+      - ./staff-frontend:/app
+      - /app/node_modules
+      - /app/.next
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
       interval: 30s
@@ -955,6 +959,8 @@ services:
       - workflow-orchestrator
       - verification-feedback
       - staff-service
+      - auth-service
+      - staff-frontend
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
@@ -1030,7 +1036,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - grafana_logs:/var/lib/grafana/logs
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/dashboards-clean:/etc/grafana/provisioning/dashboards:ro
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
       - ./monitoring/grafana/init:/docker-entrypoint-initdb.d:ro
     depends_on:
