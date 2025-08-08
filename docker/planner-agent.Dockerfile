@@ -29,7 +29,7 @@ WORKDIR /app
 USER root
 
 # Copy dependencies
-COPY --from=deps /usr/local/lib/python*/site-packages /usr/local/lib/python*/site-packages
+COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=deps /usr/local/bin /usr/local/bin
 
 # Copy service code

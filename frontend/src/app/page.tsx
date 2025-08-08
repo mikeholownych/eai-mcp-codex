@@ -338,29 +338,30 @@ export default function HomePage() {
 
           <motion.div variants={itemVariants} className="mb-8">
             <motion.h1
-              className="text-6xl md:text-8xl font-extrabold text-white mb-6 leading-tight tracking-tight"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            >
-              Transform Ideas Into{' '}
-              <motion.span
-                className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600"
-                animate={{
-                  backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: 'linear',
-                }}
-                style={{
-                  backgroundSize: '200% 200%',
-                }}
+                className="text-6xl md:text-8xl font-extrabold text-white mb-6 leading-tight tracking-tight font-display"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
               >
-                Production Code
-              </motion.span>
-            </motion.h1>
+                Unleash Your Potential with
+                <br />
+                <motion.span
+                  className="text-transparent bg-clip-text bg-gradient-primary"
+                  animate={{
+                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'linear',
+                  }}
+                  style={{
+                    backgroundSize: '200% 200%',
+                  }}
+                >
+                  AI-Powered Development
+                </motion.span>
+              </motion.h1>
           </motion.div>
 
           <motion.p
@@ -592,7 +593,7 @@ export default function HomePage() {
             {pricingPlans.map((plan, index) => (
               <Card
                 key={index}
-                className={`h-full ${plan.highlighted ? 'ring-2 ring-purple-500' : ''}`}
+                className={`h-full ${plan.highlighted ? 'ring-2 ring-primary-500' : ''} glassmorphism`}
               >
                 <Card.Header>
                   <div className="text-center">
@@ -636,7 +637,7 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
         <div className="max-w-4xl mx-auto text-center">
-          <Card className="bg-slate-800 border-slate-700">
+          <Card className="bg-dark-800 border-dark-700 glassmorphism">
             <Card.Content className="py-16">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                 Ready to Transform Your Development Process?
@@ -668,14 +669,14 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer
-        className="border-t border-slate-700 bg-slate-800 py-12 px-4 sm:px-6 lg:px-8"
+        className="border-t border-dark-700 bg-dark-800 py-12 px-4 sm:px-6 lg:px-8"
         style={{ zIndex: 5 }}
       >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">AI</span>
                 </div>
                 <span className="text-xl font-bold text-white">Ethical AI Insider</span>

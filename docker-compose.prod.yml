@@ -26,7 +26,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: "127.0.0.1:24224"
+        fluentd-address: "mcp-fluentd:24224"
         tag: "{{.Name}}"
 
   plan-management:
@@ -47,6 +47,14 @@ services:
           memory: 384M
           cpus: '0.4'
     restart: always
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "mcp-fluentd:24224"
+        tag: "{{.Name}}"
 
   git-worktree-manager:
     build:
@@ -65,6 +73,14 @@ services:
           memory: 256M
           cpus: '0.3'
     restart: always
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "mcp-fluentd:24224"
+        tag: "{{.Name}}"
 
   workflow-orchestrator:
     build:
@@ -89,6 +105,11 @@ services:
     depends_on:
       mcp-fluentd:
         condition: service_healthy
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "mcp-fluentd:24224"
+        tag: "{{.Name}}"
 
   verification-feedback:
     build:
@@ -113,95 +134,11 @@ services:
     depends_on:
       mcp-fluentd:
         condition: service_healthy
-
-  # Production fluentd
-  mcp-fluentd:
-    image: fluent/fluentd:v1.16
-    container_name: mcp-fluentd
-    ports:
-      - "24224:24224"
-      - "24224:24224/udp"
-    volumes:
-      - ./fluentd/conf:/fluentd/etc
-    command: ["fluentd", "-c", "/fluentd/etc/fluent.conf", "-v"]
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "fluentd --dry-run -c /fluentd/etc/fluent.conf || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      mcp-network:
-        aliases:
-          - fluentd
-
-  # Production database with performance tuning
-  postgres:
-    image: postgres:15-alpine
-    container_name: mcp-postgres
-    restart: unless-stopped
-
-    environment:
-      POSTGRES_DB: mcp_database
-      POSTGRES_USER: mcp_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mcp_secure_password}
-      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
-      PGDATA: /var/lib/postgresql/data/pgdata
-
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - ./database/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
-
-    command: >
-      postgres
-      -c max_connections=200
-      -c shared_buffers=256MB
-      -c effective_cache_size=1GB
-      -c work_mem=4MB
-      -c maintenance_work_mem=64MB
-      -c random_page_cost=1.1
-      -c temp_file_limit=2GB
-      -c log_min_duration_statement=1000
-      -c log_connections=on
-      -c log_disconnections=on
-      -c log_lock_waits=on
-
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mcp_user -d mcp_database"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-    ports:
-      - "5432:5432"
-
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: "127.0.0.1:24224"
-        tag: "mcp-postgres"
-
-    networks:
-      - mcp-network
-
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '1.5'
-        reservations:
-          memory: 1G
-          cpus: '0.75'
-
-    depends_on:
-      mcp-fluentd:
-        condition: service_healthy
+        fluentd-address: "mcp-fluentd:24224"
+        tag: "{{.Name}}"
 
   # Production Redis with persistence
   redis:
@@ -230,11 +167,14 @@ services:
       timeout: 5s
       retries: 3
 
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: "127.0.0.1:24224"
-        tag: "mcp-redis"
+        fluentd-address: "mcp-fluentd:24224"
+        tag: "{{.Name}}"
 
     networks:
       - mcp-network
@@ -283,6 +223,11 @@ services:
     restart: always
     networks:
       - mcp-network
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "mcp-fluentd:24224"
+        tag: "{{.Name}}"
 
   # Customer Frontend React/Next.js Application
   frontend:
@@ -293,12 +238,11 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost/api
+      - NEXT_PUBLIC_API_URL=http://nginx/api
       - PORT=3000
     ports:
       - "3002:3000"
-    volumes:
-      - ./frontend/.next:/app/.next
+    # Remove volume mount to avoid permission issues
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -307,6 +251,11 @@ services:
       start_period: 40s
     networks:
       - mcp-network
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "mcp-fluentd:24224"
+        tag: "{{.Name}}"
     deploy:
       resources:
         limits:
@@ -319,26 +268,30 @@ services:
   # Staff Frontend React/Next.js Application
   staff-frontend:
     build:
-      context: ./frontend
+      context: ./staff-frontend
       dockerfile: Dockerfile
     container_name: mcp-staff-frontend
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost/api/staff
-      - PORT=3000
+      - NEXT_PUBLIC_API_URL=http://nginx/api/staff
+      - PORT=3001
     ports:
-      - "3001:3000"
-    volumes:
-      - ./frontend/.next:/app/.next
+      - "3001:3001"
+    # Remove volume mount to avoid permission issues
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     networks:
       - mcp-network
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "mcp-fluentd:24224"
+        tag: "{{.Name}}"
     deploy:
       resources:
         limits:

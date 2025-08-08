@@ -27,7 +27,7 @@ FROM base as plan-management
 WORKDIR /app
 
 # Copy dependencies
-COPY --from=deps /usr/local/lib/python*/site-packages /usr/local/lib/python*/site-packages
+COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=deps /usr/local/bin /usr/local/bin
 
 USER root
@@ -54,5 +54,5 @@ EXPOSE 8002
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python health_check.py --service=plan-management --port=8002
 
-# Run Alembic migrations then start the service
-ENTRYPOINT ["sh", "-c", "alembic -c alembic.ini upgrade head && exec python start.py"]
+# Start the service (skip migrations for now)
+CMD ["python", "start.py"]

@@ -4,7 +4,7 @@ import asyncio
 import aiohttp
 import asyncpg
 import redis.asyncio as redis
-from typing import Dict, Any, Optional, List, Callable, Union
+from typing import Dict, Any, Optional, List, Callable, Union, Awaitable
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 from enum import Enum
@@ -65,7 +65,7 @@ class HealthCheckResult:
 class HealthCheckConfig:
     """Configuration for a health check."""
     name: str
-    check_func: Union[Callable, Callable[[], asyncio.Awaitable]]
+    check_func: Union[Callable, Callable[[], Awaitable]]
     check_type: HealthCheckType = HealthCheckType.LIVENESS
     critical: bool = True
     timeout: float = 5.0

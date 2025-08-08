@@ -9,6 +9,10 @@ common:
       chunks_directory: /loki/chunks
       rules_directory: /loki/rules
 
+  ring:
+    kvstore:
+      store: inmemory
+
 schema_config:
   configs:
     - from: 2020-10-24
@@ -37,3 +41,8 @@ storage_config:
 ingester:
   wal:
     enabled: false
+  lifecycler:
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1

@@ -1,14 +1,24 @@
 # Docker Compose v2 Configuration for MCP Server Microservices
 services:
+  mcp-base-builder:
+    build:
+      context: .
+      dockerfile: docker/base.Dockerfile
+    image: mcp-base:latest # Tag the built image
+    profiles:
+      - builder # So it's not always brought up with `up`
+
   # Fluentd for Logging Requirements
   mcp-fluentd:
     image: fluent/fluentd:v1.16
     container_name: mcp-fluentd
+    user: 1000:1000
     ports:
       - "24224:24224"
       - "24224:24224/udp"
     volumes:
       - ./fluentd/conf:/fluentd/etc
+      - ./fluentd/log:/var/log/fluentd
     command: ["fluentd", "-c", "/fluentd/etc/fluent.conf", "-v"]
     restart: unless-stopped
     healthcheck:
@@ -18,9 +28,6 @@ services:
       retries: 5
     logging:
       driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
     networks:
       mcp-network:
         aliases:
@@ -32,7 +39,7 @@ services:
     container_name: mcp-redis
     restart: unless-stopped
     ports:
-     - "6379:6379"
+      - "6379:6379"
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
       - redis_data:/data
@@ -44,14 +51,12 @@ services:
       retries: 3
     networks:
       - mcp-network
-    depends_on:
-      mcp-fluentd:
-        condition: service_healthy
     logging:
       driver: "json-file"
 
+  # RabbitMQ for Message Queue
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:3.8-management
     container_name: mcp-rabbitmq
     restart: unless-stopped
     ports:
@@ -73,7 +78,7 @@ services:
     logging:
       driver: "json-file"
 
-  # PostgreSQL Database - CRITICAL SERVICE WITH CORRUPTION PREVENTION
+  # PostgreSQL for Database Service
   postgres:
     image: postgres:15-alpine
     container_name: mcp-postgres
@@ -128,7 +133,6 @@ services:
       -c min_wal_size=1GB
       -c max_wal_size=4GB
       -c max_worker_processes=8
-      -c max_parallel_workers_per_gather=4
       -c max_parallel_workers=8
       -c max_parallel_maintenance_workers=4
       -c log_statement=all
@@ -158,14 +162,6 @@ services:
       options:
         max-size: "50m"
         max-file: "5"
-    deploy:
-      resources:
-        limits:
-          memory: 1GB
-          cpus: '1.0'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
 
   # PostgreSQL Monitoring & Backup Service
   postgres-monitor:
@@ -195,14 +191,8 @@ services:
       "
     networks:
       - mcp-network
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.2'
-        reservations:
-          memory: 128M
-          cpus: '0.1'
+    logging:
+      driver: "json-file"
 
   # Service Discovery and Configuration
   consul:
@@ -221,21 +211,47 @@ services:
       retries: 3
     networks:
       - mcp-network
+    logging:
+      driver: "json-file"
 
   # =====================================
   # CORE MCP MICROSERVICES
-  # =====================================#
+  # =====================================
+
+  # Vault Agent for Model Router
+  mcp-model-router-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-model-router-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/model_router_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/model_router_vault_secret_id
+    volumes:
+      - ./.secrets/model_router_vault_role_id:/run/secrets/model_router_vault_role_id:ro
+      - ./.secrets/model_router_vault_secret_id:/run/secrets/model_router_vault_secret_id:ro
+      - model_router_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/model-router/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/model-router/model_router_config.ctmpl:/vault/secrets/model_router_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Model Router Service
   model-router:
     build:
       context: .
       dockerfile: docker/model-router.Dockerfile
-    # container_name: mcp-model-router
+    image: mcp-model-router:latest
     restart: unless-stopped
     environment:
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - ABACUSAI_API_KEY=${ABACUSAI_API_KEY}
       - USE_ABACUS_AI=true
       - PREFER_LOCAL_MODELS=false
       - REDIS_URL=redis://redis:6379
@@ -255,9 +271,12 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      mcp-model-router-vault-agent:
+        condition: service_healthy
     volumes:
       - ./logs/model-router:/app/logs
       - ./config:/app/config:ro
+      - model_router_secrets:/vault/secrets:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 30s
@@ -265,6 +284,7 @@ services:
       retries: 3
     networks:
       - mcp-network
+    command: ["sh", "-c", "source /vault/secrets/.env && python start.py"]
     deploy:
       resources:
         limits:
@@ -273,13 +293,41 @@ services:
         reservations:
           memory: 256M
           cpus: '0.25'
+    logging:
+      driver: "json-file"
+
+  # Vault Agent for Plan Management
+  mcp-plan-management-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-plan-management-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/plan_management_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/plan_management_vault_secret_id
+    volumes:
+      - ./.secrets/plan_management_vault_role_id:/run/secrets/plan_management_vault_role_id:ro
+      - ./.secrets/plan_management_vault_secret_id:/run/secrets/plan_management_vault_secret_id:ro
+      - plan_management_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/plan-management/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/plan-management/plan_management_config.ctmpl:/vault/secrets/plan_management_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Plan Management Service
   plan-management:
     build:
       context: .
       dockerfile: docker/plan-management.Dockerfile
-    # container_name: mcp-plan-management
+    image: mcp-plan-management:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -301,10 +349,14 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      mcp-plan-management-vault-agent:
+        condition: service_healthy
     volumes:
       - ./logs/plan-management:/app/logs
       - ./config:/app/config:ro
+      - ./database/migrations:/app/database/migrations:ro
       - plan_storage:/app/data
+      - plan_management_secrets:/vault/secrets:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 30s
@@ -312,6 +364,7 @@ services:
       retries: 3
     networks:
       - mcp-network
+    command: ["sh", "-c", "source /vault/secrets/.env && python start.py"]
     deploy:
       resources:
         limits:
@@ -320,13 +373,41 @@ services:
         reservations:
           memory: 192M
           cpus: '0.2'
+    logging:
+      driver: "json-file"
+
+  # Vault Agent for Git Worktree Manager
+  mcp-git-worktree-manager-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-git-worktree-manager-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/git_worktree_manager_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/git_worktree_manager_vault_secret_id
+    volumes:
+      - ./.secrets/git_worktree_manager_vault_role_id:/run/secrets/git_worktree_manager_vault_role_id:ro
+      - ./.secrets/git_worktree_manager_vault_secret_id:/run/secrets/git_worktree_manager_vault_secret_id:ro
+      - git_worktree_manager_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/git-worktree-manager/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/git-worktree-manager/git_worktree_manager_config.ctmpl:/vault/secrets/git_worktree_manager_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Git Worktree Manager Service
   git-worktree-manager:
     build:
       context: .
       dockerfile: docker/git-worktree.Dockerfile
-    container_name: mcp-git-worktree
+    image: mcp-git-worktree-manager:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -348,11 +429,14 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      mcp-git-worktree-manager-vault-agent:
+        condition: service_healthy
     volumes:
       - ./logs/git-worktree:/app/logs
       - ./config:/app/config:ro
       - git_repositories:/app/repositories
       - /var/run/docker.sock:/var/run/docker.sock:ro  # For Git operations
+      - git_worktree_manager_secrets:/vault/secrets:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
       interval: 30s
@@ -360,6 +444,7 @@ services:
       retries: 3
     networks:
       - mcp-network
+    command: ["sh", "-c", "source /vault/secrets/.env && python start.py"]
     deploy:
       resources:
         limits:
@@ -368,29 +453,54 @@ services:
         reservations:
           memory: 128M
           cpus: '0.15'
+    logging:
+      driver: "json-file"
+
+  # Vault Agent for Workflow Orchestrator
+  mcp-workflow-orchestrator-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-workflow-orchestrator-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/workflow_orchestrator_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/workflow_orchestrator_vault_secret_id
+    volumes:
+      - ./.secrets/workflow_orchestrator_vault_role_id:/run/secrets/workflow_orchestrator_vault_role_id:ro
+      - ./.secrets/workflow_orchestrator_vault_secret_id:/run/secrets/workflow_orchestrator_vault_secret_id:ro
+      - workflow_orchestrator_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/workflow-orchestrator/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/workflow-orchestrator/workflow_orchestrator_config.ctmpl:/vault/secrets/workflow_orchestrator_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Workflow Orchestrator Service
   workflow-orchestrator:
     build:
       context: .
       dockerfile: docker/workflow-orchestrator.Dockerfile
-    # container_name: mcp-workflow-orchestrator
+    image: mcp-workflow-orchestrator:latest
     restart: unless-stopped
     volumes:
       - ./src:/app/src  # Mount source code for development
       - ./logs/workflow-orchestrator:/app/logs
       - ./config:/app/config:ro
+      - ./database/migrations:/app/database/migrations:ro
+      - workflow_orchestrator_secrets:/vault/secrets:ro
     environment:
       - REDIS_URL=redis://redis:6379
       - CONSUL_URL=http://consul:8500
       - SERVICE_NAME=workflow-orchestrator
       - SERVICE_PORT=8004
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/workflow_orchestrator_db
-      - WORKFLOW_ORCHESTRATOR_DB_HOST=postgres
-      - WORKFLOW_ORCHESTRATOR_DB_PORT=5432
-      - WORKFLOW_ORCHESTRATOR_DB_NAME=workflow_orchestrator_db
-      - WORKFLOW_ORCHESTRATOR_DB_USER=mcp_user
-      - WORKFLOW_ORCHESTRATOR_DB_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}
       - MODEL_ROUTER_URL=http://model-router:8001
       - PLAN_MANAGEMENT_URL=http://plan-management:8002
       - GIT_WORKTREE_URL=http://git-worktree-manager:8003
@@ -411,6 +521,8 @@ services:
         condition: service_healthy
       model-router:
         condition: service_healthy
+      mcp-workflow-orchestrator-vault-agent:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
       interval: 30s
@@ -418,6 +530,7 @@ services:
       retries: 3
     networks:
       - mcp-network
+    command: ["sh", "-c", "source /vault/secrets/.env && python start.py"]
     deploy:
       resources:
         limits:
@@ -426,28 +539,47 @@ services:
         reservations:
           memory: 256M
           cpus: '0.3'
+    logging:
+      driver: "json-file"
+
+  # Vault Agent for Verification & Feedback Service
+  mcp-verification-feedback-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-verification-feedback-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/verification_feedback_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/verification_feedback_vault_secret_id
+    volumes:
+      - ./.secrets/verification_feedback_vault_role_id:/run/secrets/verification_feedback_vault_role_id:ro
+      - ./.secrets/verification_feedback_vault_secret_id:/run/secrets/verification_feedback_vault_secret_id:ro
+      - verification_feedback_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/verification-feedback/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/verification-feedback/verification_feedback_config.ctmpl:/vault/secrets/verification_feedback_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Verification & Feedback Service
   verification-feedback:
     build:
       context: .
       dockerfile: docker/verification-feedback.Dockerfile
-    # container_name: mcp-verification-feedback
+    image: mcp-verification-feedback:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
       - CONSUL_URL=http://consul:8500
       - SERVICE_NAME=verification-feedback
       - SERVICE_PORT=8005
-      - POSTGRES_DB=verification_feedback_db
-      - POSTGRES_USER=mcp_user
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}
-      - VERIFICATION_FEEDBACK_DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD}@postgres:5432/verification_feedback_db
-      - VERIFICATION_FEEDBACK_DB_USER=mcp_user
-      - VERIFICATION_FEEDBACK_DB_PASSWORD=${POSTGRES_PASSWORD:-mcp_secure_password}
-      - VERIFICATION_FEEDBACK_DB_HOST=postgres
-      - VERIFICATION_FEEDBACK_DB_PORT=5432
-      - VERIFICATION_FEEDBACK_DB_NAME=verification_feedback_db
       - MODEL_ROUTER_URL=http://model-router:8001
       # Observability Configuration
       - LOG_FORMAT=json
@@ -465,9 +597,13 @@ services:
         condition: service_healthy
       model-router:
         condition: service_healthy
+      mcp-verification-feedback-vault-agent:
+        condition: service_healthy
     volumes:
       - ./logs/verification-feedback:/app/logs
       - ./config:/app/config:ro
+      - ./database/migrations:/app/database/migrations:ro
+      - verification_feedback_secrets:/vault/secrets:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
       interval: 30s
@@ -475,6 +611,7 @@ services:
       retries: 3
     networks:
       - mcp-network
+    command: ["sh", "-c", "source /vault/secrets/.env && python start.py"]
     deploy:
       resources:
         limits:
@@ -483,13 +620,41 @@ services:
         reservations:
           memory: 192M
           cpus: '0.2'
+    logging:
+      driver: "json-file"
+
+  # Vault Agent for Staff Service
+  mcp-staff-service-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-staff-service-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/staff_service_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/staff_service_vault_secret_id
+    volumes:
+      - ./.secrets/staff_service_vault_role_id:/run/secrets/staff_service_vault_role_id:ro
+      - ./.secrets/staff_service_vault_secret_id:/run/secrets/staff_service_vault_secret_id:ro
+      - staff_service_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/staff-service/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/staff-service/staff_service_config.ctmpl:/vault/secrets/staff_service_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Staff Management Service
   staff-service:
     build:
       context: .
       dockerfile: docker/staff-service.Dockerfile
-    # container_name: mcp-staff-service
+    image: mcp-staff-service:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -497,8 +662,6 @@ services:
       - SERVICE_NAME=staff-service
       - SERVICE_PORT=8006
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/staff_db
-      - STAFF_REQUIRE_AUTH=true
-      - STAFF_ALLOWED_ROLES=admin,manager,support
     # ports:
     #   - "8006:8006"
     depends_on:
@@ -508,9 +671,12 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      mcp-staff-service-vault-agent:
+        condition: service_healthy
     volumes:
       - ./logs/staff-service:/app/logs
       - ./config:/app/config:ro
+      - staff_service_secrets:/vault/secrets:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
       interval: 30s
@@ -518,6 +684,7 @@ services:
       retries: 3
     networks:
       - mcp-network
+    command: ["sh", "-c", "source /vault/secrets/.env && python start.py"]
     deploy:
       resources:
         limits:
@@ -526,14 +693,41 @@ services:
         reservations:
           memory: 128M
           cpus: '0.15'
+    logging:
+      driver: "json-file"
+
+  # Vault Agent for Auth Service
+  mcp-auth-service-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-auth-service-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/auth_service_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/auth_service_vault_secret_id
+    volumes:
+      - ./.secrets/auth_service_vault_role_id:/run/secrets/auth_service_vault_role_id:ro
+      - ./.secrets/auth_service_vault_secret_id:/run/secrets/auth_service_vault_secret_id:ro
+      - auth_service_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/auth-service/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/auth-service/auth_config.ctmpl:/vault/secrets/auth_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Authentication Service - CRITICAL FOR SECURITY
   auth-service:
     build:
       context: .
       dockerfile: docker/auth-service.Dockerfile
-    container_name: mcp-auth-service
-    command: ["python", "start.py"]
+    image: mcp-auth-service:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -541,10 +735,7 @@ services:
       - SERVICE_NAME=auth-service
       - SERVICE_PORT=8007
       - DATABASE_URL=postgresql://mcp_user:${POSTGRES_PASSWORD:-mcp_secure_password}@postgres:5432/auth_db
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-super-secret-jwt-key-change-in-production}
       - JWT_EXPIRY_HOURS=24
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
       - ENABLE_GITHUB_OAUTH=false
     ports:
       - "8007:8007"
@@ -555,9 +746,12 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      mcp-auth-service-vault-agent:
+        condition: service_healthy
     volumes:
       - ./logs/auth-service:/app/logs
       - ./config:/app/config:ro
+      - auth_service_secrets:/vault/secrets:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
       interval: 30s
@@ -565,6 +759,7 @@ services:
       retries: 3
     networks:
       - mcp-network
+    command: ["sh", "-c", "source /vault/secrets/auth_config.env && python start.py"]
     deploy:
       resources:
         limits:
@@ -573,9 +768,11 @@ services:
         reservations:
           memory: 128M
           cpus: '0.15'
+    logging:
+      driver: "json-file"
 
   # =====================================
-  # AGENT FRAMEWORK SERVICES  
+  # AGENT FRAMEWORK SERVICES
   # =====================================
 
   # A2A Communication Hub
@@ -583,7 +780,7 @@ services:
     build:
       context: .
       dockerfile: docker/a2a-communication.Dockerfile
-    container_name: mcp-a2a-communication
+    image: mcp-a2a-communication:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -617,13 +814,15 @@ services:
         reservations:
           memory: 128M
           cpus: '0.15'
+    logging:
+      driver: "json-file"
 
   # Agent Pool Manager
   agent-pool:
     build:
       context: .
       dockerfile: docker/agent-pool.Dockerfile
-    container_name: mcp-agent-pool
+    image: mcp-agent-pool:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -659,13 +858,15 @@ services:
         reservations:
           memory: 192M
           cpus: '0.2'
+    logging:
+      driver: "json-file"
 
   # Collaboration Orchestrator
   collaboration-orchestrator:
     build:
       context: .
       dockerfile: docker/collaboration-orchestrator.Dockerfile
-    container_name: mcp-collaboration-orchestrator
+    image: mcp-collaboration-orchestrator:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -706,13 +907,15 @@ services:
         reservations:
           memory: 256M
           cpus: '0.25'
+    logging:
+      driver: "json-file"
 
   # Specialized Agent Services
   planner-agent:
     build:
       context: .
       dockerfile: docker/planner-agent.Dockerfile
-    container_name: mcp-planner-agent
+    image: mcp-planner-agent:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -746,12 +949,14 @@ services:
         reservations:
           memory: 128M
           cpus: '0.15'
+    logging:
+      driver: "json-file"
 
   security-agent:
     build:
       context: .
       dockerfile: docker/security-agent.Dockerfile
-    container_name: mcp-security-agent
+    image: mcp-security-agent:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -785,12 +990,14 @@ services:
         reservations:
           memory: 128M
           cpus: '0.15'
+    logging:
+      driver: "json-file"
 
   developer-agent:
     build:
       context: .
       dockerfile: docker/developer-agent.Dockerfile
-    container_name: mcp-developer-agent
+    image: mcp-developer-agent:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -825,13 +1032,15 @@ services:
         reservations:
           memory: 192M
           cpus: '0.2'
+    logging:
+      driver: "json-file"
 
   # Agent Monitor (for real-time agent activity monitoring)
   agent-monitor:
     build:
       context: .
       dockerfile: docker/agent-monitor.Dockerfile
-    container_name: mcp-agent-monitor
+    image: mcp-agent-monitor:latest
     restart: unless-stopped
     environment:
       - REDIS_URL=redis://redis:6379
@@ -867,21 +1076,49 @@ services:
         reservations:
           memory: 128M
           cpus: '0.15'
+    logging:
+      driver: "json-file"
 
   # =====================================
   # FRONTEND APPLICATION
   # =====================================
+
+  # Vault Agent for Frontend
+  mcp-frontend-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-frontend-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/frontend_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/frontend_vault_secret_id
+    volumes:
+      - ./.secrets/frontend_vault_role_id:/run/secrets/frontend_vault_role_id:ro
+      - ./.secrets/frontend_vault_secret_id:/run/secrets/frontend_vault_secret_id:ro
+      - frontend_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/frontend/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/frontend/nextauth_config.ctmpl:/vault/secrets/nextauth_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Customer Frontend React/Next.js Application
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    container_name: mcp-frontend
+    image: mcp-frontend:latest
     restart: unless-stopped
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost/api
+      - NEXT_PUBLIC_API_URL=http://nginx/api
       - PORT=3000
     ports:
       - "3002:3000"
@@ -889,6 +1126,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
+      - frontend_secrets:/vault/secrets:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -900,29 +1138,59 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 2G
           cpus: '0.5'
         reservations:
           memory: 256M
           cpus: '0.25'
+    logging:
+      driver: "json-file"
+
+  # Vault Agent for Staff Frontend
+  mcp-staff-frontend-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-staff-frontend-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/staff_frontend_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/staff_frontend_vault_secret_id
+    volumes:
+      - ./.secrets/staff_frontend_vault_role_id:/run/secrets/staff_frontend_vault_role_id:ro
+      - ./.secrets/staff_frontend_vault_secret_id:/run/secrets/staff_frontend_vault_secret_id:ro
+      - staff_frontend_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/staff-frontend/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/staff-frontend/nextauth_config.ctmpl:/vault/secrets/nextauth_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Staff Frontend React/Next.js Application
   staff-frontend:
     build:
       context: ./staff-frontend
       dockerfile: Dockerfile.dev
-    container_name: mcp-staff-frontend
+    image: mcp-staff-frontend:latest
     restart: unless-stopped
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost/api/staff
+      - NEXT_PUBLIC_API_URL=http://nginx/api/staff
       - PORT=3001
+      - NEXTAUTH_SECRET_FILE=/vault/secrets/nextauth_config.env
     ports:
       - "3004:3001"
     volumes:
       - ./staff-frontend:/app
       - /app/node_modules
       - /app/.next
+      - staff_frontend_secrets:/vault/secrets:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
       interval: 30s
@@ -931,14 +1199,20 @@ services:
       start_period: 40s
     networks:
       - mcp-network
+    depends_on:
+      mcp-staff-frontend-vault-agent:
+        condition: service_healthy
+    command: ["sh", "-c", "source /vault/secrets/nextauth_config.env && npm run dev"]
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 2G
           cpus: '0.5'
         reservations:
           memory: 256M
           cpus: '0.25'
+    logging:
+      driver: "json-file"
 
   # =====================================
   # MONITORING & OBSERVABILITY
@@ -947,7 +1221,6 @@ services:
   # API Gateway / Load Balancer
   nginx:
     image: nginx:alpine
-    container_name: mcp-nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -967,6 +1240,9 @@ services:
       - staff-service
       - auth-service
       - staff-frontend
+      - mcp-fluentd
+    logging:
+      driver: "json-file"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
@@ -979,7 +1255,6 @@ services:
   # Metrics Collection
   prometheus:
     image: prom/prometheus:latest
-    container_name: mcp-prometheus
     restart: unless-stopped
     ports:
       - "9090:9090"
@@ -995,11 +1270,40 @@ services:
       - '--web.enable-lifecycle'
     networks:
       - mcp-network
+    depends_on:
+      - mcp-fluentd
+    logging:
+      driver: "json-file"
+
+  # Vault Agent for Grafana
+  mcp-grafana-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-grafana-vault-agent
+    restart: on-failure
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/grafana_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/grafana_vault_secret_id
+    volumes:
+      - ./.secrets/grafana_vault_role_id:/run/secrets/grafana_vault_role_id:ro
+      - ./.secrets/grafana_vault_secret_id:/run/secrets/grafana_vault_secret_id:ro
+      - grafana_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/grafana/agent-config.hcl:/vault/agent-config.hcl:ro
+      - ./vault/agent-configs/grafana/grafana_config.ctmpl:/vault/secrets/grafana_config.ctmpl:ro
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Metrics Visualization
   grafana:
     image: grafana/grafana:latest
-    container_name: mcp-grafana
     restart: unless-stopped
     ports:
       - "3005:3000"
@@ -1016,9 +1320,9 @@ services:
       - GF_DATABASE_CONN_MAX_LIFETIME=14400
       
       # Security Configuration
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
-      - GF_SECURITY_SECRET_KEY=${GRAFANA_SECRET_KEY:-SW2YcwTIb9zpOOhoPsMm}
+      - GF_SECURITY_ADMIN_USER_FILE=/vault/secrets/grafana_config.env
+      - GF_SECURITY_ADMIN_PASSWORD_FILE=/vault/secrets/grafana_config.env
+      - GF_SECURITY_SECRET_KEY_FILE=/vault/secrets/grafana_config.env
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_USERS_AUTO_ASSIGN_ORG=true
       - GF_USERS_AUTO_ASSIGN_ORG_ROLE=Viewer
@@ -1045,11 +1349,15 @@ services:
       - ./monitoring/grafana/dashboards-clean:/etc/grafana/provisioning/dashboards:ro
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
       - ./monitoring/grafana/init:/docker-entrypoint-initdb.d:ro
+      - grafana_secrets:/vault/secrets:ro
     depends_on:
       postgres:
         condition: service_healthy
       prometheus:
         condition: service_started
+      
+      mcp-grafana-vault-agent:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
       interval: 30s
@@ -1066,11 +1374,12 @@ services:
         reservations:
           memory: 256M
           cpus: '0.25'
+    logging:
+      driver: "json-file"
 
   # Log Aggregation - Loki (Grafana Stack)
   loki:
     image: grafana/loki:2.9.0
-    container_name: mcp-loki
     restart: unless-stopped
     depends_on:
       - consul
@@ -1095,11 +1404,12 @@ services:
         reservations:
           memory: 256M
           cpus: '0.25'
+    logging:
+      driver: "json-file"
 
   # Distributed Tracing - Tempo (Grafana Stack)
   tempo:
     image: grafana/tempo:2.2.0
-    container_name: mcp-tempo
     restart: unless-stopped
     ports:
       - "3200:3200"   # Tempo HTTP
@@ -1117,6 +1427,11 @@ services:
       retries: 3
     networks:
       - mcp-network
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
     deploy:
       resources:
         limits:
@@ -1129,7 +1444,6 @@ services:
   # Log Shipping to Loki - Promtail
   promtail:
     image: grafana/promtail:2.9.0
-    container_name: mcp-promtail
     restart: unless-stopped
     volumes:
       - ./monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
@@ -1150,11 +1464,12 @@ services:
         reservations:
           memory: 128M
           cpus: '0.15'
+    logging:
+      driver: "json-file"
 
   # Legacy Log Aggregation (Elastic Stack) - Optional for migration
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
-    container_name: mcp-elasticsearch
     restart: unless-stopped
     profiles:
       - legacy-logging
@@ -1168,11 +1483,15 @@ services:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
       - mcp-network
+    depends_on:
+      mcp-fluentd:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
 
   # Legacy Log Visualization
   kibana:
     image: docker.elastic.co/kibana/kibana:8.8.0
-    container_name: mcp-kibana
     restart: unless-stopped
     profiles:
       - legacy-logging
@@ -1182,13 +1501,14 @@ services:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
       - elasticsearch
+      - mcp-fluentd
+    logging:
+      driver: "json-file"
     networks:
       - mcp-network
 
   # Legacy Log Shipping
   filebeat:
-    image: docker.elastic.co/beats/filebeat:8.8.0
-    container_name: mcp-filebeat
     restart: unless-stopped
     profiles:
       - legacy-logging
@@ -1200,8 +1520,37 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - elasticsearch
+      - mcp-fluentd
+    logging:
+      driver: "json-file"
     networks:
       - mcp-network
+
+  # Vault Agent for Cloudflare Tunnel
+  mcp-cloudflare-tunnel-vault-agent:
+    build:
+      context: ./docker/vault-agent
+      dockerfile: Dockerfile
+    container_name: mcp-cloudflare-tunnel-vault-agent
+    restart: on-failure
+    command: vault agent -config=/vault/agent-config.hcl
+    networks:
+      - mcp-network
+    depends_on:
+      consul:
+        condition: service_healthy
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ROLE_ID_FILE=/run/secrets/cloudflare_tunnel_vault_role_id
+      - VAULT_SECRET_ID_FILE=/run/secrets/cloudflare_tunnel_vault_secret_id
+    volumes:
+      - ./.secrets/cloudflare_tunnel_vault_role_id:/run/secrets/cloudflare_tunnel_vault_role_id:ro
+      - ./.secrets/cloudflare_tunnel_vault_secret_id:/run/secrets/cloudflare_tunnel_vault_secret_id:ro
+      - cloudflare_tunnel_secrets:/vault/secrets:rw
+      - ./vault/agent-configs/cloudflare-tunnel/agent-config.hcl:/vault/agent-configs/cloudflare-tunnel/agent-config.hcl:ro
+      - ./vault/agent-configs/cloudflare-tunnel/cloudflare_tunnel_config.ctmpl:/vault/secrets/cloudflare_tunnel_config.ctmpl:ro
+    logging:
+      driver: "json-file"
 
   # Cloudflare Tunnel Service
   cloudflare-tunnel:
@@ -1211,13 +1560,17 @@ services:
     command: tunnel --config /etc/cloudflared/config.yml run
     volumes:
       - ./cloudflare-tunnel/config.yml:/etc/cloudflared/config.yml:ro
-      - ./cloudflare-tunnel/credentials.json:/etc/cloudflared/credentials.json:ro
+      - ./.secrets/cloudflare_tunnel_credentials.json:/etc/cloudflared/credentials.json:ro
     environment:
       - TUNNEL_METRICS=0.0.0.0:9080
     networks:
       - mcp-network
     depends_on:
       - nginx
+      - mcp-cloudflare-tunnel-vault-agent
+      - mcp-fluentd
+    logging:
+      driver: "json-file"
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 9080 || exit 1"]
       interval: 30s
@@ -1243,6 +1596,7 @@ services:
     build:
       context: .
       dockerfile: docker/dev-tools.Dockerfile
+    image: mcp-dev-tools:latest
     restart: "no"
     profiles:
       - dev
@@ -1265,6 +1619,8 @@ services:
     tty: true
     stdin_open: true
     command: bash -c "pip list && python -c "import os; print(os.environ.get('RABBITMQ_URL'))" && env && pytest tests/ -v"
+    logging:
+      driver: "json-file"
 
 # =====================================
 # NETWORKS
@@ -1279,6 +1635,8 @@ networks:
 # =====================================
 # VOLUMES
 # =====================================
+
+
 volumes:
   redis_data:
     driver: local
@@ -1305,4 +1663,26 @@ volumes:
   tempo_data:
     driver: local
   elasticsearch_data:
+    driver: local
+  frontend_secrets:
+    driver: local
+  staff_frontend_secrets:
+    driver: local
+  auth_service_secrets:
+    driver: local
+  grafana_secrets:
+    driver: local
+  model_router_secrets:
+    driver: local
+  plan_management_secrets:
+    driver: local
+  git_worktree_manager_secrets:
+    driver: local
+  workflow_orchestrator_secrets:
+    driver: local
+  verification_feedback_secrets:
+    driver: local
+  staff_service_secrets:
+    driver: local
+  cloudflare_tunnel_secrets:
     driver: local

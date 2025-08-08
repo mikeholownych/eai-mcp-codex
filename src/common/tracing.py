@@ -505,6 +505,12 @@ def initialize_tracing(service_name: str = None) -> None:
     config.initialize(service_name)
 
 
+def get_tracer():
+    """Get the global tracer instance."""
+    config = get_tracing_config()
+    return config.get_tracer()
+
+
 def instrument_service(app = None) -> None:
     """Instrument a service with all available instrumentation."""
     manager = get_instrumentation_manager()

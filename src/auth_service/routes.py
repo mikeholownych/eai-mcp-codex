@@ -31,11 +31,12 @@ async def register_user(user_data: UserRegistration):
                 detail="Username already exists"
             )
         
-        # Create user
+        # Create user (regular registration - no admin roles allowed via this endpoint)
         success = auth_manager.create_user(
             username=user_data.username,
             password=user_data.password,
-            roles=["user"]
+            roles=["user"],
+            requesting_user_roles=None  # Public registration, no elevated roles allowed
         )
         
         if not success:
@@ -345,6 +346,255 @@ async def refresh_token(current_user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error during token refresh"
+        )
+
+
+# ===== SUPERADMIN MANAGEMENT ENDPOINTS =====
+# These endpoints are restricted to superadmin users only
+
+@router.post("/superadmin/create")
+async def create_superadmin_user(
+    user_data: UserRegistration,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new superadmin user. Only superadmin users can access this endpoint."""
+    try:
+        auth_manager = get_auth_manager()
+        
+        # Check if requesting user has superadmin role
+        if "superadmin" not in current_user.get("roles", []):
+            logger.warning(f"Non-superadmin user {current_user.get('username')} attempted to create superadmin user")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only superadmin users can create other superadmin users"
+            )
+        
+        # Create superadmin user
+        success = auth_manager.create_superadmin_user(
+            requesting_user_roles=current_user["roles"],
+            username=user_data.username,
+            password=user_data.password,
+            full_name=user_data.full_name
+        )
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to create superadmin user"
+            )
+        
+        logger.info(f"Superadmin user created: {user_data.username} by {current_user['username']}")
+        return {"message": "Superadmin user created successfully", "username": user_data.username}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Superadmin user creation error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during superadmin user creation"
+        )
+
+
+@router.put("/superadmin/modify/{username}")
+async def modify_superadmin_user(
+    username: str,
+    password: str = None,
+    full_name: str = None,
+    is_active: bool = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Modify a superadmin user. Only superadmin users can access this endpoint."""
+    try:
+        auth_manager = get_auth_manager()
+        
+        # Check if requesting user has superadmin role
+        if "superadmin" not in current_user.get("roles", []):
+            logger.warning(f"Non-superadmin user {current_user.get('username')} attempted to modify superadmin user {username}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only superadmin users can modify other superadmin users"
+            )
+        
+        # Modify superadmin user
+        success = auth_manager.modify_superadmin_user(
+            requesting_user_roles=current_user["roles"],
+            username=username,
+            new_password=password,
+            new_full_name=full_name,
+            is_active=is_active
+        )
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to modify superadmin user"
+            )
+        
+        logger.info(f"Superadmin user modified: {username} by {current_user['username']}")
+        return {"message": "Superadmin user modified successfully", "username": username}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Superadmin user modification error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during superadmin user modification"
+        )
+
+
+@router.delete("/superadmin/delete/{username}")
+async def delete_superadmin_user(
+    username: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a superadmin user. Only superadmin users can access this endpoint."""
+    try:
+        auth_manager = get_auth_manager()
+        
+        # Check if requesting user has superadmin role
+        if "superadmin" not in current_user.get("roles", []):
+            logger.warning(f"Non-superadmin user {current_user.get('username')} attempted to delete superadmin user {username}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only superadmin users can delete other superadmin users"
+            )
+        
+        # Delete superadmin user
+        success = auth_manager.delete_superadmin_user(
+            requesting_user_roles=current_user["roles"],
+            requesting_username=current_user["username"],
+            target_username=username
+        )
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to delete superadmin user or attempted self-deletion"
+            )
+        
+        logger.info(f"Superadmin user deleted: {username} by {current_user['username']}")
+        return {"message": "Superadmin user deleted successfully", "username": username}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Superadmin user deletion error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during superadmin user deletion"
+        )
+
+
+@router.get("/superadmin/list")
+async def list_superadmin_users(current_user: dict = Depends(get_current_user)):
+    """List all superadmin users. Only superadmin users can access this endpoint."""
+    try:
+        auth_manager = get_auth_manager()
+        
+        # Check if requesting user has superadmin role
+        if "superadmin" not in current_user.get("roles", []):
+            logger.warning(f"Non-superadmin user {current_user.get('username')} attempted to list superadmin users")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only superadmin users can list other superadmin users"
+            )
+        
+        # Get list of superadmin users
+        superadmin_users = auth_manager.list_superadmin_users(
+            requesting_user_roles=current_user["roles"]
+        )
+        
+        logger.info(f"Superadmin users listed by {current_user['username']}")
+        return {"superadmin_users": superadmin_users, "count": len(superadmin_users)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Superadmin user listing error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during superadmin user listing"
+        )
+
+
+# ===== ADMIN MANAGEMENT ENDPOINTS =====
+# These endpoints are restricted to superadmin users only
+
+@router.post("/admin/create")
+async def create_admin_user(
+    user_data: UserRegistration,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new admin user. Only superadmin users can access this endpoint."""
+    try:
+        auth_manager = get_auth_manager()
+        
+        # Check if requesting user has superadmin role
+        if "superadmin" not in current_user.get("roles", []):
+            logger.warning(f"Non-superadmin user {current_user.get('username')} attempted to create admin user")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only superadmin users can create admin users"
+            )
+        
+        # Create admin user
+        success = auth_manager.create_admin_user(
+            requesting_user_roles=current_user["roles"],
+            username=user_data.username,
+            password=user_data.password,
+            full_name=user_data.full_name
+        )
+        
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to create admin user"
+            )
+        
+        logger.info(f"Admin user created: {user_data.username} by {current_user['username']}")
+        return {"message": "Admin user created successfully", "username": user_data.username}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Admin user creation error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during admin user creation"
+        )
+
+
+@router.get("/admin/list")
+async def list_admin_users(current_user: dict = Depends(get_current_user)):
+    """List all admin users. Only superadmin users can access this endpoint."""
+    try:
+        auth_manager = get_auth_manager()
+        
+        # Check if requesting user has superadmin role
+        if "superadmin" not in current_user.get("roles", []):
+            logger.warning(f"Non-superadmin user {current_user.get('username')} attempted to list admin users")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only superadmin users can list admin users"
+            )
+        
+        # Get list of admin users
+        admin_users = auth_manager.list_admin_users(
+            requesting_user_roles=current_user["roles"]
+        )
+        
+        logger.info(f"Admin users listed by {current_user['username']}")
+        return {"admin_users": admin_users, "count": len(admin_users)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Admin user listing error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during admin user listing"
         )
 
 

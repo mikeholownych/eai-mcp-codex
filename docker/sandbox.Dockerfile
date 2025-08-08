@@ -31,7 +31,7 @@ RUN groupadd --system --gid 1001 sandbox && \
 WORKDIR /home/sandbox
 
 # Copy dependencies
-COPY --from=deps /usr/local/lib/python*/site-packages /usr/local/lib/python*/site-packages
+COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=deps /usr/local/bin /usr/local/bin
 
 RUN chown -R sandbox:sandbox /home/sandbox

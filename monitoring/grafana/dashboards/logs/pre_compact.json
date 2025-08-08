@@ -54,5 +54,13 @@
     "hook_event_name": "PreCompact",
     "trigger": "auto",
     "custom_instructions": null
+  },
+  {
+    "session_id": "b10b9b94-b5e1-4511-aca2-e7d7fca595d6",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/b10b9b94-b5e1-4511-aca2-e7d7fca595d6.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/monitoring/grafana/dashboards",
+    "hook_event_name": "PreCompact",
+    "trigger": "auto",
+    "custom_instructions": null
   }
 ]

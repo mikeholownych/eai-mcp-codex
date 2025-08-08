@@ -1,0 +1,8 @@
+POSTGRES_DB={{ with secret "secret/data/verification-feedback" }}{{ .Data.data.POSTGRES_DB }}{{ end }}
+POSTGRES_USER={{ with secret "secret/data/verification-feedback" }}{{ .Data.data.POSTGRES_USER }}{{ end }}
+POSTGRES_PASSWORD={{ with secret "secret/data/verification-feedback" }}{{ .Data.data.POSTGRES_PASSWORD }}{{ end }}
+VERIFICATION_FEEDBACK_DATABASE_URL={{ with secret "secret/data/verification-feedback" }}{{ .Data.data.VERIFICATION_FEEDBACK_DATABASE_URL }}{{ end }}
+VERIFICATION_FEEDBACK_DB_USER={{ with secret "secret/data/verification-feedback" }}{{ .Data.data.VERIFICATION_FEEDBACK_DB_USER }}{{ end }}
+VERIFICATION_FEEDBACK_DB_PASSWORD={{ with secret "secret/data/verification-feedback" }}{{ .Data.data.VERIFICATION_FEEDBACK_DB_PASSWORD }}{{ end }}
+VERIFICATION_FEEDBACK_DB_HOST={{ with secret "secret/data/verification-feedback" }}{{ .Data.data.VERIFICATION_FEEDBACK_DB_HOST }}{{ end }}
+VERIFICATION_FEEDBACK_DB_NAME={{ with secret "secret/data/verification-feedback" }}{{ .Data.data.VERIFICATION_FEEDBACK_DB_NAME }}{{ end }}

@@ -1,7 +1,6 @@
 # Docker Compose for Cloudflare Tunnel
 # This extends the main docker-compose.yml with tunnel services
 
-version: '3.8'
 
 services:
   # Cloudflare Tunnel Service
@@ -17,10 +16,8 @@ services:
       - TUNNEL_METRICS=0.0.0.0:9080
     networks:
       - mcp-network
-    depends_on:
-      - nginx
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9080/ready"]
+      test: ["CMD", "curl", "-f", "http://localhost:9080/ready"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -33,31 +30,6 @@ services:
           memory: 64M
           cpus: '0.1'
 
-  # Frontend Next.js Service
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: mcp-frontend
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=https://newapi.ethical-ai-insider.com
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
-    networks:
-      - mcp-network
-    depends_on:
-      - nginx
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 networks:
   mcp-network:

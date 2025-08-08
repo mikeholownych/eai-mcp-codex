@@ -363,29 +363,30 @@ export default function HomePage() {
 
           <motion.div variants={itemVariants} className="mb-8">
             <motion.h1
-              className="text-6xl md:text-8xl font-extrabold text-white mb-6 leading-tight tracking-tight"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-              Transform Ideas Into{" "}
-              <motion.span
-                className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600"
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                style={{
-                  backgroundSize: "200% 200%",
-                }}
+                className="text-6xl md:text-8xl font-extrabold text-white mb-6 leading-tight tracking-tight font-display"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
               >
-                Production Code
-              </motion.span>
-            </motion.h1>
+                Unleash Your Potential with
+                <br />
+                <motion.span
+                  className="text-transparent bg-clip-text bg-gradient-primary"
+                  animate={{
+                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  style={{
+                    backgroundSize: "200% 200%",
+                  }}
+                >
+                  AI-Powered Development
+                </motion.span>
+              </motion.h1>
           </motion.div>
 
           <motion.p

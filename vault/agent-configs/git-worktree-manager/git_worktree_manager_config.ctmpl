@@ -1,0 +1,1 @@
+POSTGRES_PASSWORD={{ with secret "secret/data/git-worktree-manager" }}{{ .Data.data.POSTGRES_PASSWORD }}{{ end }}

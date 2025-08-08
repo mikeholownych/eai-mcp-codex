@@ -1,0 +1,3 @@
+POSTGRES_PASSWORD={{ with secret "secret/data/staff-service" }}{{ .Data.data.POSTGRES_PASSWORD }}{{ end }}
+STAFF_REQUIRE_AUTH={{ with secret "secret/data/staff-service" }}{{ .Data.data.STAFF_REQUIRE_AUTH }}{{ end }}
+STAFF_ALLOWED_ROLES={{ with secret "secret/data/staff-service" }}{{ .Data.data.STAFF_ALLOWED_ROLES }}{{ end }}

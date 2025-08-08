@@ -1,0 +1,3 @@
+{{- with secret "secret/data/nextauth/config" -}}
+NEXTAUTH_SECRET={{ .Data.data.secret }}
+{{- end -}}

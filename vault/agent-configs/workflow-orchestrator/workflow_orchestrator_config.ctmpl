@@ -1,0 +1,5 @@
+POSTGRES_PASSWORD={{ with secret "secret/data/workflow-orchestrator" }}{{ .Data.data.POSTGRES_PASSWORD }}{{ end }}
+WORKFLOW_ORCHESTRATOR_DB_USER={{ with secret "secret/data/workflow-orchestrator" }}{{ .Data.data.WORKFLOW_ORCHESTRATOR_DB_USER }}{{ end }}
+WORKFLOW_ORCHESTRATOR_DB_PASSWORD={{ with secret "secret/data/workflow-orchestrator" }}{{ .Data.data.WORKFLOW_ORCHESTRATOR_DB_PASSWORD }}{{ end }}
+WORKFLOW_ORCHESTRATOR_DB_HOST={{ with secret "secret/data/workflow-orchestrator" }}{{ .Data.data.WORKFLOW_ORCHESTRATOR_DB_HOST }}{{ end }}
+WORKFLOW_ORCHESTRATOR_DB_NAME={{ with secret "secret/data/workflow-orchestrator" }}{{ .Data.data.WORKFLOW_ORCHESTRATOR_DB_NAME }}{{ end }}

@@ -70,3 +70,6 @@ cloudflare-tunnel/credentials.json
 o/**
 .claude
 logs/
+
+# === SECRETS ===
+.secrets/

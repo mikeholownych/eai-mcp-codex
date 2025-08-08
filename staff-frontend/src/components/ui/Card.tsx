@@ -64,9 +64,7 @@ const CardContent: React.FC<CardContentProps> = ({ children, className }) => (
 );
 
 const CardFooter: React.FC<CardFooterProps> = ({ children, className }) => (
-  <div className={cn("mt-4 pt-4 border-t border-slate-700", className)}>
-    {children}
-  </div>
+  <div className={cn('mt-4 pt-4 border-t border-dark-700', className)}>{children}</div>
 );
 
 Card.Header = CardHeader;
