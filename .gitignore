@@ -51,6 +51,8 @@ site/
 *.tar.gz
 *.whl
 frontend/.next.backup/**
+frontend/.next/**
+staff-frontend/.next/**
 
 # === NODE ===
 node_modules/
