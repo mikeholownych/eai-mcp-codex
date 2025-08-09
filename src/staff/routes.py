@@ -55,23 +55,24 @@ async def get_dashboard(
         )
 
         recent_tickets = [
-            {
-                "id": "T-2024-001",
-                "title": "API Rate Limiting Issues",
-                "customer": {
+            Ticket(
+                id="T-2024-001",
+                title="API Rate Limiting Issues",
+                description="Experiencing unexpected rate limiting on API calls despite being under the limit.",
+                customer={
                     "name": "John Doe",
                     "email": "john.doe@example.com",
                     "plan": "Pro",
                 },
-                "status": "in-progress",
-                "priority": "high",
-                "category": "API",
-                "assigned_to": "Sarah Wilson",
-                "created_at": datetime.now(),
-                "updated_at": datetime.now(),
-                "response_time": 2.5,
-                "message_count": 4,
-            }
+                status="in-progress",
+                priority="high",
+                category="API",
+                assigned_to="Sarah Wilson",
+                created_at=datetime.now(),
+                updated_at=datetime.now(),
+                response_time=2.5,
+                message_count=4,
+            )
         ]
 
         system_alerts = [
@@ -534,129 +535,124 @@ async def list_tickets(
     current_user: dict = Depends(get_current_user),
     _: None = Depends(verify_staff_access),
 ) -> TicketListResponse:
-    """List support tickets with filtering and pagination."""
+    """List tickets with optional filtering."""
     record_request("staff-tickets-list")
-    logger.info(f"Ticket list requested by {current_user.get('email', 'unknown')}")
+    logger.info(f"Tickets list requested by {current_user.get('email', 'unknown')}")
 
-    # Mock tickets with comprehensive data
-    mock_tickets = [
-        Ticket(
-            id="T-2024-001",
-            title="API Rate Limiting Issues",
-            description="Experiencing unexpected rate limiting on API calls despite being under the limit.",
-            status="in-progress",
-            priority="high",
-            category="API",
-            customer={
-                "name": "John Doe",
-                "email": "john.doe@example.com",
-                "plan": "Pro",
-            },
-            assigned_to="Sarah Wilson",
-            created_at=datetime(2024, 1, 20, 10, 30),
-            updated_at=datetime(2024, 1, 21, 14, 15),
-            response_time=2.5,
-            message_count=4,
-        ),
-        Ticket(
-            id="T-2024-002",
-            title="Billing Discrepancy",
-            description="Charged twice for the same subscription period.",
-            status="waiting-customer",
-            priority="medium",
-            category="Billing",
-            customer={
-                "name": "Jane Smith",
-                "email": "jane.smith@company.com",
-                "plan": "Enterprise",
-            },
-            assigned_to="Mike Support",
-            created_at=datetime(2024, 1, 19, 16, 20),
-            updated_at=datetime(2024, 1, 20, 9, 30),
-            response_time=4.2,
-            message_count=6,
-        ),
-        Ticket(
-            id="T-2024-003",
-            title="Code Editor Performance Issues",
-            description="Code editor becomes slow with large files over 1000 lines.",
-            status="open",
-            priority="medium",
-            category="Performance",
-            customer={
-                "name": "Alex Chen",
-                "email": "alex@startup.io",
-                "plan": "Standard",
-            },
-            created_at=datetime(2024, 1, 19, 14, 45),
-            updated_at=datetime(2024, 1, 19, 14, 45),
-            message_count=1,
-        ),
-        Ticket(
-            id="T-2024-004",
-            title="Feature Request: Export Data",
-            description="Need ability to export project data in multiple formats.",
-            status="open",
-            priority="low",
-            category="Feature Request",
-            customer={
-                "name": "Sarah Johnson",
-                "email": "sarah@tech.com",
-                "plan": "Pro",
-            },
-            created_at=datetime(2024, 1, 18, 11, 20),
-            updated_at=datetime(2024, 1, 18, 11, 20),
-            message_count=2,
-        ),
-        Ticket(
-            id="T-2024-005",
-            title="Security Concern: Unauthorized Access",
-            description="Suspicious activity detected on account.",
-            status="resolved",
-            priority="urgent",
-            category="Security",
-            customer={
-                "name": "David Wilson",
-                "email": "david@enterprise.com",
-                "plan": "Enterprise",
-            },
-            assigned_to="Admin Team",
-            created_at=datetime(2024, 1, 17, 8, 30),
-            updated_at=datetime(2024, 1, 17, 15, 45),
-            response_time=0.5,
-            message_count=8,
-        ),
-    ]
-
-    # Apply filtering
-    filtered_tickets = mock_tickets
-    if status:
-        filtered_tickets = [t for t in filtered_tickets if t.status == status]
-    if priority:
-        filtered_tickets = [t for t in filtered_tickets if t.priority == priority]
-    if category:
-        filtered_tickets = [t for t in filtered_tickets if t.category == category]
-    if search:
-        search_lower = search.lower()
-        filtered_tickets = [
-            t
-            for t in filtered_tickets
-            if search_lower in t.title.lower()
-            or search_lower in t.customer["email"].lower()
-            or search_lower in t.id.lower()
+    try:
+        # Mock data - in real implementation, this would query the database
+        mock_tickets = [
+            Ticket(
+                id="T-2024-001",
+                title="API Rate Limiting Issues",
+                description="Experiencing unexpected rate limiting on API calls despite being under the limit.",
+                customer={
+                    "name": "John Doe",
+                    "email": "john.doe@example.com",
+                    "plan": "Pro",
+                },
+                status="in-progress",
+                priority="high",
+                category="API",
+                assigned_to="Sarah Wilson",
+                created_at=datetime.now(),
+                updated_at=datetime.now(),
+                response_time=2.5,
+                message_count=4,
+            ),
+            Ticket(
+                id="T-2024-002",
+                title="Billing System Integration",
+                description="Need to integrate with new billing system for automated invoicing.",
+                customer={
+                    "name": "Jane Smith",
+                    "email": "jane.smith@example.com",
+                    "plan": "Enterprise",
+                },
+                status="open",
+                priority="medium",
+                category="Billing",
+                assigned_to="Mike Johnson",
+                created_at=datetime.now(),
+                updated_at=datetime.now(),
+                response_time=1.2,
+                message_count=2,
+            ),
         ]
 
-    # Apply pagination
-    start_idx = (page - 1) * per_page
-    end_idx = start_idx + per_page
-    paginated_tickets = filtered_tickets[start_idx:end_idx]
+        # Apply filters
+        filtered_tickets = mock_tickets
+        if status:
+            filtered_tickets = [t for t in filtered_tickets if t.status == status]
+        if priority:
+            filtered_tickets = [t for t in filtered_tickets if t.priority == priority]
+        if category:
+            filtered_tickets = [t for t in filtered_tickets if t.category == category]
+        if search:
+            search_lower = search.lower()
+            filtered_tickets = [
+                t for t in filtered_tickets
+                if search_lower in t.title.lower() or search_lower in t.description.lower()
+            ]
 
-    return TicketListResponse(
-        tickets=paginated_tickets,
-        total=len(filtered_tickets),
-        page=page,
-        per_page=per_page,
-    )
+        # Pagination
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        paginated_tickets = filtered_tickets[start_idx:end_idx]
+
+        return TicketListResponse(
+            tickets=paginated_tickets,
+            total=len(filtered_tickets),
+            page=page,
+            per_page=per_page,
+            total_pages=(len(filtered_tickets) + per_page - 1) // per_page,
+        )
+
+    except Exception as e:
+        logger.error(f"Ticket list error: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to list tickets: {str(e)}"
+        )
+
+
+@router.get("/tickets/stats", response_model=Dict[str, Any])
+async def get_ticket_stats(
+    current_user: dict = Depends(get_current_user),
+    _: None = Depends(verify_staff_access),
+) -> Dict[str, Any]:
+    """Get ticket statistics and metrics."""
+    record_request("staff-tickets-stats")
+    logger.info(f"Ticket stats requested by {current_user.get('email', 'unknown')}")
+
+    try:
+        # Mock statistics
+        return {
+            "total_tickets": 5,
+            "by_status": {
+                "open": 2,
+                "in-progress": 1,
+                "waiting-customer": 1,
+                "resolved": 1,
+                "closed": 0,
+            },
+            "by_priority": {"low": 1, "medium": 2, "high": 1, "urgent": 1},
+            "by_category": {
+                "API": 1,
+                "Billing": 1,
+                "Performance": 1,
+                "Feature Request": 1,
+                "Security": 1,
+            },
+            "avg_response_time": 2.8,  # hours
+            "avg_resolution_time": 24.5,  # hours
+            "satisfaction_score": 4.2,  # out of 5
+        }
+
+    except Exception as e:
+        logger.error(f"Ticket stats error: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get ticket stats: {str(e)}"
+        )
 
 
 @router.get("/tickets/{ticket_id}", response_model=Ticket)
@@ -976,44 +972,4 @@ async def update_ticket_priority(
         logger.error(f"Ticket priority update failed: {e}")
         raise HTTPException(
             status_code=500, detail=f"Failed to update ticket priority: {str(e)}"
-        )
-
-
-@router.get("/tickets/stats", response_model=Dict[str, Any])
-async def get_ticket_stats(
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
-) -> Dict[str, Any]:
-    """Get ticket statistics and metrics."""
-    record_request("staff-tickets-stats")
-    logger.info(f"Ticket stats requested by {current_user.get('email', 'unknown')}")
-
-    try:
-        # Mock statistics
-        return {
-            "total_tickets": 5,
-            "by_status": {
-                "open": 2,
-                "in-progress": 1,
-                "waiting-customer": 1,
-                "resolved": 1,
-                "closed": 0,
-            },
-            "by_priority": {"low": 1, "medium": 2, "high": 1, "urgent": 1},
-            "by_category": {
-                "API": 1,
-                "Billing": 1,
-                "Performance": 1,
-                "Feature Request": 1,
-                "Security": 1,
-            },
-            "avg_response_time": 2.8,  # hours
-            "avg_resolution_time": 24.5,  # hours
-            "satisfaction_score": 4.2,  # out of 5
-        }
-
-    except Exception as e:
-        logger.error(f"Ticket stats error: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get ticket stats: {str(e)}"
         )

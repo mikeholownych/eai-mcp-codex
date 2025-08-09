@@ -88,8 +88,20 @@ class HealthChecker:
         self.metrics = get_metrics_collector(service_name)
         self._lock = asyncio.Lock()
 
-    def register_check(self, config: HealthCheckConfig):
-        """Register a health check with configuration."""
+    def register_check(self, config_or_name, check_func: Callable = None, **kwargs):
+        """Register a health check with configuration or simple signature.
+        Supports either register_check(HealthCheckConfig) or
+        register_check(name, func, critical=False, ...)
+        """
+        if isinstance(config_or_name, HealthCheckConfig):
+            config = config_or_name
+        else:
+            # Simple signature path
+            config = HealthCheckConfig(
+                name=config_or_name,
+                check_func=check_func,
+                **kwargs,
+            )
         self.checks[config.name] = config
         self.check_history[config.name] = []
         logger.info(f"Registered health check: {config.name} ({config.check_type.value})")
@@ -507,7 +519,7 @@ def health() -> Dict[str, str]:
 def detailed_health(service_name: str = "default") -> Dict[str, Any]:
     """Return detailed health information."""
     checker = get_health_checker(service_name)
-    return checker.run_all_checks()
+    return asyncio.get_event_loop().run_until_complete(checker.run_all_checks())
 
 
 def register_health_check(name: str, check_func: callable, critical: bool = True):

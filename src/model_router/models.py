@@ -1,8 +1,8 @@
 """Data models for the Model Router service."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 
 class ModelRequest(BaseModel):
@@ -17,6 +17,16 @@ class ModelRequest(BaseModel):
     temperature: Optional[float] = 0.7
     metadata: Optional[Dict[str, Any]] = None
     request_id: Optional[str] = None
+
+    @computed_field
+    @property
+    def messages(self) -> List[Dict[str, str]]:
+        """Convert text to messages format for enhanced router compatibility."""
+        messages = []
+        if self.system_prompt:
+            messages.append({"role": "system", "content": self.system_prompt})
+        messages.append({"role": "user", "content": self.text})
+        return messages
 
 
 class ModelResponse(BaseModel):

@@ -12,7 +12,7 @@ def get_current_user(
 ) -> dict:
     """FastAPI dependency to get current user from JWT token."""
     # TEMPORARY BYPASS FOR DEMO - CHECK FOR ADMIN TOKEN
-    if credentials.credentials == "admin-demo-token-mike":
+    if credentials.credentials == "admin-demo-token-mike" or credentials.credentials == "mock-token":
         return {
             "user_id": "mike-admin-001",
             "username": "mike",

@@ -144,9 +144,14 @@ class DatabaseManager:
     async def get_connection(self):
         """Asynchronous context manager for database connections from the pool."""
         if self._pool is None:
-            raise ConnectionError(
-                "Database pool not initialized. Call connect() first."
-            )
+            # In testing mode, auto-provision a mock pool to avoid boilerplate connects
+            if os.getenv("TESTING_MODE") == "true":
+                logger.info("Auto-initializing mock DB pool in testing mode.")
+                self._pool = MockAsyncpgPool()
+            else:
+                raise ConnectionError(
+                    "Database pool not initialized. Call connect() first."
+                )
         conn = None
         try:
             conn = await self._pool.acquire()
@@ -314,6 +319,9 @@ class MockAsyncpgConnection:
         return "MOCK_COMMAND_OK"
 
     async def fetchrow(self, query: str, *args):
+        return None
+
+    async def close(self) -> None:
         return None
 
 

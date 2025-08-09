@@ -13,8 +13,7 @@ import time
 
 import yaml
 from opentelemetry import trace, metrics
-from opentelemetry.trace import Status, StatusCode, TracerProvider, SpanKind
-from opentelemetry.metrics import MeterProvider
+from opentelemetry.trace import Status, StatusCode, SpanKind
 from opentelemetry.sdk.trace import TracerProvider, sampling
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from opentelemetry.sdk.metrics import MeterProvider
@@ -152,18 +151,19 @@ class TracingConfig:
     def _create_sampler(self) -> sampling.Sampler:
         """Create appropriate sampler based on configuration."""
         sampling_config = self.config.get('otel', {}).get('sampling', {})
-        ratio = float(sampling_config.get('ratio', 1.0))
-        
-        if sampling_config.get('adaptive', {}).get('enabled', False):
-            # Use adaptive sampling
-            return sampling.AdaptiveSampler(
-                ratio=ratio,
-                target_tps=sampling_config.get('adaptive', {}).get('target_tps', 10),
-                max_tps=sampling_config.get('adaptive', {}).get('max_tps', 100)
-            )
-        else:
-            # Use simple ratio-based sampling
-            return sampling.TraceIdRatioBased(ratio)
+        # Safely parse ratio, handling env-template strings like '${TRACE_SAMPLE_RATIO:-1.0}'
+        raw_ratio = sampling_config.get('ratio', 1.0)
+        try:
+            ratio = float(raw_ratio)
+        except (TypeError, ValueError):
+            # Fallback to env var or default
+            env_ratio = os.getenv('TRACE_SAMPLE_RATIO', '1.0')
+            try:
+                ratio = float(env_ratio)
+            except ValueError:
+                ratio = 1.0
+        # Use simple ratio-based sampling. Adaptive sampling is not available in standard SDK.
+        return sampling.TraceIdRatioBased(ratio)
     
     def _setup_exporters(self) -> None:
         """Set up trace exporters."""

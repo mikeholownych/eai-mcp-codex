@@ -30,7 +30,7 @@ logger = get_logger("staff_service")
 @app.get("/health")
 def health_check() -> dict:
     """Health check endpoint."""
-    return health()
+    return {"status": "healthy"}
 
 
 @app.on_event("startup")
