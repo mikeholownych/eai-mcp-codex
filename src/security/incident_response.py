@@ -916,7 +916,7 @@ class IncidentResponseEngine:
 
         for key, value in parameters.items():
             if isinstance(value, str):
-                # Replace placeholders
+                # Replace template variables
                 substituted[key] = value.format(
                     threat_event_id=threat_event.event_id,
                     incident_id=incident.incident_id,

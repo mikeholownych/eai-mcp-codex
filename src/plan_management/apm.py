@@ -817,21 +817,20 @@ class PlanManagementAPM:
     
     def set_plan_id(self, plan_id: str):
         """Set the plan ID for the current operation."""
-        # This would be called within the plan creation context
-        # to associate metrics with the plan
-        pass
+        # Associate metrics with current plan context
+        self.current_plan_id = plan_id
     
     def set_task_id(self, task_id: str, plan_id: str):
         """Set the task ID for the current operation."""
-        # This would be called within the task creation context
-        # to associate metrics with the task
-        pass
+        # Associate metrics with task/plan context
+        self.current_task_id = task_id
+        self.current_plan_id = plan_id
     
     def set_consensus_id(self, consensus_id: str, plan_id: str):
         """Set the consensus ID for the current operation."""
-        # This would be called within the consensus building context
-        # to associate metrics with the consensus
-        pass
+        # Associate metrics with consensus context
+        self.current_consensus_id = consensus_id
+        self.current_plan_id = plan_id
 
 
 # Global instance

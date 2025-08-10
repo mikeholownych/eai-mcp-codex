@@ -123,7 +123,7 @@ class TracingIntegration:
         try:
             logger.info(f"Initializing tracing for {self.service_name} v{self.service_version}")
             
-            # Initialize exporters
+            # Initialize exporters (no-op in testing mode)
             self.exporter_manager, metrics_collector = initialize_trace_exporters(
                 self.service_name, self.service_version, self.environment
             )

@@ -10,7 +10,9 @@ from src.common.fastapi_auth import (
     verify_staff_access,
     get_current_user,
     require_admin_access,
+    security,
 )
+from fastapi.security import HTTPAuthorizationCredentials
 
 from .models import (
     User,
@@ -30,12 +32,26 @@ from .models import (
 router = APIRouter(prefix="/staff", tags=["staff-management"])
 logger = get_logger("staff_routes")
 
+# Dependency wrappers to allow test patching to work reliably
+def get_current_user_dependency(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> dict:
+    return get_current_user(credentials)
+
+
+def verify_staff_access_dependency(current_user: dict = Depends(get_current_user_dependency)) -> None:
+    return verify_staff_access(current_user)
+
+
+def require_admin_access_dependency(current_user: dict = Depends(get_current_user_dependency)) -> None:
+    return require_admin_access(current_user)
+
 
 # Dashboard endpoint
 @router.get("/dashboard", response_model=DashboardStats)
 async def get_dashboard(
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> DashboardStats:
     """Get staff dashboard data including stats and recent activity."""
     record_request("staff-dashboard")
@@ -111,8 +127,8 @@ async def get_dashboard(
 # System statistics endpoint
 @router.get("/stats", response_model=SystemStats)
 async def get_system_stats(
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> SystemStats:
     """Get system statistics."""
     record_request("staff-stats")
@@ -138,8 +154,8 @@ async def get_system_stats(
 # System health endpoint
 @router.get("/health/system", response_model=SystemHealth)
 async def get_system_health(
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> SystemHealth:
     """Get detailed system health information."""
     record_request("staff-system-health")
@@ -187,8 +203,8 @@ async def list_users(
     role: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> UserListResponse:
     """List users with filtering and pagination."""
     record_request("staff-users-list")
@@ -285,8 +301,8 @@ async def list_users(
 @router.get("/users/{user_id}", response_model=User)
 async def get_user(
     user_id: str,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> User:
     """Get a specific user by ID."""
     record_request("staff-users-get")
@@ -314,8 +330,8 @@ async def get_user(
 @router.post("/users", response_model=StaffResponse)
 async def create_user(
     user_data: UserCreate,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(require_admin_access),  # Only admins can create users
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(require_admin_access_dependency),  # Only admins can create users
 ) -> StaffResponse:
     """Create a new user."""
     record_request("staff-users-create")
@@ -349,8 +365,8 @@ async def create_user(
 async def update_user(
     user_id: str,
     user_data: UserUpdate,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> StaffResponse:
     """Update an existing user."""
     record_request("staff-users-update")
@@ -397,8 +413,8 @@ async def update_user(
 @router.delete("/users/{user_id}", response_model=StaffResponse)
 async def delete_user(
     user_id: str,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(require_admin_access),  # Only admins can delete users
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(require_admin_access_dependency),  # Only admins can delete users
 ) -> StaffResponse:
     """Delete a user (soft delete)."""
     record_request("staff-users-delete")
@@ -441,8 +457,8 @@ async def delete_user(
 @router.patch("/users/{user_id}/suspend", response_model=StaffResponse)
 async def suspend_user(
     user_id: str,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> StaffResponse:
     """Suspend a user account."""
     record_request("staff-users-suspend")
@@ -485,8 +501,8 @@ async def suspend_user(
 @router.patch("/users/{user_id}/activate", response_model=StaffResponse)
 async def activate_user(
     user_id: str,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> StaffResponse:
     """Activate a suspended user account."""
     record_request("staff-users-activate")
@@ -532,8 +548,8 @@ async def list_tickets(
     priority: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> TicketListResponse:
     """List tickets with optional filtering."""
     record_request("staff-tickets-list")
@@ -655,11 +671,52 @@ async def get_ticket_stats(
         )
 
 
+# Place stats endpoint before parameterized ticket route to avoid any ambiguity
+@router.get("/tickets/stats", response_model=Dict[str, Any])
+async def get_ticket_stats(
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
+) -> Dict[str, Any]:
+    """Get ticket statistics and metrics."""
+    record_request("staff-tickets-stats")
+    logger.info(f"Ticket stats requested by {current_user.get('email', 'unknown')}")
+
+    try:
+        # Mock statistics
+        return {
+            "total_tickets": 5,
+            "by_status": {
+                "open": 2,
+                "in-progress": 1,
+                "waiting-customer": 1,
+                "resolved": 1,
+                "closed": 0,
+            },
+            "by_priority": {"low": 1, "medium": 2, "high": 1, "urgent": 1},
+            "by_category": {
+                "API": 1,
+                "Billing": 1,
+                "Performance": 1,
+                "Feature Request": 1,
+                "Security": 1,
+            },
+            "avg_response_time": 2.8,  # hours
+            "avg_resolution_time": 24.5,  # hours
+            "satisfaction_score": 4.2,  # out of 5
+        }
+
+    except Exception as e:
+        logger.error(f"Ticket stats error: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get ticket stats: {str(e)}"
+        )
+
+
 @router.get("/tickets/{ticket_id}", response_model=Ticket)
 async def get_ticket(
     ticket_id: str,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> Ticket:
     """Get a specific ticket by ID."""
     record_request("staff-tickets-get")
@@ -694,8 +751,8 @@ async def get_ticket(
 @router.post("/tickets", response_model=StaffResponse)
 async def create_ticket(
     ticket_data: TicketCreate,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> StaffResponse:
     """Create a new support ticket."""
     record_request("staff-tickets-create")
@@ -740,8 +797,8 @@ async def create_ticket(
 async def update_ticket(
     ticket_id: str,
     ticket_data: TicketUpdate,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> StaffResponse:
     """Update an existing ticket."""
     record_request("staff-tickets-update")
@@ -806,8 +863,8 @@ async def update_ticket(
 async def assign_ticket(
     ticket_id: str,
     assign_to: str,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> StaffResponse:
     """Assign a ticket to a staff member."""
     record_request("staff-tickets-assign")
@@ -857,8 +914,8 @@ async def assign_ticket(
 async def update_ticket_status(
     ticket_id: str,
     new_status: str,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> StaffResponse:
     """Update ticket status."""
     record_request("staff-tickets-status")
@@ -921,8 +978,8 @@ async def update_ticket_status(
 async def update_ticket_priority(
     ticket_id: str,
     new_priority: str,
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> StaffResponse:
     """Update ticket priority."""
     record_request("staff-tickets-priority")
@@ -973,3 +1030,6 @@ async def update_ticket_priority(
         raise HTTPException(
             status_code=500, detail=f"Failed to update ticket priority: {str(e)}"
         )
+
+
+## moved earlier

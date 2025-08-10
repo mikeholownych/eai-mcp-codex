@@ -1,17 +1,29 @@
 """Staff Management FastAPI application."""
 
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.common.logging import get_logger
 from src.common.health_check import health
+from src.common.fastapi_auth import get_current_user, verify_staff_access, require_admin_access
 
 from .routes import router
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Staff Management service started")
+    try:
+        yield
+    finally:
+        logger.info("Staff Management service shutting down")
+
 
 app = FastAPI(
     title="Staff Management Service",
     description="Administrative interface for user and system management",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -28,18 +40,8 @@ logger = get_logger("staff_service")
 
 
 @app.get("/health")
-def health_check() -> dict:
+async def health_check() -> dict:
     """Health check endpoint."""
-    return {"status": "healthy"}
+    return await health()
 
 
-@app.on_event("startup")
-def startup() -> None:
-    """Startup event handler."""
-    logger.info("Staff Management service started")
-
-
-@app.on_event("shutdown")
-def shutdown() -> None:
-    """Shutdown event handler."""
-    logger.info("Staff Management service shutting down")

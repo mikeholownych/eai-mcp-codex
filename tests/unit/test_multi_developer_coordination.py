@@ -313,10 +313,9 @@ class TestDeveloperProfileManager:
 
     async def test_create_developer_profile(self):
         """Test creating a developer profile."""
-        with patch('src.collaboration_orchestrator.developer_profile_manager.DatabaseManager') as MockDatabaseManager:
-            # Create a mock database manager
-            mock_db_manager = Mock()
+        with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
             mock_conn = AsyncMock()
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = mock_conn
             
             # Set up the async context manager mock
             mock_context_manager = AsyncMock()
@@ -344,38 +343,28 @@ class TestDeveloperProfileManager:
 
     async def test_find_best_agents_for_task(self):
         """Test finding best agents for a task."""
-        # Mock the profile manager's db_manager
-        mock_db_manager = Mock()
-        mock_conn = AsyncMock()
-        mock_conn.fetch.return_value = [{"agent_id": "dev_001"}, {"agent_id": "dev_002"}]
-        
-        # Create a mock context manager
-        mock_context_manager = AsyncMock()
-        mock_context_manager.__aenter__.return_value = mock_conn
-        mock_context_manager.__aexit__.return_value = None
-        
-        # Set up the mock db_manager to return our mock context manager
-        mock_db_manager.get_connection.return_value = mock_context_manager
-        
-        # Replace the profile manager's db_manager with our mock
-        self.profile_manager.db_manager = mock_db_manager
-
-        # Mock profile retrieval
-        self.profile_manager.get_developer_profile = AsyncMock()
-        self.profile_manager.get_developer_profile.side_effect = [
-            DeveloperProfile(
-                agent_id="dev_001",
-                specializations=[DeveloperSpecialization.BACKEND],
-                programming_languages=["Python"],
-                experience_level=ExperienceLevel.SENIOR,
-                current_workload=10,
-            ),
-            DeveloperProfile(
-                agent_id="dev_002",
-                specializations=[DeveloperSpecialization.FRONTEND],
-                programming_languages=["JavaScript"],
-                experience_level=ExperienceLevel.INTERMEDIATE,
-                current_workload=5,
+        with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
+            # Mock database response
+            mock_conn = AsyncMock()
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = mock_conn
+            mock_conn.fetch.return_value = [{"agent_id": "dev_001"}, {"agent_id": "dev_002"}]
+            
+            # Mock profile retrieval
+            self.profile_manager.get_developer_profile = AsyncMock()
+            self.profile_manager.get_developer_profile.side_effect = [
+                DeveloperProfile(
+                    agent_id="dev_001",
+                    specializations=[DeveloperSpecialization.BACKEND],
+                    programming_languages=["Python"],
+                    experience_level=ExperienceLevel.SENIOR,
+                    current_workload=10,
+                ),
+                DeveloperProfile(
+                    agent_id="dev_002",
+                    specializations=[DeveloperSpecialization.FRONTEND],
+                    programming_languages=["JavaScript"],
+                    experience_level=ExperienceLevel.INTERMEDIATE,
+                    current_workload=5,
                 ),
             ]
 
@@ -406,20 +395,9 @@ class TestIntelligentConflictResolver:
         session_id = uuid4()
         plan_id = uuid4()
         
-        # Mock the database connection
-        mock_conn = AsyncMock()
-        mock_conn.execute.return_value = None
-        
-        # Create a mock context manager
-        mock_context_manager = AsyncMock()
-        mock_context_manager.__aenter__.return_value = mock_conn
-        mock_context_manager.__aexit__.return_value = None
-        
-        # Mock the DatabaseManager that gets created in _get_db_connection
-        with patch('src.collaboration_orchestrator.intelligent_conflict_resolver.DatabaseManager') as MockDatabaseManager:
-            mock_db_manager = Mock()
-            mock_db_manager.get_connection.return_value = mock_context_manager
-            MockDatabaseManager.return_value = mock_db_manager
+        with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
+            mock_conn = AsyncMock()
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = mock_conn
             
             conflict = await self.conflict_resolver.detect_conflict(
                 session_id=session_id,
@@ -511,7 +489,8 @@ class TestMultiDeveloperOrchestrator:
         )
         
         with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
-            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = AsyncMock()
+            mock_conn = AsyncMock()
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = mock_conn
             
             tasks = [
                 {
@@ -640,6 +619,7 @@ class TestTaskAssignmentEngine:
         self.profile_manager = Mock(spec=DeveloperProfileManager)
         self.assignment_engine = TaskAssignmentEngine(self.profile_manager)
 
+    @pytest.mark.asyncio
     async def test_calculate_assignment_score(self):
         """Test assignment score calculation."""
         agent = DeveloperProfile(

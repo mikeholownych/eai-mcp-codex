@@ -1,6 +1,7 @@
 """Verification Feedback FastAPI application."""
 
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
 from src.common.logging import get_logger
 from src.common.health_check import health
@@ -12,7 +13,18 @@ from .feedback_processor import (
     shutdown_feedback_processor,
 )
 
-app = FastAPI(title="Verification Feedback")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await initialize_feedback_processor()
+    logger.info("Verification Feedback service started")
+    try:
+        yield
+    finally:
+        await shutdown_feedback_processor()
+        logger.info("Verification Feedback service shutdown")
+
+
+app = FastAPI(title="Verification Feedback", lifespan=lifespan)
 app.include_router(router)
 logger = get_logger("verification_feedback")
 
@@ -25,13 +37,4 @@ def health_check() -> dict:
     return health()
 
 
-@app.on_event("startup")
-async def startup() -> None:
-    await initialize_feedback_processor()
-    logger.info("Verification Feedback service started")
-
-
-@app.on_event("shutdown")
-async def shutdown() -> None:
-    await shutdown_feedback_processor()
-    logger.info("Verification Feedback service shutdown")
+## startup/shutdown handled in lifespan

@@ -655,9 +655,10 @@ class ModelRouterAPM:
     
     def set_selected_model(self, model_name: str, confidence_score: float, reasoning: str):
         """Set the selected model for the current operation."""
-        # This would be called within the model selection context
-        # to record the decision details
-        pass
+        # Record selection details for downstream spans/metrics
+        self.selected_model = model_name
+        self.selected_model_confidence = confidence_score
+        self.selected_model_reasoning = reasoning
 
 
 # Global instance

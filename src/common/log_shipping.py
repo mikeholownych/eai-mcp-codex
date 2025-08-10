@@ -256,7 +256,12 @@ class LogShippingManager:
                     'trace_flags': span_context.trace_flags
                 })
         except Exception:
-            pass
+            # Tracing context not available; proceed without it
+            context.update({
+                'trace_id': None,
+                'span_id': None,
+                'trace_flags': None,
+            })
         
         # Sanitize context
         sanitized_context = self.sanitizer.sanitize_dict(context)

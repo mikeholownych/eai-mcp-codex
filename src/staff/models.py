@@ -79,8 +79,10 @@ class User(UserBase):
     total_spent: float = 0.0
     api_calls: int = 0
 
-    class Config:
-        from_attributes = True
+    # Pydantic v2 model config
+    model_config = {
+        "from_attributes": True,
+    }
 
 
 class UserListResponse(BaseModel):
@@ -139,8 +141,9 @@ class Ticket(TicketBase):
     response_time: Optional[float] = None  # in hours
     message_count: int = 1
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True,
+    }
 
 
 class TicketListResponse(BaseModel):

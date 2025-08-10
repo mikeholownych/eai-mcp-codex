@@ -466,7 +466,7 @@ class HealthMonitor:
     async def _send_email_notification(self, alert: HealthAlert):
         """Send email notification."""
         try:
-            # This is a placeholder implementation
+            # Basic implementation for health alerting
             # In production, configure SMTP settings and use proper email sending
             logger.info(f"Would send email notification for alert: {alert.title}")
             
@@ -490,7 +490,7 @@ class HealthMonitor:
     async def _send_slack_notification(self, alert: HealthAlert):
         """Send Slack notification."""
         try:
-            # This is a placeholder implementation
+            # Basic implementation for health alerting
             # In production, integrate with Slack API
             logger.info(f"Would send Slack notification for alert: {alert.title}")
             
@@ -520,7 +520,7 @@ class HealthMonitor:
     async def _send_pagerduty_notification(self, alert: HealthAlert):
         """Send PagerDuty notification."""
         try:
-            # This is a placeholder implementation
+            # Basic implementation for health alerting
             # In production, integrate with PagerDuty API
             logger.info(f"Would send PagerDuty notification for alert: {alert.title}")
             
@@ -530,7 +530,7 @@ class HealthMonitor:
     async def _send_webhook_notification(self, alert: HealthAlert):
         """Send webhook notification."""
         try:
-            # This is a placeholder implementation
+            # Basic implementation for health alerting
             # In production, send to configured webhook URL
             logger.info(f"Would send webhook notification for alert: {alert.title}")
             

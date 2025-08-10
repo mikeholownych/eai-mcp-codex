@@ -182,6 +182,9 @@ class DatabaseManager:
         try:
             async with self.get_connection() as conn:
                 records = await conn.fetch(query, *params)
+                # If MockAsyncpgConnection returns list[dict], pass through
+                if records and isinstance(records[0], dict):
+                    return records  # already list of dicts
                 return [dict(r) for r in records]
         except Exception as e:
             logger.error(f"Query failed: {e}")
@@ -299,26 +302,92 @@ def get_connection(dsn: str) -> None:
 
 
 
-
-
 def dict_factory(cursor, row):  # Not directly used with asyncpg fetch methods
     logger.warning("dict_factory is not directly used with asyncpg fetch methods.")
     return {cursor.description[idx][0]: value for idx, value in enumerate(row)}
 
 
-async def close(self) -> None:
-    """Close the database connection pool (mock implementation)."""
-    pass
-
-
 class MockAsyncpgConnection:
+    def __init__(self):
+        # very lightweight in-memory store keyed by table
+        self._tables: Dict[str, list[Dict[str, Any]]] = {}
+
     async def fetch(self, query: str, *args):
+        # Simple matcher for workflow queries in tests
+        if query.strip().lower().startswith("select * from workflows where id ="):
+            workflow_id = args[0]
+            rows = self._tables.get("workflows", [])
+            return [r for r in rows if r.get("id") == workflow_id]
+        if query.strip().lower().startswith("select * from workflow_steps where workflow_id ="):
+            workflow_id = args[0]
+            rows = self._tables.get("workflow_steps", [])
+            return [r for r in rows if r.get("workflow_id") == workflow_id]
         return []
 
     async def execute(self, query: str, *args):
+        sql = query.strip().lower()
+        if sql.startswith("insert into workflows"):
+            row = {
+                "id": args[0],
+                "name": args[1],
+                "description": args[2],
+                "status": args[3],
+                "execution_mode": args[4],
+                "priority": args[5],
+                "created_by": args[6],
+                "created_at": args[7],
+                "updated_at": args[8],
+                "started_at": args[9],
+                "completed_at": args[10],
+                "global_parameters": args[11],
+                "success_criteria": args[12],
+                "failure_handling": args[13],
+                "notifications": args[14],
+                "metadata": args[15],
+            }
+            self._tables.setdefault("workflows", []).append(row)
+            return "INSERT 0 1"
+        if sql.startswith("insert into workflow_steps"):
+            row = {
+                "id": args[0],
+                "workflow_id": args[1],
+                "name": args[2],
+                "description": args[3],
+                "step_type": args[4],
+                "service_name": args[5],
+                "endpoint": args[6],
+                "parameters": args[7],
+                "expected_output": args[8],
+                "timeout_seconds": args[9],
+                "retry_count": args[10],
+                "max_retries": args[11],
+                "status": args[12],
+                "order_index": args[13],
+                "depends_on": args[14],
+                "conditions": args[15],
+                "created_at": args[16],
+                "started_at": args[17],
+                "completed_at": args[18],
+                "result": args[19],
+                "error_message": args[20],
+                "metadata": args[21],
+            }
+            self._tables.setdefault("workflow_steps", []).append(row)
+            return "INSERT 0 1"
+        if sql.startswith("update workflows set"):
+            # no-op for tests
+            return "UPDATE 0 1"
+        if sql.startswith("update workflow_steps set"):
+            return "UPDATE 0 1"
+        if sql.startswith("insert into workflow_executions"):
+            return "INSERT 0 1"
         return "MOCK_COMMAND_OK"
 
     async def fetchrow(self, query: str, *args):
+        rows = await self.fetch(query, *args)
+        return rows[0] if rows else None
+
+    async def close(self) -> None:
         return None
 
     async def close(self) -> None:
@@ -326,8 +395,12 @@ class MockAsyncpgConnection:
 
 
 class MockAsyncpgPool:
+    def __init__(self):
+        # Share a single connection so state persists across acquire calls
+        self._conn = MockAsyncpgConnection()
+
     async def acquire(self) -> MockAsyncpgConnection:
-        return MockAsyncpgConnection()
+        return self._conn
 
     async def release(self, conn: MockAsyncpgConnection) -> None:
         return None

@@ -15,13 +15,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, Field
 
-from .common.enhanced_health_check import HealthStatus, HealthCheckType
-from .common.health_aggregator import get_health_aggregator
-from .common.health_monitoring import get_health_monitor, AlertRule, AlertSeverity, AlertType
-from .common.health_check_testing import get_health_check_tester, get_health_check_performance_tester
-from .common.logging import get_logger, setup_logging
-from .common.tracing import get_tracer, TracingConfig, InstrumentationManager
-from .common.metrics import get_metrics_collector
+from src.common.enhanced_health_check import HealthStatus, HealthCheckType
+from src.common.health_aggregator import get_health_aggregator
+from src.common.health_monitoring import (
+    get_health_monitor,
+    AlertRule,
+    AlertSeverity,
+    AlertType,
+)
+from src.common.health_check_testing import (
+    get_health_check_tester,
+    get_health_check_performance_tester,
+)
+from src.common.logging import get_logger, setup_logging
+from src.common.tracing import get_tracer, TracingConfig, InstrumentationManager
+from src.common.metrics import get_metrics_collector
 
 # Initialize logging and tracing
 logger = get_logger("health_service")
@@ -335,20 +343,22 @@ async def run_tests(request: TestRequest, background_tasks: BackgroundTasks):
 
 
 @app.get("/tests/results", response_model=Dict[str, Any])
-async def get_test_results(suite_name: Optional[str] = None):
+async def get_test_results_endpoint(suite_name: Optional[str] = None):
     """Get test results."""
     try:
-        return await get_test_results(suite_name)
+        from src.common.health_check_testing import get_test_results as _get_results
+        return await _get_results(suite_name)
     except Exception as e:
         logger.error(f"Failed to get test results: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get test results: {str(e)}")
 
 
 @app.get("/tests/summary", response_model=Dict[str, Any])
-async def get_test_summary():
+async def get_test_summary_endpoint():
     """Get test summary."""
     try:
-        return await get_test_summary()
+        from src.common.health_check_testing import get_test_summary as _get_summary
+        return await _get_summary()
     except Exception as e:
         logger.error(f"Failed to get test summary: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get test summary: {str(e)}")

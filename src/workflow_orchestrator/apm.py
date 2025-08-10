@@ -169,6 +169,13 @@ class WorkflowOrchestratorAPM:
         # History limits
         self.max_coordination_history = 1000
         self.max_communication_history = 5000
+        
+        # Current context identifiers
+        self.current_workflow_id: Optional[str] = None
+        self.current_step_id: Optional[str] = None
+        self.current_agent_id: Optional[str] = None
+        self.current_coordination_id: Optional[str] = None
+        self.current_communication_id: Optional[str] = None
     
     def _initialize_metrics(self):
         """Initialize OpenTelemetry metrics for Workflow Orchestrator."""
@@ -897,27 +904,27 @@ class WorkflowOrchestratorAPM:
     
     def set_workflow_id(self, workflow_id: str):
         """Set the workflow ID for the current operation."""
-        # This would be called within the workflow context
-        # to associate metrics with the workflow
-        pass
+        # Associate metrics with the workflow context
+        self.current_workflow_id = workflow_id
     
     def set_step_id(self, step_id: str, workflow_id: str, agent_id: str):
         """Set the step ID for the current operation."""
-        # This would be called within the step context
-        # to associate metrics with the step
-        pass
+        # Associate metrics with the step context
+        self.current_step_id = step_id
+        self.current_workflow_id = workflow_id
+        self.current_agent_id = agent_id
     
     def set_coordination_id(self, coordination_id: str, workflow_id: str):
         """Set the coordination ID for the current operation."""
-        # This would be called within the coordination context
-        # to associate metrics with the coordination
-        pass
+        # Associate metrics with the coordination context
+        self.current_coordination_id = coordination_id
+        self.current_workflow_id = workflow_id
     
     def set_communication_id(self, communication_id: str, workflow_id: str):
         """Set the communication ID for the current operation."""
-        # This would be called within the communication context
-        # to associate metrics with the communication
-        pass
+        # Associate metrics with the communication context
+        self.current_communication_id = communication_id
+        self.current_workflow_id = workflow_id
 
 
 # Global instance

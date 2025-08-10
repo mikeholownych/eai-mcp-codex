@@ -31,6 +31,7 @@ from opentelemetry.trace.span import Span
 
 from .tracing import get_tracing_config
 from .trace_sampling import get_trace_sampling_manager
+import os
 from .trace_exporters import get_trace_exporter_manager
 
 logger = logging.getLogger(__name__)
@@ -101,7 +102,10 @@ class TraceValidator:
         """Initialize trace validator."""
         self.tracing_config = get_tracing_config()
         self.sampling_manager = get_trace_sampling_manager()
-        self.exporter_manager = get_trace_exporter_manager()
+        if os.getenv("TESTING_MODE", "").lower() == "true":
+            self.exporter_manager = None
+        else:
+            self.exporter_manager = get_trace_exporter_manager()
         
         # Validation rules
         self.required_attributes = {

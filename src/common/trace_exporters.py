@@ -631,17 +631,26 @@ class TraceMetricsCollector:
 
 
 # Global instance
-trace_exporter_manager = TraceExporterManager()
+testing_mode = os.getenv("TESTING_MODE", "").lower() == "true"
+trace_exporter_manager = TraceExporterManager() if not testing_mode else None
 
 
 def get_trace_exporter_manager() -> TraceExporterManager:
     """Get the global trace exporter manager."""
+    if os.getenv("TESTING_MODE", "").lower() == "true":
+        raise RuntimeError("Trace exporters are disabled in testing mode")
     return trace_exporter_manager
 
 
 def initialize_trace_exporters(service_name: str, service_version: str = "1.0.0",
                             environment: str = "development"):
     """Initialize trace exporters for a service."""
+    if os.getenv("TESTING_MODE", "").lower() == "true":
+        # No-op in testing mode
+        class _NoopMetrics:
+            def __init__(self):
+                self.meter_provider = MeterProvider()
+        return None, _NoopMetrics()
     trace_exporter_manager.initialize_providers(
         service_name, service_version, environment
     )
@@ -654,7 +663,8 @@ def initialize_trace_exporters(service_name: str, service_version: str = "1.0.0"
 
 def shutdown_trace_exporters():
     """Shutdown all trace exporters."""
-    trace_exporter_manager.shutdown()
+    if trace_exporter_manager is not None:
+        trace_exporter_manager.shutdown()
 
 
 def get_exporter_status(exporter_type: ExporterType) -> Dict[str, Any]:

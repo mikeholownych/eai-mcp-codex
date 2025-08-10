@@ -639,8 +639,12 @@ async def get_worktree_manager() -> WorktreeManager:
 
 
 # Legacy function for backward compatibility
-def create(path: str) -> str:
-    """Create a directory representing a worktree."""
+async def create(path: str) -> str:
+    """Create a directory representing a worktree.
+
+    Async to match test expectations and to keep interface consistent with
+    other async operations in this module.
+    """
     worktree = Path(path)
     worktree.mkdir(parents=True, exist_ok=True)
     return str(worktree.resolve())

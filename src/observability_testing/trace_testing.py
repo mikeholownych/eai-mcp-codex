@@ -32,6 +32,7 @@ from ..common.trace_validation import (
 )
 from ..common.trace_propagation import TracePropagationUtils
 from ..common.trace_sampling import get_trace_sampling_manager
+import os
 from ..common.trace_exporters import get_trace_exporter_manager
 
 logger = logging.getLogger(__name__)
@@ -89,7 +90,11 @@ class TraceTestingManager:
         self.integration_tester = TraceIntegrationTester()
         self.propagation_utils = TracePropagationUtils()
         self.sampling_manager = get_trace_sampling_manager()
-        self.exporter_manager = get_trace_exporter_manager()
+        # In testing mode, disable exporter manager to avoid network calls
+        if os.getenv("TESTING_MODE", "").lower() == "true":
+            self.exporter_manager = None
+        else:
+            self.exporter_manager = get_trace_exporter_manager()
         
         # Test metrics
         self.test_counter = Counter(

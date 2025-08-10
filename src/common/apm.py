@@ -4,6 +4,7 @@ Provides comprehensive performance monitoring, profiling, and analysis capabilit
 """
 
 import logging
+import os
 import time
 import threading
 import asyncio
@@ -720,13 +721,24 @@ def get_apm() -> APMInstrumentation:
     """Get the global APM instance."""
     global _apm_instance
     if _apm_instance is None:
-        _apm_instance = APMInstrumentation()
+        testing_mode = os.getenv("TESTING_MODE", "").lower() == "true"
+        apm_enabled_env = os.getenv("APM_ENABLED", "true").lower() == "true"
+        config = APMConfig(enabled=(not testing_mode) and apm_enabled_env)
+        _apm_instance = APMInstrumentation(config)
     return _apm_instance
 
 
 def initialize_apm(config: APMConfig = None):
     """Initialize the global APM instance."""
     global _apm_instance
+    # Respect testing mode and env override when initializing explicitly
+    if config is None:
+        testing_mode = os.getenv("TESTING_MODE", "").lower() == "true"
+        apm_enabled_env = os.getenv("APM_ENABLED", "true").lower() == "true"
+        config = APMConfig(enabled=(not testing_mode) and apm_enabled_env)
+    else:
+        if os.getenv("TESTING_MODE", "").lower() == "true":
+            config.enabled = False
     _apm_instance = APMInstrumentation(config)
     return _apm_instance
 
@@ -764,8 +776,9 @@ def trace_http_request(method: str, url: str, status_code: int, duration: float)
         "http.status_code": status_code
     }
     
-    with apm.trace_operation(f"{method} {url}", APMOperationType.HTTP_REQUEST, attributes):
-        pass
+    with apm.trace_operation(f"{method} {url}", APMOperationType.HTTP_REQUEST, attributes) as span:
+        if span is not None:
+            span.set_attribute("http.reported_duration_ms", duration * 1000)
 
 
 def trace_database_query(query: str, duration: float, success: bool = True):
@@ -776,8 +789,9 @@ def trace_database_query(query: str, duration: float, success: bool = True):
         "db.success": success
     }
     
-    with apm.trace_operation("database_query", APMOperationType.DATABASE_QUERY, attributes):
-        pass
+    with apm.trace_operation("database_query", APMOperationType.DATABASE_QUERY, attributes) as span:
+        if span is not None:
+            span.set_attribute("db.reported_duration_ms", duration * 1000)
 
 
 def trace_external_api(service: str, endpoint: str, duration: float, success: bool = True):
@@ -789,5 +803,6 @@ def trace_external_api(service: str, endpoint: str, duration: float, success: bo
         "external_api.success": success
     }
     
-    with apm.trace_operation(f"{service}_{endpoint}", APMOperationType.EXTERNAL_API, attributes):
-        pass
+    with apm.trace_operation(f"{service}_{endpoint}", APMOperationType.EXTERNAL_API, attributes) as span:
+        if span is not None:
+            span.set_attribute("external_api.reported_duration_ms", duration * 1000)

@@ -501,28 +501,28 @@ def get_health_checker(service_name: str = "default") -> HealthChecker:
         _health_checker = HealthChecker(service_name)
 
         # Register common checks
-        _health_checker.register_check(
+        _health_checker.register_simple_check(
             "memory", lambda: check_memory_usage(), critical=False
         )
-        _health_checker.register_check(
+        _health_checker.register_simple_check(
             "disk", lambda: check_disk_usage(), critical=False
         )
 
     return _health_checker
 
 
-def health() -> Dict[str, str]:
-    """Return the standard health payload (legacy compatibility)."""
-    return {"status": "ok"}
+async def health() -> Dict[str, Any]:
+    """Return a minimal async health check consistent with tests expecting 'healthy'."""
+    return {"status": "healthy"}
 
 
-def detailed_health(service_name: str = "default") -> Dict[str, Any]:
+async def detailed_health(service_name: str = "default") -> Dict[str, Any]:
     """Return detailed health information."""
     checker = get_health_checker(service_name)
-    return asyncio.get_event_loop().run_until_complete(checker.run_all_checks())
+    return await checker.run_all_checks()
 
 
 def register_health_check(name: str, check_func: callable, critical: bool = True):
     """Register a custom health check (convenience function)."""
     checker = get_health_checker()
-    checker.register_check(name, check_func, critical)
+    checker.register_simple_check(name, check_func, critical=critical)

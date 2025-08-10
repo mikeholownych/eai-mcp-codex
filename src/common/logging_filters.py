@@ -196,19 +196,22 @@ class PerformanceMetricsFilter(logging.Filter):
             record.memory_vms_mb = memory_info.vms / 1024 / 1024
             record.memory_percent = process.memory_percent()
         except Exception:
-            pass
+            # If resource stats unavailable, set safe defaults
+            record.memory_rss_mb = None
+            record.memory_vms_mb = None
+            record.memory_percent = None
         
         # Add CPU usage information
         try:
             record.cpu_percent = psutil.cpu_percent(interval=None)
         except Exception:
-            pass
+            record.cpu_percent = None
         
         # Add thread count
         try:
             record.thread_count = process.num_threads()
         except Exception:
-            pass
+            record.thread_count = None
         
         return True
     

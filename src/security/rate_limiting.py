@@ -12,7 +12,7 @@ from functools import wraps
 from enum import Enum
 
 from ..common.redis_client import RedisClient
-from ..common.settings import Settings
+from ..common.settings import BaseServiceSettings as Settings
 
 
 class RateLimitStrategy(str, Enum):
@@ -301,9 +301,45 @@ def rate_limit(
     def decorator(func):
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs):
-            # This would need to be injected via dependency injection
-            # in a real FastAPI application
-            pass
+            limiter: Optional[RateLimiter] = None
+            identifier: Optional[str] = None
+
+            # Try to obtain limiter from app state
+            try:
+                app_state = getattr(request, "app", None)
+                if app_state is not None:
+                    limiter = getattr(request.app.state, "rate_limiter", None)
+            except Exception:
+                limiter = None
+
+            # Fallback: construct identifier via simple key function or client IP
+            if limiter is None and key_func is not None:
+                identifier = key_func(request)
+            elif limiter is not None:
+                identifier = limiter.get_client_identifier(request)
+            else:
+                # Basic identifier from client IP as a safe default
+                client = request.client.host if request.client else "unknown"
+                identifier = f"ip:{client}"
+
+            # If we have a limiter, enforce; otherwise best-effort allow
+            if limiter is not None:
+                allowed, info = await limiter.check_rate_limit(
+                    identifier, limit, window_seconds, strategy
+                )
+                if not allowed:
+                    raise HTTPException(
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                        detail="Rate limit exceeded",
+                        headers={
+                            "X-RateLimit-Limit": str(info["limit"]),
+                            "X-RateLimit-Remaining": str(info["remaining"]),
+                            "X-RateLimit-Reset": str(info["reset_time"]),
+                            "Retry-After": str(info["window_seconds"]),
+                        },
+                    )
+
+            return await func(request, *args, **kwargs)
 
         return wrapper
 

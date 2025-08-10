@@ -807,7 +807,7 @@ async def check_process_running(process_name: str) -> Dict[str, Any]:
                         'status': proc.info['status'],
                     })
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                pass
+                continue
         
         if processes:
             return {

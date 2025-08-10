@@ -9,7 +9,7 @@ services:
       - LOG_LEVEL=INFO
       - DEBUG_MODE=false
       - WORKERS=4
-      - ANTHROPIC_API_KEY=YOUR_ANTHROPIC_API_KEY
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:?set_in_env_or_vault}
     deploy:
       replicas: 2
       resources:

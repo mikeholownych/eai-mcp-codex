@@ -104,12 +104,21 @@ class TracingConfig:
         """Initialize OpenTelemetry tracing."""
         if self._initialized:
             return
-            
+        
+        # In testing mode, return no-op tracer/meter without exporters
+        testing_mode = os.getenv('TESTING_MODE', '').lower() == 'true'
+        service_name = service_name or self.config.get('service_name', 'unknown-service')
+        if testing_mode:
+            self.tracer = trace.get_tracer(service_name)
+            self.meter = metrics.get_meter(service_name)
+            self._initialized = True
+            logger.info("Tracing initialized in testing mode (no exporters)")
+            return
+        
         if not self.config.get('enabled', True):
             logger.info("Tracing is disabled")
             return
             
-        service_name = service_name or self.config.get('service_name', 'unknown-service')
         
         # Set up resource
         resource = Resource.create(attributes={
@@ -151,18 +160,15 @@ class TracingConfig:
     def _create_sampler(self) -> sampling.Sampler:
         """Create appropriate sampler based on configuration."""
         sampling_config = self.config.get('otel', {}).get('sampling', {})
-        # Safely parse ratio, handling env-template strings like '${TRACE_SAMPLE_RATIO:-1.0}'
         raw_ratio = sampling_config.get('ratio', 1.0)
-        try:
+        # Support env-style placeholders that may appear in YAML defaults
+        if isinstance(raw_ratio, str) and raw_ratio.startswith("${"):
+            # Default to 1.0 when placeholder not expanded
+            ratio = 1.0
+        else:
             ratio = float(raw_ratio)
-        except (TypeError, ValueError):
-            # Fallback to env var or default
-            env_ratio = os.getenv('TRACE_SAMPLE_RATIO', '1.0')
-            try:
-                ratio = float(env_ratio)
-            except ValueError:
-                ratio = 1.0
-        # Use simple ratio-based sampling. Adaptive sampling is not available in standard SDK.
+        
+        # Use simple ratio-based sampling (Adaptive is not available in standard SDK)
         return sampling.TraceIdRatioBased(ratio)
     
     def _setup_exporters(self) -> None:
@@ -183,7 +189,7 @@ class TracingConfig:
                 processors.append(BatchSpanProcessor(jaeger_exporter))
                 logger.info("Jaeger exporter configured")
             except Exception as e:
-                logger.error(f"Failed to configure Jaeger exporter: {e}")
+                logger.warning(f"Jaeger exporter not configured: {e}")
         
         # OTLP exporter
         if exporters_config.get('otlp', {}).get('enabled', False):
@@ -200,8 +206,11 @@ class TracingConfig:
         
         # Console exporter for development
         if self.config.get('environment', 'development') == 'development':
-            console_exporter = ConsoleSpanExporter()
-            processors.append(BatchSpanProcessor(console_exporter))
+            try:
+                console_exporter = ConsoleSpanExporter()
+                processors.append(BatchSpanProcessor(console_exporter))
+            except Exception as e:
+                logger.warning(f"Console exporter not configured: {e}")
         
         # Add processors to tracer provider
         for processor in processors:

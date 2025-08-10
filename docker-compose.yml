@@ -1228,7 +1228,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - /etc/letsencrypt/live/ethical-ai-insider.com/:/etc/nginx/ssl:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./logs/nginx:/var/log/nginx
     depends_on:
       - frontend
@@ -1618,7 +1618,7 @@ services:
       - mcp-network
     tty: true
     stdin_open: true
-    command: bash -c "pip list && python -c "import os; print(os.environ.get('RABBITMQ_URL'))" && env && pytest tests/ -v"
+    command: bash -c "./dev-tools-command.sh"
     logging:
       driver: "json-file"
 

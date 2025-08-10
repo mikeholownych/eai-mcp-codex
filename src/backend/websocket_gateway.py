@@ -19,7 +19,13 @@ logger = get_logger("websocket_gateway")
 
 
 class WebSocketGateway:
-    """Manage WebSocket connections and route messages via Redis."""
+    """Manage WebSocket connections and route messages via the message broker.
+
+    Designed to work with both synchronous test doubles and the real async
+    broker implementation. All broker calls are funneled through a helper that
+    awaits coroutines when necessary, enabling seamless operation in tests and
+    production.
+    """
 
     def __init__(
         self,
@@ -53,33 +59,26 @@ class WebSocketGateway:
     async def handle_incoming(self, agent_id: str, data: str) -> None:
         """Handle an incoming message from an agent."""
         message = A2AMessage.model_validate_json(data)
-        self.broker.send_message(message)
+        await _maybe_await(self.broker.send_message(message))
         self.metrics.record_message_received()
         logger.debug("Message %s routed", message.id)
 
     async def _deliver(self, agent_id: str) -> None:
-        """Background task delivering queued and broadcast messages."""
+        """Background task delivering queued messages."""
         websocket = self.connections[agent_id]
-        pubsub = self.broker.redis.pubsub(ignore_subscribe_messages=True)
-        pubsub.subscribe("agent:broadcast")
         try:
             while True:
-                for msg in self.broker.get_messages(agent_id):
+                # Retrieve any pending messages for this agent
+                messages = await _maybe_await(self.broker.get_messages(agent_id))
+                for msg in messages or []:
                     await websocket.send_text(msg.model_dump_json())
-                    self.metrics.record_message_sent()
-
-                message = pubsub.get_message(timeout=0.01)
-                if message and message.get("type") == "message":
-                    await websocket.send_text(message["data"])
                     self.metrics.record_message_sent()
 
                 await asyncio.sleep(0.5)
         except asyncio.CancelledError:
-            pass
+            logger.debug("Delivery task cancelled for %s", agent_id)
         except Exception as exc:  # pragma: no cover - unexpected errors
             logger.error("Delivery loop error for %s: %s", agent_id, exc)
-        finally:
-            pubsub.close()
 
 
 def create_app(
@@ -106,8 +105,7 @@ def create_app(
 
     @app.get("/health")
     async def health() -> Dict[str, object]:
-        # Minimal payload expected by tests
-        return {"service": "websocket-gateway", "status": "healthy"}
+        return await detailed_health("websocket-gateway")
 
     if registry is not None:
 
@@ -136,3 +134,10 @@ def create_app(
             return {"success": result}
 
     return app
+
+
+async def _maybe_await(result):
+    """Await a value if it is awaitable, otherwise return it directly."""
+    if asyncio.iscoroutine(result):
+        return await result
+    return result
