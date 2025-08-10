@@ -1,0 +1,265 @@
+# Telemetry Configuration
+# AI Agent Collaboration Platform
+
+version: "1.0.0"
+environment: "production"
+privacy_level: "strict"
+
+## Data Collection Settings
+collection:
+  # Event sampling rates (0.0 = disabled, 1.0 = 100%)
+  sampling_rates:
+    user_action: 1.0          # Track all user actions
+    system_event: 1.0         # Track all system events
+    performance_metric: 1.0    # Track all performance metrics
+    error: 1.0                # Track all errors
+    business_metric: 1.0      # Track all business metrics
+  
+  # Batch collection settings
+  batch:
+    max_events: 100           # Max events per batch
+    max_wait_time: 5000       # Max wait time in milliseconds
+    retry_attempts: 3         # Number of retry attempts
+  
+  # Real-time collection settings
+  realtime:
+    enabled: true
+    buffer_size: 1000         # Events in memory buffer
+    flush_interval: 1000      # Flush interval in milliseconds
+
+## Data Processing Settings
+processing:
+  # Event validation
+  validation:
+    strict_mode: true         # Strict JSON schema validation
+    drop_invalid: false       # Don't drop invalid events, log them
+    max_event_size: 1048576   # Max event size in bytes (1MB)
+  
+  # Event enrichment
+  enrichment:
+    add_timestamp: true       # Add server timestamp
+    add_session_id: true      # Add session identifier
+    add_correlation_id: true  # Add correlation ID for tracing
+    add_user_context: true    # Add user context (non-PII)
+    add_system_context: true  # Add system context
+  
+  # PII handling
+  pii:
+    detection_enabled: true   # Enable PII detection
+    masking_enabled: true     # Enable PII masking
+    encryption_enabled: true  # Enable PII encryption
+    retention_days: 30        # PII retention period
+
+## Data Storage Settings
+storage:
+  # Primary storage (real-time queries)
+  primary:
+    type: "timescaledb"      # Time-series database
+    connection_pool: 20      # Connection pool size
+    batch_size: 1000         # Batch insert size
+    compression_enabled: true # Enable data compression
+  
+  # Secondary storage (long-term analytics)
+  secondary:
+    type: "s3"               # Object storage
+    retention_days: 365      # Data retention period
+    compression_format: "parquet" # Storage format
+    partitioning: "daily"    # Data partitioning strategy
+  
+  # Cache settings
+  cache:
+    type: "redis"            # Cache backend
+    ttl_seconds: 3600       # Cache TTL (1 hour)
+    max_memory: "2gb"        # Max cache memory
+
+## TTF Metrics Configuration
+ttf_metrics:
+  # TTF calculation settings
+  calculation:
+    precision: "millisecond"  # Time precision
+    max_ttf_hours: 24        # Max TTF to track
+    outlier_threshold: 2.0    # Standard deviations for outliers
+  
+  # TTF targets (in minutes)
+  targets:
+    ttf_project: 5            # Signup to first project
+    ttf_agent: 10             # First project to first agent
+    ttf_workflow: 15          # First agent to first workflow
+    ttf_success: 30           # First workflow to success
+    ttf_complete: 60          # Total TTF
+  
+  # TTF alerting
+  alerting:
+    warning_threshold: 75     # Warning at 75 minutes
+    critical_threshold: 120   # Critical at 120 minutes
+    escalation_threshold: 180 # Escalation at 180 minutes
+
+## Performance Monitoring
+performance:
+  # API performance tracking
+  api:
+    response_time_threshold: 200    # Response time threshold in ms
+    error_rate_threshold: 0.01     # Error rate threshold (1%)
+    throughput_threshold: 1000     # Requests per second
+  
+  # Agent performance tracking
+  agent:
+    startup_time_threshold: 2000   # Agent startup time in ms
+    communication_latency: 100     # Inter-agent communication latency
+    consensus_time_threshold: 5000 # Consensus building time
+  
+  # Workflow performance tracking
+  workflow:
+    execution_time_threshold: 5000 # Workflow execution time in ms
+    resource_usage_threshold: 0.8  # Resource usage threshold (80%)
+    scalability_threshold: 100     # Concurrent workflows
+
+## Security & Compliance
+security:
+  # Data encryption
+  encryption:
+    at_rest: true             # Encrypt data at rest
+    in_transit: true          # Encrypt data in transit
+    algorithm: "AES-256-GCM"  # Encryption algorithm
+  
+  # Access control
+  access_control:
+    rbac_enabled: true        # Role-based access control
+    audit_logging: true       # Audit trail logging
+    data_masking: true        # Sensitive data masking
+  
+  # Compliance
+  compliance:
+    gdpr_compliant: true      # GDPR compliance
+    ccpa_compliant: true      # CCPA compliance
+    sox_compliant: true       # SOX compliance
+    data_residency: "us-east-1" # Data residency region
+
+## Integration Settings
+integrations:
+  # Analytics platforms
+  analytics:
+    - name: "mixpanel"
+      enabled: true
+      api_key: "${MIXPANEL_API_KEY}"
+      project_id: "${MIXPANEL_PROJECT_ID}"
+    
+    - name: "amplitude"
+      enabled: true
+      api_key: "${AMPLITUDE_API_KEY}"
+      project_id: "${AMPLITUDE_PROJECT_ID}"
+    
+    - name: "segment"
+      enabled: true
+      write_key: "${SEGMENT_WRITE_KEY}"
+      project_id: "${SEGMENT_PROJECT_ID}"
+  
+  # Monitoring platforms
+  monitoring:
+    - name: "datadog"
+      enabled: true
+      api_key: "${DATADOG_API_KEY}"
+      app_key: "${DATADOG_APP_KEY}"
+    
+    - name: "newrelic"
+      enabled: true
+      license_key: "${NEWRELIC_LICENSE_KEY}"
+      account_id: "${NEWRELIC_ACCOUNT_ID}"
+    
+    - name: "grafana"
+      enabled: true
+      url: "${GRAFANA_URL}"
+      api_key: "${GRAFANA_API_KEY}"
+  
+  # Alerting platforms
+  alerting:
+    - name: "pagerduty"
+      enabled: true
+      service_key: "${PAGERDUTY_SERVICE_KEY}"
+      escalation_policy: "${PAGERDUTY_ESCALATION_POLICY}"
+    
+    - name: "slack"
+      enabled: true
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#telemetry-alerts"
+    
+    - name: "email"
+      enabled: true
+      smtp_server: "${SMTP_SERVER}"
+      from_address: "telemetry@company.com"
+
+## Data Retention & Archival
+retention:
+  # Data retention periods
+  periods:
+    real_time: "30d"          # Real-time data retention
+    analytics: "1y"            # Analytics data retention
+    compliance: "7y"           # Compliance data retention
+    archived: "10y"            # Archived data retention
+  
+  # Archival settings
+  archival:
+    enabled: true
+    schedule: "0 2 * * *"     # Daily at 2 AM
+    compression_ratio: 0.3     # Target compression ratio
+    storage_class: "glacier"   # Storage class for archived data
+
+## Error Handling
+error_handling:
+  # Error logging
+  logging:
+    level: "info"              # Log level
+    format: "json"             # Log format
+    max_file_size: "100mb"     # Max log file size
+    max_files: 10              # Max log files to keep
+  
+  # Error recovery
+  recovery:
+    retry_enabled: true        # Enable retry logic
+    max_retries: 3             # Maximum retry attempts
+    backoff_multiplier: 2.0    # Exponential backoff multiplier
+    max_backoff: 300           # Maximum backoff in seconds
+  
+  # Circuit breaker
+  circuit_breaker:
+    enabled: true
+    failure_threshold: 5       # Failures before opening
+    recovery_timeout: 60       # Recovery timeout in seconds
+    expected_call_count: 10    # Expected calls in half-open state
+
+## Development & Testing
+development:
+  # Development mode settings
+  dev_mode:
+    enabled: false             # Disable in production
+    log_level: "debug"         # Debug logging in dev
+    mock_data: false           # Use mock data in dev
+  
+  # Testing settings
+  testing:
+    enabled: true
+    mock_telemetry: true       # Mock telemetry in tests
+    test_data_retention: "1d"  # Test data retention
+    performance_testing: true  # Enable performance testing
+
+## Deployment & Scaling
+deployment:
+  # Auto-scaling settings
+  scaling:
+    enabled: true
+    min_instances: 2           # Minimum instances
+    max_instances: 10          # Maximum instances
+    target_cpu_utilization: 70 # Target CPU utilization
+  
+  # Health checks
+  health_checks:
+    enabled: true
+    interval: 30               # Health check interval in seconds
+    timeout: 5                 # Health check timeout in seconds
+    failure_threshold: 3       # Failures before unhealthy
+  
+  # Graceful shutdown
+  shutdown:
+    enabled: true
+    timeout: 30                # Shutdown timeout in seconds
+    drain_connections: true
