@@ -1,0 +1,627 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Agent Collaboration Platform Telemetry Events Schema",
+  "description": "Strict schema for all telemetry events with PII flags and validation rules",
+  "type": "object",
+  "properties": {
+    "event_schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Schema version for event validation",
+      "example": "1.0.0"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event_name", "event_type", "properties", "pii_flags", "required_properties"],
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "pattern": "^[a-z_]+$",
+            "description": "Unique event identifier in snake_case"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": ["user_action", "system_event", "performance_metric", "error", "business_metric"],
+            "description": "Category of the event"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the event"
+          },
+          "properties": {
+            "type": "object",
+            "description": "Event properties with types and descriptions"
+          },
+          "pii_flags": {
+            "type": "object",
+            "description": "PII sensitivity flags for each property"
+          },
+          "required_properties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of required properties for this event"
+          },
+          "example": {
+            "type": "object",
+            "description": "Example event data"
+          }
+        }
+      }
+    }
+  },
+  "required": ["event_schema_version", "events"],
+  "events": [
+    {
+      "event_name": "user_signed_up",
+      "event_type": "user_action",
+      "description": "User completes account registration",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique user identifier"
+        },
+        "signup_method": {
+          "type": "string",
+          "enum": ["email", "github", "google", "sso"],
+          "description": "Authentication method used"
+        },
+        "plan_tier": {
+          "type": "string",
+          "enum": ["free", "pro", "enterprise"],
+          "description": "Selected plan at signup"
+        },
+        "referrer": {
+          "type": "string",
+          "description": "Referral source or campaign"
+        },
+        "signup_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of signup"
+        },
+        "user_agent": {
+          "type": "string",
+          "description": "Browser/device information"
+        },
+        "ip_address_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of IP address"
+        }
+      },
+      "pii_flags": {
+        "user_id": false,
+        "signup_method": false,
+        "plan_tier": false,
+        "referrer": false,
+        "signup_timestamp": false,
+        "user_agent": true,
+        "ip_address_hash": true
+      },
+      "required_properties": ["user_id", "signup_method", "plan_tier", "signup_timestamp"],
+      "example": {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "signup_method": "github",
+        "plan_tier": "free",
+        "referrer": "github_explore",
+        "signup_timestamp": "2024-01-15T10:30:00Z",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        "ip_address_hash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
+      }
+    },
+    {
+      "event_name": "user_signed_in",
+      "event_type": "user_action",
+      "description": "User successfully authenticates",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique user identifier"
+        },
+        "signin_method": {
+          "type": "string",
+          "enum": ["email", "github", "google", "sso"],
+          "description": "Authentication method used"
+        },
+        "signin_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of signin"
+        },
+        "session_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique session identifier"
+        },
+        "ip_address_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of IP address"
+        }
+      },
+      "pii_flags": {
+        "user_id": false,
+        "signin_method": false,
+        "signin_timestamp": false,
+        "session_id": false,
+        "ip_address_hash": true
+      },
+      "required_properties": ["user_id", "signin_method", "signin_timestamp", "session_id"],
+      "example": {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "signin_method": "github",
+        "signin_timestamp": "2024-01-15T14:30:00Z",
+        "session_id": "660e8400-e29b-41d4-a716-446655440000",
+        "ip_address_hash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"
+      }
+    },
+    {
+      "event_name": "first_project_created",
+      "event_type": "user_action",
+      "description": "User creates their first project",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique user identifier"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique project identifier"
+        },
+        "project_name": {
+          "type": "string",
+          "description": "Name of the project"
+        },
+        "project_type": {
+          "type": "string",
+          "enum": ["web_app", "api", "cli", "library", "other"],
+          "description": "Type of project created"
+        },
+        "time_from_signup_minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minutes elapsed since user signup"
+        },
+        "creation_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of project creation"
+        }
+      },
+      "pii_flags": {
+        "user_id": false,
+        "project_id": false,
+        "project_name": true,
+        "project_type": false,
+        "time_from_signup_minutes": false,
+        "creation_timestamp": false
+      },
+      "required_properties": ["user_id", "project_id", "project_name", "project_type", "time_from_signup_minutes", "creation_timestamp"],
+      "example": {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "project_id": "770e8400-e29b-41d4-a716-446655440000",
+        "project_name": "My First AI Agent",
+        "project_type": "web_app",
+        "time_from_signup_minutes": 45,
+        "creation_timestamp": "2024-01-15T11:15:00Z"
+      }
+    },
+    {
+      "event_name": "first_agent_created",
+      "event_type": "user_action",
+      "description": "User creates their first AI agent",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique user identifier"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Project identifier"
+        },
+        "agent_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique agent identifier"
+        },
+        "agent_type": {
+          "type": "string",
+          "enum": ["planner", "architect", "developer", "qa", "security", "domain_expert"],
+          "description": "Type of AI agent created"
+        },
+        "agent_model": {
+          "type": "string",
+          "enum": ["claude_o3", "claude_sonnet_4", "claude_sonnet_3_7"],
+          "description": "AI model used for the agent"
+        },
+        "time_from_project_creation_minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minutes elapsed since project creation"
+        },
+        "creation_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of agent creation"
+        }
+      },
+      "pii_flags": {
+        "user_id": false,
+        "project_id": false,
+        "agent_id": false,
+        "agent_type": false,
+        "agent_model": false,
+        "time_from_project_creation_minutes": false,
+        "creation_timestamp": false
+      },
+      "required_properties": ["user_id", "project_id", "agent_id", "agent_type", "agent_model", "time_from_project_creation_minutes", "creation_timestamp"],
+      "example": {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "project_id": "770e8400-e29b-41d4-a716-446655440000",
+        "agent_id": "880e8400-e29b-41d4-a716-446655440000",
+        "agent_type": "planner",
+        "agent_model": "claude_o3",
+        "time_from_project_creation_minutes": 15,
+        "creation_timestamp": "2024-01-15T11:30:00Z"
+      }
+    },
+    {
+      "event_name": "first_workflow_executed",
+      "event_type": "user_action",
+      "description": "User executes their first multi-agent workflow",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique user identifier"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Project identifier"
+        },
+        "workflow_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique workflow identifier"
+        },
+        "workflow_type": {
+          "type": "string",
+          "enum": ["code_review", "feature_development", "bug_fix", "testing", "deployment", "other"],
+          "description": "Type of workflow executed"
+        },
+        "agents_involved": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["planner", "architect", "developer", "qa", "security", "domain_expert"]
+          },
+          "description": "List of agent types involved in workflow"
+        },
+        "time_from_agent_creation_minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minutes elapsed since first agent creation"
+        },
+        "execution_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of workflow execution"
+        }
+      },
+      "pii_flags": {
+        "user_id": false,
+        "project_id": false,
+        "workflow_id": false,
+        "workflow_type": false,
+        "agents_involved": false,
+        "time_from_agent_creation_minutes": false,
+        "execution_timestamp": false
+      },
+      "required_properties": ["user_id", "project_id", "workflow_id", "workflow_type", "agents_involved", "time_from_agent_creation_minutes", "execution_timestamp"],
+      "example": {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "project_id": "770e8400-e29b-41d4-a716-446655440000",
+        "workflow_id": "990e8400-e29b-41d4-a716-446655440000",
+        "workflow_type": "feature_development",
+        "agents_involved": ["planner", "architect", "developer"],
+        "time_from_agent_creation_minutes": 30,
+        "execution_timestamp": "2024-01-15T12:00:00Z"
+      }
+    },
+    {
+      "event_name": "first_success_event",
+      "event_type": "user_action",
+      "description": "User achieves their first successful outcome",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique user identifier"
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Project identifier"
+        },
+        "success_type": {
+          "type": "string",
+          "enum": ["code_generated", "test_passed", "deployment_successful", "bug_fixed", "feature_completed", "other"],
+          "description": "Type of success achieved"
+        },
+        "feature_used": {
+          "type": "string",
+          "description": "Main feature that led to success"
+        },
+        "time_from_workflow_execution_minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minutes elapsed since first workflow execution"
+        },
+        "success_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of success"
+        }
+      },
+      "pii_flags": {
+        "user_id": false,
+        "project_id": false,
+        "success_type": false,
+        "feature_used": false,
+        "time_from_workflow_execution_minutes": false,
+        "success_timestamp": false
+      },
+      "required_properties": ["user_id", "project_id", "success_type", "feature_used", "time_from_workflow_execution_minutes", "success_timestamp"],
+      "example": {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "project_id": "770e8400-e29b-41d4-a716-446655440000",
+        "success_type": "code_generated",
+        "feature_used": "multi_agent_code_generation",
+        "time_from_workflow_execution_minutes": 45,
+        "success_timestamp": "2024-01-15T12:45:00Z"
+      }
+    },
+    {
+      "event_name": "agent_communication",
+      "event_type": "system_event",
+      "description": "AI agents communicate with each other",
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique session identifier"
+        },
+        "workflow_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Workflow identifier"
+        },
+        "sender_agent_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Sending agent identifier"
+        },
+        "receiver_agent_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Receiving agent identifier"
+        },
+        "message_type": {
+          "type": "string",
+          "enum": ["task_request", "task_response", "consensus_check", "verification", "error", "other"],
+          "description": "Type of inter-agent message"
+        },
+        "message_size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Size of message in bytes"
+        },
+        "communication_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of communication"
+        }
+      },
+      "pii_flags": {
+        "session_id": false,
+        "workflow_id": false,
+        "sender_agent_id": false,
+        "receiver_agent_id": false,
+        "message_type": false,
+        "message_size_bytes": false,
+        "communication_timestamp": false
+      },
+      "required_properties": ["session_id", "workflow_id", "sender_agent_id", "receiver_agent_id", "message_type", "message_size_bytes", "communication_timestamp"],
+      "example": {
+        "session_id": "660e8400-e29b-41d4-a716-446655440000",
+        "workflow_id": "990e8400-e29b-41d4-a716-446655440000",
+        "sender_agent_id": "880e8400-e29b-41d4-a716-446655440000",
+        "receiver_agent_id": "aa0e8400-e29b-41d4-a716-446655440000",
+        "message_type": "task_request",
+        "message_size_bytes": 1024,
+        "communication_timestamp": "2024-01-15T12:00:00Z"
+      }
+    },
+    {
+      "event_name": "workflow_performance",
+      "event_type": "performance_metric",
+      "description": "Workflow execution performance metrics",
+      "properties": {
+        "workflow_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique workflow identifier"
+        },
+        "execution_time_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total execution time in milliseconds"
+        },
+        "agents_used": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of agents involved"
+        },
+        "messages_exchanged": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total inter-agent messages"
+        },
+        "consensus_rounds": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of consensus building rounds"
+        },
+        "performance_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of performance measurement"
+        }
+      },
+      "pii_flags": {
+        "workflow_id": false,
+        "execution_time_ms": false,
+        "agents_used": false,
+        "messages_exchanged": false,
+        "consensus_rounds": false,
+        "performance_timestamp": false
+      },
+      "required_properties": ["workflow_id", "execution_time_ms", "agents_used", "messages_exchanged", "consensus_rounds", "performance_timestamp"],
+      "example": {
+        "workflow_id": "990e8400-e29b-41d4-a716-446655440000",
+        "execution_time_ms": 45000,
+        "agents_used": 3,
+        "messages_exchanged": 12,
+        "consensus_rounds": 2,
+        "performance_timestamp": "2024-01-15T12:45:00Z"
+      }
+    },
+    {
+      "event_name": "error_occurred",
+      "event_type": "error",
+      "description": "System or user error occurred",
+      "properties": {
+        "error_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique error identifier"
+        },
+        "error_type": {
+          "type": "string",
+          "enum": ["validation_error", "authentication_error", "authorization_error", "system_error", "agent_error", "workflow_error"],
+          "description": "Category of error"
+        },
+        "error_code": {
+          "type": "string",
+          "description": "Machine-readable error code"
+        },
+        "error_message": {
+          "type": "string",
+          "description": "Human-readable error description"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "User identifier (if applicable)"
+        },
+        "session_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Session identifier (if applicable)"
+        },
+        "stack_trace_hash": {
+          "type": "string",
+          "description": "Hash of stack trace for deduplication"
+        },
+        "error_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of error"
+        }
+      },
+      "pii_flags": {
+        "error_id": false,
+        "error_type": false,
+        "error_code": false,
+        "error_message": true,
+        "user_id": false,
+        "session_id": false,
+        "stack_trace_hash": false,
+        "error_timestamp": false
+      },
+      "required_properties": ["error_id", "error_type", "error_code", "error_message", "error_timestamp"],
+      "example": {
+        "error_id": "bb0e8400-e29b-41d4-a716-446655440000",
+        "error_type": "validation_error",
+        "error_code": "INVALID_AGENT_CONFIG",
+        "error_message": "Agent configuration validation failed",
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "session_id": "660e8400-e29b-41d4-a716-446655440000",
+        "stack_trace_hash": "cc0e8400-e29b-41d4-a716-446655440000",
+        "error_timestamp": "2024-01-15T12:30:00Z"
+      }
+    },
+    {
+      "event_name": "feature_usage",
+      "event_type": "business_metric",
+      "description": "User interaction with platform features",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique user identifier"
+        },
+        "feature_name": {
+          "type": "string",
+          "description": "Name of the feature used"
+        },
+        "feature_action": {
+          "type": "string",
+          "enum": ["view", "create", "edit", "delete", "execute", "export", "import"],
+          "description": "Action performed on the feature"
+        },
+        "feature_category": {
+          "type": "string",
+          "enum": ["project_management", "agent_creation", "workflow_execution", "analytics", "settings", "documentation"],
+          "description": "Category of the feature"
+        },
+        "session_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Session identifier"
+        },
+        "usage_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of feature usage"
+        }
+      },
+      "pii_flags": {
+        "user_id": false,
+        "feature_name": false,
+        "feature_action": false,
+        "feature_category": false,
+        "session_id": false,
+        "usage_timestamp": false
+      },
+      "required_properties": ["user_id", "feature_name", "feature_action", "feature_category", "session_id", "usage_timestamp"],
+      "example": {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "feature_name": "agent_creation_wizard",
+        "feature_action": "create",
+        "feature_category": "agent_creation",
+        "session_id": "660e8400-e29b-41d4-a716-446655440000",
+        "usage_timestamp": "2024-01-15T11:30:00Z"
+      }
+    }
+  ]
+}

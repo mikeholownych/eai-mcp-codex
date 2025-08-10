@@ -1,0 +1,930 @@
+# Kubernetes Deployment Configuration
+# AI Agent Collaboration Platform Telemetry System
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: telemetry
+  labels:
+    name: telemetry
+    app: ai-agent-collaboration
+    component: telemetry
+
+---
+# ConfigMap for telemetry configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telemetry-config
+  namespace: telemetry
+data:
+  config.yaml: |
+    version: "1.0.0"
+    environment: "production"
+    privacy_level: "strict"
+    
+    collection:
+      sampling_rates:
+        user_action: 1.0
+        system_event: 1.0
+        performance_metric: 1.0
+        error: 1.0
+        business_metric: 1.0
+      
+      batch:
+        max_events: 100
+        max_wait_time: 5000
+        retry_attempts: 3
+      
+      realtime:
+        enabled: true
+        buffer_size: 1000
+        flush_interval: 1000
+    
+    processing:
+      validation:
+        strict_mode: true
+        drop_invalid: false
+        max_event_size: 1048576
+      
+      enrichment:
+        add_timestamp: true
+        add_session_id: true
+        add_correlation_id: true
+        add_user_context: true
+        add_system_context: true
+      
+      pii:
+        detection_enabled: true
+        masking_enabled: true
+        encryption_enabled: true
+        retention_days: 30
+    
+    storage:
+      primary:
+        type: "timescaledb"
+        connection_pool: 20
+        batch_size: 1000
+        compression_enabled: true
+      
+      secondary:
+        type: "s3"
+        retention_days: 365
+        compression_format: "parquet"
+        partitioning: "daily"
+      
+      cache:
+        type: "redis"
+        ttl_seconds: 3600
+        max_memory: "2gb"
+    
+    ttf_metrics:
+      calculation:
+        precision: "millisecond"
+        max_ttf_hours: 24
+        outlier_threshold: 2.0
+      
+      targets:
+        ttf_project: 5
+        ttf_agent: 10
+        ttf_workflow: 15
+        ttf_success: 30
+        ttf_complete: 60
+      
+      alerting:
+        warning_threshold: 75
+        critical_threshold: 120
+        escalation_threshold: 180
+    
+    performance:
+      api:
+        response_time_threshold: 200
+        error_rate_threshold: 0.01
+        throughput_threshold: 1000
+      
+      agent:
+        startup_time_threshold: 2000
+        communication_latency: 100
+        consensus_time_threshold: 5000
+      
+      workflow:
+        execution_time_threshold: 5000
+        resource_usage_threshold: 0.8
+        scalability_threshold: 100
+    
+    security:
+      encryption:
+        at_rest: true
+        in_transit: true
+        algorithm: "AES-256-GCM"
+      
+      access_control:
+        rbac_enabled: true
+        audit_logging: true
+        data_masking: true
+      
+      compliance:
+        gdpr_compliant: true
+        ccpa_compliant: true
+        sox_compliant: true
+        data_residency: "us-east-1"
+    
+    integrations:
+      analytics:
+        - name: "mixpanel"
+          enabled: true
+          api_key: "${MIXPANEL_API_KEY}"
+          project_id: "${MIXPANEL_PROJECT_ID}"
+        
+        - name: "amplitude"
+          enabled: true
+          api_key: "${AMPLITUDE_API_KEY}"
+          project_id: "${AMPLITUDE_PROJECT_ID}"
+        
+        - name: "segment"
+          enabled: true
+          write_key: "${SEGMENT_WRITE_KEY}"
+          project_id: "${SEGMENT_PROJECT_ID}"
+      
+      monitoring:
+        - name: "datadog"
+          enabled: true
+          api_key: "${DATADOG_API_KEY}"
+          app_key: "${DATADOG_APP_KEY}"
+        
+        - name: "newrelic"
+          enabled: true
+          license_key: "${NEWRELIC_LICENSE_KEY}"
+          account_id: "${NEWRELIC_ACCOUNT_ID}"
+        
+        - name: "grafana"
+          enabled: true
+          url: "${GRAFANA_URL}"
+          api_key: "${GRAFANA_API_KEY}"
+      
+      alerting:
+        - name: "pagerduty"
+          enabled: true
+          service_key: "${PAGERDUTY_SERVICE_KEY}"
+          escalation_policy: "${PAGERDUTY_ESCALATION_POLICY}"
+        
+        - name: "slack"
+          enabled: true
+          webhook_url: "${SLACK_WEBHOOK_URL}"
+          channel: "#telemetry-alerts"
+        
+        - name: "email"
+          enabled: true
+          smtp_server: "${SMTP_SERVER}"
+          from_address: "telemetry@company.com"
+    
+    retention:
+      periods:
+        real_time: "30d"
+        analytics: "1y"
+        compliance: "7y"
+        archived: "10y"
+      
+      archival:
+        enabled: true
+        schedule: "0 2 * * *"
+        compression_ratio: 0.3
+        storage_class: "glacier"
+    
+    error_handling:
+      logging:
+        level: "info"
+        format: "json"
+        max_file_size: "100mb"
+        max_files: 10
+      
+      recovery:
+        retry_enabled: true
+        max_retries: 3
+        backoff_multiplier: 2.0
+        max_backoff: 300
+      
+      circuit_breaker:
+        enabled: true
+        failure_threshold: 5
+        recovery_timeout: 60
+        expected_call_count: 10
+    
+    development:
+      dev_mode:
+        enabled: false
+        log_level: "debug"
+        mock_data: false
+      
+      testing:
+        enabled: true
+        mock_telemetry: true
+        test_data_retention: "1d"
+        performance_testing: true
+    
+    deployment:
+      scaling:
+        enabled: true
+        min_instances: 2
+        max_instances: 10
+        target_cpu_utilization: 70
+      
+      health_checks:
+        enabled: true
+        interval: 30
+        timeout: 5
+        failure_threshold: 3
+      
+      shutdown:
+        enabled: true
+        timeout: 30
+        drain_connections: true
+
+---
+# Secret for sensitive configuration
+apiVersion: v1
+kind: Secret
+metadata:
+  name: telemetry-secrets
+  namespace: telemetry
+type: Opaque
+data:
+  # Base64 encoded values - replace with actual values
+  MIXPANEL_API_KEY: <base64-encoded-mixpanel-api-key>
+  AMPLITUDE_API_KEY: <base64-encoded-amplitude-api-key>
+  SEGMENT_WRITE_KEY: <base64-encoded-segment-write-key>
+  DATADOG_API_KEY: <base64-encoded-datadog-api-key>
+  DATADOG_APP_KEY: <base64-encoded-datadog-app-key>
+  NEWRELIC_LICENSE_KEY: <base64-encoded-newrelic-license-key>
+  NEWRELIC_ACCOUNT_ID: <base64-encoded-newrelic-account-id>
+  GRAFANA_API_KEY: <base64-encoded-grafana-api-key>
+  PAGERDUTY_SERVICE_KEY: <base64-encoded-pagerduty-service-key>
+  SLACK_WEBHOOK_URL: <base64-encoded-slack-webhook-url>
+  SMTP_SERVER: <base64-encoded-smtp-server>
+
+---
+# Service Account for telemetry
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: telemetry-service-account
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+
+---
+# Cluster Role for telemetry
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: telemetry-cluster-role
+  labels:
+    app: telemetry
+    component: telemetry
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints", "nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+
+---
+# Cluster Role Binding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: telemetry-cluster-role-binding
+  labels:
+    app: telemetry
+    component: telemetry
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: telemetry-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: telemetry-service-account
+    namespace: telemetry
+
+---
+# Deployment for telemetry service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemetry-service
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: telemetry
+      component: telemetry
+  template:
+    metadata:
+      labels:
+        app: telemetry
+        component: telemetry
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: telemetry-service-account
+      containers:
+        - name: telemetry-service
+          image: ai-agent-collaboration/telemetry:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: grpc
+              containerPort: 9090
+              protocol: TCP
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: TELEMETRY_CONFIG_PATH
+              value: "/etc/telemetry/config.yaml"
+            - name: TELEMETRY_SCHEMA_PATH
+              value: "/etc/telemetry/events.schema.json"
+            - name: TELEMETRY_API_URL
+              value: "https://telemetry.company.com"
+            - name: TELEMETRY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: TELEMETRY_API_KEY
+            - name: MIXPANEL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: MIXPANEL_API_KEY
+            - name: AMPLITUDE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: AMPLITUDE_API_KEY
+            - name: SEGMENT_WRITE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: SEGMENT_WRITE_KEY
+            - name: DATADOG_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: DATADOG_API_KEY
+            - name: DATADOG_APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: DATADOG_APP_KEY
+            - name: NEWRELIC_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: NEWRELIC_LICENSE_KEY
+            - name: NEWRELIC_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: NEWRELIC_ACCOUNT_ID
+            - name: GRAFANA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: GRAFANA_API_KEY
+            - name: PAGERDUTY_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: PAGERDUTY_SERVICE_KEY
+            - name: SLACK_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: SLACK_WEBHOOK_URL
+            - name: SMTP_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: telemetry-secrets
+                  key: SMTP_SERVER
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          volumeMounts:
+            - name: telemetry-config
+              mountPath: /etc/telemetry
+              readOnly: true
+            - name: telemetry-logs
+              mountPath: /var/log/telemetry
+            - name: telemetry-cache
+              mountPath: /var/cache/telemetry
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+        - name: telemetry-sidecar
+          image: ai-agent-collaboration/telemetry-sidecar:latest
+          imagePullPolicy: Always
+          ports:
+            - name: metrics
+              containerPort: 9091
+              protocol: TCP
+          env:
+            - name: TELEMETRY_SERVICE_URL
+              value: "http://localhost:8080"
+            - name: METRICS_PORT
+              value: "9091"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          volumeMounts:
+            - name: telemetry-logs
+              mountPath: /var/log/telemetry
+              readOnly: true
+      volumes:
+        - name: telemetry-config
+          configMap:
+            name: telemetry-config
+        - name: telemetry-logs
+          emptyDir: {}
+        - name: telemetry-cache
+          emptyDir: {}
+      nodeSelector:
+        node-role.kubernetes.io/telemetry: "true"
+      tolerations:
+        - key: "node-role.kubernetes.io/telemetry"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - telemetry
+                topologyKey: kubernetes.io/hostname
+
+---
+# Service for telemetry
+apiVersion: v1
+kind: Service
+metadata:
+  name: telemetry-service
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: grpc
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+    - name: metrics
+      port: 9091
+      targetPort: 9091
+      protocol: TCP
+  selector:
+    app: telemetry
+    component: telemetry
+
+---
+# Ingress for telemetry API
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: telemetry-ingress
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+    - hosts:
+        - telemetry.company.com
+      secretName: telemetry-tls
+  rules:
+    - host: telemetry.company.com
+      http:
+        paths:
+          - path: /api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: telemetry-service
+                port:
+                  number: 8080
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: telemetry-service
+                port:
+                  number: 8080
+          - path: /ready
+            pathType: Exact
+            backend:
+              service:
+                name: telemetry-service
+                port:
+                  number: 8080
+
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: telemetry-hpa
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: telemetry-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+
+---
+# Pod Disruption Budget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: telemetry-pdb
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: telemetry
+      component: telemetry
+
+---
+# Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: telemetry-network-policy
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+spec:
+  podSelector:
+    matchLabels:
+      app: telemetry
+      component: telemetry
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: default
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090
+        - protocol: TCP
+          port: 9091
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+
+---
+# Service Monitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: telemetry-service-monitor
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: telemetry
+      component: telemetry
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      honorLabels: true
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: 'ttf_.*'
+          action: keep
+        - sourceLabels: [__name__]
+          regex: 'telemetry_.*'
+          action: keep
+        - sourceLabels: [__name__]
+          regex: 'events_.*'
+          action: keep
+
+---
+# Prometheus Rule for TTF Alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: telemetry-ttf-alerts
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+    release: prometheus
+spec:
+  groups:
+    - name: ttf-alerts
+      rules:
+        - alert: TTFWarning
+          expr: avg(ttf_complete_minutes) > 75
+          for: 5m
+          labels:
+            severity: warning
+            component: telemetry
+          annotations:
+            summary: "TTF Warning - Average completion time is high"
+            description: "Average TTF is {{ $value }} minutes, above warning threshold of 75 minutes"
+        
+        - alert: TTFCritical
+          expr: avg(ttf_complete_minutes) > 120
+          for: 5m
+          labels:
+            severity: critical
+            component: telemetry
+          annotations:
+            summary: "TTF Critical - Average completion time is very high"
+            description: "Average TTF is {{ $value }} minutes, above critical threshold of 120 minutes"
+        
+        - alert: TTFEscalation
+          expr: avg(ttf_complete_minutes) > 180
+          for: 5m
+          labels:
+            severity: critical
+            component: telemetry
+          annotations:
+            summary: "TTF Escalation - Immediate attention required"
+            description: "Average TTF is {{ $value }} minutes, above escalation threshold of 180 minutes"
+        
+        - alert: TelemetryServiceDown
+          expr: up{job="telemetry"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            component: telemetry
+          annotations:
+            summary: "Telemetry service is down"
+            description: "Telemetry service has been down for more than 1 minute"
+        
+        - alert: HighErrorRate
+          expr: rate(telemetry_errors_total[5m]) > 0.1
+          for: 2m
+          labels:
+            severity: warning
+            component: telemetry
+          annotations:
+            summary: "High error rate in telemetry system"
+            description: "Error rate is {{ $value }} errors/sec, above threshold of 0.1"
+        
+        - alert: HighLatency
+          expr: histogram_quantile(0.95, rate(event_processing_duration_seconds_bucket[5m])) > 0.5
+          for: 5m
+          labels:
+            severity: warning
+            component: telemetry
+          annotations:
+            summary: "High processing latency in telemetry system"
+            description: "95th percentile latency is {{ $value }} seconds, above threshold of 0.5s"
+
+---
+# ConfigMap for Grafana dashboards
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+data:
+  ttf-overview.json: |
+    {
+      "dashboard": {
+        "title": "TTF Metrics Overview",
+        "uid": "ttf-overview",
+        "tags": ["telemetry", "ttf", "overview"],
+        "timezone": "browser",
+        "refresh": "30s",
+        "schemaVersion": 38,
+        "version": 1,
+        "time": {
+          "from": "now-24h",
+          "to": "now"
+        }
+      }
+    }
+  
+  ttf-detailed.json: |
+    {
+      "dashboard": {
+        "title": "TTF Detailed Analysis",
+        "uid": "ttf-detailed",
+        "tags": ["telemetry", "ttf", "detailed"],
+        "timezone": "browser",
+        "refresh": "1m",
+        "schemaVersion": 38,
+        "version": 1,
+        "time": {
+          "from": "now-7d",
+          "to": "now"
+        }
+      }
+    }
+  
+  telemetry-health.json: |
+    {
+      "dashboard": {
+        "title": "Telemetry System Health",
+        "uid": "telemetry-health",
+        "tags": ["telemetry", "system", "health"],
+        "timezone": "browser",
+        "refresh": "30s",
+        "schemaVersion": 38,
+        "version": 1,
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        }
+      }
+    }
+
+---
+# Job for initial data migration
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: telemetry-init
+  namespace: telemetry
+  labels:
+    app: telemetry
+    component: telemetry
+spec:
+  template:
+    metadata:
+      labels:
+        app: telemetry
+        component: telemetry
+        job: telemetry-init
+    spec:
+      serviceAccountName: telemetry-service-account
+      containers:
+        - name: telemetry-init
+          image: ai-agent-collaboration/telemetry-init:latest
+          imagePullPolicy: Always
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+            - name: TELEMETRY_CONFIG_PATH
+              value: "/etc/telemetry/config.yaml"
+            - name: TELEMETRY_SCHEMA_PATH
+              value: "/etc/telemetry/events.schema.json"
+          volumeMounts:
+            - name: telemetry-config
+              mountPath: /etc/telemetry
+              readOnly: true
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+      volumes:
+        - name: telemetry-config
+          configMap:
+            name: telemetry-config
+      restartPolicy: Never
+      backoffLimit: 3
