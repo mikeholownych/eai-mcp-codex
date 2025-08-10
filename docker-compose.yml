@@ -241,6 +241,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -319,6 +325,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -399,6 +411,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -479,6 +497,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -565,6 +589,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -646,6 +676,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -719,6 +755,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -1106,6 +1148,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -1169,6 +1217,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -1298,6 +1352,12 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
@@ -1509,6 +1569,7 @@ services:
 
   # Legacy Log Shipping
   filebeat:
+    image: docker.elastic.co/beats/filebeat:8.12.0
     restart: unless-stopped
     profiles:
       - legacy-logging
@@ -1549,6 +1610,12 @@ services:
       - cloudflare_tunnel_secrets:/vault/secrets:rw
       - ./vault/agent-configs/cloudflare-tunnel/agent-config.hcl:/vault/agent-configs/cloudflare-tunnel/agent-config.hcl:ro
       - ./vault/agent-configs/cloudflare-tunnel/cloudflare_tunnel_config.ctmpl:/vault/secrets/cloudflare_tunnel_config.ctmpl:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vault || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
 
