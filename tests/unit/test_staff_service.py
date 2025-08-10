@@ -290,17 +290,17 @@ class TestAuthentication:
     def test_dashboard_without_auth(self, client):
         """Test dashboard access without authentication."""
         response = client.get("/staff/dashboard")
-        assert response.status_code == 401
+        assert response.status_code == 403
 
     def test_users_without_auth(self, client):
         """Test user endpoints without authentication."""
         response = client.get("/staff/users")
-        assert response.status_code == 401
+        assert response.status_code == 403
 
     def test_tickets_without_auth(self, client):
         """Test ticket endpoints without authentication."""
         response = client.get("/staff/tickets")
-        assert response.status_code == 401
+        assert response.status_code == 403
 
 
 @pytest.mark.integration

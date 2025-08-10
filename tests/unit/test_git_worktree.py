@@ -6,8 +6,7 @@ import pytest
 from src.git_worktree.worktree_manager import create
 
 
-@pytest.mark.asyncio
-async def test_create(tmp_path: Path) -> None:
+def test_create(tmp_path: Path) -> None:
     path = tmp_path / "repo"
-    result = await create(str(path))
+    result = create(str(path))
     assert Path(result).exists()

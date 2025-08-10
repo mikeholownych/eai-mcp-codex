@@ -77,6 +77,7 @@ class AuthManager:
                 "roles": [UserRole.SUPERADMIN.value],
                 "is_active": True,
                 "created_at": datetime.utcnow(),
+                "last_login": None,
             },
             "service": {
                 "user_id": "service",
@@ -85,6 +86,7 @@ class AuthManager:
                 "roles": [UserRole.SERVICE.value],
                 "is_active": True,
                 "created_at": datetime.utcnow(),
+                "last_login": None,
             },
         }
 

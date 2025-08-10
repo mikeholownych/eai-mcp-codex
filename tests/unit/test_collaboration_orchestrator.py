@@ -64,9 +64,11 @@ class DummyBroker(A2AMessageBroker):
 
 @pytest.mark.asyncio
 async def test_session_invite_and_consensus() -> None:
-    orchestrator = CollaborationOrchestrator(
-        redis=DummyRedis(), message_broker=DummyBroker()
-    )
+    orchestrator = CollaborationOrchestrator()
+    # Mock the redis and message_broker for testing
+    orchestrator.redis = DummyRedis()
+    orchestrator.message_broker = DummyBroker()
+    
     session = await orchestrator.create_collaboration_session(
         title="Test", description="test", lead_agent="agent1"
     )
@@ -93,7 +95,10 @@ async def test_session_invite_and_consensus() -> None:
 @pytest.mark.asyncio
 async def test_session_metrics_efficiency_scoring() -> None:
     broker = DummyBroker()
-    orchestrator = CollaborationOrchestrator(redis=DummyRedis(), message_broker=broker)
+    orchestrator = CollaborationOrchestrator()
+    # Mock the redis and message_broker for testing
+    orchestrator.redis = DummyRedis()
+    orchestrator.message_broker = broker
 
     session = await orchestrator.create_collaboration_session(
         title="Metrics", description="m", lead_agent="agent1"
