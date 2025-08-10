@@ -235,7 +235,7 @@ services:
       - model_router_secrets:/vault/secrets:rw
       - ./vault/agent-configs/model-router/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/model-router/model_router_config.ctmpl:/vault/secrets/model_router_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -319,7 +319,7 @@ services:
       - plan_management_secrets:/vault/secrets:rw
       - ./vault/agent-configs/plan-management/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/plan-management/plan_management_config.ctmpl:/vault/secrets/plan_management_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -405,7 +405,7 @@ services:
       - git_worktree_manager_secrets:/vault/secrets:rw
       - ./vault/agent-configs/git-worktree-manager/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/git-worktree-manager/git_worktree_manager_config.ctmpl:/vault/secrets/git_worktree_manager_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -491,7 +491,7 @@ services:
       - workflow_orchestrator_secrets:/vault/secrets:rw
       - ./vault/agent-configs/workflow-orchestrator/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/workflow-orchestrator/workflow_orchestrator_config.ctmpl:/vault/secrets/workflow_orchestrator_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -583,7 +583,7 @@ services:
       - verification_feedback_secrets:/vault/secrets:rw
       - ./vault/agent-configs/verification-feedback/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/verification-feedback/verification_feedback_config.ctmpl:/vault/secrets/verification_feedback_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -670,7 +670,7 @@ services:
       - staff_service_secrets:/vault/secrets:rw
       - ./vault/agent-configs/staff-service/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/staff-service/staff_service_config.ctmpl:/vault/secrets/staff_service_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -749,7 +749,7 @@ services:
       - auth_service_secrets:/vault/secrets:rw
       - ./vault/agent-configs/auth-service/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/auth-service/auth_config.ctmpl:/vault/secrets/auth_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -1142,7 +1142,7 @@ services:
       - frontend_secrets:/vault/secrets:rw
       - ./vault/agent-configs/frontend/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/frontend/nextauth_config.ctmpl:/vault/secrets/nextauth_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -1211,7 +1211,7 @@ services:
       - staff_frontend_secrets:/vault/secrets:rw
       - ./vault/agent-configs/staff-frontend/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/staff-frontend/nextauth_config.ctmpl:/vault/secrets/nextauth_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -1346,7 +1346,7 @@ services:
       - grafana_secrets:/vault/secrets:rw
       - ./vault/agent-configs/grafana/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/grafana/grafana_config.ctmpl:/vault/secrets/grafana_config.ctmpl:ro
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -1594,7 +1594,7 @@ services:
       dockerfile: Dockerfile
     container_name: mcp-cloudflare-tunnel-vault-agent
     restart: on-failure
-    command: vault agent -config=/vault/agent-config.hcl
+    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
