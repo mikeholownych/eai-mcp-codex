@@ -217,7 +217,7 @@ def get_health_checker(service_name: str = "default") -> HealthChecker:
 
 def health() -> Dict[str, str]:
     """Return the standard health payload (legacy compatibility)."""
-    return {"status": "ok"}
+    return {"status": "healthy"}
 
 
 def detailed_health(service_name: str = "default") -> Dict[str, Any]:

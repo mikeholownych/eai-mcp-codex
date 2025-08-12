@@ -296,14 +296,61 @@ def rate_limit(
     strategy: RateLimitStrategy = RateLimitStrategy.SLIDING_WINDOW,
     key_func: Optional[callable] = None,
 ):
-    """Decorator for rate limiting specific endpoints"""
+    """Decorator for rate limiting specific endpoints
+
+    Attempts to locate a RateLimiter instance from the FastAPI app state. If none is
+    available, the wrapped function executes without rate limiting (safe fallback).
+    """
 
     def decorator(func):
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs):
-            # This would need to be injected via dependency injection
-            # in a real FastAPI application
-            pass
+            # Try to obtain a RateLimiter instance from the app state
+            rate_limiter = None
+            try:
+                app_state = getattr(request, "app", None)
+                state = getattr(app_state, "state", None) if app_state else None
+                if state is not None:
+                    if hasattr(state, "rate_limiter") and state.rate_limiter is not None:
+                        rate_limiter = state.rate_limiter
+                    elif hasattr(state, "security_stack") and getattr(
+                        state.security_stack, "rate_limiter", None
+                    ) is not None:
+                        rate_limiter = state.security_stack.rate_limiter
+            except Exception:
+                rate_limiter = None
+
+            # If no rate limiter, proceed without enforcement
+            if rate_limiter is None:
+                return await func(request, *args, **kwargs)
+
+            # Build client identifier
+            identifier = (
+                key_func(request)
+                if key_func is not None
+                else rate_limiter.get_client_identifier(request)
+            )
+
+            # Include endpoint-specific suffix for better isolation
+            endpoint_key = f"{request.method}:{request.url.path}:{func.__name__}"
+
+            allowed, info = await rate_limiter.check_rate_limit(
+                f"{identifier}:{endpoint_key}", limit, window_seconds, strategy
+            )
+
+            if not allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Rate limit exceeded",
+                    headers={
+                        "X-RateLimit-Limit": str(info.get("limit", limit)),
+                        "X-RateLimit-Remaining": str(info.get("remaining", 0)),
+                        "X-RateLimit-Reset": str(info.get("reset_time", 0)),
+                        "Retry-After": str(info.get("window_seconds", window_seconds)),
+                    },
+                )
+
+            return await func(request, *args, **kwargs)
 
         return wrapper
 

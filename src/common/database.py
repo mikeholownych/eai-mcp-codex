@@ -249,9 +249,6 @@ def dict_factory(cursor, row):  # Not directly used with asyncpg fetch methods
     return {cursor.description[idx][0]: value for idx, value in enumerate(row)}
 
 
-async def close(self) -> None:
-    """Close the database connection pool (mock implementation)."""
-    pass
 
 
 class MockAsyncpgConnection:

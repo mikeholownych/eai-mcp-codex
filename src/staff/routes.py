@@ -58,6 +58,7 @@ async def get_dashboard(
             {
                 "id": "T-2024-001",
                 "title": "API Rate Limiting Issues",
+                "description": "Experiencing unexpected rate limiting on API calls despite being under the limit.",
                 "customer": {
                     "name": "John Doe",
                     "email": "john.doe@example.com",
