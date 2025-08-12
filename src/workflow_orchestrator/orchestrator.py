@@ -5,6 +5,7 @@ import uuid
 import httpx
 from datetime import datetime
 from typing import Dict, List, Optional, Any
+import os
 
 from src.common.logging import get_logger
 from src.common.database import (
@@ -43,18 +44,28 @@ class WorkflowOrchestrator:
             "verification": "http://localhost:8005",  # Corrected port
             "feedback": "http://localhost:8005",  # Corrected port
         }
+        # In-memory store for testing mode
+        self._testing_mode = os.getenv("TESTING_MODE") == "true"
+        self._workflows_mem: Dict[str, Workflow] = {}
+        self._steps_mem: Dict[str, List[WorkflowStep]] = {}
 
     async def initialize_database(self):
         """Initialize database connection and create tables if they don't exist."""
+        if self._testing_mode:
+            return
         await self.db_manager.connect()
         await self._ensure_database()
 
     async def shutdown_database(self):
         """Shutdown database connection pool."""
+        if self._testing_mode:
+            return
         await self.db_manager.disconnect()
 
     async def _ensure_database(self):
         """Create database and tables if they don't exist."""
+        if self._testing_mode:
+            return
         script = """
                 CREATE TABLE IF NOT EXISTS workflows (
                     id TEXT PRIMARY KEY,
@@ -188,6 +199,13 @@ class WorkflowOrchestrator:
             steps.append(step)
 
         workflow.steps = steps
+
+        # In testing mode, store in memory and return
+        if self._testing_mode:
+            self._workflows_mem[workflow.id] = workflow
+            self._steps_mem[workflow.id] = steps
+            logger.info(f"Created workflow: {workflow.id} - {workflow.name}")
+            return workflow
 
         # Save to database
         query = """
@@ -502,6 +520,12 @@ class WorkflowOrchestrator:
 
     async def get_workflow(self, workflow_id: str) -> Optional[Workflow]:
         """Get a workflow by ID."""
+        if self._testing_mode:
+            wf = self._workflows_mem.get(workflow_id)
+            if not wf:
+                return None
+            wf.steps = self._steps_mem.get(workflow_id, [])
+            return wf
         query = "SELECT * FROM workflows WHERE id = $1"
         workflow_row = await self.db_manager.execute_query(query, (workflow_id,))
 
@@ -523,6 +547,15 @@ class WorkflowOrchestrator:
         self, status: Optional[str] = None, created_by: Optional[str] = None
     ) -> List[Workflow]:
         """List workflows with optional filtering."""
+        if self._testing_mode:
+            workflows = list(self._workflows_mem.values())
+            if status:
+                workflows = [w for w in workflows if w.status.value == status]
+            if created_by:
+                workflows = [w for w in workflows if w.created_by == created_by]
+            # mimic DB ordering by updated_at desc
+            workflows.sort(key=lambda w: w.updated_at, reverse=True)
+            return workflows
         query = "SELECT * FROM workflows WHERE 1=1"
         params = []
         param_idx = 1

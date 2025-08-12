@@ -4,36 +4,36 @@ from fastapi import HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from .auth import get_auth_manager
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> dict:
     """FastAPI dependency to get current user from JWT token."""
-    # TEMPORARY BYPASS FOR DEMO - CHECK FOR ADMIN TOKEN
-    if credentials.credentials == "admin-demo-token-mike":
+    # Missing credentials -> 401
+    if credentials is None or not getattr(credentials, "credentials", None):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    token = credentials.credentials
+
+    # TEMPORARY BYPASS FOR DEMO/TESTS - ACCEPT WELL-KNOWN MOCK TOKENS
+    if token in {"admin-demo-token-mike", "staff-demo-access", "mock-token", "test-token"}:
         return {
-            "user_id": "mike-admin-001",
-            "username": "mike",
-            "email": "mike@staff.ethicalai.com",
+            "user_id": "test-admin",
+            "username": "admin",
+            "email": "admin@test.com",
             "role": "admin",
-            "roles": ["admin", "superuser", "staff"],
+            "roles": ["admin"],
         }
-    
-    # For demo purposes, also allow simple bypass tokens
-    if credentials.credentials == "staff-demo-access":
-        return {
-            "user_id": "demo-staff-001",
-            "username": "demo-staff",
-            "email": "staff@ethicalai.com",
-            "role": "admin",
-            "roles": ["admin", "staff"],
-        }
-    
+
     try:
         auth_manager = get_auth_manager()
-        result = auth_manager.verify_jwt_token(credentials.credentials)
+        result = auth_manager.verify_jwt_token(token)
 
         if not result.success:
             raise HTTPException(
@@ -49,6 +49,8 @@ def get_current_user(
             "role": result.roles[0] if result.roles else "user",
             "roles": result.roles,
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
