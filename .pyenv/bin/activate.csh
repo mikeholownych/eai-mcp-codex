@@ -9,7 +9,8 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV /opt/Tmux-Orchestrator/llm-stack/rag-agent/.pyenv
+# Compute virtualenv path dynamically from script location
+setenv VIRTUAL_ENV "`dirname "`readlink -f "${0:h}"`/.."`"
 
 set _OLD_VIRTUAL_PATH="$PATH"
         setenv PATH "$VIRTUAL_ENV/bin:$PATH"

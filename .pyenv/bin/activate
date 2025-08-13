@@ -39,10 +39,10 @@ deactivate nondestructive
 if [ "${OSTYPE:-}" = "cygwin" ] || [ "${OSTYPE:-}" = "msys" ] ; then
     # transform D:\path\to\venv to /d/path/to/venv on MSYS
     # and to /cygdrive/d/path/to/venv on Cygwin
-    export VIRTUAL_ENV=$(cygpath /opt/Tmux-Orchestrator/llm-stack/rag-agent/.pyenv)
+    export VIRTUAL_ENV=$(cygpath "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")/..")")
 else
-    # use the path as-is
-    export VIRTUAL_ENV=/opt/Tmux-Orchestrator/llm-stack/rag-agent/.pyenv
+    # use the path as-is, computed dynamically from script location
+    export VIRTUAL_ENV="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")/..")"
 fi
 
 _OLD_VIRTUAL_PATH="$PATH"
