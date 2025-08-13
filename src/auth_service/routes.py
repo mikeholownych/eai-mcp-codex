@@ -1,15 +1,14 @@
 """Authentication service API routes."""
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer
-import secrets
 
 from src.auth_service.models import (
     UserRegistration, UserLogin, UserResponse, TokenResponse,
-    ApiKeyResponse, PasswordChange, ErrorResponse
+    ApiKeyResponse, PasswordChange
 )
-from src.common.auth import get_auth_manager, AuthResult
+from src.common.auth import get_auth_manager
 from src.common.fastapi_auth import get_current_user
 from src.common.logging import get_logger
 

@@ -8,13 +8,8 @@ from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 import time
 
-from opentelemetry import trace, metrics
 from opentelemetry.trace import Status, StatusCode, SpanKind
-from opentelemetry.semconv.trace import SpanAttributes
 from src.common.tracing import (
-    TracingUtils, 
-    traced, 
-    TraceContextManager,
     get_tracing_config,
     get_instrumentation_manager
 )

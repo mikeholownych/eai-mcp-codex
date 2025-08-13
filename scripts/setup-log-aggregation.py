@@ -4,7 +4,6 @@ MCP Log Aggregation and Analysis Pipeline Setup Script
 This script initializes and manages the comprehensive log aggregation and analysis pipeline.
 """
 
-import os
 import sys
 import json
 import yaml
@@ -13,9 +12,8 @@ import logging
 import requests
 import time
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 
 # Configure logging
 logging.basicConfig(
@@ -375,35 +373,35 @@ class LogAggregationPipeline:
         try:
             response = requests.get(f"{self.elasticsearch_url}/_cluster/health")
             health_status["elasticsearch"] = response.status_code == 200
-        except:
+        except Exception:
             health_status["elasticsearch"] = False
         
         # Check Kibana
         try:
             response = requests.get(f"{self.kibana_url}/api/status")
             health_status["kibana"] = response.status_code == 200
-        except:
+        except Exception:
             health_status["kibana"] = False
         
         # Check Prometheus
         try:
             response = requests.get(f"{self.prometheus_url}/-/healthy")
             health_status["prometheus"] = response.status_code == 200
-        except:
+        except Exception:
             health_status["prometheus"] = False
         
         # Check Grafana
         try:
             response = requests.get(f"{self.grafana_url}/api/health")
             health_status["grafana"] = response.status_code == 200
-        except:
+        except Exception:
             health_status["grafana"] = False
         
         # Check Alertmanager
         try:
             response = requests.get(f"{self.alertmanager_url}/-/healthy")
             health_status["alertmanager"] = response.status_code == 200
-        except:
+        except Exception:
             health_status["alertmanager"] = False
         
         return health_status

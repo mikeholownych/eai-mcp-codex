@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Database connectivity test script."""
 
-import sys
-import os
 import psycopg2
 from psycopg2 import sql
 
@@ -50,11 +48,11 @@ def test_database_connection():
             
             # Test table creation if no tables exist
             if not tables:
-                print(f"  No tables found - creating test table...")
+                print("  No tables found - creating test table...")
                 cursor.execute("CREATE TABLE test_connection (id SERIAL PRIMARY KEY, test_text VARCHAR(100));")
                 cursor.execute("INSERT INTO test_connection (test_text) VALUES ('Database connection test successful');")
                 conn.commit()
-                print(f"  ✓ Test table created and populated")
+                print("  ✓ Test table created and populated")
             
             cursor.close()
             conn.close()

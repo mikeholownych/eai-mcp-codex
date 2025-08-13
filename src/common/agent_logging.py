@@ -3,19 +3,13 @@ Agent-specific logging utilities for MCP services.
 Provides specialized logging patterns for different agent types and operations.
 """
 
-import logging
 import time
-import json
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, List
 from datetime import datetime
 from contextlib import contextmanager, asynccontextmanager
-import uuid
 
-from .logging_config import get_logger, log_operation
+from .logging_config import get_logger
 from .logging_filters import (
-    get_trace_filter, get_service_filter, get_sensitive_filter,
-    get_request_filter, get_performance_filter,
-    set_request_context, clear_request_context,
     start_operation_timing, end_operation_timing
 )
 

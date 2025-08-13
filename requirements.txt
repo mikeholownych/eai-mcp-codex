@@ -40,3 +40,4 @@ opentelemetry-propagator-b3
 opentelemetry-propagator-jaeger
 pika>=1.3.0
 structlog>=23.0.0
+psycopg2-binary>=2.9.9

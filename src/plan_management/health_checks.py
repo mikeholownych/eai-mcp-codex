@@ -3,16 +3,14 @@ Plan Management specific health checks.
 Provides comprehensive health monitoring for the Plan Management service.
 """
 
-import time
 import asyncio
-import json
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 
 from ..common.enhanced_health_check import (
     HealthStatus, HealthCheckType, HealthChecker, 
     check_memory_usage, check_disk_usage, check_cpu_usage,
-    check_network_connectivity, check_file_system, health_check
+    check_file_system, health_check
 )
 from ..common.logging import get_logger
 from ..common.tracing import get_tracer

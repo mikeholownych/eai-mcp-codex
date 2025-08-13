@@ -5,14 +5,13 @@ Provides comprehensive health monitoring for the Workflow Orchestrator service.
 
 import time
 import asyncio
-import json
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 
 from ..common.enhanced_health_check import (
     HealthStatus, HealthCheckType, HealthChecker, 
     check_memory_usage, check_disk_usage, check_cpu_usage,
-    check_network_connectivity, health_check
+    health_check
 )
 from ..common.logging import get_logger
 from ..common.tracing import get_tracer

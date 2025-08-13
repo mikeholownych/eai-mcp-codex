@@ -4,31 +4,23 @@ Provides trace context propagation for message publishing and consumption.
 """
 
 import logging
-from typing import Dict, Any, Optional, List, Callable, Union
-from contextlib import asynccontextmanager, contextmanager
-import asyncio
+from typing import Dict, Any, Callable, Union
+from contextlib import asynccontextmanager
 import json
 import time
 import uuid
 
-from opentelemetry import trace, context
 from opentelemetry.trace import (
     Span, 
     SpanKind, 
     Status, 
-    StatusCode,
-    set_span_in_context,
-    get_current_span,
-    get_value_from_span
+    StatusCode
 )
-from opentelemetry.propagate import extract, inject
-from opentelemetry.semconv.trace import SpanAttributes
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
 import pika
 import aio_pika
 from aio_pika import Message, ExchangeType
-from pika.adapters.utils.connection_workflow import AMQPConnectionWorkflow
 
 from .tracing import get_tracing_config
 from .trace_propagation import TracePropagationUtils

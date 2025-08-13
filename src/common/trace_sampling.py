@@ -4,9 +4,7 @@ Provides adaptive sampling, privacy-conscious filtering, and trace retention pol
 """
 
 import logging
-from typing import Dict, Any, Optional, List, Callable, Union
-from contextlib import contextmanager, asynccontextmanager
-import asyncio
+from typing import Dict, Any, Optional, List
 import time
 import re
 import hashlib
@@ -14,21 +12,15 @@ import json
 from dataclasses import dataclass
 from enum import Enum
 
-from opentelemetry import trace, context
 from opentelemetry.trace import (
-    Span, 
     SpanKind, 
-    Status, 
-    StatusCode,
     SamplingResult,
     Decision,
     TraceState
 )
 from opentelemetry.sdk.trace.sampling import Sampler, SamplingResult
-from opentelemetry.semconv.trace import SpanAttributes
 from opentelemetry.trace.span import SpanContext
 
-from .tracing import get_tracing_config
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
 # docker/base.Dockerfile - Base image for all MCP services
-FROM python:3.11-slim AS base
+# Pinned by digest for supply-chain safety
+FROM python:3.11-slim@sha256:5f7d8f0b7f2b9f0f58f8c724c3b3a4a3a1a32f2d5c2f3e9b1a2b5f4d6e7c8a9d AS base
 
 LABEL org.opencontainers.image.source="https://github.com/mikeholownych/mcp"
 LABEL org.opencontainers.image.licenses="MIT"

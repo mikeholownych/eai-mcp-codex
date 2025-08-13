@@ -12,9 +12,6 @@ from .health_check import (
 )
 from .metrics import get_metrics_collector, record_request, get_metrics_output
 from .database import DatabaseManager as DatabaseManager
-# Provide a safe alias for backwards compatibility while avoiding accidental
-# import of the deprecated sync helper defined in this module.
-get_connection = DatabaseManager.get_connection  # type: ignore[attr-defined]
 from .redis_client import get_redis, get_redis_connection
 from .service_registry import ServiceRegistry, ServiceInfo
 from .consul_client import register_service
@@ -52,6 +49,10 @@ from .auth import (
     AuthManager,
     UserRole,
 )
+
+# Provide a safe alias for backwards compatibility while avoiding accidental
+# import of the deprecated sync helper defined in this module.
+get_connection = DatabaseManager.get_connection  # type: ignore[attr-defined]
 
 __all__ = [
     # Core

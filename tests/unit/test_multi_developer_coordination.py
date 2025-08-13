@@ -315,16 +315,14 @@ class TestDeveloperProfileManager:
         """Test creating a developer profile."""
         with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
             mock_conn = AsyncMock()
-            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = mock_conn
-            
-            # Set up the async context manager mock
+            # Mock the context manager returned by get_connection()
             mock_context_manager = AsyncMock()
             mock_context_manager.__aenter__.return_value = mock_conn
             mock_context_manager.__aexit__.return_value = None
+
+            mock_db_manager = Mock()
             mock_db_manager.get_connection.return_value = mock_context_manager
-            
             MockDatabaseManager.return_value = mock_db_manager
-            
             # Update the profile manager's db_manager
             self.profile_manager.db_manager = mock_db_manager
 

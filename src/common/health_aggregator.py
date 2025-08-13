@@ -4,13 +4,12 @@ Provides centralized health check aggregation and monitoring for all MCP service
 """
 
 import asyncio
-import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-from .enhanced_health_check import HealthStatus, HealthCheckType
+from .enhanced_health_check import HealthStatus
 from .logging import get_logger
 from .tracing import get_tracer
 from .metrics import get_metrics_collector

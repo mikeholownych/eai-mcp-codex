@@ -5,7 +5,6 @@ This directly modifies the in-memory user store.
 """
 
 import httpx
-import json
 import sys
 import asyncio
 
@@ -33,18 +32,15 @@ async def promote_user_to_admin(username: str, auth_service_url: str = "http://l
                 print(f"Failed to login as admin: {login_response.text}")
                 return False
             
-            admin_token = login_response.json()["access_token"]
-            print(f"Successfully logged in as admin")
-            
             # Unfortunately, there's no API endpoint to modify user roles
             # The auth service would need to be modified to support this
-            print(f"ERROR: The auth service doesn't have an API endpoint to modify user roles.")
+            print("ERROR: The auth service doesn't have an API endpoint to modify user roles.")
             print(f"The user '{username}' has been created with 'user' role, but cannot be promoted to 'admin' role through the API.")
-            print(f"")
-            print(f"Solutions:")
-            print(f"1. Delete the user and recreate with admin role in the auth manager code")
-            print(f"2. Add a user role modification endpoint to the auth service")
-            print(f"3. Use the existing admin user (username: 'admin', password: 'admin123')")
+            print("")
+            print("Solutions:")
+            print("1. Delete the user and recreate with admin role in the auth manager code")
+            print("2. Add a user role modification endpoint to the auth service")
+            print("3. Use the existing admin user (username: 'admin', password: 'admin123')")
             
             return False
             

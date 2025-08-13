@@ -9,27 +9,18 @@ import time
 import threading
 import asyncio
 import psutil
-import gc
-import traceback
-from typing import Dict, Any, Optional, List, Callable, Union, ContextManager
+from typing import Dict, Any, Optional, List, Callable, Union
 from contextlib import contextmanager, asynccontextmanager
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict, deque
-import json
 import statistics
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from opentelemetry import trace, metrics
-from opentelemetry.trace import Status, StatusCode, SpanKind
-from opentelemetry.semconv.trace import SpanAttributes
-from opentelemetry.sdk.metrics import Counter, Histogram, UpDownCounter, ObservableCounter
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.trace import Status, StatusCode
 
 from .tracing import get_tracing_config
-from .trace_sampling import get_trace_sampling_manager
-from .trace_exporters import get_trace_exporter_manager
 
 logger = logging.getLogger(__name__)
 
@@ -614,7 +605,7 @@ class ResourceMonitor:
         # Get system-wide metrics
         try:
             open_files = process.num_fds() if hasattr(process, 'num_fds') else process.num_handles()
-        except:
+        except Exception:
             open_files = 0
         
         # Get network and disk I/O
@@ -624,7 +615,7 @@ class ResourceMonitor:
                 "bytes_sent": net_io.write_bytes,
                 "bytes_recv": net_io.read_bytes
             }
-        except:
+        except Exception:
             network_io = {}
         
         try:
@@ -633,7 +624,7 @@ class ResourceMonitor:
                 "write_bytes": disk_io.write_bytes,
                 "read_bytes": disk_io.read_bytes
             }
-        except:
+        except Exception:
             disk_io_dict = {}
         
         return ResourceUsage(
@@ -753,13 +744,13 @@ def apm_traced(operation_name: str = None, operation_type: APMOperationType = AP
         if asyncio.iscoroutinefunction(func):
             async def async_wrapper(*args, **kwargs):
                 apm = get_apm()
-                async with apm.trace_async_operation(op_name, operation_type, attributes) as span:
+                async with apm.trace_async_operation(op_name, operation_type, attributes):
                     return await func(*args, **kwargs)
             return async_wrapper
         else:
             def sync_wrapper(*args, **kwargs):
                 apm = get_apm()
-                with apm.trace_operation(op_name, operation_type, attributes) as span:
+                with apm.trace_operation(op_name, operation_type, attributes):
                     return func(*args, **kwargs)
             return sync_wrapper
     

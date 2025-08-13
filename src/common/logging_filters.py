@@ -6,11 +6,10 @@ Provides various filters for log enrichment, sanitization, and correlation.
 import os
 import logging
 import uuid
-import json
 import time
 import psutil
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import List
 from threading import local
 
 from .tracing import get_current_span

@@ -5,24 +5,19 @@ Provides comprehensive performance monitoring for model selection, routing, and 
 
 import logging
 import time
-import asyncio
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from collections import defaultdict
 import statistics
 import json
 
-from opentelemetry import trace, metrics
-from opentelemetry.trace import Status, StatusCode, SpanKind
-from opentelemetry.semconv.trace import SpanAttributes
+from opentelemetry.trace import Status, StatusCode
 
 from src.common.apm import (
-    APMInstrumentation, 
     APMOperationType, 
     APMConfig, 
-    PerformanceMetrics,
     get_apm
 )
 from src.common.tracing import get_tracing_config

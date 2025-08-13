@@ -1,4 +1,4 @@
-"""A2A Message Broker for handling inter-agent communication."""
+"""A2A Message Broker for handling inter-agent communication.
 
 Uses RabbitMQ for transport and Redis for lightweight state/tracking. The
 implementation degrades gracefully when infrastructure is unavailable by
@@ -163,21 +163,6 @@ class A2AMessageBroker:
 
         return messages
 
-
-def _import_pika():
-    """Import pika lazily to avoid hard dependency during unit tests.
-
-    Raises a clear error only when RabbitMQ functionality is actually used.
-    """
-    try:
-        import pika  # type: ignore
-
-        return pika
-    except Exception as e:  # pragma: no cover - only triggers when missing
-        raise RuntimeError(
-            "pika library is required for RabbitMQ operations. Install via requirements.txt"
-        ) from e
-
     async def register_agent(self, registration: AgentRegistration) -> bool:
         """Register an agent in the system."""
         try:
@@ -300,3 +285,18 @@ def _import_pika():
         except Exception as e:
             logger.error(f"Failed to cleanup expired messages: {e}")
             return 0
+
+
+def _import_pika():
+    """Import pika lazily to avoid hard dependency during unit tests.
+
+    Raises a clear error only when RabbitMQ functionality is actually used.
+    """
+    try:
+        import pika  # type: ignore
+
+        return pika
+    except Exception as e:  # pragma: no cover - only triggers when missing
+        raise RuntimeError(
+            "pika library is required for RabbitMQ operations. Install via requirements.txt"
+        ) from e

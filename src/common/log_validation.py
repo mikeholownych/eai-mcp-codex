@@ -177,7 +177,7 @@ class LogValidator:
                     ValidationIssue(
                         severity=SeverityLevel.WARNING,
                         code="INVALID_CHARACTERS",
-                        message=f"Message contains invalid characters",
+                        message="Message contains invalid characters",
                         field_path="message",
                     )
                 )
