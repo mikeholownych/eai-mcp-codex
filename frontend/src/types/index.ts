@@ -213,6 +213,69 @@ export interface PaymentMethod {
   brand?: string
   expiryMonth?: number
   expiryYear?: number
+  isDefault?: boolean
+  isEnabled?: boolean
+  metadata?: Record<string, any>
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PaymentIntent {
+  id: string
+  customerId: string
+  amount: number
+  currency: string
+  status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'requires_capture' | 'canceled' | 'succeeded'
+  captureMethod: 'automatic' | 'manual'
+  confirmationMethod: 'automatic' | 'manual'
+  providerId: string
+  metadata?: Record<string, any>
+  invoiceId?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Charge {
+  id: string
+  paymentIntentId: string
+  amount: number
+  currency: string
+  status: 'succeeded' | 'pending' | 'failed' | 'canceled'
+  failureCode?: string
+  failureMessage?: string
+  metadata?: Record<string, any>
+  createdAt: Date
+}
+
+export interface Refund {
+  id: string
+  chargeId: string
+  amount: number
+  currency: string
+  reason?: string
+  status: 'succeeded' | 'pending' | 'failed'
+  metadata?: Record<string, any>
+  createdAt: Date
+}
+
+export interface SetupIntent {
+  id: string
+  customerId: string
+  status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'canceled' | 'succeeded'
+  paymentMethodTypes: string[]
+  metadata?: Record<string, any>
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Mandate {
+  id: string
+  customerId: string
+  paymentMethodId: string
+  type: 'sepa' | 'ach' | 'bacs'
+  status: 'active' | 'inactive' | 'pending'
+  metadata?: Record<string, any>
+  createdAt: Date
 }
 
 export interface Invoice {
@@ -232,6 +295,80 @@ export interface InvoiceItem {
   quantity: number
   unitPrice: number
   amount: number
+}
+
+export interface Dispute {
+  id: string
+  chargeId: string
+  amount: number
+  currency: string
+  reason: string
+  status: 'needs_response' | 'under_review' | 'won' | 'lost'
+  evidence?: Record<string, any>
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Customer {
+  id: string
+  email: string
+  name?: string
+  phone?: string
+  address?: {
+    line1?: string
+    line2?: string
+    city?: string
+    state?: string
+    postalCode?: string
+    country?: string
+  }
+  metadata?: Record<string, any>
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Payment API Request/Response Types
+export interface CreatePaymentIntentRequest {
+  customerId: string
+  amount: number
+  currency: string
+  captureMethod?: 'automatic' | 'manual'
+  confirmationMethod?: 'automatic' | 'manual'
+  metadata?: Record<string, any>
+  idempotencyKey?: string
+}
+
+export interface CreatePaymentMethodRequest {
+  customerId: string
+  paymentMethodType: string
+  paymentMethodData: Record<string, any>
+  idempotencyKey?: string
+}
+
+export interface SetupIntentRequest {
+  customerId: string
+  paymentMethodTypes: string[]
+  metadata?: Record<string, any>
+  idempotencyKey?: string
+}
+
+export interface MandateRequest {
+  customerId: string
+  paymentMethodId: string
+  type: 'sepa' | 'ach' | 'bacs'
+  metadata?: Record<string, any>
+}
+
+export interface PaymentMethodEligibilityRequest {
+  paymentMethodType: string
+  currency: string
+  country?: string
+}
+
+export interface PaymentMethodEligibilityResponse {
+  eligible: boolean
+  requirements?: string[]
+  restrictions?: string[]
 }
 
 // Analytics and Reporting Types

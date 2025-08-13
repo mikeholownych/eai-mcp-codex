@@ -9,6 +9,19 @@ import {
   AvailableModel,
   ModelStats,
   Invoice,
+  Customer,
+  PaymentMethod,
+  PaymentIntent,
+  Charge,
+  Refund,
+  SetupIntent,
+  Mandate,
+  CreatePaymentIntentRequest,
+  CreatePaymentMethodRequest,
+  SetupIntentRequest,
+  MandateRequest,
+  PaymentMethodEligibilityRequest,
+  PaymentMethodEligibilityResponse,
 } from '@/types'
 import { API_CONFIG } from './config'
 
@@ -331,6 +344,124 @@ class ApiClient {
     const response = await this.client.get('/status')
     return response.data
   }
+
+  // Payment endpoints
+  async createCustomer(data: {
+    email: string
+    name?: string
+    phone?: string
+    address?: {
+      line1?: string
+      line2?: string
+      city?: string
+      state?: string
+      postalCode?: string
+      country?: string
+    }
+    metadata?: Record<string, any>
+  }): Promise<ApiResponse<Customer>> {
+    const response = await this.client.post('/api/payments/customers', data)
+    return response.data
+  }
+
+  async getCustomer(customerId: string): Promise<ApiResponse<Customer>> {
+    const response = await this.client.get(`/api/payments/customers/${customerId}`)
+    return response.data
+  }
+
+  async updateCustomer(
+    customerId: string,
+    data: Partial<Customer>
+  ): Promise<ApiResponse<Customer>> {
+    const response = await this.client.put(`/api/payments/customers/${customerId}`, data)
+    return response.data
+  }
+
+  async createPaymentIntent(data: CreatePaymentIntentRequest): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.post('/api/payments/payment-intents', data)
+    return response.data
+  }
+
+  async getPaymentIntent(paymentIntentId: string): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.get(`/api/payments/payment-intents/${paymentIntentId}`)
+    return response.data
+  }
+
+  async confirmPaymentIntent(
+    paymentIntentId: string,
+    data?: { paymentMethodId?: string; returnUrl?: string }
+  ): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.post(`/api/payments/payment-intents/${paymentIntentId}/confirm`, data)
+    return response.data
+  }
+
+  async capturePaymentIntent(
+    paymentIntentId: string,
+    data?: { amount?: number }
+  ): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.post(`/api/payments/payment-intents/${paymentIntentId}/capture`, data)
+    return response.data
+  }
+
+  async cancelPaymentIntent(paymentIntentId: string): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.post(`/api/payments/payment-intents/${paymentIntentId}/cancel`)
+    return response.data
+  }
+
+  async createPaymentMethod(data: CreatePaymentMethodRequest): Promise<ApiResponse<PaymentMethod>> {
+    const response = await this.client.post(`/api/payments/customers/${data.customerId}/payment-methods`, data)
+    return response.data
+  }
+
+  async getCustomerPaymentMethods(customerId: string): Promise<ApiResponse<PaymentMethod[]>> {
+    const response = await this.client.get(`/api/payments/customers/${customerId}/payment-methods`)
+    return response.data
+  }
+
+  async deletePaymentMethod(paymentMethodId: string): Promise<ApiResponse<{ success: boolean }>> {
+    const response = await this.client.delete(`/api/payments/payment-methods/${paymentMethodId}`)
+    return response.data
+  }
+
+  async createSetupIntent(data: SetupIntentRequest): Promise<ApiResponse<SetupIntent>> {
+    const response = await this.client.post('/api/payments/setup-intents', data)
+    return response.data
+  }
+
+  async getSetupIntent(setupIntentId: string): Promise<ApiResponse<SetupIntent>> {
+    const response = await this.client.get(`/api/payments/setup-intents/${setupIntentId}`)
+    return response.data
+  }
+
+  async createMandate(data: MandateRequest): Promise<ApiResponse<Mandate>> {
+    const response = await this.client.post('/api/payments/mandates', data)
+    return response.data
+  }
+
+  async checkPaymentMethodEligibility(
+    data: PaymentMethodEligibilityRequest
+  ): Promise<ApiResponse<PaymentMethodEligibilityResponse>> {
+    const response = await this.client.post('/api/payments/payment-methods/eligibility', data)
+    return response.data
+  }
+
+  async createRefund(
+    chargeId: string,
+    data: { amount?: number; reason?: string; metadata?: Record<string, any> }
+  ): Promise<ApiResponse<Refund>> {
+    const response = await this.client.post(`/api/payments/charges/${chargeId}/refunds`, data)
+    return response.data
+  }
+
+  async getRefund(refundId: string): Promise<ApiResponse<Refund>> {
+    const response = await this.client.get(`/api/payments/refunds/${refundId}`)
+    return response.data
+  }
+
+  async getCharge(chargeId: string): Promise<ApiResponse<Charge>> {
+    const response = await this.client.get(`/api/payments/charges/${chargeId}`)
+    return response.data
+  }
 }
 
 // Create singleton instance
@@ -390,6 +521,42 @@ export const billingApi = {
   updateSubscription: apiClient.updateSubscription.bind(apiClient),
   getInvoices: apiClient.getInvoices.bind(apiClient),
   downloadInvoice: apiClient.downloadInvoice.bind(apiClient),
+}
+
+export const paymentApi = {
+  // Customer management
+  createCustomer: apiClient.createCustomer.bind(apiClient),
+  getCustomer: apiClient.getCustomer.bind(apiClient),
+  updateCustomer: apiClient.updateCustomer.bind(apiClient),
+  
+  // Payment intents
+  createPaymentIntent: apiClient.createPaymentIntent.bind(apiClient),
+  getPaymentIntent: apiClient.getPaymentIntent.bind(apiClient),
+  confirmPaymentIntent: apiClient.confirmPaymentIntent.bind(apiClient),
+  capturePaymentIntent: apiClient.capturePaymentIntent.bind(apiClient),
+  cancelPaymentIntent: apiClient.cancelPaymentIntent.bind(apiClient),
+  
+  // Payment methods
+  createPaymentMethod: apiClient.createPaymentMethod.bind(apiClient),
+  getCustomerPaymentMethods: apiClient.getCustomerPaymentMethods.bind(apiClient),
+  deletePaymentMethod: apiClient.deletePaymentMethod.bind(apiClient),
+  
+  // Setup intents
+  createSetupIntent: apiClient.createSetupIntent.bind(apiClient),
+  getSetupIntent: apiClient.getSetupIntent.bind(apiClient),
+  
+  // Mandates
+  createMandate: apiClient.createMandate.bind(apiClient),
+  
+  // Eligibility
+  checkPaymentMethodEligibility: apiClient.checkPaymentMethodEligibility.bind(apiClient),
+  
+  // Refunds
+  createRefund: apiClient.createRefund.bind(apiClient),
+  getRefund: apiClient.getRefund.bind(apiClient),
+  
+  // Charges
+  getCharge: apiClient.getCharge.bind(apiClient),
 }
 
 // Export the axios instance for direct use

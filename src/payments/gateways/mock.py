@@ -18,6 +18,11 @@ logger = logging.getLogger(__name__)
 class MockGateway(PaymentGateway):
     """Mock payment gateway for development and testing."""
     
+    @property
+    def provider_name(self) -> str:
+        """Return the name of the payment provider."""
+        return "mock"
+    
     def __init__(self):
         self.settings = get_settings()
         self.customers = {}
@@ -25,6 +30,7 @@ class MockGateway(PaymentGateway):
         self.charges = {}
         self.refunds = {}
         self.mandates = {}
+        self.payment_methods = {}
         
         # Simulate realistic payment processing delays
         self.processing_delay_ms = 100  # 100ms delay
@@ -345,3 +351,43 @@ class MockGateway(PaymentGateway):
         """Set the failure rate for testing (0.0 to 1.0)."""
         self.failure_rate = max(0.0, min(1.0, failure_rate))
         logger.info("Mock gateway failure rate set to %.2f%%", self.failure_rate * 100)
+    
+    async def create_payment_method(
+        self,
+        customer_id: str,
+        payment_method_type: str,
+        payment_method_data: Dict[str, Any],
+        idempotency_key: Optional[str] = None
+    ) -> PaymentMethod:
+        """Create a mock payment method."""
+        if customer_id not in self.customers:
+            raise PaymentGatewayError(
+                message="Customer not found",
+                code="customer_not_found"
+            )
+        
+        payment_method_id = f"pm_mock_{uuid.uuid4().hex[:8]}"
+        
+        payment_method = PaymentMethod(
+            id=payment_method_id,
+            brand=payment_method_data.get("brand", "visa"),
+            last4=payment_method_data.get("last4", "4242"),
+            exp_month=payment_method_data.get("exp_month", 12),
+            exp_year=payment_method_data.get("exp_year", 2030),
+            customer_id=customer_id
+        )
+        
+        self.payment_methods[payment_method_id] = payment_method
+        
+        logger.info("Created mock payment method %s for customer %s", payment_method_id, customer_id)
+        return payment_method
+    
+    async def delete_payment_method(self, payment_method_id: str) -> bool:
+        """Delete a mock payment method."""
+        if payment_method_id in self.payment_methods:
+            del self.payment_methods[payment_method_id]
+            logger.info("Deleted mock payment method %s", payment_method_id)
+            return True
+        else:
+            logger.warning("Payment method %s not found for deletion", payment_method_id)
+            return False

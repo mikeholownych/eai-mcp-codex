@@ -53,8 +53,8 @@ logger = get_logger("collaboration_orchestrator")
 
 
 @app.get("/health")
-def health_check() -> dict:
-    return health()
+async def health_check() -> dict:
+    return await health()
 
 
 ## startup handled in lifespan

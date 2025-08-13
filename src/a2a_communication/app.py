@@ -29,5 +29,5 @@ setup_metrics_endpoint(app)
 
 
 @app.get("/health")
-def health_check() -> dict:
-    return health()
+async def health_check() -> dict:
+    return await health()

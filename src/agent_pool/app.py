@@ -23,8 +23,8 @@ logger = get_logger("agent_pool")
 
 
 @app.get("/health")
-def health_check() -> dict:
-    return health()
+async def health_check() -> dict:
+    return await health()
 
 
 ## startup moved to lifespan
