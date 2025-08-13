@@ -8,6 +8,7 @@ import uuid
 import httpx
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
+import os
 
 from src.common.database import (
     DatabaseManager,
@@ -526,6 +527,15 @@ class WorkflowOrchestrator:
         self, status: Optional[str] = None, created_by: Optional[str] = None
     ) -> List[Workflow]:
         """List workflows with optional filtering."""
+        if self._testing_mode:
+            workflows = list(self._workflows_mem.values())
+            if status:
+                workflows = [w for w in workflows if w.status.value == status]
+            if created_by:
+                workflows = [w for w in workflows if w.created_by == created_by]
+            # mimic DB ordering by updated_at desc
+            workflows.sort(key=lambda w: w.updated_at, reverse=True)
+            return workflows
         query = "SELECT * FROM workflows WHERE 1=1"
         params = []
         param_idx = 1

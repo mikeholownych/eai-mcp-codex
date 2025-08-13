@@ -296,7 +296,11 @@ def rate_limit(
     strategy: RateLimitStrategy = RateLimitStrategy.SLIDING_WINDOW,
     key_func: Optional[callable] = None,
 ):
-    """Decorator for rate limiting specific endpoints"""
+    """Decorator for rate limiting specific endpoints
+
+    Attempts to locate a RateLimiter instance from the FastAPI app state. If none is
+    available, the wrapped function executes without rate limiting (safe fallback).
+    """
 
     def decorator(func):
         @wraps(func)

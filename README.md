@@ -7,6 +7,7 @@
 [![Claude](https://img.shields.io/badge/Claude-Sonnet%204%20|%20O3-purple?logo=anthropic)](https://anthropic.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/Build-Passing-success)](https://github.com/your-repo/actions)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/mikeholownych/eai-mcp-codex?utm_source=oss&utm_medium=github&utm_campaign=mikeholownych%2Feai-mcp-codex&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 ## 🌟 **What This Project Does**
 
