@@ -4,7 +4,8 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from src.common.logging import get_logger
-from src.common.health_check import health
+from src.common.health_check import health, readiness
+from src.common.metrics import setup_metrics_endpoint
 
 from .routes import router
 from .multi_developer_routes import router as multi_dev_router
@@ -48,13 +49,25 @@ app = FastAPI(
 # Include both the original collaboration routes and new multi-developer routes
 app.include_router(router, prefix="/collaboration")
 app.include_router(multi_dev_router)
+# Setup metrics endpoint
+setup_metrics_endpoint(app)
 
 logger = get_logger("collaboration_orchestrator")
 
 
 @app.get("/health")
-def health_check() -> dict:
-    return health()
+async def health_check() -> dict:
+    return await health()
+
+
+@app.get("/healthz")
+def liveness_check() -> dict:
+    return {"status": "healthy"}
+
+
+@app.get("/readyz")
+async def readiness_check() -> dict:
+    return await readiness()
 
 
 ## startup handled in lifespan

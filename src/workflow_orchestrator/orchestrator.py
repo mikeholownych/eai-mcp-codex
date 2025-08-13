@@ -8,8 +8,8 @@ import uuid
 import httpx
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
+import os
 
-from src.common.logging import get_logger
 from src.common.database import (
     DatabaseManager,
     serialize_json_field,
@@ -18,6 +18,7 @@ from src.common.database import (
     deserialize_datetime,
     MockAsyncpgPool,
 )
+from src.common.tracing import get_tracer
 
 from .models import (
     ExecutionMode,
@@ -28,6 +29,7 @@ from .models import (
     WorkflowStatus,
     WorkflowStep,
     StepExecutionResult,
+    StepType,
 )
 
 logger = logging.getLogger(__name__)
@@ -175,7 +177,7 @@ class WorkflowOrchestrator:
             id, name, description, status, execution_mode, created_by,
             created_at, updated_at, global_parameters, success_criteria,
             failure_handling, notifications, metadata
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         """
         workflow_values = (
             workflow.id,
@@ -202,7 +204,7 @@ class WorkflowOrchestrator:
                 endpoint, parameters, expected_output, timeout_seconds,
                 retry_count, max_retries, status, order_index, depends_on,
                 conditions, created_at, metadata
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
             """
             step_values = (
                 step.id,
@@ -525,6 +527,15 @@ class WorkflowOrchestrator:
         self, status: Optional[str] = None, created_by: Optional[str] = None
     ) -> List[Workflow]:
         """List workflows with optional filtering."""
+        if self._testing_mode:
+            workflows = list(self._workflows_mem.values())
+            if status:
+                workflows = [w for w in workflows if w.status.value == status]
+            if created_by:
+                workflows = [w for w in workflows if w.created_by == created_by]
+            # mimic DB ordering by updated_at desc
+            workflows.sort(key=lambda w: w.updated_at, reverse=True)
+            return workflows
         query = "SELECT * FROM workflows WHERE 1=1"
         params = []
         param_idx = 1

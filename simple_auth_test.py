@@ -7,7 +7,7 @@ import hashlib
 import secrets
 from datetime import datetime
 from enum import Enum
-from typing import List, Dict, Any, Optional
+from typing import List
 
 # Simplified UserRole enum
 class UserRole(str, Enum):
@@ -87,7 +87,7 @@ def test_modified_auth():
     print("1. Testing user data structure:")
     superadmin_user = users.get("mike.holownych@gmail.com")
     if superadmin_user:
-        print(f"   ✅ Superadmin user exists")
+        print("   ✅ Superadmin user exists")
         print(f"   ✅ Username: {superadmin_user['username']}")
         print(f"   ✅ User ID: {superadmin_user['user_id']}")
         print(f"   ✅ Roles: {superadmin_user['roles']}")
@@ -125,7 +125,7 @@ def test_modified_auth():
     print("\n4. Testing API key:")
     superadmin_api_key = api_keys.get("superadmin-api-key-456")
     if superadmin_api_key:
-        print(f"   ✅ Superadmin API key exists")
+        print("   ✅ Superadmin API key exists")
         print(f"   ✅ API key user: {superadmin_api_key['username']}")
         print(f"   ✅ API key roles: {superadmin_api_key['roles']}")
     else:
@@ -150,12 +150,12 @@ def test_modified_auth():
     print("\n" + "=" * 50)
     print("✅ ALL TESTS PASSED!")
     print("\n🎉 Successfully modified default admin credentials:")
-    print(f"   Username: mike.holownych@gmail.com")
-    print(f"   Password: jack@345")
+    print("   Username: mike.holownych@gmail.com")
+    print("   Password: jack@345")
     print(f"   Role: {UserRole.SUPERADMIN.value}")
-    print(f"   User ID: superadmin")
-    print(f"   API Key: superadmin-api-key-456")
-    print(f"   Full super administrative privileges: ✅")
+    print("   User ID: superadmin")
+    print("   API Key: superadmin-api-key-456")
+    print("   Full super administrative privileges: ✅")
     
     return True
 

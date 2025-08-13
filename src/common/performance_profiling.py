@@ -5,30 +5,23 @@ Provides CPU and memory profiling, database query monitoring, external API track
 
 import logging
 import time
-import asyncio
-import threading
 import psutil
 import tracemalloc
 import cProfile
 import pstats
 import io
-from typing import Dict, Any, Optional, List, Union, Callable, Tuple
+from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict, deque
 import statistics
-import json
 
-from opentelemetry import trace, metrics
-from opentelemetry.trace import Status, StatusCode, SpanKind
-from opentelemetry.semconv.trace import SpanAttributes
+from opentelemetry.trace import Status, StatusCode
 
 from src.common.apm import (
-    APMInstrumentation, 
     APMOperationType, 
     APMConfig, 
-    PerformanceMetrics,
     get_apm
 )
 from src.common.tracing import get_tracing_config

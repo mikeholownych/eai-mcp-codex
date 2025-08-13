@@ -1,5 +1,7 @@
 """Payment system exceptions."""
 
+from typing import Optional, Dict, Any
+
 
 class PaymentError(Exception):
     """Base exception for payment system errors."""
@@ -8,7 +10,12 @@ class PaymentError(Exception):
 
 class PaymentGatewayError(PaymentError):
     """Raised when there's an error with payment gateway operations."""
-    pass
+    
+    def __init__(self, message: str, code: Optional[str] = None, details: Optional[Dict[str, Any]] = None):
+        super().__init__(message)
+        self.message = message
+        self.code = code
+        self.details = details or {}
 
 
 class PaymentValidationError(PaymentError):

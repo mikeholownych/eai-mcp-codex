@@ -4,29 +4,18 @@ Provides validation, health checks, and integration testing for distributed trac
 """
 
 import logging
-from typing import Dict, Any, Optional, List, Callable, Union, Tuple
-from contextlib import contextmanager, asynccontextmanager
-import asyncio
+from typing import Dict, Any, List
 import time
-import json
 import re
 from dataclasses import dataclass
 from enum import Enum
 from collections import defaultdict
 
-from opentelemetry import trace, context
 from opentelemetry.trace import (
     Span, 
-    SpanKind, 
     Status, 
-    StatusCode,
-    SpanContext,
-    get_current_span,
-    TraceFlags
+    StatusCode
 )
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
-from opentelemetry.semconv.trace import SpanAttributes
 from opentelemetry.trace.span import Span
 
 from .tracing import get_tracing_config

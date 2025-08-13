@@ -4,7 +4,6 @@ Test script to validate the superadmin authentication changes.
 """
 
 import sys
-import os
 sys.path.append('src')
 
 from src.common.auth import AuthManager, UserRole
@@ -33,7 +32,7 @@ def test_superadmin_auth():
     print("\n2. Testing authentication with new credentials:")
     auth_result = auth_manager.authenticate_password("mike.holownych@gmail.com", "jack@345")
     if auth_result.success:
-        print(f"   ✅ Authentication successful")
+        print("   ✅ Authentication successful")
         print(f"   ✅ User ID: {auth_result.user_id}")
         print(f"   ✅ Username: {auth_result.username}")
         print(f"   ✅ Roles: {auth_result.roles}")
@@ -60,13 +59,13 @@ def test_superadmin_auth():
             username=auth_result.username,
             roles=auth_result.roles
         )
-        print(f"   ✅ JWT token created successfully")
+        print("   ✅ JWT token created successfully")
         print(f"   ✅ Token preview: {jwt_token[:50]}...")
         
         # Verify the token
         verify_result = auth_manager.verify_jwt_token(jwt_token)
         if verify_result.success:
-            print(f"   ✅ JWT token verification successful")
+            print("   ✅ JWT token verification successful")
             print(f"   ✅ Verified user: {verify_result.username}")
             print(f"   ✅ Verified roles: {verify_result.roles}")
         else:
@@ -101,9 +100,9 @@ def test_superadmin_auth():
     
     print("\n" + "=" * 50)
     print("✅ ALL TESTS PASSED - Superadmin authentication working correctly!")
-    print(f"✅ New superadmin credentials:")
-    print(f"   Username: mike.holownych@gmail.com")
-    print(f"   Password: jack@345")
+    print("✅ New superadmin credentials:")
+    print("   Username: mike.holownych@gmail.com")
+    print("   Password: jack@345")
     print(f"   Role: {UserRole.SUPERADMIN.value}")
     print(f"   API Key: {superadmin_key}")
     

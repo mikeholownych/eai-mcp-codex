@@ -5,17 +5,15 @@ Comprehensive tools for validating Prometheus alerting rules and testing alert f
 """
 
 import yaml
-import json
 import requests
 import re
 import sys
 import argparse
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, Any
 from pathlib import Path
-from datetime import datetime, timedelta
-import prometheus_client
-from prometheus_client import CollectorRegistry, Gauge, Counter, generate_latest
+from datetime import datetime
+from prometheus_client import CollectorRegistry, Gauge
 import time
 
 # Configure logging

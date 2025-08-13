@@ -13,8 +13,6 @@ import * as verificationFeedback from './verification-feedback';
 
 // Import configuration system
 import { ConfigurationManager } from '../config/configuration-manager';
-import { AgentDefinitionLoader } from '../loaders/agent-definition-loader';
-import { CommandDefinitionLoader } from '../loaders/command-definition-loader';
 import { AgentDefinitionLoader, AgentExecutionContext } from '../loaders/agent-definition-loader';
 import { CommandDefinitionLoader, CommandExecutionContext } from '../loaders/command-definition-loader';
 import { AgentDefinition, CommandDefinition } from '../types/configuration';

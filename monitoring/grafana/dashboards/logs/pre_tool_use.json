@@ -74,6 +74,7 @@
       "command": "cd /opt/Tmux-Orchestrator/llm-stack/rag-agent && sed -i.bak 's|\\./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro|./monitoring/grafana/dashboards-clean:/etc/grafana/provisioning/dashboards:ro|' docker-compose.yml",
       "description": "Update docker-compose to use clean dashboards directory"
     }
+<<<<<<< HEAD
   },
   {
     "session_id": "b10b9b94-b5e1-4511-aca2-e7d7fca595d6",
@@ -1246,5 +1247,7 @@
       "command": "cd /opt/Tmux-Orchestrator/llm-stack/rag-agent && docker compose -f docker-compose.yml -f docker-compose.prod.yml ps",
       "description": "Show all services to see if Nginx is there"
     }
+=======
+>>>>>>> main
   }
 ]

@@ -166,6 +166,23 @@ class PaymentGatewayFactory:
             logger.info("Created payment gateway instance for provider: %s", provider_name)
         
         return cls._instances[provider_name]
+    
+    @classmethod
+    def get_best_gateway(cls, payment_method_type: str, country: str) -> str:
+        """Get the best gateway for a payment method and country."""
+        # Simple logic for determining best gateway
+        if payment_method_type == "card":
+            if country in ["US", "CA", "GB", "DE", "FR", "AU"]:
+                return "stripe"
+            else:
+                return "paypal"
+        elif payment_method_type == "sepa_debit":
+            if country in ["DE", "FR", "NL", "BE"]:
+                return "adyen"
+            else:
+                return "stripe"
+        else:
+            return "stripe"  # Default fallback
 
 
 # Convenience functions

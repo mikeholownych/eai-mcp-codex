@@ -1,0 +1,23 @@
+[
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false
+  },
+  {
+    "session_id": "50ae73bb-fb52-4aa2-b7f9-e2639a32b3cd",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/50ae73bb-fb52-4aa2-b7f9-e2639a32b3cd.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "SubagentStop",
+    "stop_hook_active": false
+  }
+]

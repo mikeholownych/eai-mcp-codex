@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import SessionProvider from '@/components/providers/SessionProvider'
+import QueryProvider from '@/components/providers/QueryProvider'
+import StripeProvider from '@/components/providers/StripeProvider'
 import WebVitalsReporter from '@/components/performance/WebVitalsReporter'
 
 export const metadata: Metadata = {
@@ -129,8 +131,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased min-h-screen">
         <SessionProvider>
-          <WebVitalsReporter />
-          {children}
+          <QueryProvider>
+            <StripeProvider>
+              <WebVitalsReporter />
+              {children}
+            </StripeProvider>
+          </QueryProvider>
         </SessionProvider>
 
         <script

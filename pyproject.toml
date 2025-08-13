@@ -5,6 +5,9 @@ exclude = "(cli|database|hooks|tests|frontend/node_modules|src/collaboration_orc
 [tool.ruff]
 line-length = 88
 exclude = [
+    ".pyenv",
+    ".venv",
+    "node_modules",
     "cli",
     "database",
     "hooks",

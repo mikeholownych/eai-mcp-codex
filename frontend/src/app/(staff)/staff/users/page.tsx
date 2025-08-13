@@ -31,13 +31,21 @@ const roleColors: Record<string, string> = {
 
 const getRoleColor = (role: string) => roleColors[role] ?? 'bg-gray-500/10 text-gray-400'
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 export default function UserManagement() {
   const { user: currentUser } = useAuth()
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedRole, setSelectedRole] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
+<<<<<<< HEAD
   const currentPage = 1
+=======
+    const currentPage = 1
+>>>>>>> main
   const [userStats, setUserStats] = useState({
     total: 0,
     active: 0,

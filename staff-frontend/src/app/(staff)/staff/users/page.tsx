@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,6 +9,18 @@ import Button from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { debug } from "@/lib/utils";
 import { getUserStatusColor, getUserStatusIcon } from "@/lib/statusHelpers";
+=======
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { useUsers, useUserActions } from '@/hooks/useStaff'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
+import { useRouter } from 'next/navigation'
+import { debug } from '@/lib/utils'
+import { getUserStatusColor, getUserStatusIcon } from '@/lib/statusHelpers'
+>>>>>>> main
 import {
   UserGroupIcon,
   PlusIcon,
@@ -19,6 +32,7 @@ import {
   CheckCircleIcon,
   EyeIcon,
   UserCircleIcon,
+<<<<<<< HEAD
 } from "@heroicons/react/24/outline";
 
 const roleColors: Record<string, string> = {
@@ -39,17 +53,46 @@ export default function UserManagement() {
   const [selectedRole, setSelectedRole] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const currentPage = 1;
+=======
+} from '@heroicons/react/24/outline'
+
+
+const roleColors: Record<string, string> = {
+  admin: 'bg-red-500/10 text-red-400',
+  manager: 'bg-blue-500/10 text-blue-400',
+  support: 'bg-green-500/10 text-green-400',
+  content: 'bg-purple-500/10 text-purple-400',
+  customer: 'bg-gray-500/10 text-gray-400',
+}
+
+const getRoleColor = (role: string) => roleColors[role] ?? 'bg-gray-500/10 text-gray-400'
+
+
+export default function UserManagement() {
+  const { user: currentUser } = useAuth()
+  const router = useRouter()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedRole, setSelectedRole] = useState<string>('all')
+  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+    const currentPage = 1
+>>>>>>> main
   const [userStats, setUserStats] = useState({
     total: 0,
     active: 0,
     staff: 0,
+<<<<<<< HEAD
     suspended: 0,
   });
+=======
+    suspended: 0
+  })
+>>>>>>> main
 
   // Build filters for API call
   const filters = {
     page: currentPage,
     per_page: 20,
+<<<<<<< HEAD
     role: selectedRole === "all" ? undefined : selectedRole,
     status: selectedStatus === "all" ? undefined : selectedStatus,
     search: searchTerm || undefined,
@@ -62,12 +105,22 @@ export default function UserManagement() {
     deleteUser,
     loading: actionLoading,
   } = useUserActions();
+=======
+    role: selectedRole === 'all' ? undefined : selectedRole,
+    status: selectedStatus === 'all' ? undefined : selectedStatus,
+    search: searchTerm || undefined
+  }
+
+  const { users, total, loading, error, refetch } = useUsers(filters)
+  const { suspendUser, activateUser, deleteUser, loading: actionLoading } = useUserActions()
+>>>>>>> main
 
   // Update stats when users change
   useEffect(() => {
     if (users) {
       setUserStats({
         total: total,
+<<<<<<< HEAD
         active: users.filter((u) => u.status === "active").length,
         staff: users.filter((u) =>
           ["admin", "manager", "support", "content"].includes(u.role),
@@ -79,6 +132,17 @@ export default function UserManagement() {
 
   // Check if user has permission to manage users
   if (!currentUser || !["admin", "manager"].includes(currentUser.role)) {
+=======
+        active: users.filter(u => u.status === 'active').length,
+        staff: users.filter(u => ['admin', 'manager', 'support', 'content'].includes(u.role)).length,
+        suspended: users.filter(u => u.status === 'suspended').length
+      })
+    }
+  }, [users, total])
+
+  // Check if user has permission to manage users
+  if (!currentUser || !['admin', 'manager'].includes(currentUser.role)) {
+>>>>>>> main
     return (
       <div className="text-center py-12">
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
@@ -87,7 +151,11 @@ export default function UserManagement() {
           You don&apos;t have permission to access user management.
         </p>
       </div>
+<<<<<<< HEAD
     );
+=======
+    )
+>>>>>>> main
   }
 
   if (loading) {
@@ -95,21 +163,30 @@ export default function UserManagement() {
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
       </div>
+<<<<<<< HEAD
     );
+=======
+    )
+>>>>>>> main
   }
 
   if (error) {
     return (
       <div className="text-center py-12">
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
+<<<<<<< HEAD
         <h3 className="mt-2 text-sm font-medium text-white">
           Error Loading Users
         </h3>
+=======
+        <h3 className="mt-2 text-sm font-medium text-white">Error Loading Users</h3>
+>>>>>>> main
         <p className="mt-1 text-sm text-gray-400">{error}</p>
         <Button variant="outline" className="mt-4" onClick={refetch}>
           Try Again
         </Button>
       </div>
+<<<<<<< HEAD
     );
   }
 
@@ -157,6 +234,50 @@ export default function UserManagement() {
       alert("Failed to update user status");
     }
   };
+=======
+    )
+  }
+
+  const handleCreateUser = () => {
+    setShowCreateModal(true)
+  }
+
+  const handleEditUser = (userId: string) => {
+    debug('Edit user', { userId })
+    router.push(`/staff/users?edit=${userId}`)
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return
+    }
+    
+    try {
+      await deleteUser(userId)
+      refetch() // Refresh the users list
+    } catch (error) {
+      debug('Failed to delete user', error)
+      alert('Failed to delete user')
+    }
+  }
+
+  const handleSuspendUser = async (userId: string) => {
+    const user = users.find(u => u.id === userId)
+    if (!user) return
+
+    try {
+      if (user.status === 'suspended') {
+        await activateUser(userId)
+      } else {
+        await suspendUser(userId)
+      }
+      refetch() // Refresh the users list
+    } catch (error) {
+      debug('Failed to update user status', error)
+      alert('Failed to update user status')
+    }
+  }
+>>>>>>> main
 
   return (
     <div className="space-y-6">
@@ -166,7 +287,11 @@ export default function UserManagement() {
           <h1 className="text-2xl font-bold text-white">User Management</h1>
           <p className="text-gray-400">Manage users, roles, and permissions</p>
         </div>
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> main
         <Button variant="primary" onClick={handleCreateUser}>
           <PlusIcon className="h-4 w-4 mr-2" />
           Create User
@@ -182,9 +307,13 @@ export default function UserManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Total Users</p>
+<<<<<<< HEAD
               <p className="text-2xl font-semibold text-white">
                 {userStats.total.toLocaleString()}
               </p>
+=======
+              <p className="text-2xl font-semibold text-white">{userStats.total.toLocaleString()}</p>
+>>>>>>> main
             </div>
           </div>
         </Card>
@@ -196,9 +325,13 @@ export default function UserManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Active Users</p>
+<<<<<<< HEAD
               <p className="text-2xl font-semibold text-white">
                 {userStats.active.toLocaleString()}
               </p>
+=======
+              <p className="text-2xl font-semibold text-white">{userStats.active.toLocaleString()}</p>
+>>>>>>> main
             </div>
           </div>
         </Card>
@@ -210,9 +343,13 @@ export default function UserManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Staff Members</p>
+<<<<<<< HEAD
               <p className="text-2xl font-semibold text-white">
                 {userStats.staff.toLocaleString()}
               </p>
+=======
+              <p className="text-2xl font-semibold text-white">{userStats.staff.toLocaleString()}</p>
+>>>>>>> main
             </div>
           </div>
         </Card>
@@ -224,9 +361,13 @@ export default function UserManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Suspended</p>
+<<<<<<< HEAD
               <p className="text-2xl font-semibold text-white">
                 {userStats.suspended.toLocaleString()}
               </p>
+=======
+              <p className="text-2xl font-semibold text-white">{userStats.suspended.toLocaleString()}</p>
+>>>>>>> main
             </div>
           </div>
         </Card>
@@ -282,6 +423,7 @@ export default function UserManagement() {
           <table className="w-full">
             <thead className="bg-slate-700/50">
               <tr>
+<<<<<<< HEAD
                 <th className="text-left py-3 px-6 font-medium text-gray-300">
                   User
                 </th>
@@ -300,6 +442,14 @@ export default function UserManagement() {
                 <th className="text-left py-3 px-6 font-medium text-gray-300">
                   Actions
                 </th>
+=======
+                <th className="text-left py-3 px-6 font-medium text-gray-300">User</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">Role</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">Status</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">Plan</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">Last Active</th>
+                <th className="text-left py-3 px-6 font-medium text-gray-300">Actions</th>
+>>>>>>> main
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
@@ -309,26 +459,39 @@ export default function UserManagement() {
                     <div className="flex items-center">
                       <UserCircleIcon className="h-8 w-8 text-gray-400 mr-3" />
                       <div>
+<<<<<<< HEAD
                         <div className="text-sm font-medium text-white">
                           {user.name}
                         </div>
                         <div className="text-sm text-gray-400">
                           {user.email}
                         </div>
+=======
+                        <div className="text-sm font-medium text-white">{user.name}</div>
+                        <div className="text-sm text-gray-400">{user.email}</div>
+>>>>>>> main
                       </div>
                     </div>
                   </td>
                   <td className="py-4 px-6">
+<<<<<<< HEAD
                     <span
                       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}
                     >
+=======
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
+>>>>>>> main
                       {user.role.toUpperCase()}
                     </span>
                   </td>
                   <td className="py-4 px-6">
+<<<<<<< HEAD
                     <span
                       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getUserStatusColor(user.status)}`}
                     >
+=======
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getUserStatusColor(user.status)}`}>
+>>>>>>> main
                       {getUserStatusIcon(user.status)}
                       <span className="ml-1">{user.status}</span>
                     </span>
@@ -338,9 +501,13 @@ export default function UserManagement() {
                   </td>
                   <td className="py-4 px-6">
                     <span className="text-sm text-gray-400">
+<<<<<<< HEAD
                       {user.last_active
                         ? new Date(user.last_active).toLocaleDateString()
                         : "Never"}
+=======
+                      {user.last_active ? new Date(user.last_active).toLocaleDateString() : 'Never'}
+>>>>>>> main
                     </span>
                   </td>
                   <td className="py-4 px-6">
@@ -361,16 +528,24 @@ export default function UserManagement() {
                       >
                         <PencilIcon className="h-4 w-4" />
                       </button>
+<<<<<<< HEAD
                       {currentUser.role === "admin" && (
+=======
+                      {currentUser.role === 'admin' && (
+>>>>>>> main
                         <>
                           <button
                             onClick={() => handleSuspendUser(user.id)}
                             className="p-1 text-gray-400 hover:text-orange-400 transition-colors"
+<<<<<<< HEAD
                             title={
                               user.status === "suspended"
                                 ? "Activate User"
                                 : "Suspend User"
                             }
+=======
+                            title={user.status === 'suspended' ? 'Activate User' : 'Suspend User'}
+>>>>>>> main
                             disabled={actionLoading}
                           >
                             <ExclamationTriangleIcon className="h-4 w-4" />
@@ -397,9 +572,13 @@ export default function UserManagement() {
       {users.length === 0 && !loading && (
         <Card className="p-12 text-center">
           <UserGroupIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+<<<<<<< HEAD
           <h3 className="text-lg font-medium text-white mb-2">
             No users found
           </h3>
+=======
+          <h3 className="text-lg font-medium text-white mb-2">No users found</h3>
+>>>>>>> main
           <p className="text-gray-400 mb-6">
             Try adjusting your search criteria or create a new user.
           </p>
@@ -412,5 +591,10 @@ export default function UserManagement() {
 
       {/* Pagination could be added here */}
     </div>
+<<<<<<< HEAD
   );
 }
+=======
+  )
+}
+>>>>>>> main

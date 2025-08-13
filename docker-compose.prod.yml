@@ -24,10 +24,10 @@ services:
       mcp-fluentd:
         condition: service_healthy
     logging:
-      driver: "fluentd"
+      driver: "json-file"
       options:
-        fluentd-address: "mcp-fluentd:24224"
-        tag: "{{.Name}}"
+        max-size: "10m"
+        max-file: "5"
 
   plan-management:
     build:
@@ -51,10 +51,10 @@ services:
       mcp-fluentd:
         condition: service_healthy
     logging:
-      driver: "fluentd"
+      driver: "json-file"
       options:
-        fluentd-address: "mcp-fluentd:24224"
-        tag: "{{.Name}}"
+        max-size: "10m"
+        max-file: "5"
 
   git-worktree-manager:
     build:
@@ -77,10 +77,10 @@ services:
       mcp-fluentd:
         condition: service_healthy
     logging:
-      driver: "fluentd"
+      driver: "json-file"
       options:
-        fluentd-address: "mcp-fluentd:24224"
-        tag: "{{.Name}}"
+        max-size: "10m"
+        max-file: "5"
 
   workflow-orchestrator:
     build:
@@ -106,10 +106,10 @@ services:
       mcp-fluentd:
         condition: service_healthy
     logging:
-      driver: "fluentd"
+      driver: "json-file"
       options:
-        fluentd-address: "mcp-fluentd:24224"
-        tag: "{{.Name}}"
+        max-size: "10m"
+        max-file: "5"
 
   verification-feedback:
     build:
@@ -135,10 +135,10 @@ services:
       mcp-fluentd:
         condition: service_healthy
     logging:
-      driver: "fluentd"
+      driver: "json-file"
       options:
-        fluentd-address: "mcp-fluentd:24224"
-        tag: "{{.Name}}"
+        max-size: "10m"
+        max-file: "5"
 
   # Production Redis with persistence
   redis:
@@ -171,10 +171,10 @@ services:
       mcp-fluentd:
         condition: service_healthy
     logging:
-      driver: "fluentd"
+      driver: "json-file"
       options:
-        fluentd-address: "mcp-fluentd:24224"
-        tag: "{{.Name}}"
+        max-size: "10m"
+        max-file: "5"
 
     networks:
       - mcp-network
@@ -224,10 +224,10 @@ services:
     networks:
       - mcp-network
     logging:
-      driver: "fluentd"
+      driver: "json-file"
       options:
-        fluentd-address: "mcp-fluentd:24224"
-        tag: "{{.Name}}"
+        max-size: "10m"
+        max-file: "5"
 
   # Customer Frontend React/Next.js Application
   frontend:

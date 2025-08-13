@@ -6,12 +6,10 @@ Provides centralized setup and instrumentation for distributed tracing.
 import os
 import yaml
 import logging
-from typing import Dict, Any, Optional, List, Callable
-from contextlib import contextmanager, asynccontextmanager
+from typing import Dict, Any
+from contextlib import contextmanager
 from functools import wraps
-import time
 
-import yaml
 from opentelemetry import trace, metrics
 from opentelemetry.trace import Status, StatusCode, SpanKind
 from opentelemetry.sdk.trace import TracerProvider, sampling
@@ -26,7 +24,6 @@ from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from opentelemetry.instrumentation.asyncpg import AsyncPGInstrumentor
 from opentelemetry.instrumentation.redis import RedisInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.semconv.trace import SpanAttributes
 from opentelemetry.semconv.resource import ResourceAttributes
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.propagate import set_global_textmap, get_global_textmap
@@ -35,10 +32,6 @@ from opentelemetry.propagators.b3 import B3MultiFormat
 from opentelemetry.propagators.jaeger import JaegerPropagator
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 from fastapi import Request, Response
-from fastapi.responses import JSONResponse
-import httpx
-import redis.asyncio as redis
-import asyncpg
 
 logger = logging.getLogger(__name__)
 

@@ -327,27 +327,30 @@ class MockAsyncpgConnection:
     async def execute(self, query: str, *args):
         sql = query.strip().lower()
         if sql.startswith("insert into workflows"):
+            # Match parameter order used in orchestrator insert ($1..$13)
             row = {
                 "id": args[0],
                 "name": args[1],
                 "description": args[2],
                 "status": args[3],
                 "execution_mode": args[4],
-                "priority": args[5],
-                "created_by": args[6],
-                "created_at": args[7],
-                "updated_at": args[8],
-                "started_at": args[9],
-                "completed_at": args[10],
-                "global_parameters": args[11],
-                "success_criteria": args[12],
-                "failure_handling": args[13],
-                "notifications": args[14],
-                "metadata": args[15],
+                "created_by": args[5],
+                "created_at": args[6],
+                "updated_at": args[7],
+                "global_parameters": args[8],
+                "success_criteria": args[9],
+                "failure_handling": args[10],
+                "notifications": args[11],
+                "metadata": args[12],
+                # Optional fields not provided by insert, default to None
+                "priority": None,
+                "started_at": None,
+                "completed_at": None,
             }
             self._tables.setdefault("workflows", []).append(row)
             return "INSERT 0 1"
         if sql.startswith("insert into workflow_steps"):
+            # Match parameter order used in orchestrator insert ($1..$18)
             row = {
                 "id": args[0],
                 "workflow_id": args[1],
@@ -366,11 +369,12 @@ class MockAsyncpgConnection:
                 "depends_on": args[14],
                 "conditions": args[15],
                 "created_at": args[16],
-                "started_at": args[17],
-                "completed_at": args[18],
-                "result": args[19],
-                "error_message": args[20],
-                "metadata": args[21],
+                "metadata": args[17],
+                # Fields updated later
+                "started_at": None,
+                "completed_at": None,
+                "result": None,
+                "error_message": None,
             }
             self._tables.setdefault("workflow_steps", []).append(row)
             return "INSERT 0 1"
@@ -386,9 +390,6 @@ class MockAsyncpgConnection:
     async def fetchrow(self, query: str, *args):
         rows = await self.fetch(query, *args)
         return rows[0] if rows else None
-
-    async def close(self) -> None:
-        return None
 
     async def close(self) -> None:
         return None

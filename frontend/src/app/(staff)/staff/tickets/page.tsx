@@ -7,7 +7,10 @@ import { Ticket } from '@/lib/staffApi'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { debug } from '@/lib/utils'
+<<<<<<< HEAD
 import { getTicketStatusColor, getTicketStatusIcon } from '@/lib/statusHelpers'
+=======
+>>>>>>> main
 import {
   LifebuoyIcon,
   MagnifyingGlassIcon,
@@ -30,6 +33,10 @@ const priorityColors: Record<string, string> = {
 const getPriorityColor = (priority: string) =>
   priorityColors[priority] ?? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 const categories = [
   'All Categories',
   'API',
@@ -115,10 +122,14 @@ export default function StaffTicketManagement() {
       refetch() // Refresh the tickets list
       if (selectedTicket && selectedTicket.id === ticketId) {
         // Update the selected ticket status for immediate UI feedback
+<<<<<<< HEAD
         setSelectedTicket({
           ...selectedTicket,
           status: newStatus as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed',
         })
+=======
+        setSelectedTicket({ ...selectedTicket, status: newStatus as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed' })
+>>>>>>> main
       }
     } catch (error) {
       debug('Failed to update ticket status', error)
@@ -126,6 +137,10 @@ export default function StaffTicketManagement() {
     }
   }
 
+<<<<<<< HEAD
+=======
+  
+>>>>>>> main
   const handleViewTicket = (ticket: Ticket) => {
     setSelectedTicket(ticket)
   }
@@ -138,10 +153,15 @@ export default function StaffTicketManagement() {
             ← Back to Tickets
           </Button>
           <div className="flex items-center space-x-3">
+<<<<<<< HEAD
             <span
               className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTicketStatusColor(selectedTicket.status)}`}
             >
               {getTicketStatusIcon(selectedTicket.status)}
+=======
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTicketStatusColor(selectedTicket.status)}`}>
+              {getStatusIcon(selectedTicket.status)}
+>>>>>>> main
               <span className="ml-1">{selectedTicket.status.replace('-', ' ').toUpperCase()}</span>
             </span>
             <span

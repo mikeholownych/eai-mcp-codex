@@ -2,7 +2,8 @@
 
 import os
 from typing import Optional, Dict, Any
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class PaymentSettings(BaseSettings):
@@ -12,6 +13,18 @@ class PaymentSettings(BaseSettings):
     database_url: str = Field(
         default="postgresql://user:password@localhost/payments",
         env="PAYMENT_DATABASE_URL"
+    )
+    db_pool_size: int = Field(
+        default=10,
+        env="DB_POOL_SIZE"
+    )
+    db_max_overflow: int = Field(
+        default=20,
+        env="DB_MAX_OVERFLOW"
+    )
+    db_echo_queries: bool = Field(
+        default=False,
+        env="DB_ECHO_QUERIES"
     )
     
     # Stripe settings

@@ -8,7 +8,7 @@ import sys
 import json
 import logging
 import logging.config
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any
 from datetime import datetime
 import uuid
 import re
@@ -27,7 +27,7 @@ try:
 except ImportError:
     LOGURU_AVAILABLE = False
 
-from .tracing import get_tracing_config, get_current_span
+from .tracing import get_current_span
 from .trace_propagation import TracePropagationUtils
 
 logger = logging.getLogger(__name__)

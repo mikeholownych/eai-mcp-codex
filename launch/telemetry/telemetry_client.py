@@ -13,7 +13,6 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict
 import requests
-from jsonschema import validate, ValidationError
 import yaml
 import os
 
@@ -335,7 +334,7 @@ class TelemetryClient:
             
             response = requests.post(webhook_url, json=message, timeout=10)
             response.raise_for_status()
-            logger.info(f"Slack alert sent successfully")
+            logger.info("Slack alert sent successfully")
             
         except Exception as e:
             logger.error(f"Failed to send Slack alert: {e}")
@@ -360,7 +359,7 @@ class TelemetryClient:
             response = requests.post("https://events.pagerduty.com/v2/enqueue", 
                                   json=message, timeout=10)
             response.raise_for_status()
-            logger.info(f"PagerDuty alert sent successfully")
+            logger.info("PagerDuty alert sent successfully")
             
         except Exception as e:
             logger.error(f"Failed to send PagerDuty alert: {e}")

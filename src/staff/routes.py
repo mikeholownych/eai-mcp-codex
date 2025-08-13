@@ -633,8 +633,8 @@ async def list_tickets(
 
 @router.get("/tickets/stats", response_model=Dict[str, Any])
 async def get_ticket_stats(
-    current_user: dict = Depends(get_current_user),
-    _: None = Depends(verify_staff_access),
+    current_user: dict = Depends(get_current_user_dependency),
+    _: None = Depends(verify_staff_access_dependency),
 ) -> Dict[str, Any]:
     """Get ticket statistics and metrics."""
     record_request("staff-tickets-stats")

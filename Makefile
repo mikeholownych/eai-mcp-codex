@@ -49,18 +49,18 @@ dev-clean: ## Clean development environment (remove volumes)
 ##@ Production Commands
 prod: check-env ## Start production environment
 	@echo "🚀 Starting production environment..."
-	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+	docker compose -f docker-compose.yml -f docker-compose.prod.fixed.yml up -d --build
 	@echo "✅ Production environment started"
 
 prod-logs: ## Show production logs
-	docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
+	docker compose -f docker-compose.yml -f docker-compose.prod.fixed.yml logs -f
 
 prod-down: ## Stop production environment
-	docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+	docker compose -f docker-compose.yml -f docker-compose.prod.fixed.yml down
 
 prod-update: ## Update production environment
-	docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+	docker compose -f docker-compose.yml -f docker-compose.prod.fixed.yml pull
+	docker compose -f docker-compose.yml -f docker-compose.prod.fixed.yml up -d --build
 
 ##@ Service Management
 base: ## Build base image
@@ -169,8 +169,8 @@ test-service: ## Test specific service (usage: make test-service SERVICE=model-r
 
 ##@ Code Quality
 lint: ## Run linting on all services
-	@echo "🔍 Running linting..."
-	docker compose -f docker-compose.yml -f docker-compose.override.yml run --rm dev-tools flake8 src/
+	@echo "🔍 Running linting (ruff + mypy)..."
+	docker compose -f docker-compose.yml -f docker-compose.override.yml run --rm dev-tools ruff check .
 	docker compose -f docker-compose.yml -f docker-compose.override.yml run --rm dev-tools mypy src/
 
 format: ## Format code using black

@@ -26,6 +26,7 @@ FROM base as planner-agent
 
 WORKDIR /app
 
+<<<<<<< HEAD
 USER root
 
 # Copy dependencies
@@ -44,6 +45,9 @@ RUN mkdir -p /app/logs && chown -R mcp:mcp /app
 USER mcp
 
 # Expose internal port
+=======
+# Expose port
+>>>>>>> main
 EXPOSE 8013
 
 # Health check

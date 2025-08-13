@@ -4,22 +4,18 @@ Provides comprehensive testing and validation for health check implementations.
 """
 
 import asyncio
-import json
 import time
-from typing import Dict, Any, List, Optional, Callable, Tuple
-from datetime import datetime, timedelta
+from typing import Dict, Any, List, Optional, Callable
+from datetime import datetime
 from dataclasses import dataclass, asdict
 from enum import Enum
 import pytest
-import aiohttp
-from unittest.mock import Mock, patch, AsyncMock
 
 from .enhanced_health_check import (
-    HealthStatus, HealthCheckType, HealthChecker, HealthCheckResult,
-    check_memory_usage, check_disk_usage, check_cpu_usage,
-    check_network_connectivity, health_check
+    HealthStatus, HealthChecker, check_memory_usage, check_disk_usage, check_cpu_usage,
+    check_network_connectivity
 )
-from .health_aggregator import HealthAggregator, SystemHealthReport
+from .health_aggregator import HealthAggregator
 from .health_monitoring import HealthMonitor, AlertRule, AlertSeverity, AlertType
 from .logging import get_logger
 from .tracing import get_tracer

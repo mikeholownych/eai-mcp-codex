@@ -4,12 +4,21 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { SystemHealth } from '@/types'
+<<<<<<< HEAD
 import {
   StaffApiService,
   User,
   Ticket,
   SystemStats,
   DashboardData,
+=======
+import { 
+  StaffApiService, 
+  User, 
+  Ticket, 
+  SystemStats, 
+  DashboardData, 
+>>>>>>> main
   handleStaffApiError,
   UserCreate,
   UserUpdate,
@@ -412,11 +421,15 @@ export function useTicketActions() {
 
 // Ticket Stats Hook
 export function useTicketStats() {
+<<<<<<< HEAD
   const [stats, setStats] = useState<{
     total_tickets: number
     by_status: Record<string, number>
     avg_response_time: number
   } | null>(null)
+=======
+  const [stats, setStats] = useState<{ total_tickets: number; by_status: Record<string, number>; avg_response_time: number } | null>(null)
+>>>>>>> main
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 

@@ -4,11 +4,8 @@ Provides Jaeger and OTLP exporters with metrics collection and health checks.
 """
 
 import logging
-from typing import Dict, Any, Optional, List, Callable, Union
-from contextlib import contextmanager, asynccontextmanager
-import asyncio
+from typing import Dict, Any, Optional
 import time
-import json
 import os
 from dataclasses import dataclass
 from enum import Enum
@@ -30,7 +27,6 @@ from opentelemetry.exporter.zipkin.json import ZipkinExporter
 from opentelemetry.exporter.logging import LoggingSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.semconv.resource import ResourceAttributes
-from opentelemetry.semconv.trace import SpanAttributes
 
 from .tracing import get_tracing_config
 from .trace_sampling import get_adaptive_sampler

@@ -1,0 +1,44 @@
+# Temporary override to bypass vault dependencies
+services:
+  model-router:
+    depends_on:
+      - redis
+      - consul
+    command: ["sh", "-c", "echo 'Starting without vault secrets' && python start.py"]
+    
+  plan-management:
+    depends_on:
+      - redis
+      - postgres
+      - consul
+    command: ["sh", "-c", "echo 'Starting without vault secrets' && python start.py"]
+    
+  git-worktree-manager:
+    depends_on:
+      - redis
+      - postgres
+      - consul
+    command: ["sh", "-c", "echo 'Starting without vault secrets' && python start.py"]
+    
+  workflow-orchestrator:
+    depends_on:
+      - redis
+      - postgres
+      - consul
+      - model-router
+    command: ["sh", "-c", "echo 'Starting without vault secrets' && python start.py"]
+    
+  verification-feedback:
+    depends_on:
+      - redis
+      - postgres
+      - consul
+      - model-router
+    command: ["sh", "-c", "echo 'Starting without vault secrets' && python start.py"]
+    
+  auth-service:
+    depends_on:
+      - redis
+      - postgres
+      - consul
+    command: ["sh", "-c", "echo 'Starting without vault secrets' && python start.py"]

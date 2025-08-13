@@ -91,7 +91,7 @@ class SetupIntent(Base):
     status: Mapped[str] = mapped_column(String(50), nullable=False)
     client_secret: Mapped[str] = mapped_column(String(255), nullable=False)
     payment_method_types: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    metadata_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now(), 
@@ -131,7 +131,7 @@ class Subscription(Base):
     cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     canceled_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     ended_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    metadata_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now(), 
@@ -191,7 +191,7 @@ class Invoice(Base):
     period_start: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     period_end: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    metadata_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now(), 
@@ -245,7 +245,7 @@ class Dispute(Base):
     evidence_due_by: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     evidence_submitted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     evidence: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    metadata_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now(), 
@@ -298,7 +298,7 @@ class PaymentMethod(Base):
     )
     is_default: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    metadata_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now(), 
@@ -351,7 +351,7 @@ class PaymentIntent(Base):
     confirmation_method: Mapped[str] = mapped_column(String(20), nullable=False)
     three_ds_status: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     idempotency_key: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    metadata_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now(), 
@@ -402,7 +402,7 @@ class Charge(Base):
     receipt_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     failure_code: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     failure_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    metadata_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now(), 
@@ -514,7 +514,7 @@ class AuditLog(Base):
     action: Mapped[str] = mapped_column(String(100), nullable=False)
     resource_type: Mapped[str] = mapped_column(String(50), nullable=False)
     resource_id: Mapped[str] = mapped_column(UUID(as_uuid=True), nullable=False)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
+    metadata_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now(), 

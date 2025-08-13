@@ -24,6 +24,7 @@ FROM base as developer-agent
 
 WORKDIR /app
 
+<<<<<<< HEAD
 USER root
 
 # Copy dependencies from deps
@@ -44,6 +45,8 @@ USER mcp
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8015/health || exit 1
 
+=======
+>>>>>>> main
 # Expose port
 EXPOSE 8015
 

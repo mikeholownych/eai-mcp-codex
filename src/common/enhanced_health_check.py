@@ -2,19 +2,16 @@ import time
 import psutil
 import asyncio
 import aiohttp
-import asyncpg
-import redis.asyncio as redis
-from typing import Dict, Any, Optional, List, Callable, Union
-from datetime import datetime, timedelta
+from typing import Dict, Any, List, Callable, Union
+from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
 from contextlib import asynccontextmanager
-import json
 import socket
 import os
 
 from .logging import get_logger
-from .tracing import get_tracer, traced
+from .tracing import get_tracer
 from .metrics import get_metrics_collector
 
 logger = get_logger("health")
