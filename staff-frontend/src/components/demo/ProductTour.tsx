@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 import React, { useState } from "react";
@@ -5,11 +6,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   XMarkIcon,
   ChevronLeftIcon,
+=======
+'use client'
+
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  XMarkIcon, 
+  ChevronLeftIcon, 
+>>>>>>> main
   ChevronRightIcon,
   PlayIcon,
   CodeBracketIcon,
   CpuChipIcon,
   ShieldCheckIcon,
+<<<<<<< HEAD
   CommandLineIcon,
 } from "@heroicons/react/24/outline";
 import Button from "@/components/ui/Button";
@@ -23,10 +34,26 @@ interface TourStep {
   image: string;
   features: string[];
   color: string;
+=======
+  CommandLineIcon
+} from '@heroicons/react/24/outline'
+import Button from '@/components/ui/Button'
+import Card from '@/components/ui/Card'
+
+interface TourStep {
+  id: string
+  title: string
+  description: string
+  icon: React.ComponentType<{ className?: string }>
+  image: string
+  features: string[]
+  color: string
+>>>>>>> main
 }
 
 const tourSteps: TourStep[] = [
   {
+<<<<<<< HEAD
     id: "agent-network",
     title: "AI Agent Network",
     description:
@@ -135,6 +162,112 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
 
   const currentTourStep = tourSteps[currentStep];
   const IconComponent = currentTourStep.icon;
+=======
+    id: 'agent-network',
+    title: 'AI Agent Network',
+    description: 'Watch multiple specialized AI agents collaborate in real-time to solve complex coding challenges.',
+    icon: CpuChipIcon,
+    image: '/demo/agent-network.png',
+    features: [
+      'Claude O3 & Sonnet 4 integration',
+      'Multi-agent collaboration',
+      'Real-time code review',
+      'Automated testing'
+    ],
+    color: 'from-purple-400 to-pink-400'
+  },
+  {
+    id: 'code-generation',
+    title: 'Smart Code Generation',
+    description: 'Transform ideas into production-ready code with context-aware AI that understands your patterns.',
+    icon: CodeBracketIcon,
+    image: '/demo/code-generation.png',
+    features: [
+      'Natural language to code',
+      'Pattern recognition',
+      'Best practices enforcement',
+      'Multi-language support'
+    ],
+    color: 'from-blue-400 to-cyan-400'
+  },
+  {
+    id: 'security',
+    title: 'Enterprise Security',
+    description: 'SOC 2 compliant platform with advanced security controls and comprehensive audit logging.',
+    icon: ShieldCheckIcon,
+    image: '/demo/security.png',
+    features: [
+      'JWT tenant isolation',
+      'Row-level security',
+      'Audit logging',
+      'RBAC controls'
+    ],
+    color: 'from-green-400 to-emerald-400'
+  },
+  {
+    id: 'integrations',
+    title: 'DevTool Integrations',
+    description: 'Seamlessly integrate with your existing workflow through popular development tools.',
+    icon: CommandLineIcon,
+    image: '/demo/integrations.png',
+    features: [
+      'GitHub integration',
+      'VS Code extension',
+      'CI/CD pipelines',
+      'Slack notifications'
+    ],
+    color: 'from-orange-400 to-red-400'
+  }
+]
+
+interface ProductTourProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  const nextStep = () => {
+    setCurrentStep((prev) => (prev + 1) % tourSteps.length)
+  }
+
+  const prevStep = () => {
+    setCurrentStep((prev) => (prev - 1 + tourSteps.length) % tourSteps.length)
+  }
+
+  const goToStep = (index: number) => {
+    setCurrentStep(index)
+  }
+
+  const handleBulletClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement
+    if (target.matches('button[data-index]')) {
+      const index = Number(target.getAttribute('data-index'))
+      goToStep(index)
+    }
+  }
+
+  const startDemo = () => {
+    setIsPlaying(true)
+    // Auto-advance through steps
+    const interval = setInterval(() => {
+      setCurrentStep((prev) => {
+        const nextIndex = prev + 1
+        if (nextIndex >= tourSteps.length) {
+          clearInterval(interval)
+          setIsPlaying(false)
+          return 0
+        }
+        return nextIndex
+      })
+    }, 4000)
+  }
+
+  const currentTourStep = tourSteps[currentStep]
+  const IconComponent = currentTourStep.icon
+>>>>>>> main
 
   return (
     <AnimatePresence>
@@ -167,9 +300,13 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                 <div className="space-y-6">
                   {/* Header */}
                   <div className="flex items-center space-x-4">
+<<<<<<< HEAD
                     <div
                       className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-4 shadow-lg`}
                     >
+=======
+                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-4 shadow-lg`}>
+>>>>>>> main
                       <IconComponent className="w-8 h-8 text-white" />
                     </div>
                     <div>
@@ -184,9 +321,13 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
 
                   {/* Features */}
                   <div className="space-y-3">
+<<<<<<< HEAD
                     <h3 className="text-xl font-semibold text-white">
                       Key Features:
                     </h3>
+=======
+                    <h3 className="text-xl font-semibold text-white">Key Features:</h3>
+>>>>>>> main
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {currentTourStep.features.map((feature, index) => (
                         <motion.div
@@ -196,9 +337,13 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                           transition={{ delay: index * 0.1 }}
                           className="flex items-center space-x-3 p-3 rounded-lg bg-slate-800/50"
                         >
+<<<<<<< HEAD
                           <div
                             className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentTourStep.color}`}
                           />
+=======
+                          <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentTourStep.color}`} />
+>>>>>>> main
                           <span className="text-gray-300">{feature}</span>
                         </motion.div>
                       ))}
@@ -214,8 +359,13 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                           data-index={index}
                           className={`w-3 h-3 rounded-full transition-all ${
                             index === currentStep
+<<<<<<< HEAD
                               ? "bg-purple-500 scale-125"
                               : "bg-slate-600 hover:bg-slate-500"
+=======
+                              ? 'bg-purple-500 scale-125'
+                              : 'bg-slate-600 hover:bg-slate-500'
+>>>>>>> main
                           }`}
                         />
                       ))}
@@ -270,9 +420,13 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                     {/* Placeholder for demo image/video */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center space-y-4">
+<<<<<<< HEAD
                         <div
                           className={`w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-6 shadow-xl`}
                         >
+=======
+                        <div className={`w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-6 shadow-xl`}>
+>>>>>>> main
                           <IconComponent className="w-12 h-12 text-white" />
                         </div>
                         <div>
@@ -287,9 +441,13 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                     </div>
 
                     {/* Animated Border */}
+<<<<<<< HEAD
                     <div
                       className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${currentTourStep.color} opacity-20 animate-pulse`}
                     />
+=======
+                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${currentTourStep.color} opacity-20 animate-pulse`} />
+>>>>>>> main
                   </motion.div>
 
                   {/* Progress Indicator */}
@@ -313,6 +471,7 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                     </p>
                   </div>
                   <div className="flex space-x-4">
+<<<<<<< HEAD
                     <Button
                       variant="outline"
                       size="sm"
@@ -322,6 +481,13 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                     </Button>
                     <Button
                       variant="secondary"
+=======
+                    <Button variant="outline" size="sm" className="border-slate-600">
+                      Learn More
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+>>>>>>> main
                       size="sm"
                       className="bg-gradient-to-r from-purple-600 to-pink-600"
                     >
@@ -335,5 +501,10 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
         </motion.div>
       )}
     </AnimatePresence>
+<<<<<<< HEAD
   );
 }
+=======
+  )
+}
+>>>>>>> main

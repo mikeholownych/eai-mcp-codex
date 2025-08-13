@@ -4,31 +4,19 @@ Handles HTTP request tracing, message queue tracing, and database correlation.
 """
 
 import logging
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any
 from contextlib import contextmanager, asynccontextmanager
-import asyncio
-import json
 import time
 
-from opentelemetry import trace, context
 from opentelemetry.trace import (
-    Span, 
     SpanKind, 
     Status, 
     StatusCode,
-    set_span_in_context,
-    get_current_span,
-    get_value_from_span
+    get_current_span
 )
-from opentelemetry.propagate import extract, inject
-from opentelemetry.semconv.trace import SpanAttributes
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 from fastapi import Request, Response
-from fastapi.responses import JSONResponse
 import httpx
-import aiohttp
-import redis.asyncio as redis
-import asyncpg
 
 from .tracing import get_tracing_config
 

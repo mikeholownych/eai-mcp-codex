@@ -8,33 +8,24 @@ including validation, performance testing, and integration testing.
 import asyncio
 import time
 import json
-import uuid
 import os
 import re
 import logging
-from typing import Dict, Any, List, Optional, Tuple, Callable, Union
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
-from contextlib import asynccontextmanager, contextmanager
-from pathlib import Path
-import pytest
-import httpx
-from prometheus_client import Counter, Histogram, Gauge
+from prometheus_client import Counter, Histogram
 
 from ..common.logging_config import (
-    StructuredLogger, LoggingManager, LogSanitizer, LogFormatter,
-    get_logging_manager, get_logger
+    LogSanitizer, get_logging_manager, get_logger
 )
 from ..common.logging_filters import (
     TraceCorrelationFilter, ServiceMetadataFilter, SensitiveDataFilter,
-    RequestContextFilter, PerformanceMetricsFilter, SecurityEventFilter,
-    PerformanceEventFilter, BusinessEventFilter, ErrorEventFilter,
-    AuditEventFilter, LLMEventFilter, DatabaseEventFilter
+    RequestContextFilter, PerformanceMetricsFilter
 )
 from ..common.agent_logging import (
-    AgentLogger, ModelRouterLogger, PlanManagementLogger, GitWorktreeLogger,
-    WorkflowOrchestratorLogger, VerificationFeedbackLogger, LLMOperationLogger,
-    CollaborationLogger, get_agent_logger
+    ModelRouterLogger, PlanManagementLogger, GitWorktreeLogger,
+    WorkflowOrchestratorLogger, VerificationFeedbackLogger
 )
 
 logger = logging.getLogger(__name__)
@@ -1104,7 +1095,7 @@ class LogTestingManager:
             try:
                 try:
                     raise ValueError("Test exception for logging")
-                except Exception as e:
+                except Exception:
                     test_logger.exception("Exception occurred during test", error_id="test_exception_1")
                 error_tests.append({"test": "exception_logging", "success": True})
             except Exception as e:

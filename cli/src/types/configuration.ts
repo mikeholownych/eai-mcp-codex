@@ -110,6 +110,8 @@ export interface CommandDefinition extends MCPConfiguration {
   metadata: { version: string; usageCount?: number; };
 }
 
+// Duplicate interfaces below caused TS conflicts; removing duplicate declarations.
+/*
 export interface AgentDefinition extends MCPConfiguration {
   instructions: string;
   systemPrompt?: string;
@@ -159,6 +161,7 @@ export interface CommandDefinition extends MCPConfiguration {
   contextRequirements: { requiredContext: string[] };
   metadata: { version: string; usageCount?: number; };
 }
+*/
 
 export interface AgentExecutionContext {
   agent: AgentDefinition;
@@ -372,5 +375,6 @@ export interface ConfigurationEvent {
 export type ConfigurationEventListener = (event: ConfigurationEvent) => void;
 
 // Re-export specialized types from loaders
-export type { AgentDefinition, AgentExecutionContext } from '../loaders/agent-definition-loader';
-export type { CommandDefinition, CommandExecutionContext } from '../loaders/command-definition-loader';
+// Remove circular re-exports to avoid conflicting type names
+// export type { AgentDefinition, AgentExecutionContext } from '../loaders/agent-definition-loader';
+// export type { CommandDefinition, CommandExecutionContext } from '../loaders/command-definition-loader';

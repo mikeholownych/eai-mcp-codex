@@ -4,12 +4,11 @@ Test script to verify only superadmins can create admin users.
 """
 
 import sys
-import os
 import hashlib
 import secrets
 from datetime import datetime
 from enum import Enum
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 # Simplified classes for testing
 class UserRole(str, Enum):

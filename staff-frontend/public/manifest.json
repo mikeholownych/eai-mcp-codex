@@ -20,7 +20,11 @@
       "label": "Main dashboard on desktop"
     },
     {
+<<<<<<< HEAD
       "src": "/screenshots/mobile-1.png",
+=======
+      "src": "/screenshots/mobile-1.png", 
+>>>>>>> main
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
@@ -36,7 +40,11 @@
     },
     {
       "src": "/icons/icon-96x96.png",
+<<<<<<< HEAD
       "sizes": "96x96",
+=======
+      "sizes": "96x96", 
+>>>>>>> main
       "type": "image/png",
       "purpose": "any"
     },
@@ -100,4 +108,8 @@
       "icons": [{ "src": "/icons/shortcut-chat.png", "sizes": "192x192" }]
     }
   ]
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

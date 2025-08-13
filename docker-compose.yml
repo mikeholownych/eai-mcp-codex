@@ -226,7 +226,7 @@ services:
     container_name: mcp-model-router-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://host.docker.internal:8200
       - VAULT_ROLE_ID_FILE=/run/secrets/model_router_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/model_router_vault_secret_id
     volumes:
@@ -235,7 +235,8 @@ services:
       - model_router_secrets:/vault/secrets:rw
       - ./vault/agent-configs/model-router/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/model-router/model_router_config.ctmpl:/vault/secrets/model_router_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - mcp-network
     depends_on:
@@ -310,7 +311,7 @@ services:
     container_name: mcp-plan-management-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/plan_management_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/plan_management_vault_secret_id
     volumes:
@@ -319,7 +320,6 @@ services:
       - plan_management_secrets:/vault/secrets:rw
       - ./vault/agent-configs/plan-management/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/plan-management/plan_management_config.ctmpl:/vault/secrets/plan_management_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -396,7 +396,7 @@ services:
     container_name: mcp-git-worktree-manager-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/git_worktree_manager_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/git_worktree_manager_vault_secret_id
     volumes:
@@ -405,7 +405,6 @@ services:
       - git_worktree_manager_secrets:/vault/secrets:rw
       - ./vault/agent-configs/git-worktree-manager/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/git-worktree-manager/git_worktree_manager_config.ctmpl:/vault/secrets/git_worktree_manager_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -482,7 +481,7 @@ services:
     container_name: mcp-workflow-orchestrator-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/workflow_orchestrator_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/workflow_orchestrator_vault_secret_id
     volumes:
@@ -491,7 +490,6 @@ services:
       - workflow_orchestrator_secrets:/vault/secrets:rw
       - ./vault/agent-configs/workflow-orchestrator/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/workflow-orchestrator/workflow_orchestrator_config.ctmpl:/vault/secrets/workflow_orchestrator_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -574,7 +572,7 @@ services:
     container_name: mcp-verification-feedback-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/verification_feedback_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/verification_feedback_vault_secret_id
     volumes:
@@ -583,7 +581,6 @@ services:
       - verification_feedback_secrets:/vault/secrets:rw
       - ./vault/agent-configs/verification-feedback/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/verification-feedback/verification_feedback_config.ctmpl:/vault/secrets/verification_feedback_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -661,7 +658,7 @@ services:
     container_name: mcp-staff-service-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/staff_service_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/staff_service_vault_secret_id
     volumes:
@@ -670,7 +667,6 @@ services:
       - staff_service_secrets:/vault/secrets:rw
       - ./vault/agent-configs/staff-service/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/staff-service/staff_service_config.ctmpl:/vault/secrets/staff_service_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -740,7 +736,7 @@ services:
     container_name: mcp-auth-service-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/auth_service_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/auth_service_vault_secret_id
     volumes:
@@ -749,7 +745,6 @@ services:
       - auth_service_secrets:/vault/secrets:rw
       - ./vault/agent-configs/auth-service/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/auth-service/auth_config.ctmpl:/vault/secrets/auth_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -1133,7 +1128,7 @@ services:
     container_name: mcp-frontend-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/frontend_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/frontend_vault_secret_id
     volumes:
@@ -1142,7 +1137,6 @@ services:
       - frontend_secrets:/vault/secrets:rw
       - ./vault/agent-configs/frontend/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/frontend/nextauth_config.ctmpl:/vault/secrets/nextauth_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -1202,7 +1196,7 @@ services:
     container_name: mcp-staff-frontend-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/staff_frontend_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/staff_frontend_vault_secret_id
     volumes:
@@ -1211,7 +1205,6 @@ services:
       - staff_frontend_secrets:/vault/secrets:rw
       - ./vault/agent-configs/staff-frontend/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/staff-frontend/nextauth_config.ctmpl:/vault/secrets/nextauth_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -1337,7 +1330,7 @@ services:
     container_name: mcp-grafana-vault-agent
     restart: on-failure
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/grafana_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/grafana_vault_secret_id
     volumes:
@@ -1346,7 +1339,6 @@ services:
       - grafana_secrets:/vault/secrets:rw
       - ./vault/agent-configs/grafana/agent-config.hcl:/vault/agent-config.hcl:ro
       - ./vault/agent-configs/grafana/grafana_config.ctmpl:/vault/secrets/grafana_config.ctmpl:ro
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
@@ -1594,14 +1586,13 @@ services:
       dockerfile: Dockerfile
     container_name: mcp-cloudflare-tunnel-vault-agent
     restart: on-failure
-    command: vault agent -config /vault/agent-config.hcl
     networks:
       - mcp-network
     depends_on:
       consul:
         condition: service_healthy
     environment:
-      - VAULT_ADDR=http://127.0.0.1:8200 # Replace with your Vault server address
+      - VAULT_ADDR=http://172.50.0.1:8200 # Docker host gateway
       - VAULT_ROLE_ID_FILE=/run/secrets/cloudflare_tunnel_vault_role_id
       - VAULT_SECRET_ID_FILE=/run/secrets/cloudflare_tunnel_vault_secret_id
     volumes:

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 import React, { forwardRef } from "react";
@@ -20,6 +21,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     },
     ref,
   ) => {
+=======
+'use client'
+
+import React, { forwardRef } from 'react'
+import { cn } from '@/lib/utils'
+import { InputProps } from '@/types'
+
+const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ label, placeholder, type = 'text', value, onChange, error, disabled = false, required = false, className, ...props }, ref) => {
+>>>>>>> main
     return (
       <div className="w-full">
         {label && (
@@ -37,17 +48,27 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           disabled={disabled}
           required={required}
           className={cn(
+<<<<<<< HEAD
             "w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-gray-400",
             "focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             "transition-all duration-200",
             error && "border-red-500 ring-1 ring-red-500",
             className,
+=======
+            'w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-white placeholder-gray-400',
+            'focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent',
+            'disabled:opacity-50 disabled:cursor-not-allowed',
+            'transition-all duration-200',
+            error && 'border-red-500 ring-1 ring-red-500',
+            className
+>>>>>>> main
           )}
           {...props}
         />
         {error && (
           <p className="mt-1 text-sm text-red-500 flex items-center">
+<<<<<<< HEAD
             <svg
               className="w-4 h-4 mr-1"
               fill="currentColor"
@@ -58,11 +79,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
                 clipRule="evenodd"
               />
+=======
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+>>>>>>> main
             </svg>
             {error}
           </p>
         )}
       </div>
+<<<<<<< HEAD
     );
   },
 );
@@ -70,3 +96,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input";
 
 export default Input;
+=======
+    )
+  }
+)
+
+Input.displayName = 'Input'
+
+export default Input
+>>>>>>> main

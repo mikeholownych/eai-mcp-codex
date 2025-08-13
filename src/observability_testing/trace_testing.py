@@ -5,30 +5,24 @@ This module provides advanced testing capabilities for distributed tracing compo
 including validation, performance testing, and integration testing.
 """
 
+import logging
+import logging
 import asyncio
 import time
 import json
-import uuid
-from typing import Dict, Any, List, Optional, Tuple, Callable, Union
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
-from contextlib import asynccontextmanager, contextmanager
-import pytest
-import httpx
-from prometheus_client import Counter, Histogram, Gauge
+from prometheus_client import Counter, Histogram
 
-from opentelemetry import trace, context
 from opentelemetry.trace import (
-    Span, SpanKind, Status, StatusCode, SpanContext, Tracer
+    Status, StatusCode
 )
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
-from opentelemetry.semconv.trace import SpanAttributes
 
 from ..common.tracing import get_tracing_config, get_tracer
 from ..common.trace_validation import (
     TraceValidator, TraceHealthChecker, TraceIntegrationTester,
-    ValidationLevel, ValidationStatus, ValidationResult, TraceValidationReport
+    ValidationLevel, ValidationStatus
 )
 from ..common.trace_propagation import TracePropagationUtils
 from ..common.trace_sampling import get_trace_sampling_manager
@@ -509,7 +503,7 @@ class TraceTestingManager:
                         else:
                             raise RuntimeError("Test runtime error")
                             
-                except Exception as e:
+                except Exception:
                     errors_created += 1
                     # Exception should be recorded in span
             

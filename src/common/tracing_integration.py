@@ -5,20 +5,21 @@ Provides initialization, configuration, and utilities for distributed tracing.
 
 import logging
 import os
-import sys
-from typing import Dict, Any, Optional, List, Callable, Union
+from typing import Dict, Any, Optional
 from contextlib import contextmanager, asynccontextmanager
 import asyncio
 import time
 import yaml
 
-from .tracing import get_tracing_config, TracingConfig
+from opentelemetry.trace import Status, StatusCode
+
+from .tracing import get_tracing_config
 from .trace_propagation import TracePropagationUtils
 from .message_queue_tracing import MessageQueueTracing
 from .database_tracing import DatabaseTracing
 from .llm_tracing import LLMTracing
 from .trace_sampling import TraceSamplingManager
-from .trace_exporters import TraceExporterManager, initialize_trace_exporters
+from .trace_exporters import initialize_trace_exporters
 from .trace_validation import TraceValidator, TraceHealthChecker, TraceIntegrationTester
 
 logger = logging.getLogger(__name__)

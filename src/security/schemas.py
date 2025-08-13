@@ -148,7 +148,7 @@ class UserRegistration(BaseSecureModel):
 
     @root_validator
     def validate_admin_registration(cls, values):
-        """Prevent unauthorized admin registration"""
+        """Prevent unauthorized admin self-registration in production-like environments."""
         if values.get("role") == UserRole.ADMIN:
             # Only allow when explicitly enabled or during tests
             allow_env = os.getenv("ALLOW_ADMIN_REGISTRATION", "false").lower()

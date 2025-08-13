@@ -4,31 +4,21 @@ Provides trace correlation for database operations and query execution.
 """
 
 import logging
-from typing import Dict, Any, Optional, List, Callable, Union
-from contextlib import asynccontextmanager, contextmanager
-import asyncio
+from typing import Dict, Any, Optional, List
+from contextlib import asynccontextmanager
 import time
 import hashlib
 import re
 
-from opentelemetry import trace, context
 from opentelemetry.trace import (
     Span, 
     SpanKind, 
     Status, 
-    StatusCode,
-    set_span_in_context,
-    get_current_span,
-    get_value_from_span
+    StatusCode
 )
-from opentelemetry.propagate import extract, inject
-from opentelemetry.semconv.trace import SpanAttributes
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
 import asyncpg
-import sqlalchemy
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
 import redis.asyncio as redis
 
 from .tracing import get_tracing_config

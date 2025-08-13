@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Development Dockerfile for Staff Frontend
 FROM node:18-alpine
 
@@ -32,19 +33,55 @@ RUN npm ci --frozen-lockfile && \
 
 # Copy source code with proper ownership
 COPY --chown=nextjs:nodejs . .
+=======
+# Emergency Development Dockerfile for Frontend Crisis
+FROM node:20-alpine
+
+# Install system dependencies
+RUN apk add --no-cache libc6-compat dumb-init curl
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install ALL dependencies (including devDependencies for Next.js CLI)
+RUN npm ci && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Create next user for security
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    chown -R nextjs:nodejs /app
+>>>>>>> main
 
 # Switch to non-root user
 USER nextjs
 
+<<<<<<< HEAD
 # Expose port (staff frontend on different port)
 EXPOSE 3001
 
 # Health check (with more lenient timing for dev)
 HEALTHCHECK --interval=45s --timeout=15s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:3001/api/health || exit 1
+=======
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+>>>>>>> main
 
 # Use dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
 
+<<<<<<< HEAD
 # Development server with hot reloading
+=======
+# Default command for development
+>>>>>>> main
 CMD ["npm", "run", "dev"]

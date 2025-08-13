@@ -1,7 +1,7 @@
 """FastAPI application for Authentication Service."""
 
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
@@ -70,7 +70,7 @@ def create_app() -> FastAPI:
     # Include routes
     app.include_router(router, prefix="/api/auth", tags=["authentication"])
     
-    # Add health check at root level
+    # Add health checks
     @app.get("/health")
     async def health_check():
         """Service health check."""
@@ -79,6 +79,15 @@ def create_app() -> FastAPI:
             "service": "auth-service",
             "version": "1.0.0"
         }
+
+    @app.get("/healthz")
+    async def liveness_check():
+        return {"status": "healthy"}
+
+    @app.get("/readyz")
+    async def readiness_check():
+        from src.common.health_check import readiness
+        return await readiness()
     
     return app
 

@@ -167,6 +167,7 @@ export default function CodeEditorPage() {
     }, 2000)
   }
 
+<<<<<<< HEAD
   const handleEditorDidMount = (editor: unknown) => {
     const typedEditor = editor as {
       getValue: () => string;
@@ -174,6 +175,10 @@ export default function CodeEditorPage() {
       focus: () => void;
       updateOptions?: (options: Record<string, unknown>) => void;
     };
+=======
+  const handleEditorDidMount = (editor: { getValue: () => string; setValue: (value: string) => void; focus: () => void }) => {
+    editorRef.current = editor
+>>>>>>> main
     
     editorRef.current = {
       getValue: () => typedEditor.getValue(),

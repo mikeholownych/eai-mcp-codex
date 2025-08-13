@@ -26,6 +26,7 @@ FROM base as security-agent
 
 WORKDIR /app
 
+<<<<<<< HEAD
 USER root
 
 # Copy dependencies
@@ -44,6 +45,9 @@ RUN mkdir -p /app/logs && chown -R mcp:mcp /app
 USER mcp
 
 # Expose service port
+=======
+# Expose port
+>>>>>>> main
 EXPOSE 8014
 
 # Health check

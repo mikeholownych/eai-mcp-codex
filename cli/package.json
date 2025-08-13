@@ -40,6 +40,8 @@
     "yaml": "^2.3.4"
   },
   "devDependencies": {
+    "@types/ink": "^0.5.2",
+    "@types/ink-select-input": "^3.0.5",
     "@types/inquirer": "^8.2.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.1.0",

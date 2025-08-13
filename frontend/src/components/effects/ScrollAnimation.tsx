@@ -2,12 +2,16 @@
 
 import React, { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
+<<<<<<< HEAD
 import {
   SparklesIcon,
   CodeBracketIcon,
   ShieldCheckIcon,
   CpuChipIcon,
 } from '@heroicons/react/24/outline'
+=======
+import { SparklesIcon, CodeBracketIcon, ShieldCheckIcon, CpuChipIcon } from '@heroicons/react/24/outline'
+>>>>>>> main
 
 interface ScrollAnimationProps {
   children: React.ReactNode
@@ -17,15 +21,30 @@ const ScrollAnimation: React.FC<ScrollAnimationProps> = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
+<<<<<<< HEAD
     offset: ['start end', 'end start'],
   })
 
   const y = useTransform(scrollYProgress, [0, 1], ['-20%', '20%'])
+=======
+    offset: ["start end", "end start"]
+  })
+
+  const y = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"])
+>>>>>>> main
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 0.8])
 
   return (
+<<<<<<< HEAD
     <motion.div ref={ref} style={{ y, opacity, scale }} className="relative">
+=======
+    <motion.div
+      ref={ref}
+      style={{ y, opacity, scale }}
+      className="relative"
+    >
+>>>>>>> main
       {children}
     </motion.div>
   )
@@ -39,6 +58,7 @@ interface FeatureCardProps {
   index: number
 }
 
+<<<<<<< HEAD
 const FeatureCard: React.FC<FeatureCardProps> = ({
   icon: Icon,
   title,
@@ -65,6 +85,26 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-20 transition-all duration-500 rounded-2xl blur-xl"
         style={{ background: `linear-gradient(135deg, ${gradient})` }}
       />
+=======
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, description, gradient, index }) => {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  })
+
+  const x = useTransform(scrollYProgress, [0, 1], index % 2 === 0 ? ["-100px", "100px"] : ["100px", "-100px"])
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0])
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ x, opacity }}
+      className="group relative"
+    >
+      <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-20 transition-all duration-500 rounded-2xl blur-xl"
+           style={{ background: `linear-gradient(135deg, ${gradient})` }} />
+>>>>>>> main
       <div className="relative bg-slate-800/50 border border-slate-700/50 backdrop-blur-xl rounded-2xl p-8 h-full">
         <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${gradient} p-4 mb-6 shadow-lg`}>
           <Icon className="w-8 h-8 text-white" />
@@ -83,29 +123,45 @@ const EnhancedFeatures: React.FC = () => {
     {
       icon: CpuChipIcon,
       title: 'Agent Network',
+<<<<<<< HEAD
       description:
         'Multi-agent AI collaboration with Claude O3, Sonnet 4, and specialized coding agents working together to solve complex problems.',
+=======
+      description: 'Multi-agent AI collaboration with Claude O3, Sonnet 4, and specialized coding agents working together to solve complex problems.',
+>>>>>>> main
       gradient: 'from-purple-400 to-pink-400',
     },
     {
       icon: CodeBracketIcon,
       title: 'Code Generation',
+<<<<<<< HEAD
       description:
         'Transform ideas into production-ready code with intelligent AI models that understand context, patterns, and best practices.',
+=======
+      description: 'Transform ideas into production-ready code with intelligent AI models that understand context, patterns, and best practices.',
+>>>>>>> main
       gradient: 'from-blue-400 to-cyan-400',
     },
     {
       icon: ShieldCheckIcon,
       title: 'Compliance & Security',
+<<<<<<< HEAD
       description:
         'SOC 2 ready platform with JWT tenant isolation, comprehensive audit logging, and enterprise-grade security controls.',
+=======
+      description: 'SOC 2 ready platform with JWT tenant isolation, comprehensive audit logging, and enterprise-grade security controls.',
+>>>>>>> main
       gradient: 'from-green-400 to-emerald-400',
     },
     {
       icon: SparklesIcon,
       title: 'Intelligent Assistant',
+<<<<<<< HEAD
       description:
         'AI-powered chatbot trained on all Ethical AI Insider content with RAG architecture for contextual responses.',
+=======
+      description: 'AI-powered chatbot trained on all Ethical AI Insider content with RAG architecture for contextual responses.',
+>>>>>>> main
       gradient: 'from-violet-400 to-purple-400',
     },
   ]
@@ -116,7 +172,11 @@ const EnhancedFeatures: React.FC = () => {
       <div className="relative max-w-7xl mx-auto">
         <ScrollAnimation>
           <div className="text-center mb-20">
+<<<<<<< HEAD
             <motion.h2
+=======
+            <motion.h2 
+>>>>>>> main
               className="text-4xl md:text-5xl font-bold text-white mb-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -125,15 +185,23 @@ const EnhancedFeatures: React.FC = () => {
             >
               Experience the Future of Development
             </motion.h2>
+<<<<<<< HEAD
             <motion.p
+=======
+            <motion.p 
+>>>>>>> main
               className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
+<<<<<<< HEAD
               Scroll to discover our cutting-edge features that will revolutionize your development
               workflow.
+=======
+              Scroll to discover our cutting-edge features that will revolutionize your development workflow.
+>>>>>>> main
             </motion.p>
           </div>
         </ScrollAnimation>
@@ -155,4 +223,8 @@ const EnhancedFeatures: React.FC = () => {
   )
 }
 
+<<<<<<< HEAD
 export default EnhancedFeatures
+=======
+export default EnhancedFeatures
+>>>>>>> main

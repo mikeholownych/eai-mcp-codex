@@ -232,11 +232,15 @@ export class StaffApiService {
     return response.data
   }
 
+<<<<<<< HEAD
   static async getTicketStats(): Promise<{
     total_tickets: number
     by_status: Record<string, number>
     avg_response_time: number
   }> {
+=======
+  static async getTicketStats(): Promise<{ total_tickets: number; by_status: Record<string, number>; avg_response_time: number }> {
+>>>>>>> main
     const response = await api.get(`${STAFF_API_BASE}/tickets/stats`)
     return response.data
   }
@@ -248,10 +252,16 @@ export function useStaffApi() {
 }
 
 // Error handling helper
+<<<<<<< HEAD
 export function handleStaffApiError(error: unknown): string {
   const apiError = error as { response?: { data?: { message?: string }, status?: number }, message?: string }
   if (apiError.response?.data?.message) {
     return apiError.response.data.message
+=======
+export function handleStaffApiError(error: { response?: { data?: { message?: string } }; status?: number; message?: string }): string {
+  if (error.response?.data?.message) {
+    return error.response.data.message
+>>>>>>> main
   }
   if (apiError.response?.status === 401) {
     return 'Unauthorized access. Please check your permissions.'

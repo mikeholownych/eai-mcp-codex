@@ -9,6 +9,8 @@ class BaseServiceSettings(BaseSettings):
 
     service_name: str = ""
     service_port: int = 0
+    # Strict env validation toggle
+    require_env: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore"
@@ -156,9 +158,16 @@ agent_monitor_settings = AgentMonitorSettings(_env_prefix="AGENT_MONITOR_")
 
 global_settings = GlobalSettings()
 
-# Enforce explicit secret in production
-if global_settings.environment == "production" and not os.getenv("JWT_SECRET"):
-    raise ValueError("JWT_SECRET environment variable must be set in production")
+def enforce_env_strictly():
+    """Fail fast when critical env vars are missing in production.
+
+    This provides a single place to centralize validation and can be invoked by
+    each service at startup.
+    """
+    if global_settings.environment == "production":
+        validate_required_env_vars(["JWT_SECRET"])  # add more as needed
+
+enforce_env_strictly()
 
 # Set Anthropic API key globally if available
 if global_settings.anthropic_api_key:

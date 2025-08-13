@@ -4,6 +4,45 @@
     "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/b10b9b94-b5e1-4511-aca2-e7d7fca595d6.jsonl",
     "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
     "hook_event_name": "UserPromptSubmit",
+<<<<<<< HEAD
     "prompt": "\n#181 [frontend runner 3/7] COPY --from=builder --chown=nextjs:nodejs /app/public ./public\n#181 CACHED\n\n#182 [frontend runner 4/7] COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./\n#182 ERROR: failed to calculate checksum of ref 1e6b1689-5026-458e-b82b-d77e4da5b6b4::ordaghtcsog8u8p11549qensg: \"/app/.next/standalone\": not found\n\n#181 [staff-frontend runner 3/7] COPY --from=builder --chown=nextjs:nodejs /app/public ./public\n#181 CACHED\n\n#182 [staff-frontend runner 4/7] COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./\n#182 ERROR: failed to calculate checksum of ref 1e6b1689-5026-458e-b82b-d77e4da5b6b4::ordaghtcsog8u8p11549qensg: \"/app/.next/standalone\": not found\n------\n > [staff-frontend runner 4/7] COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./:\n------\nDockerfile:55\n\n--------------------\n\n  53 |     # Copy only necessary runtime artifacts\n\n  54 |     COPY --from=builder --chown=nextjs:nodejs /app/public ./public\n\n  55 | >>> COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./\n\n  56 |     COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static\n\n  57 |     COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules\n\n--------------------\n\ntarget staff-frontend: failed to solve: failed to compute cache key: failed to calculate checksum of ref 1e6b1689-5026-458e-b82b-d77e4da5b6b4::ordaghtcsog8u8p11549qensg: \"/app/.next/standalone\": not found\n\nmake: *** [Makefile:52: prod] Error 1\n"
+=======
+    "prompt": "PRODUCTION INCIDENT RESOLVED \u2705 \n\nAll critical services are now healthy. You can resume frontend development work on the EAI - MCP Codex project. \n\nCurrent status: Production environment is stable and serving traffic normally.\n\nPlease continue with your codebase analysis of ./llm-stack/rag-agent and proceed with the landing page redesign as planned."
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "\ud83d\udea8 CRITICAL FRONTEND ISSUE - CSS Not Loading\n\nUSER REPORTS:\n- CSS not loading on direct access: http://192.168.2.185:3000\n- CSS not loading through domain: https://new.ethical-ai-insider.com\n\nIMPACT: Your launch-ready frontend redesign is not displaying properly for users!\n\nIMMEDIATE INVESTIGATION NEEDED:\n1. Check frontend container build process\n2. Verify static asset serving (CSS, JS files)\n3. Examine Next.js build output\n4. Test asset paths and routing\n5. Check nginx proxy configuration\n\nThis is blocking user access to your completed work. The frontend shows as unhealthy in docker compose - likely related to CSS build/serve issues.\n\nPRIORITY: Fix CSS loading to restore proper frontend display. All your conversion-optimized design work is currently invisible to users."
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "continue"
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "continue"
+  },
+  {
+    "session_id": "3d65cdf4-b8e8-42c9-b73f-62028ce963f1",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/3d65cdf4-b8e8-42c9-b73f-62028ce963f1.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Staff frontend is not healthy \nmcp-staff-frontend  |    \u25b2 Next.js 15.4.5\nmcp-staff-frontend  |    - Local:        http://localhost:3001\nmcp-staff-frontend  |    - Network:      http://0.0.0.0:3001\nmcp-staff-frontend  |\nmcp-staff-frontend  |  \u2713 Starting...\nmcp-staff-frontend  |  \u2713 Ready in 604ms\nmcp-staff-frontend  | Failed to update prerender cache for /favicon.ico [Error: EACCES: permission denied, open '/app/.next/server/app/favicon.ico.body'] {\nmcp-staff-frontend  |   errno: -13,\nmcp-staff-frontend  |   code: 'EACCES',\nmcp-staff-frontend  |   syscall: 'open',\nmcp-staff-frontend  |   path: '/app/.next/server/app/favicon.ico.body'\nmcp-staff-frontend  | }\n"
+  },
+  {
+    "session_id": "50ae73bb-fb52-4aa2-b7f9-e2639a32b3cd",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/50ae73bb-fb52-4aa2-b7f9-e2639a32b3cd.jsonl",
+    "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "https://new.ethical-ai-insider.com is showing a cloudflare bad gateway error (502)"
+>>>>>>> main
   }
 ]

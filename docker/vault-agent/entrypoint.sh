@@ -23,4 +23,6 @@ else
 fi
 
 # Execute the vault agent command with the loaded credentials
-exec vault agent "$@"
+echo "Starting vault agent with config /vault/agent-config.hcl"
+echo "VAULT_ADDR: $VAULT_ADDR"
+exec /bin/vault agent -config=/vault/agent-config.hcl

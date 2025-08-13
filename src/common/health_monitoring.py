@@ -4,17 +4,12 @@ Provides comprehensive monitoring, alerting, and dashboard integration for healt
 """
 
 import asyncio
-import json
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from enum import Enum
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
-from .health_aggregator import HealthAggregator, SystemHealthReport, ServiceHealthSummary, AggregationStatus
-from .enhanced_health_check import HealthStatus
+from .health_aggregator import SystemHealthReport, ServiceHealthSummary, AggregationStatus, get_health_aggregator
 from .logging import get_logger
 from .tracing import get_tracer
 from .metrics import get_metrics_collector
@@ -416,12 +411,12 @@ class HealthMonitor:
         message += f"Last Updated: {service_summary.last_updated}\n"
         
         if service_summary.critical_issues:
-            message += f"\nCritical Issues:\n"
+            message += "\nCritical Issues:\n"
             for issue in service_summary.critical_issues:
                 message += f"- {issue}\n"
         
         if service_summary.warnings:
-            message += f"\nWarnings:\n"
+            message += "\nWarnings:\n"
             for warning in service_summary.warnings:
                 message += f"- {warning}\n"
         

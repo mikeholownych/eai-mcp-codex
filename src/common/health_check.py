@@ -1,19 +1,16 @@
 import time
 import psutil
 import asyncio
-import aiohttp
-import asyncpg
-import redis.asyncio as redis
 from typing import Dict, Any, Optional, List, Callable, Union, Awaitable
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
-from contextlib import asynccontextmanager
-import json
 
 from .logging import get_logger
-from .tracing import get_tracer, traced
+from .tracing import get_tracer
 from .metrics import get_metrics_collector
+import os
+import asyncio as _asyncio
 
 logger = get_logger("health")
 
@@ -512,8 +509,8 @@ def get_health_checker(service_name: str = "default") -> HealthChecker:
 
 
 async def health() -> Dict[str, Any]:
-    """Return a minimal async health check consistent with tests expecting 'healthy'."""
-    return {"status": "healthy"}
+    """Return a minimal async health check consistent with tests expecting 'ok'."""
+    return {"status": "ok"}
 
 
 async def detailed_health(service_name: str = "default") -> Dict[str, Any]:
@@ -526,3 +523,39 @@ def register_health_check(name: str, check_func: callable, critical: bool = True
     """Register a custom health check (convenience function)."""
     checker = get_health_checker()
     checker.register_simple_check(name, check_func, critical=critical)
+
+
+async def readiness() -> Dict[str, Any]:
+    """Simple readiness check based on environment-configured dependencies.
+
+    - If REDIS_URL is set, ping Redis
+    - If DATABASE_URL is set, attempt connection (asyncpg)
+    If none are set, consider ready.
+    """
+    checks: Dict[str, Any] = {}
+    overall_ready = True
+
+    redis_url = os.getenv("REDIS_URL")
+    if redis_url:
+        try:
+            import redis.asyncio as _redis
+            client = _redis.from_url(redis_url)
+            await _asyncio.wait_for(client.ping(), timeout=3)
+            checks["redis"] = {"status": "ready"}
+        except Exception as e:
+            overall_ready = False
+            checks["redis"] = {"status": "not_ready", "error": str(e)}
+
+    db_url = os.getenv("DATABASE_URL")
+    if db_url:
+        try:
+            import asyncpg as _asyncpg
+            conn = await _asyncio.wait_for(_asyncpg.connect(dsn=db_url), timeout=5)
+            await conn.close()
+            checks["database"] = {"status": "ready"}
+        except Exception as e:
+            overall_ready = False
+            checks["database"] = {"status": "not_ready", "error": str(e)}
+
+    status = "ready" if overall_ready else "not_ready"
+    return {"status": status, "checks": checks}

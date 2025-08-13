@@ -4,25 +4,18 @@ Provides custom spans and metrics for LLM operations, model calls, and token usa
 """
 
 import logging
-from typing import Dict, Any, Optional, List, Callable, Union
-from contextlib import asynccontextmanager, contextmanager
-import asyncio
+from typing import Dict, Any, List
+from contextlib import asynccontextmanager
 import time
-import json
 import hashlib
+import re
 
-from opentelemetry import trace, metrics
 from opentelemetry.trace import (
     Span, 
     SpanKind, 
     Status, 
-    StatusCode,
-    set_span_in_context,
-    get_current_span,
-    get_value_from_span
+    StatusCode
 )
-from opentelemetry.propagate import extract, inject
-from opentelemetry.semconv.trace import SpanAttributes
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
 from .tracing import get_tracing_config

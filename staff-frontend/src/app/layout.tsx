@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SessionProvider from "@/components/providers/SessionProvider";
@@ -21,6 +22,28 @@ export const metadata: Metadata = {
     title: "Ethical AI Insider - MCP Agent Network",
     description:
       "Secure, multi-tenant platform for code generation via agentic AI",
+=======
+import type { Metadata, Viewport } from 'next'
+import './globals.css'
+import SessionProvider from '@/components/providers/SessionProvider'
+import WebVitalsReporter from '@/components/performance/WebVitalsReporter'
+
+export const metadata: Metadata = {
+  title: 'Ethical AI Insider - MCP Agent Network',
+  description: 'Secure, multi-tenant platform for code generation via agentic AI with real-time collaboration and enterprise features.',
+  keywords: 'AI, code generation, ethics, agents, collaboration, enterprise',
+  authors: [{ name: 'Ethical AI Insider' }],
+  openGraph: {
+    title: 'Ethical AI Insider - MCP Agent Network',
+    description: 'Secure, multi-tenant platform for code generation via agentic AI',
+    type: 'website',
+    siteName: 'Ethical AI Insider',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ethical AI Insider - MCP Agent Network',
+    description: 'Secure, multi-tenant platform for code generation via agentic AI',
+>>>>>>> main
   },
   robots: {
     index: true,
@@ -28,6 +51,7 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
+<<<<<<< HEAD
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
@@ -44,23 +68,50 @@ export const viewport: Viewport = {
   themeColor: "#a855f7",
   colorScheme: "dark",
 };
+=======
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'google-site-verification=example123',
+  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#a855f7',
+  colorScheme: 'dark',
+}
+>>>>>>> main
 
 export default function RootLayout({
   children,
 }: {
+<<<<<<< HEAD
   children: React.ReactNode;
+=======
+  children: React.ReactNode
+>>>>>>> main
 }) {
   return (
     <html lang="en" className="dark">
       <head>
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
+<<<<<<< HEAD
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin=""
         />
 
+=======
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        
+>>>>>>> main
         {/* Preload critical fonts */}
         <link
           rel="preload"
@@ -76,14 +127,22 @@ export default function RootLayout({
           type="font/woff2"
           crossOrigin=""
         />
+<<<<<<< HEAD
 
         {/* DNS prefetch for API endpoints */}
         <link rel="dns-prefetch" href="//newapi.ethical-ai-insider.com" />
 
+=======
+        
+        {/* DNS prefetch for API endpoints */}
+        <link rel="dns-prefetch" href="//newapi.ethical-ai-insider.com" />
+        
+>>>>>>> main
         {/* PWA Manifest */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+<<<<<<< HEAD
         <meta
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
@@ -106,6 +165,19 @@ export default function RootLayout({
         {/* Optimize resource loading */}
         <link rel="preload" href="/globals.css" as="style" />
 
+=======
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="EAI Codex" />
+        
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+        
+        {/* Optimize resource loading */}
+        <link rel="preload" href="/globals.css" as="style" />
+        
+>>>>>>> main
         {/* Performance monitoring script */}
         <script
           dangerouslySetInnerHTML={{
@@ -184,5 +256,9 @@ export default function RootLayout({
         />
       </body>
     </html>
+<<<<<<< HEAD
   );
+=======
+  )
+>>>>>>> main
 }

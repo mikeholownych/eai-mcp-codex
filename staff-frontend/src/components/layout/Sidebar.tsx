@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 "use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+=======
+'use client'
+
+import React, { useState } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
+>>>>>>> main
 import {
   HomeIcon,
   CodeBracketIcon,
@@ -18,6 +27,7 @@ import {
   ChartBarIcon,
   UsersIcon,
   CogIcon,
+<<<<<<< HEAD
 } from "@heroicons/react/24/outline";
 
 interface SidebarItem {
@@ -89,6 +99,65 @@ const Sidebar: React.FC<SidebarProps> = ({
         collapsed ? "w-16" : "w-64",
       )}
     >
+=======
+} from '@heroicons/react/24/outline'
+
+interface SidebarItem {
+  name: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  badge?: string
+  children?: SidebarItem[]
+}
+
+interface SidebarProps {
+  role?: string
+  plan?: string
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ role = 'customer', plan = 'standard' }) => {
+  const [collapsed, setCollapsed] = useState(false)
+  const pathname = usePathname()
+
+  const customerItems: SidebarItem[] = [
+    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+    { name: 'Code Editor', href: '/editor', icon: CodeBracketIcon },
+    { name: 'AI Assistant', href: '/chat', icon: ChatBubbleLeftRightIcon },
+    { name: 'Video Library', href: '/videos', icon: PlayIcon },
+    { name: 'Documentation', href: '/docs', icon: DocumentTextIcon },
+    { name: 'Billing', href: '/billing', icon: CreditCardIcon },
+    { name: 'Support', href: '/support', icon: LifebuoyIcon },
+    { name: 'Profile', href: '/profile', icon: UserIcon },
+  ]
+
+  const staffItems: SidebarItem[] = [
+    { name: 'Overview', href: '/staff', icon: HomeIcon },
+    { name: 'Analytics', href: '/staff/analytics', icon: ChartBarIcon },
+    { name: 'Customers', href: '/staff/customers', icon: UsersIcon },
+    { name: 'Support', href: '/staff/support', icon: LifebuoyIcon },
+    { name: 'Content', href: '/staff/content', icon: DocumentTextIcon, children: [
+      { name: 'Blog Posts', href: '/staff/content/blog', icon: DocumentTextIcon },
+      { name: 'Videos', href: '/staff/content/videos', icon: PlayIcon },
+    ]},
+    { name: 'Billing', href: '/staff/billing', icon: CreditCardIcon },
+    { name: 'Settings', href: '/staff/settings', icon: CogIcon },
+  ]
+
+  const items = role === 'customer' ? customerItems : staffItems
+
+  const isActive = (href: string) => {
+    if (href === '/dashboard' || href === '/staff') {
+      return pathname === href
+    }
+    return pathname.startsWith(href)
+  }
+
+  return (
+    <div className={cn(
+      'h-screen bg-dark-900 border-r border-dark-700 flex flex-col transition-all duration-300',
+      collapsed ? 'w-16' : 'w-64'
+    )}>
+>>>>>>> main
       {/* Header */}
       <div className="p-4 border-b border-dark-700">
         <div className="flex items-center justify-between">
@@ -123,6 +192,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Link
               href={item.href}
               className={cn(
+<<<<<<< HEAD
                 "flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group",
                 isActive(item.href)
                   ? "bg-primary-500 text-white shadow-glow"
@@ -135,6 +205,18 @@ const Sidebar: React.FC<SidebarProps> = ({
                   collapsed ? "mx-auto" : "mr-3",
                 )}
               />
+=======
+                'flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group',
+                isActive(item.href)
+                  ? 'bg-primary-500 text-white shadow-glow'
+                  : 'text-gray-300 hover:text-white hover:bg-dark-700'
+              )}
+            >
+              <item.icon className={cn(
+                'flex-shrink-0 w-5 h-5',
+                collapsed ? 'mx-auto' : 'mr-3'
+              )} />
+>>>>>>> main
               {!collapsed && (
                 <>
                   <span className="flex-1">{item.name}</span>
@@ -155,10 +237,17 @@ const Sidebar: React.FC<SidebarProps> = ({
                     key={child.name}
                     href={child.href}
                     className={cn(
+<<<<<<< HEAD
                       "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                       isActive(child.href)
                         ? "text-primary-400 bg-dark-700"
                         : "text-gray-400 hover:text-white hover:bg-dark-700",
+=======
+                      'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                      isActive(child.href)
+                        ? 'text-primary-400 bg-dark-700'
+                        : 'text-gray-400 hover:text-white hover:bg-dark-700'
+>>>>>>> main
                     )}
                   >
                     <child.icon className="w-4 h-4 mr-2" />
@@ -179,16 +268,27 @@ const Sidebar: React.FC<SidebarProps> = ({
               <UserIcon className="w-4 h-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">
+<<<<<<< HEAD
               <p className="text-sm font-medium text-white truncate">
                 John Doe
               </p>
+=======
+              <p className="text-sm font-medium text-white truncate">John Doe</p>
+>>>>>>> main
               <p className="text-xs text-gray-400 capitalize">{plan} Plan</p>
             </div>
           </div>
         </div>
       )}
     </div>
+<<<<<<< HEAD
   );
 };
 
 export default Sidebar;
+=======
+  )
+}
+
+export default Sidebar
+>>>>>>> main

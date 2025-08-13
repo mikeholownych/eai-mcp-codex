@@ -208,9 +208,15 @@ async def test_claude_connection() -> Dict[str, Any]:
         claude_client = get_claude_client()
         connection_ok = await claude_client.test_connection()
 
+        available = claude_client.list_available_models()
+        if hasattr(available, "__await__"):
+            try:
+                available = await available
+            except Exception:
+                available = []
         return {
             "claude_api_connected": connection_ok,
-            "available_models": claude_client.list_available_models(),
+            "available_models": list(available),
             "status": "healthy" if connection_ok else "unhealthy",
         }
     except Exception as e:

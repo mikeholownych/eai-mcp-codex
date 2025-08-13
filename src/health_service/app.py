@@ -3,19 +3,17 @@ Health Check Service Application.
 Provides comprehensive health check endpoints and monitoring for all MCP services.
 """
 
-import asyncio
-import json
 from typing import Dict, Any, Optional
 from datetime import datetime
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, Field
 
-from src.common.enhanced_health_check import HealthStatus, HealthCheckType
+from src.common.enhanced_health_check import HealthStatus
 from src.common.health_aggregator import get_health_aggregator
 from src.common.health_monitoring import (
     get_health_monitor,
