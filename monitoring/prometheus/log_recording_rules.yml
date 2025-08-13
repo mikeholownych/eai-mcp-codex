@@ -1,0 +1,210 @@
+# Log-Based Recording Rules for Prometheus
+# Recording rules for log-based metrics aggregation and computation
+
+groups:
+  - name: log_metrics
+    rules:
+      # Error rate calculations
+      - record: mcp_error_logs_total
+        expr: count(rate(mcp_logs_total{log_level=~"ERROR|CRITICAL"}[5m]))
+      
+      - record: mcp_critical_logs_total
+        expr: count(rate(mcp_logs_total{log_level="CRITICAL"}[5m]))
+      
+      - record: mcp_warning_logs_total
+        expr: count(rate(mcp_logs_total{log_level=~"WARNING|WARN"}[5m]))
+      
+      - record: mcp_error_rate
+        expr: rate(mcp_error_logs_total[5m])
+      
+      - record: mcp_error_rate_by_service
+        expr: sum by (service_name) (rate(mcp_logs_total{log_level=~"ERROR|CRITICAL"}[5m]))
+      
+      # Security metrics
+      - record: mcp_security_logs_total
+        expr: count(rate(mcp_logs_total{is_security_event="true"}[5m]))
+      
+      - record: mcp_security_severity_high_total
+        expr: count(rate(mcp_logs_total{is_security_event="true", security_severity>=4}[5m]))
+      
+      - record: mcp_security_events_by_category
+        expr: sum by (security_category) (rate(mcp_logs_total{is_security_event="true"}[5m]))
+      
+      - record: mcp_security_events_by_severity
+        expr: sum by (security_severity) (rate(mcp_logs_total{is_security_event="true"}[5m]))
+      
+      # Performance metrics
+      - record: mcp_response_time_seconds_avg
+        expr: avg(mcp_response_time_seconds)
+      
+      - record: mcp_response_time_seconds_p95
+        expr: histogram_quantile(0.95, mcp_response_time_seconds_bucket)
+      
+      - record: mcp_response_time_seconds_p99
+        expr: histogram_quantile(0.99, mcp_response_time_seconds_bucket)
+      
+      - record: mcp_response_time_by_service
+        expr: avg by (service_name) (mcp_response_time_seconds)
+      
+      - record: mcp_memory_usage_bytes
+        expr: avg(mcp_memory_usage_mb) * 1048576
+      
+      - record: mcp_memory_usage_percent
+        expr: avg(mcp_memory_usage_percent)
+      
+      - record: mcp_cpu_usage_percent
+        expr: avg(mcp_cpu_usage_percent)
+      
+      - record: mcp_throughput_rps
+        expr: sum(rate(mcp_logs_total[5m])) / 300
+      
+      # Service health metrics
+      - record: mcp_service_logs_total
+        expr: sum by (service_name) (rate(mcp_logs_total[5m]))
+      
+      - record: mcp_service_error_rate
+        expr: sum by (service_name) (rate(mcp_logs_total{log_level=~"ERROR|CRITICAL"}[5m])) / sum by (service_name) (rate(mcp_logs_total[5m]))
+      
+      - record: mcp_service_availability
+        expr: 1 - mcp_service_error_rate
+      
+      # Log volume metrics
+      - record: mcp_logs_total
+        expr: count(rate(mcp_logs_total[5m]))
+      
+      - record: mcp_logs_by_level
+        expr: sum by (log_level) (rate(mcp_logs_total[5m]))
+      
+      - record: mcp_logs_by_service
+        expr: sum by (service_name) (rate(mcp_logs_total[5m]))
+      
+      - record: mcp_logs_by_environment
+        expr: sum by (environment) (rate(mcp_logs_total[5m]))
+      
+      # Trace correlation metrics
+      - record: mcp_traces_total
+        expr: count(count by (trace_id) (mcp_logs_total))
+      
+      - record: mcp_trace_correlation_errors_total
+        expr: count(mcp_logs_total{trace_id=""})
+      
+      - record: mcp_trace_duration_avg
+        expr: avg by (trace_id) (mcp_duration_ms) / 1000
+      
+      - record: mcp_trace_duration_p95
+        expr: histogram_quantile(0.95, mcp_trace_duration_seconds_bucket)
+      
+      # Anomaly detection metrics
+      - record: mcp_log_anomaly_score
+        expr: avg(mcp_anomaly_score)
+      
+      - record: mcp_log_volume_anomaly
+        expr: abs(rate(mcp_logs_total[5m]) - avg(rate(mcp_logs_total[1h])[5m:])) / avg(rate(mcp_logs_total[1h])[5m:])
+      
+      - record: mcp_error_rate_anomaly
+        expr: abs(mcp_error_rate - avg(mcp_error_rate[1h])[5m:]) / avg(mcp_error_rate[1h])[5m:]
+      
+      # Compliance metrics
+      - record: mcp_compliance_violations_total
+        expr: count(rate(mcp_logs_total{is_compliance_event="true", compliance_status="violation"}[5m]))
+      
+      - record: mcp_audit_logs_total
+        expr: count(rate(mcp_logs_total{is_audit_event="true"}[5m]))
+      
+      - record: mcp_audit_events_by_category
+        expr: sum by (audit_category) (rate(mcp_logs_total{is_audit_event="true"}[5m]))
+      
+      # Infrastructure metrics
+      - record: mcp_infrastructure_logs_total
+        expr: count(rate(mcp_logs_total{log_source="infrastructure"}[5m]))
+      
+      - record: mcp_container_logs_total
+        expr: count(rate(mcp_logs_total{log_source="container"}[5m]))
+      
+      - record: mcp_system_logs_total
+        expr: count(rate(mcp_logs_total{log_source="system"}[5m]))
+      
+      # Business metrics
+      - record: mcp_business_transactions_total
+        expr: count(rate(mcp_logs_total{business_transaction!=""}[5m]))
+      
+      - record: mcp_business_transactions_by_type
+        expr: sum by (business_transaction) (rate(mcp_logs_total{business_transaction!=""}[5m]))
+      
+      - record: mcp_business_impact_score
+        expr: avg(mcp_business_impact_score)
+      
+      # Quality metrics
+      - record: mcp_log_quality_score
+        expr: avg(mcp_log_quality_score)
+      
+      - record: mcp_log_completeness
+        expr: avg(mcp_log_completeness)
+      
+      - record: mcp_log_accuracy
+        expr: avg(mcp_log_accuracy)
+      
+      - record: mcp_log_consistency
+        expr: avg(mcp_log_consistency)
+      
+      - record: mcp_log_timeliness
+        expr: avg(mcp_log_timeliness)
+      
+      # Cost optimization metrics
+      - record: mcp_storage_cost_total
+        expr: sum(mcp_storage_cost)
+      
+      - record: mcp_processing_cost_total
+        expr: sum(mcp_processing_cost)
+      
+      - record: mcp_total_cost
+        expr: mcp_storage_cost_total + mcp_processing_cost_total
+      
+      - record: mcp_cost_by_service
+        expr: sum by (service_name) (mcp_total_cost)
+      
+      - record: mcp_cost_per_log
+        expr: mcp_total_cost / mcp_logs_total
+      
+      # Alert metrics
+      - record: mcp_alerts_total
+        expr: count(ALERTS{alertstate="firing"})
+      
+      - record: mcp_alerts_by_severity
+        expr: sum by (severity) (ALERTS{alertstate="firing"})
+      
+      - record: mcp_alerts_by_category
+        expr: sum by (category) (ALERTS{alertstate="firing"})
+      
+      # SLO metrics
+      - record: mcp_slo_error_budget_remaining
+        expr: (1 - mcp_service_error_rate) * 100
+      
+      - record: mcp_slo_availability_target
+        expr: 99.9
+      
+      - record: mcp_slo_performance_target
+        expr: 95
+      
+      - record: mcp_slo_compliance_rate
+        expr: (1 - mcp_compliance_violations_total / mcp_audit_logs_total) * 100
+      
+      # Trend analysis metrics
+      - record: mcp_log_volume_trend
+        expr: predict_linear(mcp_logs_total[1h], 3600)
+      
+      - record: mcp_error_rate_trend
+        expr: predict_linear(mcp_error_rate[1h], 3600)
+      
+      - record: mcp_performance_trend
+        expr: predict_linear(mcp_response_time_seconds_avg[1h], 3600)
+      
+      # Capacity planning metrics
+      - record: mcp_log_growth_rate
+        expr: deriv(mcp_logs_total[1h])
+      
+      - record: mcp_storage_growth_rate
+        expr: deriv(mcp_storage_cost_total[1h])
+      
+      - record: mcp_processing_load
+        expr: mcp_logs_total / mcp_processing_capacity

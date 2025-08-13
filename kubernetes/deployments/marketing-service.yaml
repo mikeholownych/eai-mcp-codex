@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marketing-service
+  namespace: mcp
+  labels:
+    app: marketing-service
+    tier: backend
+    service: marketing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: marketing-service
+  template:
+    metadata:
+      labels:
+        app: marketing-service
+        tier: backend
+        service: marketing
+    spec:
+      containers:
+      - name: marketing-service
+        image: mcp-marketing-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8008
+          name: http
+          protocol: TCP
+        env:
+        - name: SERVICE_PORT
+          value: "8008"
+        - name: SERVICE_HOST
+          value: "0.0.0.0"
+        - name: REDIS_URL
+          value: "redis://redis-service:6379"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: mcp-secrets
+              key: database-url
+        - name: CONSUL_URL
+          value: "http://consul-service:8500"
+        - name: LOG_LEVEL
+          value: "INFO"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8008
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8008
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: marketing-service-config
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marketing-service
+  namespace: mcp
+  labels:
+    app: marketing-service
+    tier: backend
+    service: marketing
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8008
+    targetPort: 8008
+    protocol: TCP
+    name: http
+  selector:
+    app: marketing-service
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marketing-service-config
+  namespace: mcp
+  labels:
+    app: marketing-service
+    tier: backend
+    service: marketing
+data:
+  marketing.yml: |
+    # Marketing service configuration
+    email:
+      smtp:
+        host: smtp.gmail.com
+        port: 587
+        username: ${SMTP_USERNAME}
+        password: ${SMTP_PASSWORD}
+        use_tls: true
+      
+      templates:
+        default_sender: "noreply@mcp.com"
+        default_sender_name: "MCP Marketing"
+    
+    crm:
+      providers:
+        salesforce:
+          api_version: "58.0"
+          auth_url: "https://login.salesforce.com/services/oauth2/token"
+        hubspot:
+          api_version: "v3"
+          base_url: "https://api.hubapi.com"
+    
+    analytics:
+      tracking:
+        enabled: true
+        events:
+          - lead_created
+          - email_opened
+          - email_clicked
+          - funnel_progress
+          - conversion
+    
+    automation:
+      rules:
+        enabled: true
+        max_rules: 100
+      sequences:
+        enabled: true
+        max_sequences: 50
+        max_emails_per_sequence: 10

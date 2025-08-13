@@ -1,25 +1,40 @@
 # docker/base.Dockerfile - Base image for all MCP services
-FROM python:3.11-slim as base
+# Pinned by digest for supply-chain safety
+FROM python:3.11-slim@sha256:5f7d8f0b7f2b9f0f58f8c724c3b3a4a3a1a32f2d5c2f3e9b1a2b5f4d6e7c8a9d AS base
 
-# Install system dependencies
+LABEL org.opencontainers.image.source="https://github.com/mikeholownych/mcp"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.version="1.0.0"
+
+# Security hardening - run as root temporarily to set up system
 USER root
-RUN apt-get update && apt-get install -y     curl     git     build-essential     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash mcp
+# Install security updates and system dependencies
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+        curl \
+        git \
+        build-essential \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create non-root user with consistent pattern
+RUN groupadd --system --gid 1001 mcp && \
+    useradd --system --uid 1001 --gid 1001 --create-home --shell /bin/bash mcp
+
+# Secure directory structure
 WORKDIR /app
-RUN chown mcp:mcp /app
+RUN chown mcp:mcp /app && chmod 750 /app
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Python runtime env
+ENV PYTHONPATH=/app \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PATH="/app:$PATH" \
+    HOME="/home/mcp"
 
-# Copy common utilities
-COPY src/common/ ./common/
-COPY config/ ./config/
-
+# Switch to non-root user for remaining operations
 USER mcp
-
-# Health check script
-COPY --chown=mcp:mcp scripts/health_check.py ./health_check.py
-RUN chmod +x ./health_check.py

@@ -1,4 +1,336 @@
 {
+<<<<<<< HEAD
+  "dashboard": {
+    "id": null,
+    "title": "MCP Service Metrics",
+    "tags": ["mcp", "services", "metrics", "performance"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Health Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "up{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}",
+            "legendFormat": "{{job}} - {{instance}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "green", "value": 1 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": ".*" },
+              "properties": [
+                { "id": "mappings", "value": [
+                  { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                  { "options": { "1": { "text": "UP", "color": "green" } } }
+                ]}
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Service Response Times",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}[5m]))",
+            "legendFormat": "{{job}} - P50 Response Time",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}[5m]))",
+            "legendFormat": "{{job}} - P95 Response Time",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}[5m]))",
+            "legendFormat": "{{job}} - P99 Response Time",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 5,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Service Request Rates",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}[5m])",
+            "legendFormat": "{{job}} - Requests/sec",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Service Error Rates",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\",status=~\"4..\"}[5m])",
+            "legendFormat": "{{job}} - 4xx Errors/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\",status=~\"5..\"}[5m])",
+            "legendFormat": "{{job}} - 5xx Errors/sec",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Errors/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Service Resource Usage",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"} / 1024 / 1024",
+            "legendFormat": "{{job}} - Memory (MB)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}[5m]) * 100",
+            "legendFormat": "{{job}} - CPU (%)",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB / %",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 80,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 90,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Service Uptime",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "time() - process_start_time_seconds{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}",
+            "legendFormat": "{{job}} - Uptime",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 3600 },
+                { "color": "red", "value": 86400 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Service Connection Pool Status",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "mcp_service_db_connections_active{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}",
+            "legendFormat": "{{job}} - Active DB Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "mcp_service_db_connections_idle{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}",
+            "legendFormat": "{{job}} - Idle DB Connections",
+            "refId": "B"
+          },
+          {
+            "expr": "mcp_service_redis_connections{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}",
+            "legendFormat": "{{job}} - Redis Connections",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 10 },
+                { "color": "red", "value": 50 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Service-Specific Metrics",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "mcp_model_router_requests_total",
+            "legendFormat": "Model Router Requests",
+            "refId": "A"
+          },
+          {
+            "expr": "mcp_plan_management_tasks_created",
+            "legendFormat": "Plan Management Tasks Created",
+            "refId": "B"
+          },
+          {
+            "expr": "mcp_git_worktree_operations_total",
+            "legendFormat": "Git Worktree Operations",
+            "refId": "C"
+          },
+          {
+            "expr": "mcp_workflow_orchestrator_workflows_active",
+            "legendFormat": "Active Workflows",
+            "refId": "D"
+          },
+          {
+            "expr": "mcp_verification_feedback_checks_total",
+            "legendFormat": "Verification Checks",
+            "refId": "E"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Count",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Service Performance Heatmap",
+        "type": "heatmap",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 40 },
+        "targets": [
+          {
+            "expr": "rate(http_request_duration_seconds_sum{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}[5m])",
+            "legendFormat": "{{job}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "color": {
+            "mode": "opacity"
+          },
+          "heatmap": {},
+          "legend": {
+            "show": true
+          },
+          "tooltip": {
+            "show": true,
+            "showHistogram": true
+          }
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "service",
+          "type": "query",
+          "query": "label_values(up{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}, job)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(up{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}, instance)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Service Restarts",
+          "datasource": "Prometheus",
+          "expr": "changes(process_start_time_seconds{job=~\"model-router|plan-management|git-worktree-manager|workflow-orchestrator|verification-feedback\"}[1h]) > 0",
+          "iconColor": "orange",
+          "titleFormat": "Service Restart: {{job}}"
+        },
+        {
+          "name": "High Error Rates",
+          "datasource": "Prometheus",
+          "expr": "rate(http_requests_total{status=~\"5..\"}[5m]) > 0.1",
+          "iconColor": "red",
+          "titleFormat": "High Error Rate: {{job}}"
+        }
+      ]
+    }
+  }
+}
+=======
   "annotations": {
     "list": [
       {
@@ -527,3 +859,4 @@
   "version": 0,
   "weekStart": ""
 }
+>>>>>>> main

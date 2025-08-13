@@ -1,0 +1,2 @@
+ANTHROPIC_API_KEY={{ with secret "secret/data/model-router" }}{{ .Data.data.ANTHROPIC_API_KEY }}{{ end }}
+ABACUSAI_API_KEY={{ with secret "secret/data/model-router" }}{{ .Data.data.ABACUSAI_API_KEY }}{{ end }}

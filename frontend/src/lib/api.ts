@@ -1,5 +1,32 @@
 import axios, { AxiosInstance } from 'axios'
+<<<<<<< HEAD
+import {
+  ApiResponse,
+  User,
+  ChatSession,
+  SupportTicket,
+  Subscription,
+  ModelRouteResponse,
+  AvailableModel,
+  ModelStats,
+  Invoice,
+  Customer,
+  PaymentMethod,
+  PaymentIntent,
+  Charge,
+  Refund,
+  SetupIntent,
+  Mandate,
+  CreatePaymentIntentRequest,
+  CreatePaymentMethodRequest,
+  SetupIntentRequest,
+  MandateRequest,
+  PaymentMethodEligibilityRequest,
+  PaymentMethodEligibilityResponse,
+} from '@/types'
+=======
 import { ApiResponse, User, ChatSession, SupportTicket, Subscription, ModelRouteResponse, AvailableModel, ModelStats } from '@/types'
+>>>>>>> main
 import { API_CONFIG } from './config'
 
 class ApiClient {
@@ -19,25 +46,25 @@ class ApiClient {
 
     // Request interceptor to add auth token
     this.client.interceptors.request.use(
-      (config) => {
+      config => {
         const token = this.getAuthToken()
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
         return config
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error),
     )
 
     // Response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      response => response,
+      error => {
         if (error.response?.status === 401) {
           this.handleUnauthorized()
         }
         return Promise.reject(error)
-      }
+      },
     )
   }
 
@@ -56,7 +83,10 @@ class ApiClient {
   }
 
   // Auth endpoints
-  async login(email: string, password: string): Promise<ApiResponse<{ user: User; token: string }>> {
+  async login(
+    email: string,
+    password: string,
+  ): Promise<ApiResponse<{ user: User; token: string }>> {
     const response = await this.client.post('/api/auth/login', { email, password })
     return response.data
   }
@@ -82,6 +112,20 @@ class ApiClient {
   }
 
   // Model Router endpoints - Updated to match backend API
+<<<<<<< HEAD
+  async routeRequest(
+    prompt: string,
+    options?: {
+      model?: string
+      temperature?: number
+      maxTokens?: number
+      taskType?: string
+      priority?: string
+      systemPrompt?: string
+      context?: Record<string, unknown>
+    },
+  ): Promise<ApiResponse<ModelRouteResponse>> {
+=======
   async routeRequest(prompt: string, options?: {
     model?: string
     temperature?: number
@@ -91,6 +135,7 @@ class ApiClient {
     systemPrompt?: string
     context?: Record<string, unknown>
   }): Promise<ApiResponse<ModelRouteResponse>> {
+>>>>>>> main
     const requestId = Date.now().toString()
     const response = await this.client.post('/model/route', {
       text: prompt,
@@ -130,12 +175,26 @@ class ApiClient {
     return response.data
   }
 
+<<<<<<< HEAD
+  async getPlans(): Promise<
+    ApiResponse<Array<{ id: string; title: string; description: string; status: string }>>
+  > {
+=======
   async getPlans(): Promise<ApiResponse<Array<{ id: string; title: string; description: string; status: string }>>> {
+>>>>>>> main
     const response = await this.client.get('/api/plans')
     return response.data
   }
 
+<<<<<<< HEAD
+  async getPlan(
+    id: string,
+  ): Promise<
+    ApiResponse<{ id: string; title: string; description: string; requirements: string[] }>
+  > {
+=======
   async getPlan(id: string): Promise<ApiResponse<{ id: string; title: string; description: string; requirements: string[] }>> {
+>>>>>>> main
     const response = await this.client.get(`/api/plans/${id}`)
     return response.data
   }
@@ -150,7 +209,13 @@ class ApiClient {
     return response.data
   }
 
+<<<<<<< HEAD
+  async getWorktrees(): Promise<
+    ApiResponse<Array<{ id: string; repository: string; branch: string; name: string }>>
+  > {
+=======
   async getWorktrees(): Promise<ApiResponse<Array<{ id: string; repository: string; branch: string; name: string }>>> {
+>>>>>>> main
     const response = await this.client.get('/api/git/list')
     return response.data
   }
@@ -165,12 +230,24 @@ class ApiClient {
     return response.data
   }
 
+<<<<<<< HEAD
+  async executeWorkflow(
+    id: string,
+  ): Promise<ApiResponse<{ id: string; status: string; result: unknown }>> {
+=======
   async executeWorkflow(id: string): Promise<ApiResponse<{ id: string; status: string; result: unknown }>> {
+>>>>>>> main
     const response = await this.client.post(`/api/workflows/${id}/execute`)
     return response.data
   }
 
+<<<<<<< HEAD
+  async getWorkflows(): Promise<
+    ApiResponse<Array<{ id: string; name: string; description: string; status: string }>>
+  > {
+=======
   async getWorkflows(): Promise<ApiResponse<Array<{ id: string; name: string; description: string; status: string }>>> {
+>>>>>>> main
     const response = await this.client.get('/api/workflows')
     return response.data
   }
@@ -186,7 +263,13 @@ class ApiClient {
     return response.data
   }
 
+<<<<<<< HEAD
+  async getFeedback(): Promise<
+    ApiResponse<Array<{ id: string; type: string; title: string; status: string }>>
+  > {
+=======
   async getFeedback(): Promise<ApiResponse<Array<{ id: string; type: string; title: string; status: string }>>> {
+>>>>>>> main
     const response = await this.client.get('/api/feedback/list')
     return response.data
   }
@@ -202,7 +285,14 @@ class ApiClient {
     return response.data
   }
 
+<<<<<<< HEAD
+  async sendChatMessage(
+    sessionId: string,
+    message: string,
+  ): Promise<ApiResponse<{ id: string; content: string; role: string; timestamp: Date }>> {
+=======
   async sendChatMessage(sessionId: string, message: string): Promise<ApiResponse<{ id: string; content: string; role: string; timestamp: Date }>> {
+>>>>>>> main
     const response = await this.client.post(`/api/chat/sessions/${sessionId}/messages`, {
       content: message,
     })
@@ -224,7 +314,10 @@ class ApiClient {
     return response.data
   }
 
-  async updateTicket(id: string, data: Partial<SupportTicket>): Promise<ApiResponse<SupportTicket>> {
+  async updateTicket(
+    id: string,
+    data: Partial<SupportTicket>,
+  ): Promise<ApiResponse<SupportTicket>> {
     const response = await this.client.patch(`/api/support/tickets/${id}`, data)
     return response.data
   }
@@ -253,23 +346,47 @@ class ApiClient {
   }
 
   // Video Library endpoints
+<<<<<<< HEAD
+  async getVideos(): Promise<
+    ApiResponse<Array<{ id: string; title: string; description: string; duration: number }>>
+  > {
+=======
   async getVideos(): Promise<ApiResponse<Array<{ id: string; title: string; description: string; duration: number }>>> {
+>>>>>>> main
     const response = await this.client.get('/api/videos')
     return response.data
   }
 
+<<<<<<< HEAD
+  async getVideo(
+    id: string,
+  ): Promise<ApiResponse<{ id: string; title: string; description: string; url: string }>> {
+=======
   async getVideo(id: string): Promise<ApiResponse<{ id: string; title: string; description: string; url: string }>> {
+>>>>>>> main
     const response = await this.client.get(`/api/videos/${id}`)
     return response.data
   }
 
   // Analytics endpoints
+<<<<<<< HEAD
+  async getAnalytics(
+    timeRange: string,
+  ): Promise<ApiResponse<{ metrics: Array<{ metric: string; value: number; change: number }> }>> {
+=======
   async getAnalytics(timeRange: string): Promise<ApiResponse<{ metrics: Array<{ metric: string; value: number; change: number }> }>> {
+>>>>>>> main
     const response = await this.client.get(`/api/analytics?range=${timeRange}`)
     return response.data
   }
 
+<<<<<<< HEAD
+  async getDashboardStats(): Promise<
+    ApiResponse<{ users: number; subscriptions: number; revenue: number }>
+  > {
+=======
   async getDashboardStats(): Promise<ApiResponse<{ users: number; subscriptions: number; revenue: number }>> {
+>>>>>>> main
     const response = await this.client.get('/api/analytics/dashboard')
     return response.data
   }
@@ -281,8 +398,132 @@ class ApiClient {
   }
 
   // System status
+<<<<<<< HEAD
+  async getSystemStatus(): Promise<
+    ApiResponse<{ status: string; services: Record<string, string> }>
+  > {
+=======
   async getSystemStatus(): Promise<ApiResponse<{ status: string; services: Record<string, string> }>> {
+>>>>>>> main
     const response = await this.client.get('/status')
+    return response.data
+  }
+
+  // Payment endpoints
+  async createCustomer(data: {
+    email: string
+    name?: string
+    phone?: string
+    address?: {
+      line1?: string
+      line2?: string
+      city?: string
+      state?: string
+      postalCode?: string
+      country?: string
+    }
+    metadata?: Record<string, any>
+  }): Promise<ApiResponse<Customer>> {
+    const response = await this.client.post('/api/payments/customers', data)
+    return response.data
+  }
+
+  async getCustomer(customerId: string): Promise<ApiResponse<Customer>> {
+    const response = await this.client.get(`/api/payments/customers/${customerId}`)
+    return response.data
+  }
+
+  async updateCustomer(
+    customerId: string,
+    data: Partial<Customer>
+  ): Promise<ApiResponse<Customer>> {
+    const response = await this.client.put(`/api/payments/customers/${customerId}`, data)
+    return response.data
+  }
+
+  async createPaymentIntent(data: CreatePaymentIntentRequest): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.post('/api/payments/payment-intents', data)
+    return response.data
+  }
+
+  async getPaymentIntent(paymentIntentId: string): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.get(`/api/payments/payment-intents/${paymentIntentId}`)
+    return response.data
+  }
+
+  async confirmPaymentIntent(
+    paymentIntentId: string,
+    data?: { paymentMethodId?: string; returnUrl?: string }
+  ): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.post(`/api/payments/payment-intents/${paymentIntentId}/confirm`, data)
+    return response.data
+  }
+
+  async capturePaymentIntent(
+    paymentIntentId: string,
+    data?: { amount?: number }
+  ): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.post(`/api/payments/payment-intents/${paymentIntentId}/capture`, data)
+    return response.data
+  }
+
+  async cancelPaymentIntent(paymentIntentId: string): Promise<ApiResponse<PaymentIntent>> {
+    const response = await this.client.post(`/api/payments/payment-intents/${paymentIntentId}/cancel`)
+    return response.data
+  }
+
+  async createPaymentMethod(data: CreatePaymentMethodRequest): Promise<ApiResponse<PaymentMethod>> {
+    const response = await this.client.post(`/api/payments/customers/${data.customerId}/payment-methods`, data)
+    return response.data
+  }
+
+  async getCustomerPaymentMethods(customerId: string): Promise<ApiResponse<PaymentMethod[]>> {
+    const response = await this.client.get(`/api/payments/customers/${customerId}/payment-methods`)
+    return response.data
+  }
+
+  async deletePaymentMethod(paymentMethodId: string): Promise<ApiResponse<{ success: boolean }>> {
+    const response = await this.client.delete(`/api/payments/payment-methods/${paymentMethodId}`)
+    return response.data
+  }
+
+  async createSetupIntent(data: SetupIntentRequest): Promise<ApiResponse<SetupIntent>> {
+    const response = await this.client.post('/api/payments/setup-intents', data)
+    return response.data
+  }
+
+  async getSetupIntent(setupIntentId: string): Promise<ApiResponse<SetupIntent>> {
+    const response = await this.client.get(`/api/payments/setup-intents/${setupIntentId}`)
+    return response.data
+  }
+
+  async createMandate(data: MandateRequest): Promise<ApiResponse<Mandate>> {
+    const response = await this.client.post('/api/payments/mandates', data)
+    return response.data
+  }
+
+  async checkPaymentMethodEligibility(
+    data: PaymentMethodEligibilityRequest
+  ): Promise<ApiResponse<PaymentMethodEligibilityResponse>> {
+    const response = await this.client.post('/api/payments/payment-methods/eligibility', data)
+    return response.data
+  }
+
+  async createRefund(
+    chargeId: string,
+    data: { amount?: number; reason?: string; metadata?: Record<string, any> }
+  ): Promise<ApiResponse<Refund>> {
+    const response = await this.client.post(`/api/payments/charges/${chargeId}/refunds`, data)
+    return response.data
+  }
+
+  async getRefund(refundId: string): Promise<ApiResponse<Refund>> {
+    const response = await this.client.get(`/api/payments/refunds/${refundId}`)
+    return response.data
+  }
+
+  async getCharge(chargeId: string): Promise<ApiResponse<Charge>> {
+    const response = await this.client.get(`/api/payments/charges/${chargeId}`)
     return response.data
   }
 }
@@ -344,6 +585,42 @@ export const billingApi = {
   updateSubscription: apiClient.updateSubscription.bind(apiClient),
   getInvoices: apiClient.getInvoices.bind(apiClient),
   downloadInvoice: apiClient.downloadInvoice.bind(apiClient),
+}
+
+export const paymentApi = {
+  // Customer management
+  createCustomer: apiClient.createCustomer.bind(apiClient),
+  getCustomer: apiClient.getCustomer.bind(apiClient),
+  updateCustomer: apiClient.updateCustomer.bind(apiClient),
+  
+  // Payment intents
+  createPaymentIntent: apiClient.createPaymentIntent.bind(apiClient),
+  getPaymentIntent: apiClient.getPaymentIntent.bind(apiClient),
+  confirmPaymentIntent: apiClient.confirmPaymentIntent.bind(apiClient),
+  capturePaymentIntent: apiClient.capturePaymentIntent.bind(apiClient),
+  cancelPaymentIntent: apiClient.cancelPaymentIntent.bind(apiClient),
+  
+  // Payment methods
+  createPaymentMethod: apiClient.createPaymentMethod.bind(apiClient),
+  getCustomerPaymentMethods: apiClient.getCustomerPaymentMethods.bind(apiClient),
+  deletePaymentMethod: apiClient.deletePaymentMethod.bind(apiClient),
+  
+  // Setup intents
+  createSetupIntent: apiClient.createSetupIntent.bind(apiClient),
+  getSetupIntent: apiClient.getSetupIntent.bind(apiClient),
+  
+  // Mandates
+  createMandate: apiClient.createMandate.bind(apiClient),
+  
+  // Eligibility
+  checkPaymentMethodEligibility: apiClient.checkPaymentMethodEligibility.bind(apiClient),
+  
+  // Refunds
+  createRefund: apiClient.createRefund.bind(apiClient),
+  getRefund: apiClient.getRefund.bind(apiClient),
+  
+  // Charges
+  getCharge: apiClient.getCharge.bind(apiClient),
 }
 
 // Export the axios instance for direct use

@@ -12,7 +12,7 @@ from functools import wraps
 from enum import Enum
 
 from ..common.redis_client import RedisClient
-from ..common.settings import Settings
+from ..common.settings import BaseServiceSettings as Settings
 
 
 class RateLimitStrategy(str, Enum):
@@ -305,50 +305,43 @@ def rate_limit(
     def decorator(func):
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs):
-            # Try to obtain a RateLimiter instance from the app state
-            rate_limiter = None
+            limiter: Optional[RateLimiter] = None
+            identifier: Optional[str] = None
+
+            # Try to obtain limiter from app state
             try:
                 app_state = getattr(request, "app", None)
-                state = getattr(app_state, "state", None) if app_state else None
-                if state is not None:
-                    if hasattr(state, "rate_limiter") and state.rate_limiter is not None:
-                        rate_limiter = state.rate_limiter
-                    elif hasattr(state, "security_stack") and getattr(
-                        state.security_stack, "rate_limiter", None
-                    ) is not None:
-                        rate_limiter = state.security_stack.rate_limiter
+                if app_state is not None:
+                    limiter = getattr(request.app.state, "rate_limiter", None)
             except Exception:
-                rate_limiter = None
+                limiter = None
 
-            # If no rate limiter, proceed without enforcement
-            if rate_limiter is None:
-                return await func(request, *args, **kwargs)
+            # Fallback: construct identifier via simple key function or client IP
+            if limiter is None and key_func is not None:
+                identifier = key_func(request)
+            elif limiter is not None:
+                identifier = limiter.get_client_identifier(request)
+            else:
+                # Basic identifier from client IP as a safe default
+                client = request.client.host if request.client else "unknown"
+                identifier = f"ip:{client}"
 
-            # Build client identifier
-            identifier = (
-                key_func(request)
-                if key_func is not None
-                else rate_limiter.get_client_identifier(request)
-            )
-
-            # Include endpoint-specific suffix for better isolation
-            endpoint_key = f"{request.method}:{request.url.path}:{func.__name__}"
-
-            allowed, info = await rate_limiter.check_rate_limit(
-                f"{identifier}:{endpoint_key}", limit, window_seconds, strategy
-            )
-
-            if not allowed:
-                raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="Rate limit exceeded",
-                    headers={
-                        "X-RateLimit-Limit": str(info.get("limit", limit)),
-                        "X-RateLimit-Remaining": str(info.get("remaining", 0)),
-                        "X-RateLimit-Reset": str(info.get("reset_time", 0)),
-                        "Retry-After": str(info.get("window_seconds", window_seconds)),
-                    },
+            # If we have a limiter, enforce; otherwise best-effort allow
+            if limiter is not None:
+                allowed, info = await limiter.check_rate_limit(
+                    identifier, limit, window_seconds, strategy
                 )
+                if not allowed:
+                    raise HTTPException(
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                        detail="Rate limit exceeded",
+                        headers={
+                            "X-RateLimit-Limit": str(info["limit"]),
+                            "X-RateLimit-Remaining": str(info["remaining"]),
+                            "X-RateLimit-Reset": str(info["reset_time"]),
+                            "Retry-After": str(info["window_seconds"]),
+                        },
+                    )
 
             return await func(request, *args, **kwargs)
 

@@ -57,12 +57,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await authApi.login(email, password)
-      
+
       if (response.success && response.data) {
         const { user, token } = response.data
         localStorage.setItem('auth_token', token)
         setUser(user)
-        
+
         // Redirect based on user role
         if (user.role === 'customer') {
           router.push('/dashboard')
@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (data: RegisterData) => {
     try {
       const response = await authApi.register(data)
-      
+
       if (response.success && response.data) {
         const { user, token } = response.data
         localStorage.setItem('auth_token', token)
@@ -117,11 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: !!user,
   }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import {
+  ArrowLeftIcon,
+  CalendarIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+=======
 'use client'
 
 import React from 'react'
@@ -5,10 +18,56 @@ import Link from 'next/link'
 import { ArrowLeftIcon, CalendarIcon, UserIcon } from '@heroicons/react/24/outline'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
+>>>>>>> main
 
 const blogPosts = [
   {
     id: 1,
+<<<<<<< HEAD
+    title: "Introducing Multi-Agent Code Generation",
+    excerpt:
+      "Discover how our revolutionary multi-agent system transforms the way code is generated, reviewed, and deployed in enterprise environments.",
+    author: "Dr. Sarah Chen",
+    date: "2024-07-25",
+    category: "AI Innovation",
+    readTime: "8 min read",
+    image: "/api/placeholder/400/200",
+  },
+  {
+    id: 2,
+    title: "Security-First AI: Building Trust in Automated Code Generation",
+    excerpt:
+      "Learn about our comprehensive security framework that ensures every line of AI-generated code meets enterprise security standards.",
+    author: "Michael Rodriguez",
+    date: "2024-07-20",
+    category: "Security",
+    readTime: "12 min read",
+    image: "/api/placeholder/400/200",
+  },
+  {
+    id: 3,
+    title: "The Future of Developer Productivity with AI Agents",
+    excerpt:
+      "Explore how AI agents are reshaping software development workflows and what this means for developer productivity in 2024.",
+    author: "Alex Thompson",
+    date: "2024-07-15",
+    category: "Productivity",
+    readTime: "6 min read",
+    image: "/api/placeholder/400/200",
+  },
+  {
+    id: 4,
+    title: "Enterprise AI Adoption: Lessons from Early Implementers",
+    excerpt:
+      "Real-world case studies and insights from companies successfully implementing AI-driven development practices.",
+    author: "Jennifer Park",
+    date: "2024-07-12",
+    category: "Case Studies",
+    readTime: "10 min read",
+    image: "/api/placeholder/400/200",
+  },
+];
+=======
     title: 'Introducing Multi-Agent Code Generation',
     excerpt: 'Discover how our revolutionary multi-agent system transforms the way code is generated, reviewed, and deployed in enterprise environments.',
     author: 'Dr. Sarah Chen',
@@ -48,6 +107,7 @@ const blogPosts = [
     image: '/api/placeholder/400/200'
   }
 ]
+>>>>>>> main
 
 export default function BlogPage() {
   return (
@@ -57,7 +117,14 @@ export default function BlogPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
+<<<<<<< HEAD
+              <Link
+                href="/"
+                className="flex items-center text-slate-300 hover:text-white transition-colors"
+              >
+=======
               <Link href="/" className="flex items-center text-slate-300 hover:text-white transition-colors">
+>>>>>>> main
                 <ArrowLeftIcon className="w-5 h-5 mr-2" />
                 Back to Home
               </Link>
@@ -66,7 +133,13 @@ export default function BlogPage() {
               <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">AI</span>
               </div>
+<<<<<<< HEAD
+              <span className="text-xl font-bold text-white">
+                Ethical AI Insider
+              </span>
+=======
               <span className="text-xl font-bold text-white">Ethical AI Insider</span>
+>>>>>>> main
             </div>
           </div>
         </div>
@@ -79,7 +152,12 @@ export default function BlogPage() {
             AI Insights & Innovation
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+<<<<<<< HEAD
+            Stay up-to-date with the latest in AI-driven development, security
+            best practices, and industry insights.
+=======
             Stay up-to-date with the latest in AI-driven development, security best practices, and industry insights.
+>>>>>>> main
           </p>
         </div>
 
@@ -92,7 +170,13 @@ export default function BlogPage() {
                   <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-white font-bold text-2xl">AI</span>
                   </div>
+<<<<<<< HEAD
+                  <p className="text-white text-sm opacity-90">
+                    Featured Article
+                  </p>
+=======
                   <p className="text-white text-sm opacity-90">Featured Article</p>
+>>>>>>> main
                 </div>
               </div>
             </div>
@@ -109,6 +193,19 @@ export default function BlogPage() {
               <h2 className="text-2xl font-bold text-white mb-4">
                 {blogPosts[0].title}
               </h2>
+<<<<<<< HEAD
+              <p className="text-gray-400 mb-6">{blogPosts[0].excerpt}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <UserIcon className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-400 text-sm">
+                    {blogPosts[0].author}
+                  </span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-400 text-sm">
+                    {blogPosts[0].readTime}
+                  </span>
+=======
               <p className="text-gray-400 mb-6">
                 {blogPosts[0].excerpt}
               </p>
@@ -118,6 +215,7 @@ export default function BlogPage() {
                   <span className="text-gray-400 text-sm">{blogPosts[0].author}</span>
                   <span className="text-gray-500">•</span>
                   <span className="text-gray-400 text-sm">{blogPosts[0].readTime}</span>
+>>>>>>> main
                 </div>
                 <Button variant="secondary" size="sm">
                   Read More
@@ -139,7 +237,11 @@ export default function BlogPage() {
                   <p className="text-slate-300 text-sm">{post.category}</p>
                 </div>
               </div>
+<<<<<<< HEAD
+
+=======
               
+>>>>>>> main
               <Card.Content>
                 <div className="flex items-center space-x-4 mb-3">
                   <div className="flex items-center text-gray-400 text-sm">
@@ -149,6 +251,17 @@ export default function BlogPage() {
                   <span className="text-gray-500">•</span>
                   <span className="text-gray-400 text-sm">{post.readTime}</span>
                 </div>
+<<<<<<< HEAD
+
+                <h3 className="text-xl font-semibold text-white mb-3">
+                  {post.title}
+                </h3>
+
+                <p className="text-gray-400 mb-4 line-clamp-3">
+                  {post.excerpt}
+                </p>
+
+=======
                 
                 <h3 className="text-xl font-semibold text-white mb-3">
                   {post.title}
@@ -158,6 +271,7 @@ export default function BlogPage() {
                   {post.excerpt}
                 </p>
                 
+>>>>>>> main
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <UserIcon className="w-4 h-4 text-gray-400" />
@@ -179,7 +293,12 @@ export default function BlogPage() {
               Stay Informed
             </h3>
             <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
+<<<<<<< HEAD
+              Subscribe to our newsletter for the latest insights on AI
+              development, security best practices, and industry trends.
+=======
               Subscribe to our newsletter for the latest insights on AI development, security best practices, and industry trends.
+>>>>>>> main
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
               <input
@@ -187,13 +306,22 @@ export default function BlogPage() {
                 placeholder="Enter your email"
                 className="flex-1 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
+<<<<<<< HEAD
+              <Button variant="secondary">Subscribe</Button>
+=======
               <Button variant="secondary">
                 Subscribe
               </Button>
+>>>>>>> main
             </div>
           </Card.Content>
         </Card>
       </div>
     </div>
+<<<<<<< HEAD
+  );
+}
+=======
   )
 }
+>>>>>>> main

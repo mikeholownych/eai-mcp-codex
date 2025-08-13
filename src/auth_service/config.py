@@ -1,6 +1,5 @@
 """Configuration for Auth Service."""
 
-import os
 from pydantic_settings import BaseSettings
 from typing import Optional
 

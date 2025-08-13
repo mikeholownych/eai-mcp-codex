@@ -1,0 +1,1 @@
+POSTGRES_PASSWORD={{ with secret "secret/data/plan-management" }}{{ .Data.data.POSTGRES_PASSWORD }}{{ end }}

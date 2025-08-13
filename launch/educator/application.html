@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educator Referral Program Application - AI Agent Collaboration Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .application-form {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .form-section h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.75rem;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+
+        .required {
+            color: #e53e3e;
+            margin-left: 0.25rem;
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .benefits {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .benefits h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .benefits ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .benefits li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            background: #e1e5e9;
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .tier-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .tier-info h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .tier-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .tier-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .tier-card h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .tier-card p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .application-form {
+                padding: 2rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tier-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Educator Referral Program</h1>
+            <p>Join our academic partnership program to integrate AI agent collaboration into your curriculum, research, and student programs. Shape the future of AI education.</p>
+        </div>
+
+        <div class="application-form">
+            <div class="benefits">
+                <h3>Program Benefits</h3>
+                <ul>
+                    <li>Free platform access for teaching and research</li>
+                    <li>Free student licenses for enrolled students</li>
+                    <li>Research funding and collaboration opportunities</li>
+                    <li>Curriculum development support and resources</li>
+                    <li>Industry connections and networking</li>
+                    <li>Conference support and speaking opportunities</li>
+                </ul>
+            </div>
+
+            <div class="tier-info">
+                <h3>Program Tiers</h3>
+                <div class="tier-grid">
+                    <div class="tier-card">
+                        <h4>Research Partners</h4>
+                        <p>Top-tier institutions with 5+ faculty members. Dedicated research support, custom features, and joint publications.</p>
+                    </div>
+                    <div class="tier-card">
+                        <h4>Teaching Partners</h4>
+                        <p>Course integration with 100+ student users. Curriculum support, teaching resources, and industry connections.</p>
+                    </div>
+                    <div class="tier-card">
+                        <h4>Innovation Partners</h4>
+                        <p>Startup programs and innovation centers. Entrepreneurship support, mentorship, and investment network access.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Step 1 of 6</div>
+
+            <form id="educatorApplication">
+                <!-- Personal Information -->
+                <div class="form-section" id="section1">
+                    <h2>Personal Information</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name <span class="required">*</span></label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name <span class="required">*</span></label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn Profile</label>
+                        <input type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/yourprofile">
+                    </div>
+                </div>
+
+                <!-- Institutional Information -->
+                <div class="form-section" id="section2" style="display: none;">
+                    <h2>Institutional Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="institution">Institution Name <span class="required">*</span></label>
+                        <input type="text" id="institution" name="institution" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="department">Department/School <span class="required">*</span></label>
+                            <input type="text" id="department" name="department" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="jobTitle">Job Title <span class="required">*</span></label>
+                            <input type="text" id="jobTitle" name="jobTitle" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="institutionType">Institution Type <span class="required">*</span></label>
+                        <select id="institutionType" name="institutionType" required>
+                            <option value="">Select institution type</option>
+                            <option value="research-university">Research University</option>
+                            <option value="technical-institute">Technical Institute</option>
+                            <option value="liberal-arts">Liberal Arts College</option>
+                            <option value="community-college">Community College</option>
+                            <option value="international">International University</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="institutionSize">Institution Size</label>
+                        <select id="institutionSize" name="institutionSize">
+                            <option value="">Select institution size</option>
+                            <option value="small">Small (< 5,000 students)</option>
+                            <option value="medium">Medium (5,000 - 20,000 students)</option>
+                            <option value="large">Large (20,000+ students)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="website">Institution Website</label>
+                        <input type="url" id="website" name="website" placeholder="https://www.institution.edu">
+                    </div>
+                </div>
+
+                <!-- Academic Background -->
+                <div class="form-section" id="section3" style="display: none;">
+                    <h2>Academic Background</h2>
+                    
+                    <div class="form-group">
+                        <label for="field">Primary Field of Study <span class="required">*</span></label>
+                        <select id="field" name="field" required>
+                            <option value="">Select your field</option>
+                            <option value="computer-science">Computer Science</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="data-science">Data Science</option>
+                            <option value="business">Business & Innovation</option>
+                            <option value="interdisciplinary">Interdisciplinary Studies</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="specialization">Specialization/Research Area <span class="required">*</span></label>
+                        <textarea id="specialization" name="specialization" placeholder="Describe your specific research interests, teaching focus, or specialization areas" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience">Years of Teaching/Research Experience <span class="required">*</span></label>
+                        <select id="experience" name="experience" required>
+                            <option value="">Select experience level</option>
+                            <option value="0-2">0-2 years</option>
+                            <option value="3-5">3-5 years</option>
+                            <option value="6-10">6-10 years</option>
+                            <option value="10+">10+ years</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="publications">Recent Publications/Research</label>
+                        <textarea id="publications" name="publications" placeholder="List your recent publications, research projects, or notable academic work"></textarea>
+                    </div>
+                </div>
+
+                <!-- Teaching & Curriculum -->
+                <div class="form-section" id="section4" style="display: none;">
+                    <h2>Teaching & Curriculum</h2>
+                    
+                    <div class="form-group">
+                        <label for="courses">Courses You Teach <span class="required">*</span></label>
+                        <textarea id="courses" name="courses" placeholder="List the courses you currently teach or plan to teach that could integrate AI agent collaboration" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentCount">Number of Students (Annual) <span class="required">*</span></label>
+                        <select id="studentCount" name="studentCount" required>
+                            <option value="">Select student count</option>
+                            <option value="1-50">1-50 students</option>
+                            <option value="51-100">51-100 students</option>
+                            <option value="101-200">101-200 students</option>
+                            <option value="201-500">201-500 students</option>
+                            <option value="500+">500+ students</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="curriculumIntegration">Curriculum Integration Plan <span class="required">*</span></label>
+                        <textarea id="curriculumIntegration" name="curriculumIntegration" placeholder="How do you plan to integrate AI agent collaboration into your curriculum? What specific learning objectives would this support?" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Platform Features of Interest <span class="required">*</span></label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="multiAgent" name="features" value="multi-agent-workflows">
+                            <label for="multiAgent">Multi-agent workflows and coordination</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="automation" name="features" value="workflow-automation">
+                            <label for="automation">Workflow automation and orchestration</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="integrations" name="features" value="third-party-integrations">
+                            <label for="integrations">Third-party tool integrations</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="analytics" name="features" value="advanced-analytics">
+                            <label for="analytics">Advanced analytics and monitoring</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="collaboration" name="features" value="team-collaboration">
+                            <label for="collaboration">Team collaboration features</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="scalability" name="features" value="scalability">
+                            <label for="scalability">Scalability and performance</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="timeline">Expected Integration Timeline</label>
+                        <select id="timeline" name="timeline">
+                            <option value="">Select timeline</option>
+                            <option value="immediate">Immediate (next semester)</option>
+                            <option value="3-6-months">3-6 months</option>
+                            <option value="6-12-months">6-12 months</option>
+                            <option value="12+months">12+ months</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Research & Collaboration -->
+                <div class="form-section" id="section5" style="display: none;">
+                    <h2>Research & Collaboration</h2>
+                    
+                    <div class="form-group">
+                        <label for="researchInterests">Research Interests in AI Collaboration <span class="required">*</span></label>
+                        <textarea id="researchInterests" name="researchInterests" placeholder="Describe your research interests related to AI agent collaboration, multi-agent systems, or human-AI interaction" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="currentResearch">Current Research Projects</label>
+                        <textarea id="currentResearch" name="currentResearch" placeholder="Describe any current research projects that could benefit from or contribute to AI agent collaboration"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="collaborationType">Preferred Collaboration Type</label>
+                        <select id="collaborationType" name="collaborationType">
+                            <option value="">Select collaboration type</option>
+                            <option value="joint-research">Joint research projects</option>
+                            <option value="student-projects">Student research projects</option>
+                            <option value="publications">Joint publications</option>
+                            <option value="conferences">Conference presentations</option>
+                            <option value="workshops">Workshops and training</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="funding">Research Funding Sources</label>
+                        <textarea id="funding" name="funding" placeholder="List any current or potential funding sources for AI collaboration research"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Research Opportunities</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="studentResearch" name="researchOpportunities" value="student-research">
+                            <label for="studentResearch">Student research projects</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="jointPublications" name="researchOpportunities" value="joint-publications">
+                            <label for="jointPublications">Joint publications and papers</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="conferencePresentations" name="researchOpportunities" value="conference-presentations">
+                            <label for="conferencePresentations">Conference presentations</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="workshops" name="researchOpportunities" value="workshops">
+                            <label for="workshops">Workshops and training sessions</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program Commitment -->
+                <div class="form-section" id="section6" style="display: none;">
+                    <h2>Program Commitment</h2>
+                    
+                    <div class="form-group">
+                        <label for="availability">Availability for Program Participation <span class="required">*</span></label>
+                        <select id="availability" name="availability" required>
+                            <option value="">Select availability</option>
+                            <option value="high">High - Regular meetings and active participation</option>
+                            <option value="medium">Medium - Occasional meetings and moderate participation</option>
+                            <option value="low">Low - Limited participation, primarily for resources</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="institutionalSupport">Institutional Support Level</label>
+                        <select id="institutionalSupport" name="institutionalSupport">
+                            <option value="">Select support level</option>
+                            <option value="full">Full institutional support and endorsement</option>
+                            <option value="partial">Partial support from department/school</option>
+                            <option value="individual">Individual faculty initiative</option>
+                            <option value="exploring">Exploring institutional support</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="successMetrics">Success Metrics for Your Institution</label>
+                        <textarea id="successMetrics" name="successMetrics" placeholder="How will you measure success with this program? What outcomes are important for your institution?"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Commitments</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="caseStudy" name="commitments" value="case-study">
+                            <label for="caseStudy">Participate in case studies and success stories</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="testimonials" name="commitments" value="testimonials">
+                            <label for="testimonials">Provide testimonials and references</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="networking" name="commitments" value="networking">
+                            <label for="networking">Participate in networking and community events</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="feedback" name="commitments" value="feedback">
+                            <label for="feedback">Provide regular feedback on program and platform</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="questions">Questions or Additional Information</label>
+                        <textarea id="questions" name="questions" placeholder="Any questions about the program or additional information you'd like to share?"></textarea>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="form-section" style="text-align: center;">
+                    <button type="button" id="prevBtn" style="display: none; margin-right: 1rem; padding: 0.75rem 1.5rem; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">Previous</button>
+                    <button type="button" id="nextBtn" style="display: none; margin-right: 1rem; padding: 0.75rem 1.5rem; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">Next</button>
+                    <button type="submit" id="submitBtn" style="display: none;">Submit Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentSection = 1;
+        const totalSections = 6;
+
+        function updateProgress() {
+            const progress = (currentSection / totalSections) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Step ${currentSection} of ${totalSections}`;
+        }
+
+        function showSection(sectionNumber) {
+            // Hide all sections
+            for (let i = 1; i <= totalSections; i++) {
+                document.getElementById(`section${i}`).style.display = 'none';
+            }
+            
+            // Show current section
+            document.getElementById(`section${sectionNumber}`).style.display = 'block';
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').style.display = sectionNumber > 1 ? 'inline-block' : 'none';
+            document.getElementById('nextBtn').style.display = sectionNumber < totalSections ? 'inline-block' : 'none';
+            document.getElementById('submitBtn').style.display = sectionNumber === totalSections ? 'inline-block' : 'none';
+            
+            updateProgress();
+        }
+
+        function nextSection() {
+            if (currentSection < totalSections) {
+                currentSection++;
+                showSection(currentSection);
+            }
+        }
+
+        function prevSection() {
+            if (currentSection > 1) {
+                currentSection--;
+                showSection(currentSection);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('nextBtn').addEventListener('click', nextSection);
+        document.getElementById('prevBtn').addEventListener('click', prevSection);
+
+        // Form submission
+        document.getElementById('educatorApplication').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Validate required fields
+            const requiredFields = ['firstName', 'lastName', 'email', 'institution', 'department', 'jobTitle', 'institutionType', 'field', 'specialization', 'experience', 'courses', 'studentCount', 'curriculumIntegration', 'researchInterests', 'availability'];
+            const missingFields = requiredFields.filter(field => !data[field]);
+            
+            if (missingFields.length > 0) {
+                alert('Please complete all required fields before submitting.');
+                return;
+            }
+            
+            // Simulate form submission
+            alert('Thank you for your application! We will review your submission and contact you within 48 hours to discuss partnership opportunities.');
+            
+            // Reset form
+            this.reset();
+            currentSection = 1;
+            showSection(1);
+        });
+
+        // Initialize first section
+        showSection(1);
+    </script>
+</body>
+</html>

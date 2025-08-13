@@ -2,24 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+<<<<<<< HEAD
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Regular.woff2') format('woff2');
+=======
 /* Self-hosted fonts for better performance - replace external import */
 @font-face {
   font-family: 'Inter';
   src: url('/fonts/Inter-Regular.woff2') format('woff2');
+>>>>>>> main
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
+<<<<<<< HEAD
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Medium.woff2') format('woff2');
+=======
   font-family: 'Inter';
   src: url('/fonts/Inter-Medium.woff2') format('woff2');
+>>>>>>> main
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
+<<<<<<< HEAD
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Bold.woff2') format('woff2');
+=======
   font-family: 'Inter';
   src: url('/fonts/Inter-SemiBold.woff2') format('woff2');
   font-weight: 600;
@@ -30,28 +45,50 @@
 @font-face {
   font-family: 'Inter';
   src: url('/fonts/Inter-Bold.woff2') format('woff2');
+>>>>>>> main
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
+<<<<<<< HEAD
+  font-family: 'Mona-Sans';
+  src: url('/fonts/Mona-Sans-Regular.woff2') format('woff2');
+=======
   font-family: 'JetBrains Mono';
   src: url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+>>>>>>> main
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
+<<<<<<< HEAD
+  font-family: 'Mona-Sans';
+  src: url('/fonts/Mona-Sans-Bold.woff2') format('woff2');
+  font-weight: 700;
+=======
   font-family: 'JetBrains Mono';
   src: url('/fonts/JetBrainsMono-Medium.woff2') format('woff2');
   font-weight: 500;
+>>>>>>> main
   font-style: normal;
   font-display: swap;
 }
 
 :root {
+<<<<<<< HEAD
+  --primary-500: #14b8a6;
+  --secondary-500: #f97316;
+  --background: #020617;
+  --foreground: #f8fafc;
+  --surface: #0f172a;
+  --border: #1e293b;
+  --muted: #475569;
+  --muted-foreground: #94a3b8;
+=======
   /* MCP Codex Brand Colors - Purple Theme */
   --primary-50: #faf5ff;
   --primary-400: #c084fc;
@@ -103,11 +140,15 @@ html {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+>>>>>>> main
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
+<<<<<<< HEAD
+  font-family: 'Satoshi', sans-serif;
+=======
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   overflow-x: hidden;
 }
@@ -335,4 +376,5 @@ img {
   html {
     font-size: 16px;
   }
+>>>>>>> main
 }

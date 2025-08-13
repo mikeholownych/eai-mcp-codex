@@ -41,7 +41,8 @@ const tickets: Ticket[] = [
   {
     id: '1',
     title: 'API Rate Limiting Issues',
-    description: 'Experiencing unexpected rate limiting on API calls despite being under the limit.',
+    description:
+      'Experiencing unexpected rate limiting on API calls despite being under the limit.',
     status: 'in-progress',
     priority: 'high',
     category: 'API',
@@ -50,28 +51,40 @@ const tickets: Ticket[] = [
     messages: [
       {
         id: '1',
-        content: 'Experiencing unexpected rate limiting on API calls despite being under the limit. This is affecting our production deployment.',
+        content:
+          'Experiencing unexpected rate limiting on API calls despite being under the limit. This is affecting our production deployment.',
         isStaff: false,
         author: 'John Doe',
         timestamp: new Date('2024-01-20T10:30:00'),
       },
       {
         id: '2',
+<<<<<<< HEAD
+        content:
+          'Hi John, thank you for reaching out. We&apos;re investigating this issue. Can you please provide your API key prefix and the timestamp of when you first noticed this issue?',
+=======
         content: 'Hi John, thank you for reaching out. We&apos;re investigating this issue. Can you please provide your API key prefix and the timestamp of when you first noticed this issue?',
+>>>>>>> main
         isStaff: true,
         author: 'Sarah Support',
         timestamp: new Date('2024-01-20T11:45:00'),
       },
       {
         id: '3',
-        content: 'Sure! API key prefix is sk_test_abc123... and we first noticed this around 2024-01-20 at 09:00 UTC.',
+        content:
+          'Sure! API key prefix is sk_test_abc123... and we first noticed this around 2024-01-20 at 09:00 UTC.',
         isStaff: false,
         author: 'John Doe',
         timestamp: new Date('2024-01-20T12:00:00'),
       },
       {
         id: '4',
+<<<<<<< HEAD
+        content:
+          'Thanks for the details. We&apos;ve identified the issue and are working on a fix. This should be resolved within the next 2 hours.',
+=======
         content: 'Thanks for the details. We&apos;ve identified the issue and are working on a fix. This should be resolved within the next 2 hours.',
+>>>>>>> main
         isStaff: true,
         author: 'Sarah Support',
         timestamp: new Date('2024-01-21T14:15:00'),
@@ -90,7 +103,8 @@ const tickets: Ticket[] = [
     messages: [
       {
         id: '1',
-        content: 'The code editor becomes very slow when working with large files over 1000 lines. Typing has a noticeable delay.',
+        content:
+          'The code editor becomes very slow when working with large files over 1000 lines. Typing has a noticeable delay.',
         isStaff: false,
         author: 'John Doe',
         timestamp: new Date('2024-01-19T16:20:00'),
@@ -109,14 +123,20 @@ const tickets: Ticket[] = [
     messages: [
       {
         id: '1',
-        content: 'I notice I was charged twice for my Pro subscription for January. Can you please look into this?',
+        content:
+          'I notice I was charged twice for my Pro subscription for January. Can you please look into this?',
         isStaff: false,
         author: 'John Doe',
         timestamp: new Date('2024-01-18T09:15:00'),
       },
       {
         id: '2',
+<<<<<<< HEAD
+        content:
+          'We&apos;ve reviewed your account and found the duplicate charge. A refund has been processed and should appear in your account within 3-5 business days.',
+=======
         content: 'We&apos;ve reviewed your account and found the duplicate charge. A refund has been processed and should appear in your account within 3-5 business days.',
+>>>>>>> main
         isStaff: true,
         author: 'Mike Billing',
         timestamp: new Date('2024-01-18T17:30:00'),
@@ -161,11 +181,16 @@ export default function SupportPage() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
   const [showNewTicketForm, setShowNewTicketForm] = useState(false)
   const [newMessage, setNewMessage] = useState('')
-  const [newTicketData, setNewTicketData] = useState({
+  const [newTicketData, setNewTicketData] = useState<{
+    title: string;
+    description: string;
+    category: string;
+    priority: 'low' | 'medium' | 'high' | 'urgent';
+  }>({
     title: '',
     description: '',
     category: 'General',
-    priority: 'medium' as const,
+    priority: 'medium',
   })
   useAuth()
 
@@ -185,7 +210,7 @@ export default function SupportPage() {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedTicket || !newMessage.trim()) return
-    
+
     // Here you would normally send the message to your API
     console.log('Sending message:', newMessage)
     setNewMessage('')
@@ -199,10 +224,7 @@ export default function SupportPage() {
             <h1 className="text-2xl font-bold text-white">Create Support Ticket</h1>
             <p className="text-gray-400">Get help from our support team</p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowNewTicketForm(false)}
-          >
+          <Button variant="outline" onClick={() => setShowNewTicketForm(false)}>
             Cancel
           </Button>
         </div>
@@ -212,18 +234,16 @@ export default function SupportPage() {
             <Input
               label="Subject"
               value={newTicketData.title}
-              onChange={(value) => setNewTicketData(prev => ({ ...prev, title: value }))}
+              onChange={value => setNewTicketData(prev => ({ ...prev, title: value }))}
               placeholder="Brief description of your issue"
               required
             />
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Description
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
               <textarea
                 value={newTicketData.description}
-                onChange={(e) => setNewTicketData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={e => setNewTicketData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Please provide detailed information about your issue..."
                 className="w-full h-32 bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
                 required
@@ -232,15 +252,13 @@ export default function SupportPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Category
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
                 <select
                   value={newTicketData.category}
-                  onChange={(e) => setNewTicketData(prev => ({ ...prev, category: e.target.value }))}
+                  onChange={e => setNewTicketData(prev => ({ ...prev, category: e.target.value }))}
                   className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 >
-                  {categories.map((category) => (
+                  {categories.map(category => (
                     <option key={category} value={category}>
                       {category}
                     </option>
@@ -249,12 +267,19 @@ export default function SupportPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Priority
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Priority</label>
                 <select
                   value={newTicketData.priority}
+<<<<<<< HEAD
+                  onChange={e =>
+                    setNewTicketData(prev => ({
+                      ...prev,
+                      priority: e.target.value as 'low' | 'medium' | 'high' | 'urgent',
+                    }))
+                  }
+=======
                   onChange={(e) => setNewTicketData(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' | 'urgent' }))}
+>>>>>>> main
                   className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 >
                   <option value="low">Low</option>
@@ -266,11 +291,7 @@ export default function SupportPage() {
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowNewTicketForm(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setShowNewTicketForm(false)}>
                 Cancel
               </Button>
               <Button type="submit" variant="primary">
@@ -285,16 +306,12 @@ export default function SupportPage() {
 
   if (selectedTicket) {
     const StatusIcon = statusIcons[selectedTicket.status]
-    
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedTicket(null)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setSelectedTicket(null)}>
               ← Back to Tickets
             </Button>
             <div>
@@ -304,11 +321,15 @@ export default function SupportPage() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedTicket.status]}`}>
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedTicket.status]}`}
+            >
               <StatusIcon className="h-4 w-4 mr-1" />
               {selectedTicket.status.replace('-', ' ').toUpperCase()}
             </span>
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${priorityColors[selectedTicket.priority]}`}>
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${priorityColors[selectedTicket.priority]}`}
+            >
               {selectedTicket.priority.toUpperCase()}
             </span>
           </div>
@@ -318,9 +339,20 @@ export default function SupportPage() {
           <div className="lg:col-span-3">
             <Card className="p-6">
               <div className="space-y-6">
+<<<<<<< HEAD
+                {selectedTicket.messages.map(message => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.isStaff ? 'justify-start' : 'justify-end'}`}
+                  >
+                    <div
+                      className={`flex max-w-4xl ${message.isStaff ? 'flex-row' : 'flex-row-reverse'}`}
+                    >
+=======
                 {selectedTicket.messages.map((message) => (
                   <div key={message.id} className={`flex ${message.isStaff ? 'justify-start' : 'justify-end'}`}>
                     <div className={`flex max-w-4xl ${message.isStaff ? 'flex-row' : 'flex-row-reverse'}`}>
+>>>>>>> main
                       <div className="flex-shrink-0">
                         {message.isStaff ? (
                           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
@@ -330,7 +362,7 @@ export default function SupportPage() {
                           <UserCircleIcon className="h-8 w-8 text-gray-400" />
                         )}
                       </div>
-                      
+
                       <div className={`mx-3 ${message.isStaff ? 'text-left' : 'text-right'}`}>
                         <div className="flex items-center space-x-2 mb-1">
                           <span className="text-sm font-medium text-gray-300">
@@ -345,7 +377,7 @@ export default function SupportPage() {
                             {message.timestamp.toLocaleString()}
                           </span>
                         </div>
-                        
+
                         <div
                           className={`p-4 rounded-lg ${
                             message.isStaff
@@ -353,9 +385,7 @@ export default function SupportPage() {
                               : 'bg-slate-700/50 border border-slate-600 text-gray-200'
                           }`}
                         >
-                          <div className="text-sm whitespace-pre-wrap">
-                            {message.content}
-                          </div>
+                          <div className="text-sm whitespace-pre-wrap">{message.content}</div>
                         </div>
                       </div>
                     </div>
@@ -372,13 +402,13 @@ export default function SupportPage() {
                       </label>
                       <textarea
                         value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
+                        onChange={e => setNewMessage(e.target.value)}
                         placeholder="Type your message here..."
                         className="w-full h-24 bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
                         required
                       />
                     </div>
-                    
+
                     <div className="flex justify-end">
                       <Button type="submit" variant="primary" disabled={!newMessage.trim()}>
                         <ChatBubbleBottomCenterTextIcon className="h-4 w-4 mr-2" />
@@ -402,20 +432,24 @@ export default function SupportPage() {
                     <span className="text-white">{selectedTicket.category}</span>
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-gray-400">Created</label>
                   <div className="flex items-center mt-1">
                     <ClockIcon className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-white">{selectedTicket.createdAt.toLocaleDateString()}</span>
+                    <span className="text-white">
+                      {selectedTicket.createdAt.toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-gray-400">Last Updated</label>
                   <div className="flex items-center mt-1">
                     <ClockIcon className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-white">{selectedTicket.updatedAt.toLocaleDateString()}</span>
+                    <span className="text-white">
+                      {selectedTicket.updatedAt.toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
 
@@ -448,26 +482,34 @@ export default function SupportPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        {tickets.map((ticket) => {
+        {tickets.map(ticket => {
           const StatusIcon = statusIcons[ticket.status]
-          
+
           return (
-            <Card key={ticket.id} className="p-6 hover:bg-slate-700/30 transition-colors cursor-pointer" onClick={() => setSelectedTicket(ticket)}>
+            <Card
+              key={ticket.id}
+              className="p-6 hover:bg-slate-700/30 transition-colors cursor-pointer"
+              onClick={() => setSelectedTicket(ticket)}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
                     <h3 className="text-lg font-semibold text-white">{ticket.title}</h3>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[ticket.status]}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColors[ticket.status]}`}
+                    >
                       <StatusIcon className="h-3 w-3 mr-1" />
                       {ticket.status.replace('-', ' ')}
                     </span>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${priorityColors[ticket.priority]}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${priorityColors[ticket.priority]}`}
+                    >
                       {ticket.priority}
                     </span>
                   </div>
-                  
+
                   <p className="text-gray-400 mb-3 line-clamp-2">{ticket.description}</p>
-                  
+
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <div className="flex items-center">
                       <TagIcon className="h-4 w-4 mr-1" />
@@ -483,7 +525,7 @@ export default function SupportPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <ArrowRightIcon className="h-5 w-5 text-gray-400 ml-4" />
               </div>
             </Card>
@@ -496,7 +538,12 @@ export default function SupportPage() {
           <LifebuoyIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-white mb-2">No support tickets</h3>
           <p className="text-gray-400 mb-6">
+<<<<<<< HEAD
+            You haven&apos;t created any support tickets yet. If you need help, don&apos;t hesitate
+            to reach out!
+=======
             You haven&apos;t created any support tickets yet. If you need help, don&apos;t hesitate to reach out!
+>>>>>>> main
           </p>
           <Button variant="primary" onClick={() => setShowNewTicketForm(true)}>
             <PlusIcon className="h-4 w-4 mr-2" />

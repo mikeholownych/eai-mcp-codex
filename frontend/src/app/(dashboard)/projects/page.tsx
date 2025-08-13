@@ -81,9 +81,7 @@ export default function ProjectsPage() {
     language: 'TypeScript',
   })
 
-  const filteredProjects = projects.filter(project => 
-    filter === 'all' || project.status === filter
-  )
+  const filteredProjects = projects.filter(project => filter === 'all' || project.status === filter)
 
   const handleCreateProject = (e: React.FormEvent) => {
     e.preventDefault()
@@ -108,13 +106,11 @@ export default function ProjectsPage() {
         <Card className="p-6">
           <form onSubmit={handleCreateProject} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Project Name
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Project Name</label>
               <input
                 type="text"
                 value={newProject.name}
-                onChange={(e) => setNewProject(prev => ({ ...prev, name: e.target.value }))}
+                onChange={e => setNewProject(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="My Awesome Project"
                 className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 required
@@ -122,12 +118,10 @@ export default function ProjectsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Description
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
               <textarea
                 value={newProject.description}
-                onChange={(e) => setNewProject(prev => ({ ...prev, description: e.target.value }))}
+                onChange={e => setNewProject(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Brief description of your project..."
                 className="w-full h-24 bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none"
                 required
@@ -140,21 +134,19 @@ export default function ProjectsPage() {
               </label>
               <select
                 value={newProject.language}
-                onChange={(e) => setNewProject(prev => ({ ...prev, language: e.target.value }))}
+                onChange={e => setNewProject(prev => ({ ...prev, language: e.target.value }))}
                 className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               >
-                {Object.keys(languageColors).map((lang) => (
-                  <option key={lang} value={lang}>{lang}</option>
+                {Object.keys(languageColors).map(lang => (
+                  <option key={lang} value={lang}>
+                    {lang}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowCreateForm(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
                 Cancel
               </Button>
               <Button type="submit" variant="primary">
@@ -182,7 +174,7 @@ export default function ProjectsPage() {
 
       {/* Filter Tabs */}
       <div className="flex space-x-1 bg-slate-800 p-1 rounded-lg w-fit">
-        {(['all', 'active', 'archived'] as const).map((tab) => (
+        {(['all', 'active', 'archived'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setFilter(tab)}
@@ -202,7 +194,7 @@ export default function ProjectsPage() {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProjects.map((project) => (
+        {filteredProjects.map(project => (
           <Card key={project.id} className="p-6 hover:bg-slate-700/30 transition-colors group">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center">
@@ -211,14 +203,17 @@ export default function ProjectsPage() {
                 </div>
                 <div className="ml-3">
                   <h3 className="text-lg font-semibold text-white">{project.name}</h3>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                    languageColors[project.language as keyof typeof languageColors] || 'bg-gray-500/10 text-gray-400'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      languageColors[project.language as keyof typeof languageColors] ||
+                      'bg-gray-500/10 text-gray-400'
+                    }`}
+                  >
                     {project.language}
                   </span>
                 </div>
               </div>
-              
+
               <div className="relative">
                 <button className="p-1 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
                   <EllipsisVerticalIcon className="h-5 w-5" />
@@ -226,9 +221,7 @@ export default function ProjectsPage() {
               </div>
             </div>
 
-            <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-              {project.description}
-            </p>
+            <p className="text-gray-400 text-sm mb-4 line-clamp-2">{project.description}</p>
 
             <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
               <div className="flex items-center">
@@ -247,7 +240,7 @@ export default function ProjectsPage() {
                   <CodeBracketIcon className="h-4 w-4 mr-1" />
                   Open
                 </Button>
-                
+
                 {project.status === 'active' && (
                   <Button variant="outline" size="sm">
                     <ShareIcon className="h-4 w-4 mr-1" />
@@ -282,10 +275,9 @@ export default function ProjectsPage() {
             {filter === 'all' ? 'No projects yet' : `No ${filter} projects`}
           </h3>
           <p className="text-gray-400 mb-6">
-            {filter === 'all' 
-              ? "Create your first project to start coding with AI assistance."
-              : `You don't have any ${filter} projects.`
-            }
+            {filter === 'all'
+              ? 'Create your first project to start coding with AI assistance.'
+              : `You don't have any ${filter} projects.`}
           </p>
           {filter === 'all' && (
             <Button variant="primary" onClick={() => setShowCreateForm(true)}>

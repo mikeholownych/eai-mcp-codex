@@ -32,7 +32,7 @@ const mockBlogPosts = [
     author: {
       name: 'Sarah Johnson',
       email: 'sarah@ethicalai.com',
-      role: 'content'
+      role: 'content',
     },
     tags: ['AI', 'Development', 'Innovation'],
     created_at: '2024-01-15T10:00:00Z',
@@ -40,7 +40,7 @@ const mockBlogPosts = [
     updated_at: '2024-01-15T16:30:00Z',
     views: 2847,
     syndicated: true,
-    seo_score: 85
+    seo_score: 85,
   },
   {
     id: 'post-002',
@@ -52,7 +52,7 @@ const mockBlogPosts = [
     author: {
       name: 'Mike Chen',
       email: 'mike@ethicalai.com',
-      role: 'content'
+      role: 'content',
     },
     tags: ['Collaboration', 'Agents', 'Best Practices'],
     created_at: '2024-01-14T09:30:00Z',
@@ -60,7 +60,7 @@ const mockBlogPosts = [
     updated_at: '2024-01-14T17:45:00Z',
     views: 0,
     syndicated: false,
-    seo_score: 72
+    seo_score: 72,
   },
   {
     id: 'post-003',
@@ -72,7 +72,7 @@ const mockBlogPosts = [
     author: {
       name: 'Alex Rivera',
       email: 'alex@ethicalai.com',
-      role: 'content'
+      role: 'content',
     },
     tags: ['Security', 'AI', 'Development'],
     created_at: '2024-01-13T11:15:00Z',
@@ -80,8 +80,8 @@ const mockBlogPosts = [
     updated_at: '2024-01-13T15:20:00Z',
     views: 0,
     syndicated: false,
-    seo_score: 91
-  }
+    seo_score: 91,
+  },
 ]
 
 export default function BlogContentManagement() {
@@ -107,8 +107,9 @@ export default function BlogContentManagement() {
   }
 
   const filteredPosts = mockBlogPosts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch =
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = selectedStatus === 'all' || post.status === selectedStatus
     const matchesTag = selectedTag === 'all' || post.tags.includes(selectedTag)
     return matchesSearch && matchesStatus && matchesTag
@@ -121,7 +122,7 @@ export default function BlogContentManagement() {
     published: mockBlogPosts.filter(p => p.status === 'published').length,
     drafts: mockBlogPosts.filter(p => p.status === 'draft').length,
     in_review: mockBlogPosts.filter(p => p.status === 'review').length,
-    total_views: mockBlogPosts.reduce((sum, post) => sum + post.views, 0)
+    total_views: mockBlogPosts.reduce((sum, post) => sum + post.views, 0),
   }
 
   const handleCreatePost = () => {
@@ -159,7 +160,7 @@ export default function BlogContentManagement() {
           <h1 className="text-2xl font-bold text-white">Blog Content Management</h1>
           <p className="text-gray-400">Create, edit, and manage Ethical AI Insider blog content</p>
         </div>
-        
+
         <Button variant="primary" onClick={handleCreatePost}>
           <PlusIcon className="h-4 w-4 mr-2" />
           Create Post
@@ -223,7 +224,9 @@ export default function BlogContentManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Total Views</p>
-              <p className="text-2xl font-semibold text-white">{blogStats.total_views.toLocaleString()}</p>
+              <p className="text-2xl font-semibold text-white">
+                {blogStats.total_views.toLocaleString()}
+              </p>
             </div>
           </div>
         </Card>
@@ -238,14 +241,14 @@ export default function BlogContentManagement() {
               type="text"
               placeholder="Search posts..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="w-full pl-10 bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             />
           </div>
 
           <select
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
+            onChange={e => setSelectedStatus(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             <option value="all">All Status</option>
@@ -257,12 +260,14 @@ export default function BlogContentManagement() {
 
           <select
             value={selectedTag}
-            onChange={(e) => setSelectedTag(e.target.value)}
+            onChange={e => setSelectedTag(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             <option value="all">All Tags</option>
             {allTags.map(tag => (
-              <option key={tag} value={tag}>{tag}</option>
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
             ))}
           </select>
 
@@ -288,11 +293,13 @@ export default function BlogContentManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
-              {filteredPosts.map((post) => (
+              {filteredPosts.map(post => (
                 <tr key={post.id} className="hover:bg-slate-700/30">
                   <td className="py-4 px-6">
                     <div>
-                      <div className="text-sm font-medium text-white line-clamp-1">{post.title}</div>
+                      <div className="text-sm font-medium text-white line-clamp-1">
+                        {post.title}
+                      </div>
                       <div className="text-sm text-gray-400 line-clamp-2 mt-1">{post.excerpt}</div>
                       <div className="flex items-center mt-2 space-x-2">
                         {post.syndicated && (
@@ -315,7 +322,9 @@ export default function BlogContentManagement() {
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBlogStatusColor(post.status)}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBlogStatusColor(post.status)}`}
+                    >
                       {getBlogStatusIcon(post.status)}
                       <span className="ml-1 capitalize">{post.status}</span>
                     </span>
@@ -323,7 +332,10 @@ export default function BlogContentManagement() {
                   <td className="py-4 px-6">
                     <div className="flex flex-wrap gap-1">
                       {post.tags.slice(0, 2).map(tag => (
-                        <span key={tag} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400">
+                        <span
+                          key={tag}
+                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400"
+                        >
                           <TagIcon className="h-3 w-3 mr-1" />
                           {tag}
                         </span>
@@ -342,7 +354,10 @@ export default function BlogContentManagement() {
                       {new Date(post.updated_at).toLocaleDateString()}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {new Date(post.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(post.updated_at).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
                     </div>
                   </td>
                   <td className="py-4 px-6">
@@ -408,25 +423,19 @@ export default function BlogContentManagement() {
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-slate-800 p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Create New Blog Post
-            </h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Create New Blog Post</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Title
-                </label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-medium text-gray-300 mb-2">Title</label>
+                <input
+                  type="text"
                   className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="Enter blog post title..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Excerpt
-                </label>
-                <textarea 
+                <label className="block text-sm font-medium text-gray-300 mb-2">Excerpt</label>
+                <textarea
                   rows={3}
                   className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="Brief description of the post..."
@@ -436,16 +445,14 @@ export default function BlogContentManagement() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Tags (comma-separated)
                 </label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   placeholder="AI, Development, Best Practices"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Status
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                 <select className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600">
                   <option value="draft">Draft</option>
                   <option value="review">Ready for Review</option>
@@ -453,15 +460,15 @@ export default function BlogContentManagement() {
                 </select>
               </div>
               <div className="flex space-x-3 mt-6">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex-1"
                   onClick={() => setShowCreateModal(false)}
                 >
                   Cancel
                 </Button>
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   className="flex-1"
                   onClick={() => {
                     // Handle create post
@@ -480,9 +487,7 @@ export default function BlogContentManagement() {
       {showSyndicateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-slate-800 p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Syndicate Blog Post
-            </h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Syndicate Blog Post</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -493,11 +498,11 @@ export default function BlogContentManagement() {
                     { id: 'newsletter', name: 'ConvertKit Newsletter', enabled: true },
                     { id: 'medium', name: 'Medium Publication', enabled: false },
                     { id: 'devto', name: 'Dev.to Community', enabled: false },
-                    { id: 'linkedin', name: 'LinkedIn Article', enabled: false }
+                    { id: 'linkedin', name: 'LinkedIn Article', enabled: false },
                   ].map(channel => (
                     <label key={channel.id} className="flex items-center">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         defaultChecked={channel.enabled}
                         className="mr-3 rounded bg-slate-700 border-slate-600 text-orange-500 focus:ring-orange-500"
                       />
@@ -507,15 +512,15 @@ export default function BlogContentManagement() {
                 </div>
               </div>
               <div className="flex space-x-3 mt-6">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex-1"
                   onClick={() => setShowSyndicateModal(false)}
                 >
                   Cancel
                 </Button>
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   className="flex-1"
                   onClick={() => {
                     // Handle syndicate

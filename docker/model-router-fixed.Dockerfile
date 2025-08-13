@@ -1,38 +1,52 @@
 # =====================================
-# MODEL ROUTER SERVICE (FIXED)
+# MODEL ROUTER SERVICE (FIXED VERSION)
 # =====================================
-FROM python:3.11-slim as base
+FROM mcp-base as base
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+ENV SERVICE_NAME=model-router \
+    SERVICE_PORT=8001
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash mcp
+# ---------- Dependencies Stage ----------
+FROM base as deps
+
 WORKDIR /app
-RUN chown mcp:mcp /app
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+USER root
 
-# Copy common utilities
-COPY src/common/ ./common/
-COPY config/ ./config/
+# Copy requirements if it exists, otherwise create minimal one
+COPY requirements.txt* ./
+RUN if [ ! -f requirements.txt ]; then \
+        echo "fastapi>=0.68.0\nuvicorn[standard]>=0.15.0\npsycopg2-binary>=2.9.0\npydantic>=1.8.0\nopenai>=1.0.0" > requirements.txt; \
+    fi && \
+    python -m pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# ---------- Final Runtime Stage ----------
+FROM base as model-router
+
+WORKDIR /app
+
+USER root
+
+# Copy dependencies
+COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=deps /usr/local/bin /usr/local/bin
+
+# Copy common modules and config
+COPY --chown=mcp:mcp src/common/ ./common/
+COPY --chown=mcp:mcp config/ ./config/
+COPY --chown=mcp:mcp scripts/health_check.py ./health_check.py
+
+# Copy model router service source + entrypoint
+COPY --chown=mcp:mcp src/model_router/ ./src/model_router/
+COPY --chown=mcp:mcp scripts/start_model_router.py ./start.py
+
+# Create logs directory and set ownership and permissions
+RUN mkdir -p /app/logs && \
+    chown -R mcp:mcp /app && \
+    chmod +x ./health_check.py
 
 USER mcp
-
-# Health check script
-COPY --chown=mcp:mcp scripts/health_check.py ./health_check.py
-RUN chmod +x ./health_check.py
-
-FROM mcp-base as model-router
-
-COPY --chown=mcp:mcp src/model_router/ ./
-COPY --chown=mcp:mcp scripts/start_model_router.py ./start.py
 
 EXPOSE 8001
 

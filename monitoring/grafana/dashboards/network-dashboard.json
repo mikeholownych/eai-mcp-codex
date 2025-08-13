@@ -1,0 +1,606 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Network Dashboard",
+    "tags": ["network", "traffic-analysis", "latency", "connection-metrics"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Network Overview",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "Receive MB/s",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "Transmit MB/s",
+            "refId": "B"
+          },
+          {
+            "expr": "node_network_up",
+            "legendFormat": "Network Status",
+            "refId": "C"
+          },
+          {
+            "expr": "node_network_connections",
+            "legendFormat": "Active Connections",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Network Status" },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "options": { "0": { "text": "DOWN", "color": "red" } } },
+                    { "options": { "1": { "text": "UP", "color": "green" } } }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Network Traffic",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "Receive MB/s - {{instance}}:{{device}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "Transmit MB/s - {{instance}}:{{device}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m]) / 1024 / 1024 + rate(node_network_transmit_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "Total MB/s - {{instance}}:{{device}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB/s",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 100,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 500,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Network Latency",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "P50 Latency ms - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "P95 Latency ms - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "P99 Latency ms - {{instance}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Latency (ms)",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1000,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 5000,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Connection Metrics",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "node_network_connections",
+            "legendFormat": "Active Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_network_connections_total[5m])",
+            "legendFormat": "Connections/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "node_network_connections_established",
+            "legendFormat": "Established Connections",
+            "refId": "C"
+          },
+          {
+            "expr": "node_network_connections_time_wait",
+            "legendFormat": "TIME_WAIT Connections",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1000 },
+                { "color": "red", "value": 5000 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Network Errors",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_errs_total[5m])",
+            "legendFormat": "Receive Errors/sec - {{instance}}:{{device}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_network_transmit_errs_total[5m])",
+            "legendFormat": "Transmit Errors/sec - {{instance}}:{{device}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(node_network_receive_drop_total[5m])",
+            "legendFormat": "Receive Drops/sec - {{instance}}:{{device}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(node_network_transmit_drop_total[5m])",
+            "legendFormat": "Transmit Drops/sec - {{instance}}:{{device}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Errors/sec",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 1,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 10,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Network Traffic Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m])",
+            "legendFormat": "Receive - {{instance}}:{{device}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m])",
+            "legendFormat": "Transmit - {{instance}}:{{device}}",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "pieType": "donut",
+          "displayLabels": ["percent", "value"],
+          "legend": {
+            "displayMode": "table",
+            "placement": "right"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Network Protocol Distribution",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "targets": [
+          {
+            "expr": "rate(node_network_tcp_connections_total[5m])",
+            "legendFormat": "TCP Connections/sec - {{instance}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_network_udp_connections_total[5m])",
+            "legendFormat": "UDP Connections/sec - {{instance}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(node_network_http_connections_total[5m])",
+            "legendFormat": "HTTP Connections/sec - {{instance}}",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(node_network_https_connections_total[5m])",
+            "legendFormat": "HTTPS Connections/sec - {{instance}}",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Connections/sec",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 100,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 500,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Network Performance by Instance",
+        "type": "table",
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "node_network_up",
+            "legendFormat": "{{instance}}",
+            "refId": "Status",
+            "format": "table"
+          },
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "{{instance}}",
+            "refId": "Receive",
+            "format": "table"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m]) / 1024 / 1024",
+            "legendFormat": "{{instance}}",
+            "refId": "Transmit",
+            "format": "table"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "{{instance}}",
+            "refId": "Latency",
+            "format": "table"
+          },
+          {
+            "expr": "node_network_connections",
+            "legendFormat": "{{instance}}",
+            "refId": "Connections",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "job": true
+              },
+              "indexByName": {
+                "instance": 0,
+                "Value #Status": 1,
+                "Value #Receive": 2,
+                "Value #Transmit": 3,
+                "Value #Latency": 4,
+                "Value #Connections": 5
+              },
+              "renameByName": {
+                "instance": "Instance",
+                "Value #Status": "Status",
+                "Value #Receive": "Receive MB/s",
+                "Value #Transmit": "Transmit MB/s",
+                "Value #Latency": "P95 Latency ms",
+                "Value #Connections": "Connections"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "center",
+              "displayMode": "color-background"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Status" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "red", "value": 0 },
+                      { "color": "green", "value": 1 }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "P95 Latency ms" },
+              "properties": [
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 1000 },
+                      { "color": "red", "value": 5000 }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Network Score",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+        "targets": [
+          {
+            "expr": "100 - (((1 - node_network_up) * 100 * 30) - ((histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) * 1000 * 25) - ((rate(node_network_receive_errs_total[5m]) * 20) - ((rate(node_network_transmit_errs_total[5m]) * 15) - ((rate(node_network_receive_drop_total[5m]) * 10)",
+            "legendFormat": "Network Score",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "green", "value": 90 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Network Bandwidth",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m]) * 8 / 1000 / 1000",
+            "legendFormat": "Receive Mbps - {{instance}}:{{device}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m]) * 8 / 1000 / 1000",
+            "legendFormat": "Transmit Mbps - {{instance}}:{{device}}",
+            "refId": "B"
+          },
+          {
+            "expr": "node_network_speed_bytes / 1000 / 1000",
+            "legendFormat": "Interface Speed Mbps - {{instance}}:{{device}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Mbps",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 800,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 950,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Network Packet Analysis",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 50 },
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_packets_total[5m])",
+            "legendFormat": "Receive Packets/sec - {{instance}}:{{device}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(node_network_transmit_packets_total[5m])",
+            "legendFormat": "Transmit Packets/sec - {{instance}}:{{device}}",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(node_network_receive_multicast_total[5m])",
+            "legendFormat": "Multicast Packets/sec - {{instance}}:{{device}}",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Packets/sec",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 10000,
+            "colorMode": "warning",
+            "op": "gt"
+          },
+          {
+            "value": 50000,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Network Trends",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 50 },
+        "targets": [
+          {
+            "expr": "avg_over_time(rate(node_network_receive_bytes_total[5m]) / 1024 / 1024[24h])",
+            "legendFormat": "Avg Receive MB/s (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(rate(node_network_transmit_bytes_total[5m]) / 1024 / 1024[24h])",
+            "legendFormat": "Avg Transmit MB/s (24h)",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) * 1000[24h])",
+            "legendFormat": "Avg P95 Latency ms (24h)",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB/s / Latency ms",
+            "min": 0
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(node_network_receive_bytes_total, instance)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "device",
+          "type": "query",
+          "query": "label_values(node_network_receive_bytes_total, device)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Network Alerts",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertname=~\".*Network.*|.*Latency.*|.*Connection.*\",alertstate=\"firing\"}",
+          "iconColor": "red",
+          "titleFormat": "Network Alert: {{alertname}}"
+        },
+        {
+          "name": "High Network Latency",
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) * 1000 > 5000",
+          "iconColor": "orange",
+          "titleFormat": "High Network Latency: {{instance}}"
+        },
+        {
+          "name": "Network Errors",
+          "datasource": "Prometheus",
+          "expr": "rate(node_network_receive_errs_total[5m]) > 1 or rate(node_network_transmit_errs_total[5m]) > 1",
+          "iconColor": "orange",
+          "titleFormat": "Network Errors: {{instance}}:{{device}}"
+        },
+        {
+          "name": "Network Down",
+          "datasource": "Prometheus",
+          "expr": "node_network_up == 0",
+          "iconColor": "red",
+          "titleFormat": "Network Down: {{instance}}"
+        }
+      ]
+    }
+  }
+}

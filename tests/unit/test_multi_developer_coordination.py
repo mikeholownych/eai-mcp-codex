@@ -314,8 +314,18 @@ class TestDeveloperProfileManager:
     async def test_create_developer_profile(self):
         """Test creating a developer profile."""
         with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
-            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = AsyncMock()
-            
+            mock_conn = AsyncMock()
+            # Mock the context manager returned by get_connection()
+            mock_context_manager = AsyncMock()
+            mock_context_manager.__aenter__.return_value = mock_conn
+            mock_context_manager.__aexit__.return_value = None
+
+            mock_db_manager = Mock()
+            mock_db_manager.get_connection.return_value = mock_context_manager
+            MockDatabaseManager.return_value = mock_db_manager
+            # Update the profile manager's db_manager
+            self.profile_manager.db_manager = mock_db_manager
+
             profile = await self.profile_manager.create_developer_profile(
                 agent_id="test_agent",
                 specializations=[DeveloperSpecialization.BACKEND],
@@ -327,14 +337,15 @@ class TestDeveloperProfileManager:
             assert profile.experience_level == ExperienceLevel.SENIOR
 
             # Verify database call was made
-            mock_conn.return_value.execute.assert_called_once()
+            mock_conn.execute.assert_called_once()
 
     async def test_find_best_agents_for_task(self):
         """Test finding best agents for a task."""
         with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
             # Mock database response
-            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = AsyncMock()
-            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value.fetch.return_value = [{"agent_id": "dev_001"}, {"agent_id": "dev_002"}]
+            mock_conn = AsyncMock()
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = mock_conn
+            mock_conn.fetch.return_value = [{"agent_id": "dev_001"}, {"agent_id": "dev_002"}]
             
             # Mock profile retrieval
             self.profile_manager.get_developer_profile = AsyncMock()
@@ -355,15 +366,15 @@ class TestDeveloperProfileManager:
                 ),
             ]
 
-            candidates = await self.profile_manager.find_best_agents_for_task(
-                TaskType.FEATURE_DEVELOPMENT, ["Python"], max_agents=2
-            )
+        candidates = await self.profile_manager.find_best_agents_for_task(
+            TaskType.FEATURE_DEVELOPMENT, ["Python"], max_agents=2
+        )
 
-            assert len(candidates) == 2
-            assert (
-                candidates[0][0] == "dev_001"
-            )  # Should rank higher due to experience and skill match
-            assert candidates[0][1] > candidates[1][1]  # Higher score
+        assert len(candidates) == 2
+        assert (
+            candidates[0][0] == "dev_001"
+        )  # Should rank higher due to experience and skill match
+        assert candidates[0][1] > candidates[1][1]  # Higher score
 
 
 @pytest.mark.asyncio
@@ -383,7 +394,8 @@ class TestIntelligentConflictResolver:
         plan_id = uuid4()
         
         with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
-            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = AsyncMock()
+            mock_conn = AsyncMock()
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = mock_conn
             
             conflict = await self.conflict_resolver.detect_conflict(
                 session_id=session_id,
@@ -399,7 +411,7 @@ class TestIntelligentConflictResolver:
             assert len(conflict.involved_agents) == 2
 
             # Verify database storage
-            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value.execute.assert_called_once()
+            mock_conn.execute.assert_called_once()
     
     async def test_automated_resolution_feasibility(self):
         """Test automated resolution feasibility check."""
@@ -475,7 +487,8 @@ class TestMultiDeveloperOrchestrator:
         )
         
         with patch('src.common.database.DatabaseManager') as MockDatabaseManager:
-            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = AsyncMock()
+            mock_conn = AsyncMock()
+            MockDatabaseManager.return_value.get_connection.return_value.__aenter__.return_value = mock_conn
             
             tasks = [
                 {
@@ -595,6 +608,7 @@ class TestMultiDeveloperOrchestrator:
         self.orchestrator._handle_task_blockers.assert_called_once()
 
 
+@pytest.mark.asyncio
 class TestTaskAssignmentEngine:
     """Test TaskAssignmentEngine functionality."""
 
@@ -603,6 +617,7 @@ class TestTaskAssignmentEngine:
         self.profile_manager = Mock(spec=DeveloperProfileManager)
         self.assignment_engine = TaskAssignmentEngine(self.profile_manager)
 
+    @pytest.mark.asyncio
     async def test_calculate_assignment_score(self):
         """Test assignment score calculation."""
         agent = DeveloperProfile(

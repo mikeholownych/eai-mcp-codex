@@ -752,7 +752,7 @@ class EncryptionService:
             yield EncryptedSession(self, session_key)
         finally:
             # Cleanup if needed
-            pass
+            logger.debug("Encrypted session closed: %s", session_id)
 
     async def _get_session_key(self, session_id: str) -> EncryptionKey:
         """Get or create session-specific encryption key"""

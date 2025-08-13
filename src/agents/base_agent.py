@@ -1,11 +1,16 @@
-"""Base Agent implementation following AGENTS.md standards."""
+"""Base Agent implementation following AGENTS.md standards.
+
+This module provides the core lifecycle, messaging, and task execution
+infrastructure shared by specialized agents. It intentionally avoids
+business logic, which belongs in concrete agent implementations.
+"""
 
 import asyncio
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
-from dataclasses import dataclass
 
 from pydantic import BaseModel, Field
 
@@ -208,7 +213,7 @@ class BaseAgent(ABC):
             try:
                 # Process current tasks
                 completed_tasks = []
-                for task_id, task in self.current_tasks.items():
+                for task_id, task in list(self.current_tasks.items()):
                     if await self._is_task_ready(task):
                         result = await self._execute_task(task)
                         await self._complete_task(task, result)
@@ -216,7 +221,7 @@ class BaseAgent(ABC):
 
                 # Remove completed tasks
                 for task_id in completed_tasks:
-                    del self.current_tasks[task_id]
+                    self.current_tasks.pop(task_id, None)
 
                 # Start queued tasks if capacity available
                 while (
@@ -256,7 +261,9 @@ class BaseAgent(ABC):
             elif message.message_type == MessageType.NOTIFICATION:
                 await self._handle_notification(message)
             else:
-                self.logger.warning(f"Unhandled message type: {message.message_type}")
+                self.logger.warning(
+                    f"Unhandled message type: {message.message_type}"
+                )
 
         except Exception as e:
             self.logger.error(f"Error handling message {message.id}: {e}")
@@ -268,7 +275,7 @@ class BaseAgent(ABC):
             task = TaskInput(
                 task_id=UUID(payload.get("task_id", str(uuid4()))),
                 task_type=payload["task_type"],
-                description=payload["description"],
+                description=payload.get("description", ""),
                 context=payload.get("context", {}),
                 deadline=(
                     datetime.fromisoformat(payload["deadline"])
@@ -445,58 +452,36 @@ class BaseAgent(ABC):
         return has_capabilities and not at_capacity
 
     async def _make_consensus_decision(self, payload: Dict[str, Any]) -> str:
-        """Make a consensus decision based on agent's expertise."""
-        # Default implementation - can be overridden by specialized agents
+        """Make a consensus decision based on agent's expertise.
+
+        Default strategy is deterministic to ensure stable behavior: choose the
+        first option unless a preferred option is present in payload metadata.
+        """
         options = payload.get("options", [])
-        if options:
-            return options[0]  # Default to first option
-        return "approve"
+        preferred = payload.get("preferred_option")
+        if preferred and preferred in options:
+            return preferred
+        return options[0] if options else "abstain"
 
-    async def _get_vote_reasoning(self, payload: Dict[str, Any], vote: str) -> str:
-        """Provide reasoning for a consensus vote."""
-        return f"Agent {self.config.agent_id} voted {vote} based on {self.config.agent_type} expertise"
-
-    # Abstract methods that must be implemented by specialized agents
+    async def _get_vote_reasoning(self, payload: Dict[str, Any], decision: str) -> str:
+        """Provide a short explanation for the consensus decision."""
+        basis = payload.get("basis", "capability_match")
+        return f"Decision '{decision}' based on {basis} and agent expertise"
 
     @abstractmethod
     async def _initialize_agent(self) -> None:
-        """Initialize agent-specific resources."""
-        pass
+        """Perform agent-specific initialization (connections, caches, etc)."""
+        raise NotImplementedError
 
     @abstractmethod
     async def process_task(self, task: TaskInput) -> Dict[str, Any]:
-        """Process a task and return results."""
-        pass
+        """Execute agent-specific task logic and return a result payload."""
+        raise NotImplementedError
 
-    @abstractmethod
     async def get_capabilities(self) -> List[str]:
-        """Get agent's current capabilities."""
-        pass
+        """Return a snapshot of agent capabilities.
 
-    # Utility methods
+        Concrete agents can override to compute these dynamically.
+        """
+        return list(self.config.capabilities)
 
-    def get_metrics(self) -> Dict[str, Any]:
-        """Get agent performance metrics."""
-        uptime = (datetime.utcnow() - self.metrics["uptime_start"]).total_seconds()
-
-        return {
-            **self.metrics,
-            "uptime_seconds": uptime,
-            "current_tasks": len(self.current_tasks),
-            "queued_tasks": len(self.task_queue),
-            "utilization": len(self.current_tasks) / self.config.max_concurrent_tasks,
-        }
-
-    def get_status(self) -> Dict[str, Any]:
-        """Get agent status information."""
-        return {
-            "agent_id": self.config.agent_id,
-            "agent_type": self.config.agent_type,
-            "name": self.config.name,
-            "running": self.running,
-            "capabilities": self.config.capabilities,
-            "current_tasks": len(self.current_tasks),
-            "queued_tasks": len(self.task_queue),
-            "last_heartbeat": self.last_heartbeat.isoformat(),
-            "metrics": self.get_metrics(),
-        }

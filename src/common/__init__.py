@@ -11,7 +11,7 @@ from .health_check import (
     register_health_check,
 )
 from .metrics import get_metrics_collector, record_request, get_metrics_output
-from .database import DatabaseManager, get_connection
+from .database import DatabaseManager as DatabaseManager
 from .redis_client import get_redis, get_redis_connection
 from .service_registry import ServiceRegistry, ServiceInfo
 from .consul_client import register_service
@@ -45,6 +45,14 @@ from .utils import (
     Timer,
     RateLimiter,
 )
+from .auth import (
+    AuthManager,
+    UserRole,
+)
+
+# Provide a safe alias for backwards compatibility while avoiding accidental
+# import of the deprecated sync helper defined in this module.
+get_connection = DatabaseManager.get_connection  # type: ignore[attr-defined]
 
 __all__ = [
     # Core
@@ -68,9 +76,7 @@ __all__ = [
     "ServiceInfo",
     # Advanced
     "AuthManager",
-    "get_auth_manager",
-    "authenticate",
-    "authenticate_request",
+    "UserRole",
     "CacheManager",
     "get_cache_manager",
     "cached",

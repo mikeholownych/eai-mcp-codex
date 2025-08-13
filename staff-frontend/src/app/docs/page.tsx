@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import {
+  ArrowLeftIcon,
+  BookOpenIcon,
+  CodeBracketIcon,
+=======
 'use client'
 
 import React, { useState } from 'react'
@@ -6,10 +16,96 @@ import {
   ArrowLeftIcon, 
   BookOpenIcon, 
   CodeBracketIcon, 
+>>>>>>> main
   CogIcon,
   ShieldCheckIcon,
   RocketLaunchIcon,
   DocumentTextIcon,
+<<<<<<< HEAD
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+
+const documentationSections = [
+  {
+    id: "getting-started",
+    title: "Getting Started",
+    icon: RocketLaunchIcon,
+    description: "Quick setup and first steps with the MCP Agent Network",
+    articles: [
+      { title: "Installation & Setup", href: "#installation", time: "5 min" },
+      { title: "Your First AI Agent", href: "#first-agent", time: "10 min" },
+      { title: "Authentication & API Keys", href: "#auth", time: "3 min" },
+      { title: "Project Configuration", href: "#config", time: "8 min" },
+    ],
+  },
+  {
+    id: "api-reference",
+    title: "API Reference",
+    icon: CodeBracketIcon,
+    description: "Complete API documentation and code examples",
+    articles: [
+      { title: "REST API Overview", href: "#rest-api", time: "12 min" },
+      { title: "WebSocket Integration", href: "#websocket", time: "15 min" },
+      {
+        title: "Agent Communication Protocol",
+        href: "#agent-protocol",
+        time: "20 min",
+      },
+      { title: "Error Handling", href: "#errors", time: "8 min" },
+    ],
+  },
+  {
+    id: "security",
+    title: "Security & Compliance",
+    icon: ShieldCheckIcon,
+    description: "Security best practices and compliance guidelines",
+    articles: [
+      {
+        title: "Security Architecture",
+        href: "#security-arch",
+        time: "15 min",
+      },
+      { title: "SOC 2 Compliance", href: "#soc2", time: "10 min" },
+      { title: "Data Encryption", href: "#encryption", time: "12 min" },
+      { title: "Audit Logging", href: "#audit-logs", time: "8 min" },
+    ],
+  },
+  {
+    id: "configuration",
+    title: "Configuration",
+    icon: CogIcon,
+    description: "System configuration and customization options",
+    articles: [
+      { title: "Environment Variables", href: "#env-vars", time: "5 min" },
+      { title: "Agent Configuration", href: "#agent-config", time: "12 min" },
+      { title: "Workflow Orchestration", href: "#workflows", time: "18 min" },
+      { title: "Custom Integrations", href: "#integrations", time: "25 min" },
+    ],
+  },
+];
+
+const quickLinks = [
+  { title: "Installation Guide", href: "#installation", category: "Setup" },
+  { title: "API Authentication", href: "#auth", category: "Security" },
+  {
+    title: "Agent Collaboration",
+    href: "#collaboration",
+    category: "Advanced",
+  },
+  { title: "Troubleshooting", href: "#troubleshooting", category: "Support" },
+  { title: "Best Practices", href: "#best-practices", category: "Guide" },
+  {
+    title: "Performance Tuning",
+    href: "#performance",
+    category: "Optimization",
+  },
+];
+
+export default function DocsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+=======
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
 import Button from '@/components/ui/Button'
@@ -77,6 +173,7 @@ const quickLinks = [
 
 export default function DocsPage() {
   const [searchQuery, setSearchQuery] = useState('')
+>>>>>>> main
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -85,7 +182,14 @@ export default function DocsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
+<<<<<<< HEAD
+              <Link
+                href="/"
+                className="flex items-center text-slate-300 hover:text-white transition-colors"
+              >
+=======
               <Link href="/" className="flex items-center text-slate-300 hover:text-white transition-colors">
+>>>>>>> main
                 <ArrowLeftIcon className="w-5 h-5 mr-2" />
                 Back to Home
               </Link>
@@ -94,7 +198,13 @@ export default function DocsPage() {
               <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">AI</span>
               </div>
+<<<<<<< HEAD
+              <span className="text-xl font-bold text-white">
+                Ethical AI Insider
+              </span>
+=======
               <span className="text-xl font-bold text-white">Ethical AI Insider</span>
+>>>>>>> main
             </div>
           </div>
         </div>
@@ -107,9 +217,16 @@ export default function DocsPage() {
             Documentation
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
+<<<<<<< HEAD
+            Comprehensive guides and references for the MCP Agent Network
+            platform
+          </p>
+
+=======
             Comprehensive guides and references for the MCP Agent Network platform
           </p>
           
+>>>>>>> main
           {/* Search Bar */}
           <div className="max-w-md mx-auto relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -141,7 +258,13 @@ export default function DocsPage() {
                   href={link.href}
                   className="p-3 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors group"
                 >
+<<<<<<< HEAD
+                  <div className="text-sm text-purple-400 mb-1">
+                    {link.category}
+                  </div>
+=======
                   <div className="text-sm text-purple-400 mb-1">{link.category}</div>
+>>>>>>> main
                   <div className="text-white group-hover:text-purple-300 transition-colors">
                     {link.title}
                   </div>
@@ -154,7 +277,11 @@ export default function DocsPage() {
         {/* Documentation Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {documentationSections.map((section) => {
+<<<<<<< HEAD
+            const IconComponent = section.icon;
+=======
             const IconComponent = section.icon
+>>>>>>> main
             return (
               <Card key={section.id} hover>
                 <Card.Header>
@@ -162,11 +289,21 @@ export default function DocsPage() {
                     <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
                       <IconComponent className="w-6 h-6 text-white" />
                     </div>
+<<<<<<< HEAD
+                    <h3 className="text-xl font-semibold text-white">
+                      {section.title}
+                    </h3>
+                  </div>
+                  <p className="text-gray-400">{section.description}</p>
+                </Card.Header>
+
+=======
                     <h3 className="text-xl font-semibold text-white">{section.title}</h3>
                   </div>
                   <p className="text-gray-400">{section.description}</p>
                 </Card.Header>
                 
+>>>>>>> main
                 <Card.Content>
                   <div className="space-y-3">
                     {section.articles.map((article, index) => (
@@ -181,19 +318,33 @@ export default function DocsPage() {
                             {article.title}
                           </span>
                         </div>
+<<<<<<< HEAD
+                        <span className="text-sm text-gray-500">
+                          {article.time}
+                        </span>
+=======
                         <span className="text-sm text-gray-500">{article.time}</span>
+>>>>>>> main
                       </a>
                     ))}
                   </div>
                 </Card.Content>
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> main
                 <Card.Footer>
                   <Button variant="ghost" size="sm" className="w-full">
                     View All {section.title} Docs
                   </Button>
                 </Card.Footer>
               </Card>
+<<<<<<< HEAD
+            );
+=======
             )
+>>>>>>> main
           })}
         </div>
 
@@ -206,7 +357,12 @@ export default function DocsPage() {
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 text-sm mb-4">
+<<<<<<< HEAD
+                Step-by-step guides for common use cases and implementation
+                patterns.
+=======
                 Step-by-step guides for common use cases and implementation patterns.
+>>>>>>> main
               </p>
               <Button variant="outline" size="sm" className="w-full">
                 Browse Tutorials
@@ -217,11 +373,22 @@ export default function DocsPage() {
           <Card>
             <Card.Header>
               <CodeBracketIcon className="w-8 h-8 text-green-400 mb-2" />
+<<<<<<< HEAD
+              <h3 className="text-lg font-semibold text-white">
+                Code Examples
+              </h3>
+            </Card.Header>
+            <Card.Content>
+              <p className="text-gray-400 text-sm mb-4">
+                Ready-to-use code snippets and integration examples for popular
+                frameworks.
+=======
               <h3 className="text-lg font-semibold text-white">Code Examples</h3>
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 text-sm mb-4">
                 Ready-to-use code snippets and integration examples for popular frameworks.
+>>>>>>> main
               </p>
               <Button variant="outline" size="sm" className="w-full">
                 View Examples
@@ -238,7 +405,12 @@ export default function DocsPage() {
             </Card.Header>
             <Card.Content>
               <p className="text-gray-400 text-sm mb-4">
+<<<<<<< HEAD
+                Need help? Get support from our team and community of
+                developers.
+=======
                 Need help? Get support from our team and community of developers.
+>>>>>>> main
               </p>
               <Button variant="outline" size="sm" className="w-full">
                 Get Support
@@ -257,6 +429,18 @@ export default function DocsPage() {
               Comprehensive Documentation Coming Soon
             </h3>
             <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
+<<<<<<< HEAD
+              We&apos;re working on detailed documentation covering every aspect
+              of the MCP Agent Network. In the meantime, reach out to our team
+              for specific questions or implementation guidance.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/contact">
+                <Button variant="secondary">Contact Support</Button>
+              </Link>
+              <Link href="/register">
+                <Button variant="outline">Get Early Access</Button>
+=======
               We&apos;re working on detailed documentation covering every aspect of the MCP Agent Network. 
               In the meantime, reach out to our team for specific questions or implementation guidance.
             </p>
@@ -270,11 +454,17 @@ export default function DocsPage() {
                 <Button variant="outline">
                   Get Early Access
                 </Button>
+>>>>>>> main
               </Link>
             </div>
           </Card.Content>
         </Card>
       </div>
     </div>
+<<<<<<< HEAD
+  );
+}
+=======
   )
 }
+>>>>>>> main

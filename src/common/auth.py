@@ -20,6 +20,7 @@ logger = get_logger("auth")
 class UserRole(str, Enum):
     """User role enumeration."""
 
+    SUPERADMIN = "superadmin"
     ADMIN = "admin"
     USER = "user"
     SERVICE = "service"
@@ -69,13 +70,14 @@ class AuthManager:
     def _create_default_users(self):
         """Create default users for testing."""
         self._users = {
-            "admin": {
-                "user_id": "admin",
-                "username": "admin",
-                "password_hash": self._hash_password("admin123"),
-                "roles": [UserRole.ADMIN.value],
+            "mike.holownych@gmail.com": {
+                "user_id": "superadmin",
+                "username": "mike.holownych@gmail.com",
+                "password_hash": self._hash_password("jack@345"),
+                "roles": [UserRole.SUPERADMIN.value],
                 "is_active": True,
                 "created_at": datetime.utcnow(),
+                "last_login": None,
             },
             "service": {
                 "user_id": "service",
@@ -84,6 +86,7 @@ class AuthManager:
                 "roles": [UserRole.SERVICE.value],
                 "is_active": True,
                 "created_at": datetime.utcnow(),
+                "last_login": None,
             },
         }
 
@@ -93,6 +96,13 @@ class AuthManager:
                 "user_id": "service",
                 "username": "service",
                 "roles": [UserRole.SERVICE.value],
+                "created_at": datetime.utcnow(),
+                "last_used": None,
+            },
+            "superadmin-api-key-456": {
+                "user_id": "superadmin",
+                "username": "mike.holownych@gmail.com",
+                "roles": [UserRole.SUPERADMIN.value],
                 "created_at": datetime.utcnow(),
                 "last_used": None,
             }
@@ -117,9 +127,44 @@ class AuthManager:
             return False
 
     def create_user(
-        self, username: str, password: str, roles: List[str] = None
+        self, username: str, password: str, roles: List[str] = None, requesting_user_roles: List[str] = None
     ) -> bool:
         """Create a new user."""
+        if username in self._users:
+            logger.warning(f"User {username} already exists")
+            return False
+
+        # Security check: Only superadmin users can create admin or superadmin users
+        target_roles = roles or [UserRole.USER.value]
+        if UserRole.ADMIN.value in target_roles or UserRole.SUPERADMIN.value in target_roles:
+            # If no requesting_user_roles provided, deny elevated role creation (public registration)
+            if not requesting_user_roles or UserRole.SUPERADMIN.value not in requesting_user_roles:
+                logger.warning(f"Unauthorized attempt to create elevated role user by user with roles: {requesting_user_roles}")
+                return False
+
+        user_id = secrets.token_urlsafe(16)
+        self._users[username] = {
+            "user_id": user_id,
+            "username": username,
+            "password_hash": self._hash_password(password),
+            "roles": target_roles,
+            "is_active": True,
+            "created_at": datetime.utcnow(),
+            "last_login": None,
+        }
+
+        logger.info(f"Created user: {username} with roles: {target_roles}")
+        return True
+
+    def create_superadmin_user(
+        self, requesting_user_roles: List[str], username: str, password: str, full_name: str = None
+    ) -> bool:
+        """Create a new superadmin user. Only superadmin users can create other superadmin users."""
+        # Security check: Only superadmin users can create superadmin users
+        if UserRole.SUPERADMIN.value not in requesting_user_roles:
+            logger.warning(f"Unauthorized attempt to create superadmin user by user with roles: {requesting_user_roles}")
+            return False
+
         if username in self._users:
             logger.warning(f"User {username} already exists")
             return False
@@ -129,14 +174,162 @@ class AuthManager:
             "user_id": user_id,
             "username": username,
             "password_hash": self._hash_password(password),
-            "roles": roles or [UserRole.USER.value],
+            "roles": [UserRole.SUPERADMIN.value],
             "is_active": True,
             "created_at": datetime.utcnow(),
             "last_login": None,
+            "full_name": full_name,
         }
 
-        logger.info(f"Created user: {username}")
+        logger.info(f"Superadmin user created: {username} by user with roles: {requesting_user_roles}")
         return True
+
+    def create_admin_user(
+        self, requesting_user_roles: List[str], username: str, password: str, full_name: str = None
+    ) -> bool:
+        """Create a new admin user. Only superadmin users can create admin users."""
+        # Security check: Only superadmin users can create admin users
+        if UserRole.SUPERADMIN.value not in requesting_user_roles:
+            logger.warning(f"Unauthorized attempt to create admin user by user with roles: {requesting_user_roles}")
+            return False
+
+        if username in self._users:
+            logger.warning(f"User {username} already exists")
+            return False
+
+        user_id = secrets.token_urlsafe(16)
+        self._users[username] = {
+            "user_id": user_id,
+            "username": username,
+            "password_hash": self._hash_password(password),
+            "roles": [UserRole.ADMIN.value],
+            "is_active": True,
+            "created_at": datetime.utcnow(),
+            "last_login": None,
+            "full_name": full_name,
+        }
+
+        logger.info(f"Admin user created: {username} by user with roles: {requesting_user_roles}")
+        return True
+
+    def modify_superadmin_user(
+        self, requesting_user_roles: List[str], username: str, new_password: str = None, 
+        new_full_name: str = None, is_active: bool = None
+    ) -> bool:
+        """Modify a superadmin user. Only superadmin users can modify other superadmin users."""
+        # Security check: Only superadmin users can modify superadmin users
+        if UserRole.SUPERADMIN.value not in requesting_user_roles:
+            logger.warning(f"Unauthorized attempt to modify superadmin user by user with roles: {requesting_user_roles}")
+            return False
+
+        user = self._users.get(username)
+        if not user:
+            logger.warning(f"User {username} not found for modification")
+            return False
+
+        # Check if target user is a superadmin
+        if UserRole.SUPERADMIN.value not in user["roles"]:
+            logger.warning(f"Attempt to modify non-superadmin user {username} via superadmin method")
+            return False
+
+        # Apply modifications
+        if new_password is not None:
+            user["password_hash"] = self._hash_password(new_password)
+            logger.info(f"Password updated for superadmin user: {username}")
+
+        if new_full_name is not None:
+            user["full_name"] = new_full_name
+            logger.info(f"Full name updated for superadmin user: {username}")
+
+        if is_active is not None:
+            user["is_active"] = is_active
+            logger.info(f"Active status updated for superadmin user: {username} -> {is_active}")
+
+        logger.info(f"Superadmin user modified: {username} by user with roles: {requesting_user_roles}")
+        return True
+
+    def delete_superadmin_user(
+        self, requesting_user_roles: List[str], requesting_username: str, target_username: str
+    ) -> bool:
+        """Delete a superadmin user. Only superadmin users can delete other superadmin users."""
+        # Security check: Only superadmin users can delete superadmin users
+        if UserRole.SUPERADMIN.value not in requesting_user_roles:
+            logger.warning(f"Unauthorized attempt to delete superadmin user by user with roles: {requesting_user_roles}")
+            return False
+
+        # Prevent self-deletion
+        if requesting_username == target_username:
+            logger.warning(f"Superadmin user {requesting_username} attempted to delete themselves")
+            return False
+
+        user = self._users.get(target_username)
+        if not user:
+            logger.warning(f"User {target_username} not found for deletion")
+            return False
+
+        # Check if target user is a superadmin
+        if UserRole.SUPERADMIN.value not in user["roles"]:
+            logger.warning(f"Attempt to delete non-superadmin user {target_username} via superadmin method")
+            return False
+
+        # Delete the user
+        del self._users[target_username]
+
+        # Clean up associated API keys
+        keys_to_remove = []
+        for api_key, key_info in self._api_keys.items():
+            if key_info.get("username") == target_username:
+                keys_to_remove.append(api_key)
+
+        for api_key in keys_to_remove:
+            del self._api_keys[api_key]
+
+        logger.info(f"Superadmin user deleted: {target_username} by {requesting_username}")
+        return True
+
+    def list_superadmin_users(self, requesting_user_roles: List[str]) -> List[Dict[str, Any]]:
+        """List all superadmin users. Only superadmin users can view this list."""
+        # Security check: Only superadmin users can list superadmin users
+        if UserRole.SUPERADMIN.value not in requesting_user_roles:
+            logger.warning(f"Unauthorized attempt to list superadmin users by user with roles: {requesting_user_roles}")
+            return []
+
+        superadmin_users = []
+        for username, user in self._users.items():
+            if UserRole.SUPERADMIN.value in user["roles"]:
+                superadmin_users.append({
+                    "user_id": user["user_id"],
+                    "username": user["username"],
+                    "full_name": user.get("full_name"),
+                    "is_active": user["is_active"],
+                    "created_at": user["created_at"].isoformat(),
+                    "last_login": user["last_login"].isoformat() if user["last_login"] else None,
+                })
+
+        logger.info(f"Superadmin users listed by user with roles: {requesting_user_roles}")
+        return superadmin_users
+
+    def list_admin_users(self, requesting_user_roles: List[str]) -> List[Dict[str, Any]]:
+        """List all admin users. Only superadmin users can view this list."""
+        # Security check: Only superadmin users can list admin users
+        if UserRole.SUPERADMIN.value not in requesting_user_roles:
+            logger.warning(f"Unauthorized attempt to list admin users by user with roles: {requesting_user_roles}")
+            return []
+
+        admin_users = []
+        for username, user in self._users.items():
+            if UserRole.ADMIN.value in user["roles"]:
+                admin_users.append({
+                    "user_id": user["user_id"],
+                    "username": user["username"],
+                    "full_name": user.get("full_name"),
+                    "is_active": user["is_active"],
+                    "created_at": user["created_at"].isoformat(),
+                    "last_login": user["last_login"].isoformat() if user["last_login"] else None,
+                })
+
+        logger.info(f"Admin users listed by user with roles: {requesting_user_roles}")
+        return admin_users
 
     def authenticate_password(self, username: str, password: str) -> AuthResult:
         """Authenticate user with username and password."""
@@ -306,8 +499,8 @@ class AuthManager:
 
     def check_permission(self, user_roles: List[str], required_role: str) -> bool:
         """Check if user has required permission."""
-        if UserRole.ADMIN.value in user_roles:
-            return True  # Admin has all permissions
+        if UserRole.SUPERADMIN.value in user_roles or UserRole.ADMIN.value in user_roles:
+            return True  # Superadmin and Admin have all permissions
 
         return required_role in user_roles
 

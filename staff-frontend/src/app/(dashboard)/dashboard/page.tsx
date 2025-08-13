@@ -1,9 +1,18 @@
+<<<<<<< HEAD
+"use client";
+
+import React from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+=======
 'use client'
 
 import React from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+>>>>>>> main
 import {
   CodeBracketIcon,
   ChatBubbleBottomCenterTextIcon,
@@ -13,6 +22,64 @@ import {
   CpuChipIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+<<<<<<< HEAD
+} from "@heroicons/react/24/outline";
+
+const quickActions = [
+  {
+    name: "New Code Project",
+    description: "Start coding with AI assistance",
+    href: "/dashboard/code-editor",
+    icon: CodeBracketIcon,
+    color: "from-blue-500 to-blue-600",
+  },
+  {
+    name: "Chat with AI",
+    description: "Get instant help and answers",
+    href: "/dashboard/chat",
+    icon: ChatBubbleBottomCenterTextIcon,
+    color: "from-green-500 to-green-600",
+  },
+  {
+    name: "Browse Projects",
+    description: "View and manage your projects",
+    href: "/dashboard/projects",
+    icon: DocumentTextIcon,
+    color: "from-purple-500 to-purple-600",
+  },
+];
+
+const stats = [
+  {
+    name: "API Calls This Month",
+    value: "2,847",
+    change: "+12%",
+    changeType: "increase",
+    icon: CpuChipIcon,
+  },
+  {
+    name: "Active Projects",
+    value: "8",
+    change: "+2",
+    changeType: "increase",
+    icon: DocumentTextIcon,
+  },
+  {
+    name: "Code Generation",
+    value: "156",
+    change: "+8%",
+    changeType: "increase",
+    icon: CodeBracketIcon,
+  },
+  {
+    name: "Chat Sessions",
+    value: "42",
+    change: "-5%",
+    changeType: "decrease",
+    icon: ChatBubbleBottomCenterTextIcon,
+  },
+];
+=======
 } from '@heroicons/react/24/outline'
 
 const quickActions = [
@@ -69,26 +136,53 @@ const stats = [
     icon: ChatBubbleBottomCenterTextIcon,
   },
 ]
+>>>>>>> main
 
 const recentActivity = [
   {
     id: 1,
+<<<<<<< HEAD
+    type: "code",
+    title: "Created React component",
+    description: "UserProfile.tsx",
+    time: "2 hours ago",
+=======
     type: 'code',
     title: 'Created React component',
     description: 'UserProfile.tsx',
     time: '2 hours ago',
+>>>>>>> main
     icon: CodeBracketIcon,
   },
   {
     id: 2,
+<<<<<<< HEAD
+    type: "chat",
+    title: "AI Chat Session",
+    description: "Discussed authentication implementation",
+    time: "4 hours ago",
+=======
     type: 'chat',
     title: 'AI Chat Session',
     description: 'Discussed authentication implementation',
     time: '4 hours ago',
+>>>>>>> main
     icon: ChatBubbleBottomCenterTextIcon,
   },
   {
     id: 3,
+<<<<<<< HEAD
+    type: "project",
+    title: "Updated project settings",
+    description: "E-commerce Platform",
+    time: "1 day ago",
+    icon: DocumentTextIcon,
+  },
+];
+
+export default function DashboardPage() {
+  const { user } = useAuth();
+=======
     type: 'project',
     title: 'Updated project settings',
     description: 'E-commerce Platform',
@@ -99,23 +193,36 @@ const recentActivity = [
 
 export default function DashboardPage() {
   const { user } = useAuth()
+>>>>>>> main
 
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
       <div>
         <h1 className="text-3xl font-bold text-white">
+<<<<<<< HEAD
+          Welcome back, {user?.name?.split(" ")[0] || "User"}! 👋
+        </h1>
+        <p className="mt-2 text-gray-400">
+          Here&apos;s what&apos;s happening with your AI development workspace
+          today.
+=======
           Welcome back, {user?.name?.split(' ')[0] || 'User'}! 👋
         </h1>
         <p className="mt-2 text-gray-400">
           Here&apos;s what&apos;s happening with your AI development workspace today.
+>>>>>>> main
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((item) => {
+<<<<<<< HEAD
+          const Icon = item.icon;
+=======
           const Icon = item.icon
+>>>>>>> main
           return (
             <Card key={item.name} className="p-6">
               <div className="flex items-center">
@@ -133,18 +240,34 @@ export default function DashboardPage() {
                       </div>
                       <div
                         className={`ml-2 flex items-baseline text-sm font-semibold ${
+<<<<<<< HEAD
+                          item.changeType === "increase"
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        {item.changeType === "increase" ? (
+=======
                           item.changeType === 'increase'
                             ? 'text-green-400'
                             : 'text-red-400'
                         }`}
                       >
                         {item.changeType === 'increase' ? (
+>>>>>>> main
                           <ArrowUpIcon className="h-4 w-4 flex-shrink-0 self-center" />
                         ) : (
                           <ArrowDownIcon className="h-4 w-4 flex-shrink-0 self-center" />
                         )}
                         <span className="sr-only">
+<<<<<<< HEAD
+                          {item.changeType === "increase"
+                            ? "Increased"
+                            : "Decreased"}{" "}
+                          by
+=======
                           {item.changeType === 'increase' ? 'Increased' : 'Decreased'} by
+>>>>>>> main
                         </span>
                         {item.change}
                       </div>
@@ -153,7 +276,11 @@ export default function DashboardPage() {
                 </div>
               </div>
             </Card>
+<<<<<<< HEAD
+          );
+=======
           )
+>>>>>>> main
         })}
       </div>
 
@@ -162,6 +289,31 @@ export default function DashboardPage() {
         <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {quickActions.map((action) => {
+<<<<<<< HEAD
+            const Icon = action.icon;
+            return (
+              <Card
+                key={action.name}
+                className="p-6 hover:bg-slate-700/50 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center">
+                  <div
+                    className={`flex-shrink-0 w-12 h-12 bg-gradient-to-r ${action.color} rounded-lg flex items-center justify-center`}
+                  >
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-medium text-white">
+                      {action.name}
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      {action.description}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            );
+=======
             const Icon = action.icon
             return (
               <Card key={action.name} className="p-6 hover:bg-slate-700/50 transition-colors cursor-pointer">
@@ -176,6 +328,7 @@ export default function DashboardPage() {
                 </div>
               </Card>
             )
+>>>>>>> main
           })}
         </div>
       </div>
@@ -184,12 +337,22 @@ export default function DashboardPage() {
       <div className="lg:grid lg:grid-cols-2 lg:gap-8">
         {/* Recent Activity */}
         <div>
+<<<<<<< HEAD
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Recent Activity
+          </h2>
+=======
           <h2 className="text-xl font-semibold text-white mb-4">Recent Activity</h2>
+>>>>>>> main
           <Card className="p-6">
             <div className="flow-root">
               <ul className="-mb-8">
                 {recentActivity.map((item, itemIdx) => {
+<<<<<<< HEAD
+                  const Icon = item.icon;
+=======
                   const Icon = item.icon
+>>>>>>> main
                   return (
                     <li key={item.id}>
                       <div className="relative pb-8">
@@ -226,7 +389,11 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </li>
+<<<<<<< HEAD
+                  );
+=======
                   )
+>>>>>>> main
                 })}
               </ul>
             </div>
@@ -235,20 +402,36 @@ export default function DashboardPage() {
 
         {/* Usage Overview */}
         <div>
+<<<<<<< HEAD
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Usage Overview
+          </h2>
+=======
           <h2 className="text-xl font-semibold text-white mb-4">Usage Overview</h2>
+>>>>>>> main
           <Card className="p-6">
             <div className="space-y-6">
               {/* API Usage */}
               <div>
                 <div className="flex items-center justify-between">
+<<<<<<< HEAD
+                  <h3 className="text-sm font-medium text-gray-300">
+                    API Calls
+                  </h3>
+=======
                   <h3 className="text-sm font-medium text-gray-300">API Calls</h3>
+>>>>>>> main
                   <span className="text-sm text-gray-400">2,847 / 5,000</span>
                 </div>
                 <div className="mt-2">
                   <div className="bg-slate-700 rounded-full h-2">
                     <div
                       className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full"
+<<<<<<< HEAD
+                      style={{ width: "57%" }}
+=======
                       style={{ width: '57%' }}
+>>>>>>> main
                     />
                   </div>
                 </div>
@@ -264,7 +447,11 @@ export default function DashboardPage() {
                   <div className="bg-slate-700 rounded-full h-2">
                     <div
                       className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
+<<<<<<< HEAD
+                      style={{ width: "12%" }}
+=======
                       style={{ width: '12%' }}
+>>>>>>> main
                     />
                   </div>
                 </div>
@@ -273,14 +460,24 @@ export default function DashboardPage() {
               {/* Bandwidth */}
               <div>
                 <div className="flex items-center justify-between">
+<<<<<<< HEAD
+                  <h3 className="text-sm font-medium text-gray-300">
+                    Bandwidth
+                  </h3>
+=======
                   <h3 className="text-sm font-medium text-gray-300">Bandwidth</h3>
+>>>>>>> main
                   <span className="text-sm text-gray-400">845 MB / 2 GB</span>
                 </div>
                 <div className="mt-2">
                   <div className="bg-slate-700 rounded-full h-2">
                     <div
                       className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full"
+<<<<<<< HEAD
+                      style={{ width: "42%" }}
+=======
                       style={{ width: '42%' }}
+>>>>>>> main
                     />
                   </div>
                 </div>
@@ -297,5 +494,10 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+<<<<<<< HEAD
+  );
+}
+=======
   )
 }
+>>>>>>> main

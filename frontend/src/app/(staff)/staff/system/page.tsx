@@ -31,7 +31,7 @@ const HEALTH_COLORS: Record<string, string> = {
   error: 'text-red-400',
 }
 
-const HEALTH_ICONS: Record<string, JSX.Element> = {
+const HEALTH_ICONS: Record<string, React.JSX.Element> = {
   healthy: <CheckCircleIcon className="h-5 w-5 text-green-400" />,
   optimal: <CheckCircleIcon className="h-5 w-5 text-green-400" />,
   good: <CheckCircleIcon className="h-5 w-5 text-green-400" />,
@@ -42,12 +42,15 @@ const HEALTH_ICONS: Record<string, JSX.Element> = {
   loading: <ClockIcon className="h-5 w-5 text-gray-400" />,
 }
 
-const getHealthColor = (status: string) =>
-  HEALTH_COLORS[status.toLowerCase()] ?? 'text-gray-400'
+const getHealthColor = (status: string) => HEALTH_COLORS[status.toLowerCase()] ?? 'text-gray-400'
 
+<<<<<<< HEAD
+const getHealthIcon = (status: string) => HEALTH_ICONS[status.toLowerCase()] ?? HEALTH_ICONS.loading
+=======
 const getHealthIcon = (status: string) =>
   HEALTH_ICONS[status.toLowerCase()] ?? HEALTH_ICONS.loading
 
+>>>>>>> main
 
 const mockMetrics = {
   cpu_usage: { current: 45.2, trend: 'up', change: '+5.2%' },
@@ -55,7 +58,7 @@ const mockMetrics = {
   disk_usage: { current: 23.8, trend: 'up', change: '+2.3%' },
   network_io: { current: 156.7, trend: 'down', change: '-12.4%' },
   active_connections: { current: 847, trend: 'up', change: '+15.2%' },
-  requests_per_minute: { current: 2340, trend: 'up', change: '+8.7%' }
+  requests_per_minute: { current: 2340, trend: 'up', change: '+8.7%' },
 }
 
 const mockAlerts = [
@@ -65,7 +68,7 @@ const mockAlerts = [
     message: 'API Gateway response time increased by 15%',
     service: 'nginx',
     time: '5 minutes ago',
-    severity: 'medium'
+    severity: 'medium',
   },
   {
     id: 2,
@@ -73,7 +76,7 @@ const mockAlerts = [
     message: 'Database backup completed successfully',
     service: 'postgresql',
     time: '1 hour ago',
-    severity: 'low'
+    severity: 'low',
   },
   {
     id: 3,
@@ -81,14 +84,23 @@ const mockAlerts = [
     message: 'High memory usage detected on workflow-orchestrator',
     service: 'workflow-orchestrator',
     time: '2 hours ago',
-    severity: 'medium'
-  }
+    severity: 'medium',
+  },
 ]
 
 export default function SystemMonitoring() {
   const { user } = useAuth()
   const { loading: statsLoading, error: statsError } = useSystemStats()
+<<<<<<< HEAD
+  const {
+    health: systemHealth,
+    loading: healthLoading,
+    error: healthError,
+    refetch,
+  } = useSystemHealth()
+=======
   const { health: systemHealth, loading: healthLoading, error: healthError, refetch } = useSystemHealth()
+>>>>>>> main
   const [selectedTimeRange, setSelectedTimeRange] = useState('1h')
   const [autoRefresh, setAutoRefresh] = useState(true)
 
@@ -139,11 +151,11 @@ export default function SystemMonitoring() {
             Real-time system health, performance metrics, and service monitoring
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <select
             value={selectedTimeRange}
-            onChange={(e) => setSelectedTimeRange(e.target.value)}
+            onChange={e => setSelectedTimeRange(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             <option value="1h">Last Hour</option>
@@ -152,15 +164,15 @@ export default function SystemMonitoring() {
             <option value="7d">Last 7 Days</option>
             <option value="30d">Last 30 Days</option>
           </select>
-          
+
           <Button
-            variant={autoRefresh ? "primary" : "outline"}
+            variant={autoRefresh ? 'primary' : 'outline'}
             size="sm"
             onClick={() => setAutoRefresh(!autoRefresh)}
           >
             {autoRefresh ? 'Auto-Refresh ON' : 'Auto-Refresh OFF'}
           </Button>
-          
+
           <Button variant="outline" size="sm" onClick={refetch}>
             Refresh
           </Button>
@@ -181,17 +193,21 @@ export default function SystemMonitoring() {
             </div>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-slate-700/50 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-300">API Performance</h3>
-              {systemHealth?.api_performance ? getHealthIcon(systemHealth.api_performance.status) : getHealthIcon('loading')}
+              {systemHealth?.api_performance
+                ? getHealthIcon(systemHealth.api_performance.status)
+                : getHealthIcon('loading')}
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-400">Success Rate</span>
-                <span className="text-white">{systemHealth?.api_performance?.success_rate || 0}%</span>
+                <span className="text-white">
+                  {systemHealth?.api_performance?.success_rate || 0}%
+                </span>
               </div>
               <div className="bg-slate-600 rounded-full h-2">
                 <div
@@ -199,19 +215,25 @@ export default function SystemMonitoring() {
                   style={{ width: `${systemHealth?.api_performance?.success_rate || 0}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-500">Avg response time: {systemHealth?.api_performance?.avg_response_time || 0}ms</p>
+              <p className="text-xs text-gray-500">
+                Avg response time: {systemHealth?.api_performance?.avg_response_time || 0}ms
+              </p>
             </div>
           </div>
 
           <div className="bg-slate-700/50 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-300">Database</h3>
-              {systemHealth?.database_status ? getHealthIcon(systemHealth.database_status.status) : getHealthIcon('loading')}
+              {systemHealth?.database_status
+                ? getHealthIcon(systemHealth.database_status.status)
+                : getHealthIcon('loading')}
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-400">Utilization</span>
-                <span className="text-white">{systemHealth?.database_status?.utilization || 0}%</span>
+                <span className="text-white">
+                  {systemHealth?.database_status?.utilization || 0}%
+                </span>
               </div>
               <div className="bg-slate-600 rounded-full h-2">
                 <div
@@ -219,19 +241,25 @@ export default function SystemMonitoring() {
                   style={{ width: `${systemHealth?.database_status?.utilization || 0}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-500">Connection pool: {systemHealth?.database_status?.connection_pool || 'unknown'}</p>
+              <p className="text-xs text-gray-500">
+                Connection pool: {systemHealth?.database_status?.connection_pool || 'unknown'}
+              </p>
             </div>
           </div>
 
           <div className="bg-slate-700/50 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-300">Memory Usage</h3>
-              {systemHealth?.memory_usage ? getHealthIcon(systemHealth.memory_usage.status) : getHealthIcon('loading')}
+              {systemHealth?.memory_usage
+                ? getHealthIcon(systemHealth.memory_usage.status)
+                : getHealthIcon('loading')}
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-400">Used</span>
-                <span className="text-white">{systemHealth?.memory_usage?.usage_percent || 0}%</span>
+                <span className="text-white">
+                  {systemHealth?.memory_usage?.usage_percent || 0}%
+                </span>
               </div>
               <div className="bg-slate-600 rounded-full h-2">
                 <div
@@ -239,7 +267,9 @@ export default function SystemMonitoring() {
                   style={{ width: `${systemHealth?.memory_usage?.usage_percent || 0}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-500">Available: {systemHealth?.memory_usage?.available_gb || 0}GB</p>
+              <p className="text-xs text-gray-500">
+                Available: {systemHealth?.memory_usage?.available_gb || 0}GB
+              </p>
             </div>
           </div>
 
@@ -249,12 +279,14 @@ export default function SystemMonitoring() {
               <CheckCircleIcon className="h-5 w-5 text-green-400" />
             </div>
             <div className="space-y-1">
-              {systemHealth?.service_status ? Object.entries(systemHealth.service_status).map(([service, status]) => (
-                <div key={service} className="flex justify-between text-xs">
-                  <span className="text-gray-400 capitalize">{service.replace('_', ' ')}</span>
-                  <span className={getHealthColor(status)}>{status}</span>
-                </div>
-              )) : (
+              {systemHealth?.service_status ? (
+                Object.entries(systemHealth.service_status).map(([service, status]) => (
+                  <div key={service} className="flex justify-between text-xs">
+                    <span className="text-gray-400 capitalize">{service.replace('_', ' ')}</span>
+                    <span className={getHealthColor(status)}>{status}</span>
+                  </div>
+                ))
+              ) : (
                 <div className="text-xs text-gray-500">Loading services...</div>
               )}
             </div>
@@ -268,7 +300,7 @@ export default function SystemMonitoring() {
           <ChartBarIcon className="h-6 w-6 mr-2 text-blue-400" />
           Performance Metrics
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Object.entries(mockMetrics).map(([metric, data]) => (
             <div key={metric} className="bg-slate-700/30 rounded-lg p-4">
@@ -276,10 +308,15 @@ export default function SystemMonitoring() {
                 <h3 className="text-sm font-medium text-gray-300 capitalize">
                   {metric.replace('_', ' ')}
                 </h3>
-                <div className={`flex items-center text-xs font-medium ${
-                  data.trend === 'up' ? 'text-green-400' : 
-                  data.trend === 'down' ? 'text-red-400' : 'text-gray-400'
-                }`}>
+                <div
+                  className={`flex items-center text-xs font-medium ${
+                    data.trend === 'up'
+                      ? 'text-green-400'
+                      : data.trend === 'down'
+                        ? 'text-red-400'
+                        : 'text-gray-400'
+                  }`}
+                >
                   {data.trend === 'up' ? (
                     <ArrowUpIcon className="h-3 w-3 mr-1" />
                   ) : data.trend === 'down' ? (
@@ -289,14 +326,13 @@ export default function SystemMonitoring() {
                 </div>
               </div>
               <div className="text-2xl font-bold text-white mb-1">
-                {typeof data.current === 'number' ? 
-                  (data.current > 100 ? data.current.toLocaleString() : `${data.current}%`) :
-                  data.current
-                }
+                {typeof data.current === 'number'
+                  ? data.current > 100
+                    ? data.current.toLocaleString()
+                    : `${data.current}%`
+                  : data.current}
               </div>
-              <div className="text-xs text-gray-500">
-                vs previous {selectedTimeRange}
-              </div>
+              <div className="text-xs text-gray-500">vs previous {selectedTimeRange}</div>
             </div>
           ))}
         </div>
@@ -309,19 +345,58 @@ export default function SystemMonitoring() {
             <ServerIcon className="h-6 w-6 mr-2 text-purple-400" />
             Service Status
           </h2>
-          
+
           <div className="space-y-4">
             {[
-              { name: 'Model Router', status: 'running', uptime: '99.9%', port: '8001', icon: CpuChipIcon },
-              { name: 'Plan Management', status: 'running', uptime: '99.8%', port: '8002', icon: Cog6ToothIcon },
-              { name: 'Git Worktree Manager', status: 'running', uptime: '99.7%', port: '8003', icon: CommandLineIcon },
-              { name: 'Workflow Orchestrator', status: 'running', uptime: '99.9%', port: '8004', icon: BoltIcon },
-              { name: 'Verification Feedback', status: 'running', uptime: '99.6%', port: '8005', icon: CheckCircleIcon },
-              { name: 'Staff Service', status: 'running', uptime: '100%', port: '8006', icon: ShieldCheckIcon }
-            ].map((service) => {
+              {
+                name: 'Model Router',
+                status: 'running',
+                uptime: '99.9%',
+                port: '8001',
+                icon: CpuChipIcon,
+              },
+              {
+                name: 'Plan Management',
+                status: 'running',
+                uptime: '99.8%',
+                port: '8002',
+                icon: Cog6ToothIcon,
+              },
+              {
+                name: 'Git Worktree Manager',
+                status: 'running',
+                uptime: '99.7%',
+                port: '8003',
+                icon: CommandLineIcon,
+              },
+              {
+                name: 'Workflow Orchestrator',
+                status: 'running',
+                uptime: '99.9%',
+                port: '8004',
+                icon: BoltIcon,
+              },
+              {
+                name: 'Verification Feedback',
+                status: 'running',
+                uptime: '99.6%',
+                port: '8005',
+                icon: CheckCircleIcon,
+              },
+              {
+                name: 'Staff Service',
+                status: 'running',
+                uptime: '100%',
+                port: '8006',
+                icon: ShieldCheckIcon,
+              },
+            ].map(service => {
               const Icon = service.icon
               return (
-                <div key={service.name} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                <div
+                  key={service.name}
+                  className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
+                >
                   <div className="flex items-center space-x-3">
                     <Icon className="h-5 w-5 text-gray-400" />
                     <div>
@@ -348,10 +423,13 @@ export default function SystemMonitoring() {
             <ExclamationTriangleIcon className="h-6 w-6 mr-2 text-yellow-400" />
             Recent Alerts
           </h2>
-          
+
           <div className="space-y-4">
-            {mockAlerts.map((alert) => (
-              <div key={alert.id} className="flex items-start space-x-3 p-3 bg-slate-700/30 rounded-lg">
+            {mockAlerts.map(alert => (
+              <div
+                key={alert.id}
+                className="flex items-start space-x-3 p-3 bg-slate-700/30 rounded-lg"
+              >
                 <div className="flex-shrink-0 mt-0.5">
                   {alert.type === 'warning' ? (
                     <ExclamationTriangleIcon className="h-4 w-4 text-yellow-400" />
@@ -366,11 +444,15 @@ export default function SystemMonitoring() {
                   <div className="flex items-center mt-1 text-xs text-gray-500 space-x-4">
                     <span className="capitalize">{alert.service}</span>
                     <span>{alert.time}</span>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      alert.severity === 'high' ? 'bg-red-500/10 text-red-400' :
-                      alert.severity === 'medium' ? 'bg-yellow-500/10 text-yellow-400' :
-                      'bg-blue-500/10 text-blue-400'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        alert.severity === 'high'
+                          ? 'bg-red-500/10 text-red-400'
+                          : alert.severity === 'medium'
+                            ? 'bg-yellow-500/10 text-yellow-400'
+                            : 'bg-blue-500/10 text-blue-400'
+                      }`}
+                    >
                       {alert.severity}
                     </span>
                   </div>
@@ -378,7 +460,7 @@ export default function SystemMonitoring() {
               </div>
             ))}
           </div>
-          
+
           <div className="mt-4 text-center">
             <Button variant="outline" size="sm">
               View All Alerts
@@ -393,7 +475,7 @@ export default function SystemMonitoring() {
           <CloudIcon className="h-6 w-6 mr-2 text-indigo-400" />
           Infrastructure Overview
         </h2>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-white">Containers</h3>
@@ -402,9 +484,12 @@ export default function SystemMonitoring() {
                 { name: 'PostgreSQL', status: 'running', memory: '512MB' },
                 { name: 'Redis', status: 'running', memory: '128MB' },
                 { name: 'Nginx', status: 'running', memory: '64MB' },
-                { name: 'Consul', status: 'running', memory: '256MB' }
-              ].map((container) => (
-                <div key={container.name} className="flex justify-between items-center p-2 bg-slate-700/30 rounded">
+                { name: 'Consul', status: 'running', memory: '256MB' },
+              ].map(container => (
+                <div
+                  key={container.name}
+                  className="flex justify-between items-center p-2 bg-slate-700/30 rounded"
+                >
                   <span className="text-sm text-white">{container.name}</span>
                   <div className="flex items-center space-x-2">
                     <span className="text-xs text-gray-400">{container.memory}</span>
@@ -414,7 +499,7 @@ export default function SystemMonitoring() {
               ))}
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-white">Network</h3>
             <div className="space-y-2">
@@ -432,7 +517,7 @@ export default function SystemMonitoring() {
               </div>
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-white">Storage</h3>
             <div className="space-y-2">

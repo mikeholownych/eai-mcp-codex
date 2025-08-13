@@ -2,7 +2,10 @@
 
 import React, { useState, useMemo } from 'react'
 import Card from '@/components/ui/Card'
+<<<<<<< HEAD
+=======
 import CardContent from '@/components/ui/CardContent'
+>>>>>>> main
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
@@ -13,9 +16,20 @@ import { Ticket, TicketCreate, TicketUpdate } from '@/lib/staffApi'
 
 const TicketManagement: React.FC = () => {
   const { tickets, loading, error, refetch } = useTickets()
+<<<<<<< HEAD
+  const {
+    createTicket,
+    updateTicket,
+    updateTicketStatus,
+    loading: actionLoading,
+  } = useTicketActions()
+  const { stats } = useTicketStats()
+
+=======
   const { createTicket, updateTicket, updateTicketStatus, loading: actionLoading } = useTicketActions()
   const { stats } = useTicketStats()
   
+>>>>>>> main
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [priorityFilter, setPriorityFilter] = useState('')
@@ -23,6 +37,17 @@ const TicketManagement: React.FC = () => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+<<<<<<< HEAD
+
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
+    category: '',
+    customer_id: '',
+    assigned_to: '',
+    status: 'open' as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed',
+=======
   
   const [formData, setFormData] = useState({
     title: '',
@@ -32,38 +57,77 @@ const TicketManagement: React.FC = () => {
     customer_id: '',
     assigned_to: '',
     status: 'open' as const
+>>>>>>> main
   })
 
   const filteredTickets = useMemo(() => {
     return tickets.filter(ticket => {
+<<<<<<< HEAD
+      const matchesSearch =
+        ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket.description.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesStatus = !statusFilter || ticket.status === statusFilter
+      const matchesPriority = !priorityFilter || ticket.priority === priorityFilter
+      const matchesCategory = !categoryFilter || ticket.category === categoryFilter
+
+=======
       const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            ticket.description.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesStatus = !statusFilter || ticket.status === statusFilter
       const matchesPriority = !priorityFilter || ticket.priority === priorityFilter
       const matchesCategory = !categoryFilter || ticket.category === categoryFilter
       
+>>>>>>> main
       return matchesSearch && matchesStatus && matchesPriority && matchesCategory
     })
   }, [tickets, searchTerm, statusFilter, priorityFilter, categoryFilter])
 
   const getStatusColor = (status: string) => {
     switch (status) {
+<<<<<<< HEAD
+      case 'open':
+        return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+      case 'in-progress':
+        return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+      case 'waiting-customer':
+        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+      case 'resolved':
+        return 'bg-green-500/20 text-green-400 border-green-500/30'
+      case 'closed':
+        return 'bg-slate-600 text-slate-300'
+      default:
+        return 'bg-slate-600 text-slate-300'
+=======
       case 'open': return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
       case 'in-progress': return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
       case 'waiting-customer': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
       case 'resolved': return 'bg-green-500/20 text-green-400 border-green-500/30'
       case 'closed': return 'bg-slate-600 text-slate-300'
       default: return 'bg-slate-600 text-slate-300'
+>>>>>>> main
     }
   }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
+<<<<<<< HEAD
+      case 'urgent':
+        return 'bg-red-500/20 text-red-400 border-red-500/30'
+      case 'high':
+        return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+      case 'medium':
+        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+      case 'low':
+        return 'bg-green-500/20 text-green-400 border-green-500/30'
+      default:
+        return 'bg-slate-600 text-slate-300'
+=======
       case 'urgent': return 'bg-red-500/20 text-red-400 border-red-500/30'
       case 'high': return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
       case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
       case 'low': return 'bg-green-500/20 text-green-400 border-green-500/30'
       default: return 'bg-slate-600 text-slate-300'
+>>>>>>> main
     }
   }
 
@@ -78,7 +142,11 @@ const TicketManagement: React.FC = () => {
         category: '',
         customer_id: '',
         assigned_to: '',
+<<<<<<< HEAD
+        status: 'open',
+=======
         status: 'open'
+>>>>>>> main
       })
       refetch()
     } catch (error) {
@@ -88,7 +156,11 @@ const TicketManagement: React.FC = () => {
 
   const handleUpdateTicket = async () => {
     if (!selectedTicket) return
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> main
     try {
       await updateTicket(selectedTicket.id, formData as TicketUpdate)
       setIsEditModalOpen(false)
@@ -100,7 +172,11 @@ const TicketManagement: React.FC = () => {
         category: '',
         customer_id: '',
         assigned_to: '',
+<<<<<<< HEAD
+        status: 'open',
+=======
         status: 'open'
+>>>>>>> main
       })
       refetch()
     } catch (error) {
@@ -113,11 +189,19 @@ const TicketManagement: React.FC = () => {
     setFormData({
       title: ticket.title,
       description: ticket.description,
+<<<<<<< HEAD
+      priority: ticket.priority as 'low' | 'medium' | 'high' | 'urgent',
+      category: ticket.category,
+      customer_id: '',
+      assigned_to: ticket.assigned_to || '',
+      status: ticket.status as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed',
+=======
       priority: ticket.priority,
       category: ticket.category,
       customer_id: '',
       assigned_to: ticket.assigned_to || '',
       status: ticket.status
+>>>>>>> main
     })
     setIsEditModalOpen(true)
   }
@@ -166,7 +250,13 @@ const TicketManagement: React.FC = () => {
           </Card>
           <Card>
             <div className="text-center">
+<<<<<<< HEAD
+              <p className="text-2xl font-bold text-blue-400">
+                {stats.by_status?.['in-progress'] || 0}
+              </p>
+=======
               <p className="text-2xl font-bold text-blue-400">{stats.by_status?.['in-progress'] || 0}</p>
+>>>>>>> main
               <p className="text-sm text-slate-400">In Progress</p>
             </div>
           </Card>
@@ -181,58 +271,98 @@ const TicketManagement: React.FC = () => {
 
       {/* Filters */}
       <Card>
+<<<<<<< HEAD
+        <div className="p-6">
+=======
         <CardContent>
+>>>>>>> main
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Input
               placeholder="Search tickets..."
               value={searchTerm}
+<<<<<<< HEAD
+              onChange={value => setSearchTerm(value)}
+=======
               onChange={(value) => setSearchTerm(value)}
+>>>>>>> main
             />
             <Select
               placeholder="Filter by status"
               value={statusFilter}
+<<<<<<< HEAD
+              onValueChange={value => setStatusFilter(value)}
+=======
               onValueChange={(value) => setStatusFilter(value)}
+>>>>>>> main
               options={[
                 { value: '', label: 'All Status' },
                 { value: 'open', label: 'Open' },
                 { value: 'in-progress', label: 'In Progress' },
                 { value: 'waiting-customer', label: 'Waiting Customer' },
                 { value: 'resolved', label: 'Resolved' },
+<<<<<<< HEAD
+                { value: 'closed', label: 'Closed' },
+=======
                 { value: 'closed', label: 'Closed' }
+>>>>>>> main
               ]}
             />
             <Select
               placeholder="Filter by priority"
               value={priorityFilter}
+<<<<<<< HEAD
+              onValueChange={value => setPriorityFilter(value)}
+=======
               onValueChange={(value) => setPriorityFilter(value)}
+>>>>>>> main
               options={[
                 { value: '', label: 'All Priority' },
                 { value: 'urgent', label: 'Urgent' },
                 { value: 'high', label: 'High' },
                 { value: 'medium', label: 'Medium' },
+<<<<<<< HEAD
+                { value: 'low', label: 'Low' },
+=======
                 { value: 'low', label: 'Low' }
+>>>>>>> main
               ]}
             />
             <Select
               placeholder="Filter by category"
               value={categoryFilter}
+<<<<<<< HEAD
+              onValueChange={value => setCategoryFilter(value)}
+=======
               onValueChange={(value) => setCategoryFilter(value)}
+>>>>>>> main
               options={[
                 { value: '', label: 'All Categories' },
                 { value: 'technical', label: 'Technical' },
                 { value: 'billing', label: 'Billing' },
                 { value: 'account', label: 'Account' },
                 { value: 'feature', label: 'Feature Request' },
+<<<<<<< HEAD
+                { value: 'bug', label: 'Bug Report' },
+              ]}
+            />
+          </div>
+        </div>
+=======
                 { value: 'bug', label: 'Bug Report' }
               ]}
             />
           </div>
         </CardContent>
+>>>>>>> main
       </Card>
 
       {/* Tickets Table */}
       <Card>
+<<<<<<< HEAD
+        <div className="p-6">
+=======
         <CardContent>
+>>>>>>> main
           {loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -247,6 +377,39 @@ const TicketManagement: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-700">
+<<<<<<< HEAD
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">
+                      Ticket
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">
+                      Customer
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">
+                      Priority
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">
+                      Status
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">
+                      Category
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">
+                      Assigned
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">
+                      Response Time
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">
+                      Created
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTickets.map(ticket => (
+=======
                     <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">Ticket</th>
                     <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">Customer</th>
                     <th className="text-left py-3 px-4 text-sm font-medium text-slate-300">Priority</th>
@@ -260,6 +423,7 @@ const TicketManagement: React.FC = () => {
                 </thead>
                 <tbody>
                   {filteredTickets.map((ticket) => (
+>>>>>>> main
                     <tr key={ticket.id} className="border-b border-slate-700 hover:bg-slate-700/50">
                       <td className="py-3 px-4">
                         <div>
@@ -275,18 +439,43 @@ const TicketManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="py-3 px-4">
+<<<<<<< HEAD
+                        <Badge
+                          variant="secondary"
+                          size="sm"
+                          className={getPriorityColor(ticket.priority)}
+                        >
+=======
                         <Badge variant="secondary" size="sm" className={getPriorityColor(ticket.priority)}>
+>>>>>>> main
                           {ticket.priority}
                         </Badge>
                       </td>
                       <td className="py-3 px-4">
+<<<<<<< HEAD
+                        <Badge
+                          variant="secondary"
+                          size="sm"
+                          className={getStatusColor(ticket.status)}
+                        >
+=======
                         <Badge variant="secondary" size="sm" className={getStatusColor(ticket.status)}>
+>>>>>>> main
                           {ticket.status}
                         </Badge>
                       </td>
                       <td className="py-3 px-4 text-slate-300">{ticket.category}</td>
+<<<<<<< HEAD
+                      <td className="py-3 px-4 text-slate-300">
+                        {ticket.assigned_to || 'Unassigned'}
+                      </td>
+                      <td className="py-3 px-4 text-slate-300">
+                        {formatResponseTime(ticket.response_time)}
+                      </td>
+=======
                       <td className="py-3 px-4 text-slate-300">{ticket.assigned_to || 'Unassigned'}</td>
                       <td className="py-3 px-4 text-slate-300">{formatResponseTime(ticket.response_time)}</td>
+>>>>>>> main
                       <td className="py-3 px-4 text-slate-300">{formatDate(ticket.created_at)}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-2">
@@ -296,8 +485,23 @@ const TicketManagement: React.FC = () => {
                             onClick={() => openEditModal(ticket)}
                             className="p-1"
                           >
+<<<<<<< HEAD
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+=======
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+>>>>>>> main
                             </svg>
                           </Button>
                           <Button
@@ -307,8 +511,23 @@ const TicketManagement: React.FC = () => {
                             className="p-1 text-green-400 hover:text-green-300"
                             title="Mark as resolved"
                           >
+<<<<<<< HEAD
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+=======
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+>>>>>>> main
                             </svg>
                           </Button>
                         </div>
@@ -319,7 +538,11 @@ const TicketManagement: React.FC = () => {
               </table>
             </div>
           )}
+<<<<<<< HEAD
+        </div>
+=======
         </CardContent>
+>>>>>>> main
       </Card>
 
       {/* Create Ticket Modal */}
@@ -334,7 +557,11 @@ const TicketManagement: React.FC = () => {
             label="Ticket Title"
             placeholder="Enter ticket title"
             value={formData.title}
+<<<<<<< HEAD
+            onChange={value => setFormData(prev => ({ ...prev, title: value }))}
+=======
             onChange={(value) => setFormData(prev => ({ ...prev, title: value }))}
+>>>>>>> main
             required
           />
           <div className="space-y-2">
@@ -344,18 +571,35 @@ const TicketManagement: React.FC = () => {
               rows={4}
               placeholder="Describe the issue or request..."
               value={formData.description}
+<<<<<<< HEAD
+              onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+=======
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+>>>>>>> main
             />
           </div>
           <Select
             label="Priority"
             value={formData.priority}
+<<<<<<< HEAD
+            onValueChange={value =>
+              setFormData(prev => ({
+                ...prev,
+                priority: value as 'low' | 'medium' | 'high' | 'urgent',
+              }))
+            }
+=======
             onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as 'low' | 'medium' | 'high' | 'urgent' }))}
+>>>>>>> main
             options={[
               { value: 'low', label: 'Low' },
               { value: 'medium', label: 'Medium' },
               { value: 'high', label: 'High' },
+<<<<<<< HEAD
+              { value: 'urgent', label: 'Urgent' },
+=======
               { value: 'urgent', label: 'Urgent' }
+>>>>>>> main
             ]}
             required
           />
@@ -363,14 +607,22 @@ const TicketManagement: React.FC = () => {
             label="Category"
             placeholder="e.g., technical, billing, account"
             value={formData.category}
+<<<<<<< HEAD
+            onChange={value => setFormData(prev => ({ ...prev, category: value }))}
+=======
             onChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+>>>>>>> main
             required
           />
           <Input
             label="Customer ID"
             placeholder="Enter customer ID"
             value={formData.customer_id}
+<<<<<<< HEAD
+            onChange={value => setFormData(prev => ({ ...prev, customer_id: value }))}
+=======
             onChange={(value) => setFormData(prev => ({ ...prev, customer_id: value }))}
+>>>>>>> main
             required
           />
           <div className="flex justify-end space-x-3 pt-4">
@@ -396,7 +648,11 @@ const TicketManagement: React.FC = () => {
             label="Ticket Title"
             placeholder="Enter ticket title"
             value={formData.title}
+<<<<<<< HEAD
+            onChange={value => setFormData(prev => ({ ...prev, title: value }))}
+=======
             onChange={(value) => setFormData(prev => ({ ...prev, title: value }))}
+>>>>>>> main
             required
           />
           <div className="space-y-2">
@@ -406,31 +662,66 @@ const TicketManagement: React.FC = () => {
               rows={4}
               placeholder="Describe the issue or request..."
               value={formData.description}
+<<<<<<< HEAD
+              onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+=======
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+>>>>>>> main
             />
           </div>
           <Select
             label="Priority"
             value={formData.priority}
+<<<<<<< HEAD
+            onValueChange={value =>
+              setFormData(prev => ({
+                ...prev,
+                priority: value as 'low' | 'medium' | 'high' | 'urgent',
+              }))
+            }
+=======
             onValueChange={(value) => setFormData(prev => ({ ...prev, priority: value as 'low' | 'medium' | 'high' | 'urgent' }))}
+>>>>>>> main
             options={[
               { value: 'low', label: 'Low' },
               { value: 'medium', label: 'Medium' },
               { value: 'high', label: 'High' },
+<<<<<<< HEAD
+              { value: 'urgent', label: 'Urgent' },
+=======
               { value: 'urgent', label: 'Urgent' }
+>>>>>>> main
             ]}
             required
           />
           <Select
             label="Status"
             value={formData.status}
+<<<<<<< HEAD
+            onValueChange={value =>
+              setFormData(prev => ({
+                ...prev,
+                status: value as
+                  | 'open'
+                  | 'in-progress'
+                  | 'waiting-customer'
+                  | 'resolved'
+                  | 'closed',
+              }))
+            }
+=======
             onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'open' | 'in-progress' | 'waiting-customer' | 'resolved' | 'closed' }))}
+>>>>>>> main
             options={[
               { value: 'open', label: 'Open' },
               { value: 'in-progress', label: 'In Progress' },
               { value: 'waiting-customer', label: 'Waiting Customer' },
               { value: 'resolved', label: 'Resolved' },
+<<<<<<< HEAD
+              { value: 'closed', label: 'Closed' },
+=======
               { value: 'closed', label: 'Closed' }
+>>>>>>> main
             ]}
             required
           />
@@ -438,7 +729,11 @@ const TicketManagement: React.FC = () => {
             label="Category"
             placeholder="e.g., technical, billing, account"
             value={formData.category}
+<<<<<<< HEAD
+            onChange={value => setFormData(prev => ({ ...prev, category: value }))}
+=======
             onChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+>>>>>>> main
             required
           />
           <div className="flex justify-end space-x-3 pt-4">
@@ -455,4 +750,8 @@ const TicketManagement: React.FC = () => {
   )
 }
 
+<<<<<<< HEAD
 export default TicketManagement
+=======
+export default TicketManagement
+>>>>>>> main

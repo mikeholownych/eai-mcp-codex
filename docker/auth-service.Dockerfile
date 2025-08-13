@@ -1,42 +1,55 @@
-# Authentication Service Dockerfile
-FROM python:3.11-slim
+# ---------- Base Image ----------
+FROM mcp-base AS base
 
-# Set working directory
+ENV SERVICE_NAME=auth-service \
+    SERVICE_PORT=8007
+
+# ---------- Dependencies Stage ----------
+FROM base AS deps
+
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
+USER root
+
+# Install additional system dependencies needed for this service
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy requirements if it exists, otherwise create minimal one
+COPY requirements.txt* ./
+RUN if [ ! -f requirements.txt ]; then \
+        echo "fastapi>=0.68.0\nuvicorn[standard]>=0.15.0\npsycopg2-binary>=2.9.0\npydantic[email]>=1.8.0" > requirements.txt; \
+    fi && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy common modules
-COPY src/common/ ./src/common/
+# ---------- Final Runtime Stage ----------
+FROM base AS auth-service
 
-# Create auth service structure
-COPY src/auth_service/ ./src/auth_service/
+WORKDIR /app
 
-# Copy start script
-COPY scripts/start_auth_service.py ./start.py
+USER root
 
-# Create logs directory
-RUN mkdir -p /app/logs
+# Copy dependencies
+COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=deps /usr/local/bin /usr/local/bin
 
-# Set environment variables
-ENV PYTHONPATH=/app
-ENV SERVICE_NAME=auth-service
-ENV SERVICE_PORT=8007
+# Copy source code
+COPY --chown=mcp:mcp src/common/ ./src/common/
+COPY --chown=mcp:mcp src/auth_service/ ./src/auth_service/
+COPY --chown=mcp:mcp scripts/start_auth_service.py ./start.py
 
-# Expose port
-EXPOSE 8007
+# Create logs directory with proper permissions
+RUN mkdir -p /app/logs && \
+    chown -R mcp:mcp /app
 
-# Health check
+USER mcp
+
+# Healthcheck for service
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8007/health || exit 1
 
-# Run the service
+EXPOSE 8007
+
 CMD ["python", "start.py"]

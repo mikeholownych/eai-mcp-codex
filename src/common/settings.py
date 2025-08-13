@@ -9,6 +9,8 @@ class BaseServiceSettings(BaseSettings):
 
     service_name: str = ""
     service_port: int = 0
+    # Strict env validation toggle
+    require_env: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore"
@@ -58,7 +60,7 @@ class VerificationFeedbackSettings(BaseServiceSettings):
 class A2ACommunicationSettings(BaseServiceSettings):
     """A2A communication specific settings."""
 
-    message_broker_url: str = "redis://localhost:6379/0"
+    message_broker_url: str = "redis://redis:6379/0"
     channel_prefix: str = "a2a:"
     service_name: str = "a2a-communication"
     service_port: int = 8010
@@ -125,8 +127,8 @@ class GlobalSettings(BaseSettings):
     log_level: str = "INFO"
     jwt_secret: str = os.getenv("JWT_SECRET") or secrets.token_urlsafe(32)
     database_url: str = "sqlite:///data/mcp_global.db"  # For global data if any
-    redis_url: str = "redis://localhost:6379"
-    consul_url: str = "http://localhost:8500"
+    redis_url: str = "redis://redis:6379"
+    consul_url: str = "http://consult:8500"
     anthropic_api_key: Optional[str] = None
 
     model_config = SettingsConfigDict(
@@ -156,9 +158,16 @@ agent_monitor_settings = AgentMonitorSettings(_env_prefix="AGENT_MONITOR_")
 
 global_settings = GlobalSettings()
 
-# Enforce explicit secret in production
-if global_settings.environment == "production" and not os.getenv("JWT_SECRET"):
-    raise ValueError("JWT_SECRET environment variable must be set in production")
+def enforce_env_strictly():
+    """Fail fast when critical env vars are missing in production.
+
+    This provides a single place to centralize validation and can be invoked by
+    each service at startup.
+    """
+    if global_settings.environment == "production":
+        validate_required_env_vars(["JWT_SECRET"])  # add more as needed
+
+enforce_env_strictly()
 
 # Set Anthropic API key globally if available
 if global_settings.anthropic_api_key:

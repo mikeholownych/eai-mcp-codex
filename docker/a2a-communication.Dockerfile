@@ -1,31 +1,52 @@
-# A2A Communication Hub Service Dockerfile
-FROM mcp-base as a2a-communication
+# ---------- Base Python Image ----------
+FROM mcp-base as base
 
-# Set working directory
+ENV SERVICE_NAME=a2a-communication \
+    SERVICE_PORT=8010
+
+# ---------- Stage: Build Dependencies ----------
+FROM base as deps
+
 WORKDIR /app
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+USER root
 
-# Copy source code
-COPY src/ ./src/
-COPY scripts/ ./scripts/
+# Copy requirements if it exists, otherwise create minimal one
+COPY requirements.txt* ./
+RUN if [ ! -f requirements.txt ]; then \
+        echo "fastapi>=0.68.0\nuvicorn[standard]>=0.15.0\nredis>=4.0.0\npsycopg2-binary>=2.9.0\npydantic>=1.8.0" > requirements.txt; \
+    fi && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Create logs directory
-RUN mkdir -p /app/logs
+# ---------- Stage: Application ----------
+FROM base as a2a-communication
 
-# Set environment variables
-ENV PYTHONPATH=/app
-ENV SERVICE_NAME=a2a-communication
-ENV SERVICE_PORT=8010
+WORKDIR /app
 
-# Health check
+USER root
+
+# Copy dependencies from deps stage
+COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=deps /usr/local/bin /usr/local/bin
+
+# Copy application source code
+COPY --chown=mcp:mcp src/ ./src/
+COPY --chown=mcp:mcp scripts/ ./scripts/
+
+# Create logs directory with correct permissions
+RUN mkdir -p /app/logs && \
+    chown -R mcp:mcp /app
+
+# Health check for the service
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8010/health || exit 1
+
+# Set non-root user
+USER mcp
 
 # Expose port
 EXPOSE 8010
 
-# Run the service
+# Run the service using Uvicorn
 CMD ["python", "-m", "uvicorn", "src.a2a_communication.app:app", "--host", "0.0.0.0", "--port", "8010"]

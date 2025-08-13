@@ -1,9 +1,14 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { paymentApi, billingApi } from '@/lib/api'
+import { PaymentMethod, Customer, Subscription } from '@/types'
+import PaymentMethodList from '@/components/payments/PaymentMethodList'
+import PaymentMethodForm from '@/components/payments/PaymentMethodForm'
 import {
   CreditCardIcon,
   DocumentTextIcon,
@@ -12,6 +17,7 @@ import {
   CalendarDaysIcon,
   ChartBarIcon,
   DocumentArrowDownIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline'
 
 const plans = [
@@ -66,280 +72,250 @@ const plans = [
   },
 ]
 
-const billingHistory = [
-  {
-    id: '1',
-    date: '2024-01-15',
-    description: 'Pro Plan - Monthly Subscription',
-    amount: 79,
-    status: 'paid',
-    invoice: 'INV-2024-001',
-  },
-  {
-    id: '2',
-    date: '2023-12-15',
-    description: 'Pro Plan - Monthly Subscription',
-    amount: 79,
-    status: 'paid',
-    invoice: 'INV-2023-012',
-  },
-  {
-    id: '3',
-    date: '2023-11-15',
-    description: 'Standard Plan - Monthly Subscription',
-    amount: 29,
-    status: 'paid',
-    invoice: 'INV-2023-011',
-  },
-]
-
-const paymentMethods = [
-  {
-    id: '1',
-    type: 'card',
-    brand: 'visa',
-    last4: '4242',
-    expiry: '12/26',
-    isDefault: true,
-  },
-  {
-    id: '2',
-    type: 'card',
-    brand: 'mastercard',
-    last4: '8888',
-    expiry: '08/25',
-    isDefault: false,
-  },
-]
-
 export default function BillingPage() {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
   const [currentPlan, setCurrentPlan] = useState('pro')
   const [isChangingPlan, setIsChangingPlan] = useState(false)
-  useAuth()
+  const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false)
+  const [customer, setCustomer] = useState<Customer | null>(null)
+
+  // Fetch customer data
+  const { data: customerData, isLoading: customerLoading } = useQuery({
+    queryKey: ['customer', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null
+      
+      // Try to get existing customer, create if not exists
+      try {
+        const response = await paymentApi.getCustomer(user.id)
+        if (response.success && response.data) {
+          return response.data
+        }
+      } catch (error) {
+        // Customer doesn't exist, create one
+        const createResponse = await paymentApi.createCustomer({
+          email: user.email,
+          name: user.name,
+          metadata: { userId: user.id, tenantId: user.tenantId },
+        })
+        if (createResponse.success && createResponse.data) {
+          return createResponse.data
+        }
+      }
+      return null
+    },
+    enabled: !!user?.id,
+  })
+
+  // Fetch payment methods
+  const { data: paymentMethods = [], refetch: refetchPaymentMethods } = useQuery({
+    queryKey: ['paymentMethods', customer?.id],
+    queryFn: async () => {
+      if (!customer?.id) return []
+      const response = await paymentApi.getCustomerPaymentMethods(customer.id)
+      return response.success ? response.data || [] : []
+    },
+    enabled: !!customer?.id,
+  })
+
+  // Fetch subscription data
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription', user?.tenantId],
+    queryFn: async () => {
+      if (!user?.tenantId) return null
+      const response = await billingApi.getSubscription()
+      return response.success ? response.data : null
+    },
+    enabled: !!user?.tenantId,
+  })
+
+  // Fetch billing history
+  const { data: billingHistory = [] } = useQuery({
+    queryKey: ['billingHistory', user?.tenantId],
+    queryFn: async () => {
+      if (!user?.tenantId) return []
+      const response = await billingApi.getInvoices()
+      return response.success ? response.data || [] : []
+    },
+    enabled: !!user?.tenantId,
+  })
+
+  // Update customer state when data is fetched
+  useEffect(() => {
+    if (customerData) {
+      setCustomer(customerData)
+    }
+  }, [customerData])
 
   const handlePlanChange = async (planId: string) => {
     setIsChangingPlan(true)
-    
-    // Simulate plan change
-    setTimeout(() => {
-      setCurrentPlan(planId)
+
+    try {
+      // Here you would integrate with your subscription management system
+      // For now, we'll just simulate the change
+      setTimeout(() => {
+        setCurrentPlan(planId)
+        setIsChangingPlan(false)
+      }, 2000)
+    } catch (error) {
+      console.error('Error changing plan:', error)
       setIsChangingPlan(false)
-    }, 2000)
+    }
+  }
+
+  const handlePaymentMethodSuccess = () => {
+    setShowAddPaymentMethod(false)
+    refetchPaymentMethods()
   }
 
   const currentPlanDetails = plans.find(plan => plan.id === currentPlan)
+
+  if (customerLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-slate-700 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="animate-pulse">
+              <div className="h-32 bg-slate-700 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Billing & Subscription</h1>
-        <p className="text-gray-400">Manage your subscription, payment methods, and billing history</p>
+        <p className="text-gray-400">
+          Manage your subscription, payment methods, and billing history
+        </p>
       </div>
 
       {/* Current Plan Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="p-6">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-              <CheckCircleIcon className="h-6 w-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-semibold text-white">Current Plan</h3>
-              <p className="text-2xl font-bold text-green-400">{currentPlanDetails?.name}</p>
-              <p className="text-sm text-gray-400">
-                {currentPlanDetails?.price ? `$${currentPlanDetails.price}/${currentPlanDetails.interval}` : 'Custom pricing'}
-              </p>
-            </div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">Current Plan</h3>
+            <span className="text-sm text-gray-400">
+              {subscription?.status || 'Active'}
+            </span>
           </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <CalendarDaysIcon className="h-6 w-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-semibold text-white">Next Billing</h3>
-              <p className="text-xl font-bold text-white">Feb 15, 2024</p>
-              <p className="text-sm text-gray-400">Auto-renewal enabled</p>
-            </div>
+          <div className="mb-4">
+            <h4 className="text-2xl font-bold text-white">
+              {currentPlanDetails?.name}
+            </h4>
+            <p className="text-gray-400">
+              {currentPlanDetails?.price ? `$${currentPlanDetails.price}/${currentPlanDetails.interval}` : 'Custom pricing'}
+            </p>
           </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-              <ChartBarIcon className="h-6 w-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-semibold text-white">Usage This Month</h3>
-              <p className="text-xl font-bold text-white">28,456 / 50,000</p>
-              <p className="text-sm text-gray-400">API calls</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Usage Details */}
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Current Usage</h2>
-        <div className="space-y-4">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-300">API Calls</span>
-              <span className="text-sm text-gray-400">28,456 / 50,000</span>
-            </div>
-            <div className="bg-slate-700 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full"
-                style={{ width: '57%' }}
-              />
-            </div>
-          </div>
-          
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-300">Storage</span>
-              <span className="text-sm text-gray-400">45 GB / 100 GB</span>
-            </div>
-            <div className="bg-slate-700 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
-                style={{ width: '45%' }}
-              />
-            </div>
-          </div>
-          
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-300">Bandwidth</span>
-              <span className="text-sm text-gray-400">12 GB / 50 GB</span>
-            </div>
-            <div className="bg-slate-700 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full"
-                style={{ width: '24%' }}
-              />
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Available Plans */}
-      <div>
-        <h2 className="text-xl font-semibold text-white mb-6">Available Plans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {plans.map((plan) => (
-            <Card
-              key={plan.id}
-              className={`p-6 relative ${
-                plan.id === currentPlan
-                  ? 'ring-2 ring-orange-500 bg-orange-500/5'
-                  : plan.popular
-                  ? 'ring-2 ring-blue-500'
-                  : ''
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-              
-              {plan.id === currentPlan && (
-                <div className="absolute -top-3 right-4">
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                    Current Plan
-                  </span>
-                </div>
-              )}
-
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold text-white mb-2">{plan.name}</h3>
-                <div className="mb-4">
-                  {plan.price ? (
-                    <>
-                      <span className="text-3xl font-bold text-white">${plan.price}</span>
-                      <span className="text-gray-400">/{plan.interval}</span>
-                    </>
-                  ) : (
-                    <span className="text-2xl font-bold text-white">Custom</span>
-                  )}
-                </div>
+          <div className="space-y-2">
+            {currentPlanDetails?.features.slice(0, 3).map((feature, index) => (
+              <div key={index} className="flex items-center text-sm text-gray-300">
+                <CheckCircleIcon className="h-4 w-4 text-green-400 mr-2" />
+                {feature}
               </div>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            className="w-full mt-4"
+            disabled={isChangingPlan}
+            loading={isChangingPlan}
+          >
+            Change Plan
+          </Button>
+        </Card>
 
-              <ul className="space-y-3 mb-6">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center text-sm">
-                    <CheckCircleIcon className="h-4 w-4 text-green-400 mr-3 flex-shrink-0" />
-                    <span className="text-gray-300">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">Billing Cycle</h3>
+            <CalendarDaysIcon className="h-5 w-5 text-gray-400" />
+          </div>
+          <div className="mb-4">
+            <p className="text-sm text-gray-400">Next billing date</p>
+            <p className="text-lg font-semibold text-white">
+              {subscription?.currentPeriodEnd 
+                ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
+                : 'N/A'
+              }
+            </p>
+          </div>
+          <div className="mb-4">
+            <p className="text-sm text-gray-400">Amount</p>
+            <p className="text-lg font-semibold text-white">
+              {subscription?.amount 
+                ? `$${subscription.amount} ${subscription.currency?.toUpperCase()}`
+                : 'N/A'
+              }
+            </p>
+          </div>
+        </Card>
 
-              <Button
-                variant={plan.id === currentPlan ? 'outline' : 'primary'}
-                className="w-full"
-                disabled={plan.id === currentPlan || isChangingPlan}
-                loading={isChangingPlan}
-                onClick={() => plan.id !== currentPlan && handlePlanChange(plan.id)}
-              >
-                {plan.id === currentPlan ? 'Current Plan' : plan.price ? 'Upgrade' : 'Contact Sales'}
-              </Button>
-            </Card>
-          ))}
-        </div>
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">Usage</h3>
+            <ChartBarIcon className="h-5 w-5 text-gray-400" />
+          </div>
+          <div className="space-y-3">
+            <div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">API Calls</span>
+                <span className="text-white">2,847 / 50,000</span>
+              </div>
+              <div className="w-full bg-slate-700 rounded-full h-2 mt-1">
+                <div className="bg-blue-500 h-2 rounded-full" style={{ width: '5.7%' }}></div>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Storage</span>
+                <span className="text-white">45 GB / 100 GB</span>
+              </div>
+              <div className="w-full bg-slate-700 rounded-full h-2 mt-1">
+                <div className="bg-green-500 h-2 rounded-full" style={{ width: '45%' }}></div>
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
 
       {/* Payment Methods */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-white">Payment Methods</h2>
-          <Button variant="outline" size="sm">
-            <CreditCardIcon className="h-4 w-4 mr-2" />
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowAddPaymentMethod(true)}
+          >
+            <PlusIcon className="h-4 w-4 mr-2" />
             Add Payment Method
           </Button>
         </div>
 
-        <div className="space-y-4">
-          {paymentMethods.map((method) => (
-            <div
-              key={method.id}
-              className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg border border-slate-600"
-            >
-              <div className="flex items-center">
-                <div className="w-10 h-6 bg-slate-600 rounded mr-3 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white uppercase">
-                    {method.brand}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-white font-medium">
-                    •••• •••• •••• {method.last4}
-                  </p>
-                  <p className="text-sm text-gray-400">Expires {method.expiry}</p>
-                </div>
-                {method.isDefault && (
-                  <span className="ml-3 bg-green-500/10 text-green-400 px-2 py-1 rounded text-xs">
-                    Default
-                  </span>
-                )}
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                  Edit
-                </Button>
-                <Button variant="outline" size="sm">
-                  Remove
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+        {showAddPaymentMethod ? (
+          <div className="border border-slate-600 rounded-lg p-6 bg-slate-800/50">
+            <PaymentMethodForm
+              customerId={customer?.id || ''}
+              onSuccess={handlePaymentMethodSuccess}
+              onCancel={() => setShowAddPaymentMethod(false)}
+            />
+          </div>
+        ) : (
+          <PaymentMethodList
+            paymentMethods={paymentMethods}
+            customerId={customer?.id || ''}
+            onUpdate={refetchPaymentMethods}
+          />
+        )}
       </Card>
 
       {/* Billing History */}
@@ -348,51 +324,65 @@ export default function BillingPage() {
           <h2 className="text-xl font-semibold text-white">Billing History</h2>
           <Button variant="outline" size="sm">
             <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
-            Download All
+            Export
           </Button>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-600">
-                <th className="text-left py-3 px-4 font-medium text-gray-300">Date</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-300">Description</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-300">Amount</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-300">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-300">Invoice</th>
+              <tr className="border-b border-slate-700">
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Date</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Description</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Amount</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Status</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Invoice</th>
               </tr>
             </thead>
             <tbody>
-              {billingHistory.map((item) => (
-                <tr key={item.id} className="border-b border-slate-700">
-                  <td className="py-3 px-4 text-gray-300">
-                    {new Date(item.date).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-4 text-gray-300">{item.description}</td>
-                  <td className="py-3 px-4 text-white font-medium">${item.amount}</td>
-                  <td className="py-3 px-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      item.status === 'paid'
-                        ? 'bg-green-500/10 text-green-400'
-                        : 'bg-red-500/10 text-red-400'
-                    }`}>
-                      {item.status === 'paid' ? (
-                        <CheckCircleIcon className="h-3 w-3 mr-1" />
-                      ) : (
-                        <ExclamationTriangleIcon className="h-3 w-3 mr-1" />
-                      )}
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <Button variant="outline" size="sm">
-                      <DocumentTextIcon className="h-4 w-4 mr-1" />
-                      {item.invoice}
-                    </Button>
+              {billingHistory.length > 0 ? (
+                billingHistory.map(item => (
+                  <tr key={item.id} className="border-b border-slate-700">
+                    <td className="py-3 px-4 text-gray-300">
+                      {new Date(item.dueDate).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4 text-gray-300">
+                      {item.items?.[0]?.description || 'Subscription'}
+                    </td>
+                    <td className="py-3 px-4 text-white font-medium">
+                      ${item.amount} {item.currency?.toUpperCase()}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          item.status === 'paid'
+                            ? 'bg-green-500/10 text-green-400'
+                            : 'bg-red-500/10 text-red-400'
+                        }`}
+                      >
+                        {item.status === 'paid' ? (
+                          <CheckCircleIcon className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ExclamationTriangleIcon className="h-3 w-3 mr-1" />
+                        )}
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Button variant="outline" size="sm">
+                        <DocumentTextIcon className="h-4 w-4 mr-1" />
+                        {item.id}
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-gray-400">
+                    No billing history available
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

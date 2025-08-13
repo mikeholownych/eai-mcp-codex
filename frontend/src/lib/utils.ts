@@ -1,4 +1,4 @@
-import { API_CONFIG } from "./config"
+import { API_CONFIG } from './config'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -48,7 +48,7 @@ export function formatRelativeTime(date: Date): string {
   if (minutes < 60) return `${minutes}m ago`
   if (hours < 24) return `${hours}h ago`
   if (days < 7) return `${days}d ago`
-  
+
   return date.toLocaleDateString()
 }
 
@@ -57,7 +57,7 @@ export function formatRelativeTime(date: Date): string {
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout
   return (...args: Parameters<T>) => {
@@ -90,23 +90,31 @@ export function hasPermission({
   requiredPlan = [],
 }: PermissionOptions): boolean {
   const roleHierarchy = {
-    'superadmin': 10,
-    'admin': 9,
-    'manager': 8,
-    'staff': 7,
-    'enterprise': 6,
-    'pro': 5,
-    'standard': 4,
-    'free': 3,
+    superadmin: 10,
+    admin: 9,
+    manager: 8,
+    staff: 7,
+    enterprise: 6,
+    pro: 5,
+    standard: 4,
+    free: 3,
   }
 
-  const hasRolePermission = requiredRole.length === 0 || 
-    requiredRole.some(role => (roleHierarchy[userRole as keyof typeof roleHierarchy] || 0) >= 
-                             (roleHierarchy[role as keyof typeof roleHierarchy] || 0))
+  const hasRolePermission =
+    requiredRole.length === 0 ||
+    requiredRole.some(
+      role =>
+        (roleHierarchy[userRole as keyof typeof roleHierarchy] || 0) >=
+        (roleHierarchy[role as keyof typeof roleHierarchy] || 0),
+    )
 
-  const hasPlanPermission = requiredPlan.length === 0 || 
-    requiredPlan.some(plan => (roleHierarchy[userPlan as keyof typeof roleHierarchy] || 0) >= 
-                             (roleHierarchy[plan as keyof typeof roleHierarchy] || 0))
+  const hasPlanPermission =
+    requiredPlan.length === 0 ||
+    requiredPlan.some(
+      plan =>
+        (roleHierarchy[userPlan as keyof typeof roleHierarchy] || 0) >=
+        (roleHierarchy[plan as keyof typeof roleHierarchy] || 0),
+    )
 
   return hasRolePermission && hasPlanPermission
 }
@@ -224,7 +232,7 @@ export function buildQueryString(params: Record<string, string>): string {
 export async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
-  timeout = API_CONFIG.timeoutMs
+  timeout = API_CONFIG.timeoutMs,
 ): Promise<Response> {
   const controller = new AbortController()
   const id = setTimeout(() => controller.abort(), timeout)

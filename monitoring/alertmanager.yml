@@ -1,0 +1,664 @@
+# Alertmanager Configuration
+# Comprehensive alert routing and notification configuration
+
+global:
+  # SMTP configuration for email notifications
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@mcp-system.local'
+  smtp_auth_username: 'alerts@mcp-system.local'
+  smtp_auth_password: 'secure_password'
+  
+  # Slack webhook URL
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+  
+  # PagerDuty configuration
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  pagerduty_service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
+
+# Templates for alert notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route configuration
+route:
+  # Default receiver
+  receiver: 'default'
+  
+  # Group alerts by these labels
+  group_by: ['alertname', 'severity', 'service', 'category']
+  
+  # How long to wait to group alerts
+  group_wait: 10s
+  
+  # How long to wait before sending a notification about new alerts in a group
+  group_interval: 10s
+  
+  # How long to wait before sending a notification again if it has already been sent
+  repeat_interval: 1h
+  
+  # Default routes
+  routes:
+    # Critical alerts route
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 5s
+      group_interval: 5s
+      repeat_interval: 15m
+      continue: true
+      
+    # Warning alerts route
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      group_interval: 30s
+      repeat_interval: 1h
+      continue: true
+      
+    # Service-specific routes
+    - match:
+        service: mcp-services
+      receiver: 'mcp-services-alerts'
+      continue: true
+      
+    - match:
+        service: model-router
+      receiver: 'model-router-alerts'
+      continue: true
+      
+    - match:
+        service: plan-management
+      receiver: 'plan-management-alerts'
+      continue: true
+      
+    - match:
+        service: git-worktree-manager
+      receiver: 'git-worktree-alerts'
+      continue: true
+      
+    - match:
+        service: workflow-orchestrator
+      receiver: 'workflow-orchestrator-alerts'
+      continue: true
+      
+    - match:
+        service: verification-feedback
+      receiver: 'verification-feedback-alerts'
+      continue: true
+      
+    - match:
+        service: frontend
+      receiver: 'frontend-alerts'
+      continue: true
+      
+    - match:
+        service: database
+      receiver: 'database-alerts'
+      continue: true
+      
+    - match:
+        service: infrastructure
+      receiver: 'infrastructure-alerts'
+      continue: true
+      
+    - match:
+        service: security
+      receiver: 'security-alerts'
+      continue: true
+      
+    - match:
+        service: business
+      receiver: 'business-alerts'
+      continue: true
+      
+    # Category-specific routes
+    - match:
+        category: system_health
+      receiver: 'system-health-alerts'
+      continue: true
+      
+    - match:
+        category: error_budget
+      receiver: 'error-budget-alerts'
+      continue: true
+      
+    - match:
+        category: business
+      receiver: 'business-alerts'
+      continue: true
+      
+    - match:
+        category: security
+      receiver: 'security-alerts'
+      continue: true
+      
+    # Time-based routing
+    - match_re:
+        severity: critical
+      active_time_intervals:
+        - business_hours
+      receiver: 'business-hours-critical'
+      continue: true
+      
+    - match_re:
+        severity: warning
+      active_time_intervals:
+        - business_hours
+      receiver: 'business-hours-warning'
+      continue: true
+      
+    # Weekend routing
+    - match_re:
+        severity: critical
+      active_time_intervals:
+        - weekend
+      receiver: 'weekend-critical'
+      continue: true
+
+# Time intervals for routing
+time_intervals:
+  - name: business_hours
+    time_intervals:
+      - times:
+          - start_time: 09:00
+            end_time: 17:00
+        weekdays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+        location: 'UTC'
+        
+  - name: weekend
+    time_intervals:
+      - weekdays: ['saturday', 'sunday']
+        location: 'UTC'
+
+# Inhibition rules to prevent alert spam
+inhibit_rules:
+  # Inhibit warning alerts if critical alerts are firing for the same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['service', 'alertname']
+    
+  # Inhibit non-critical alerts if system-wide critical alerts are firing
+  - source_match:
+      severity: 'critical'
+      service: 'aggregate'
+    target_match:
+      severity: 'warning'
+    equal: ['category']
+    
+  # Inhibit specific alerts if maintenance is in progress
+  - source_match:
+      alertname: 'MaintenanceInProgress'
+    target_match_re:
+      alertname: '.*'
+    equal: ['service']
+
+# Receivers for different alert types
+receivers:
+  # Default receiver
+  - name: 'default'
+    email_configs:
+      - to: 'devops@mcp-system.local'
+        subject: 'Alert: {{ .GroupLabels.alertname }} - {{ .GroupLabels.severity }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Service: {{ .Labels.service }}
+          Category: {{ .Labels.category }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#alerts'
+        title: 'Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Service:* {{ .Labels.service }}
+          *Category:* {{ .Labels.category }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: 'warning'
+        
+  # Critical alerts receiver
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'devops-critical@mcp-system.local,oncall@mcp-system.local'
+        subject: 'CRITICAL: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        body: |
+          {{ range .Alerts }}
+          CRITICAL ALERT: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Category: {{ .Labels.category }}
+          Immediate action required!
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#critical-alerts'
+        title: 'CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *CRITICAL ALERT:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          *Category:* {{ .Labels.category }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          *Immediate action required!*
+          {{ end }}
+        color: 'danger'
+    pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
+        description: 'Critical alert: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        severity: 'critical'
+        client: 'MCP Alertmanager'
+        client_url: 'https://grafana.mcp-system.local'
+        
+  # Warning alerts receiver
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'devops@mcp-system.local'
+        subject: 'WARNING: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        body: |
+          {{ range .Alerts }}
+          WARNING: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Category: {{ .Labels.category }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#alerts'
+        title: 'WARNING: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *WARNING:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          *Category:* {{ .Labels.category }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: 'warning'
+        
+  # Service-specific receivers
+  - name: 'mcp-services-alerts'
+    email_configs:
+      - to: 'mcp-services-team@mcp-system.local'
+        subject: 'MCP Services Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          MCP Services Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#mcp-services'
+        title: 'MCP Services Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *MCP Services Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'model-router-alerts'
+    email_configs:
+      - to: 'model-router-team@mcp-system.local'
+        subject: 'Model Router Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Model Router Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#model-router'
+        title: 'Model Router Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Model Router Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'plan-management-alerts'
+    email_configs:
+      - to: 'plan-management-team@mcp-system.local'
+        subject: 'Plan Management Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Plan Management Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#plan-management'
+        title: 'Plan Management Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Plan Management Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'git-worktree-alerts'
+    email_configs:
+      - to: 'git-worktree-team@mcp-system.local'
+        subject: 'Git Worktree Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Git Worktree Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#git-worktree'
+        title: 'Git Worktree Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Git Worktree Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'workflow-orchestrator-alerts'
+    email_configs:
+      - to: 'workflow-orchestrator-team@mcp-system.local'
+        subject: 'Workflow Orchestrator Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Workflow Orchestrator Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#workflow-orchestrator'
+        title: 'Workflow Orchestrator Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Workflow Orchestrator Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'verification-feedback-alerts'
+    email_configs:
+      - to: 'verification-feedback-team@mcp-system.local'
+        subject: 'Verification Feedback Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Verification Feedback Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#verification-feedback'
+        title: 'Verification Feedback Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Verification Feedback Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'frontend-alerts'
+    email_configs:
+      - to: 'frontend-team@mcp-system.local'
+        subject: 'Frontend Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Frontend Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#frontend'
+        title: 'Frontend Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Frontend Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'database-alerts'
+    email_configs:
+      - to: 'database-team@mcp-system.local'
+        subject: 'Database Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Database Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#database'
+        title: 'Database Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Database Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'infrastructure-alerts'
+    email_configs:
+      - to: 'infrastructure-team@mcp-system.local'
+        subject: 'Infrastructure Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Infrastructure Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#infrastructure'
+        title: 'Infrastructure Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Infrastructure Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'security-alerts'
+    email_configs:
+      - to: 'security-team@mcp-system.local'
+        subject: 'Security Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Security Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#security'
+        title: 'Security Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Security Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'business-alerts'
+    email_configs:
+      - to: 'business-team@mcp-system.local'
+        subject: 'Business Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Business Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#business'
+        title: 'Business Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Business Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'system-health-alerts'
+    email_configs:
+      - to: 'devops@mcp-system.local'
+        subject: 'System Health Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          System Health Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#system-health'
+        title: 'System Health Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *System Health Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  - name: 'error-budget-alerts'
+    email_configs:
+      - to: 'sre-team@mcp-system.local'
+        subject: 'Error Budget Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Error Budget Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#error-budget'
+        title: 'Error Budget Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Error Budget Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: '{{ if eq .Labels.severity "critical" }}danger{{ else if eq .Labels.severity "warning" }}warning{{ else }}good{{ end }}'
+        
+  # Time-based receivers
+  - name: 'business-hours-critical'
+    email_configs:
+      - to: 'devops-business-hours@mcp-system.local'
+        subject: 'Business Hours Critical: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Business Hours Critical Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#business-hours-critical'
+        title: 'Business Hours Critical: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Business Hours Critical:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: 'danger'
+        
+  - name: 'business-hours-warning'
+    email_configs:
+      - to: 'devops-business-hours@mcp-system.local'
+        subject: 'Business Hours Warning: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Business Hours Warning: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#business-hours-warning'
+        title: 'Business Hours Warning: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Business Hours Warning:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: 'warning'
+        
+  - name: 'weekend-critical'
+    email_configs:
+      - to: 'oncall-weekend@mcp-system.local'
+        subject: 'Weekend Critical: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Weekend Critical Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - channel: '#weekend-critical'
+        title: 'Weekend Critical: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Weekend Critical:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+        color: 'danger'
+    pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
+        description: 'Weekend critical alert: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        severity: 'critical'
+        client: 'MCP Alertmanager'
+        client_url: 'https://grafana.mcp-system.local'

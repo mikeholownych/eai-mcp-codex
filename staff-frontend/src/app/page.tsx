@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import {
+=======
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -5,6 +14,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { 
+>>>>>>> main
   CheckIcon,
   ArrowRightIcon,
   SparklesIcon,
@@ -13,6 +23,22 @@ import {
   CpuChipIcon,
   CommandLineIcon,
   StarIcon,
+<<<<<<< HEAD
+  PlayIcon,
+} from "@heroicons/react/24/outline";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import ProductTour from "@/components/demo/ProductTour";
+import ParticleBackground from "@/components/effects/ParticleBackground";
+import EnhancedFeatures from "@/components/effects/ScrollAnimation";
+import InteractiveDemo from "@/components/demo/InteractiveDemo";
+import StructuredData, {
+  organizationSchema,
+  softwareApplicationSchema,
+  serviceSchema,
+  faqSchema,
+} from "@/components/seo/StructuredData";
+=======
   PlayIcon
 } from '@heroicons/react/24/outline'
 import Button from '@/components/ui/Button'
@@ -27,10 +53,102 @@ import StructuredData, {
   serviceSchema, 
   faqSchema 
 } from '@/components/seo/StructuredData'
+>>>>>>> main
 
 const features = [
   {
     icon: CpuChipIcon,
+<<<<<<< HEAD
+    title: "Agent Network",
+    description:
+      "Multi-agent AI collaboration with Claude O3, Sonnet 4, and specialized coding agents working together to solve complex problems.",
+    gradient: "from-purple-400 to-pink-400",
+  },
+  {
+    icon: CodeBracketIcon,
+    title: "Code Generation",
+    description:
+      "Transform ideas into production-ready code with intelligent AI models that understand context, patterns, and best practices.",
+    gradient: "from-blue-400 to-cyan-400",
+  },
+  {
+    icon: ShieldCheckIcon,
+    title: "Compliance & Security",
+    description:
+      "SOC 2 ready platform with JWT tenant isolation, comprehensive audit logging, and enterprise-grade security controls.",
+    gradient: "from-green-400 to-emerald-400",
+  },
+  {
+    icon: CommandLineIcon,
+    title: "DevTool Integrations",
+    description:
+      "Seamless integration with GitHub, VS Code, and popular development tools for streamlined workflows.",
+    gradient: "from-orange-400 to-red-400",
+  },
+  {
+    icon: SparklesIcon,
+    title: "Intelligent Assistant",
+    description:
+      "AI-powered chatbot trained on all Ethical AI Insider content with RAG architecture for contextual responses.",
+    gradient: "from-violet-400 to-purple-400",
+  },
+  {
+    icon: StarIcon,
+    title: "Premium Support",
+    description:
+      "Access to comprehensive video library, expert support, and collaborative workflows with staff escalations.",
+    gradient: "from-yellow-400 to-orange-400",
+  },
+];
+
+const testimonials = [
+  {
+    name: "Sarah Chen",
+    role: "Lead Developer at TechCorp",
+    content:
+      "The agent network saved us 40+ hours per week. Code quality improved dramatically.",
+    avatar: "/api/placeholder/48/48",
+    rating: 5,
+  },
+  {
+    name: "Marcus Rodriguez",
+    role: "CTO at StartupXYZ",
+    content:
+      "Best investment we made. The security compliance features are enterprise-grade.",
+    avatar: "/api/placeholder/48/48",
+    rating: 5,
+  },
+  {
+    name: "Emily Watson",
+    role: "Full Stack Engineer",
+    content:
+      "Game-changer for solo developers. Like having a senior team at your fingertips.",
+    avatar: "/api/placeholder/48/48",
+    rating: 5,
+  },
+];
+
+const stats = [
+  { label: "Lines of Code Generated", value: "2.5M+", suffix: "" },
+  { label: "Developer Hours Saved", value: "15K+", suffix: "" },
+  { label: "Uptime SLA", value: "99.9", suffix: "%" },
+  { label: "Security Score", value: "A+", suffix: "" },
+];
+
+const pricingPlans = [
+  {
+    name: "Standard",
+    price: "$29",
+    period: "per month",
+    description: "Perfect for individual developers and small teams",
+    features: [
+      "Code generation with basic models",
+      "AI assistant with standard knowledge base",
+      "Basic video library access",
+      "Email support",
+      "10,000 API calls/month",
+      "5GB storage",
+=======
     title: 'Agent Network',
     description: 'Multi-agent AI collaboration with Claude O3, Sonnet 4, and specialized coding agents working together to solve complex problems.',
     gradient: 'from-purple-400 to-pink-400',
@@ -111,10 +229,25 @@ const pricingPlans = [
       'Email support',
       '10,000 API calls/month',
       '5GB storage',
+>>>>>>> main
     ],
     highlighted: false,
   },
   {
+<<<<<<< HEAD
+    name: "Pro",
+    price: "$79",
+    period: "per month",
+    description: "Advanced features for growing businesses",
+    features: [
+      "All Standard features",
+      "Advanced AI models (Claude O3, Sonnet 4)",
+      "Real-time collaboration",
+      "Priority support",
+      "50,000 API calls/month",
+      "25GB storage",
+      "Custom integrations",
+=======
     name: 'Pro',
     price: '$79',
     period: 'per month',
@@ -127,10 +260,29 @@ const pricingPlans = [
       '50,000 API calls/month',
       '25GB storage',
       'Custom integrations',
+>>>>>>> main
     ],
     highlighted: true,
   },
   {
+<<<<<<< HEAD
+    name: "Enterprise",
+    price: "Custom",
+    period: "contact us",
+    description: "Complete solution for large organizations",
+    features: [
+      "All Pro features",
+      "Unlimited API calls",
+      "Unlimited storage",
+      "Dedicated support team",
+      "Custom deployment options",
+      "Advanced security features",
+      "SLA guarantees",
+    ],
+    highlighted: false,
+  },
+];
+=======
     name: 'Enterprise',
     price: 'Custom',
     period: 'contact us',
@@ -147,6 +299,7 @@ const pricingPlans = [
     highlighted: false,
   },
 ]
+>>>>>>> main
 
 // Animation variants
 const containerVariants = {
@@ -155,10 +308,17 @@ const containerVariants = {
     opacity: 1,
     transition: {
       delayChildren: 0.3,
+<<<<<<< HEAD
+      staggerChildren: 0.2,
+    },
+  },
+};
+=======
       staggerChildren: 0.2
     }
   }
 }
+>>>>>>> main
 
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -166,6 +326,74 @@ const itemVariants = {
     y: 0,
     opacity: 1,
     transition: {
+<<<<<<< HEAD
+      duration: 0.5,
+    },
+  },
+};
+
+const AnimatedCounter = ({
+  value,
+  suffix = "",
+  duration = 2000,
+}: {
+  value: number | string;
+  suffix?: string;
+  duration?: number;
+}) => {
+  const [count, setCount] = useState(0);
+  const { ref, inView } = useInView({ threshold: 0.1, triggerOnce: true });
+
+  useEffect(() => {
+    if (inView) {
+      const startTime = Date.now();
+      const startValue = 0;
+      const numericValue =
+        typeof value === "string"
+          ? parseFloat(value.replace(/[^\d.]/g, "")) || 0
+          : value;
+
+      const updateCount = () => {
+        const now = Date.now();
+        const progress = Math.min((now - startTime) / duration, 1);
+        const currentValue =
+          startValue + (numericValue - startValue) * progress;
+
+        setCount(currentValue);
+
+        if (progress < 1) {
+          requestAnimationFrame(updateCount);
+        }
+      };
+
+      requestAnimationFrame(updateCount);
+    }
+  }, [inView, value, duration]);
+
+  const formatValue = (val: number) => {
+    const valueStr = String(value);
+    if (valueStr.includes("M+")) return `${Math.floor(val / 100000) / 10}M+`;
+    if (valueStr.includes("K+")) return `${Math.floor(val / 100) / 10}K+`;
+    if (valueStr.includes("%")) return val.toFixed(1);
+    if (valueStr === "A+") return inView ? "A+" : "F";
+    return Math.floor(val).toString();
+  };
+
+  return (
+    <div
+      ref={ref}
+      className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
+    >
+      {formatValue(count)}
+      {suffix}
+    </div>
+  );
+};
+
+export default function HomePage() {
+  const [showTour, setShowTour] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
+=======
       duration: 0.5
     }
   }
@@ -216,11 +444,27 @@ const AnimatedCounter = ({ value, suffix = '', duration = 2000 }) => {
 export default function HomePage() {
   const [showTour, setShowTour] = useState(false)
   const [showDemo, setShowDemo] = useState(false)
+>>>>>>> main
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
       {/* 3D Particle Background */}
       <ParticleBackground />
+<<<<<<< HEAD
+
+      {/* Background Effects */}
+      <div
+        className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900"
+        style={{ zIndex: 2 }}
+      />
+      <div
+        className="fixed inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]"
+        style={{ zIndex: 3 }}
+      />
+
+      {/* Navigation */}
+      <motion.nav
+=======
       
       {/* Background Effects */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900" style={{ zIndex: 2 }} />
@@ -228,6 +472,7 @@ export default function HomePage() {
       
       {/* Navigation */}
       <motion.nav 
+>>>>>>> main
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
@@ -236,7 +481,11 @@ export default function HomePage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+<<<<<<< HEAD
+            <motion.div
+=======
             <motion.div 
+>>>>>>> main
               className="flex items-center space-x-2"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -244,6 +493,24 @@ export default function HomePage() {
               <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/25">
                 <span className="text-white font-bold text-sm">AI</span>
               </div>
+<<<<<<< HEAD
+              <span className="text-xl font-bold text-white">
+                Ethical AI Insider
+              </span>
+            </motion.div>
+
+            <div className="hidden md:flex items-center space-x-8">
+              {["Features", "Pricing", "Docs", "Blog"].map((item) => (
+                <motion.div
+                  key={item}
+                  whileHover={{ y: -2 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Link
+                    href={`#${item.toLowerCase()}`}
+                    className="text-gray-300 hover:text-white transition-colors relative group"
+                  >
+=======
               <span className="text-xl font-bold text-white">Ethical AI Insider</span>
             </motion.div>
             
@@ -251,22 +518,46 @@ export default function HomePage() {
               {['Features', 'Pricing', 'Docs', 'Blog'].map((item) => (
                 <motion.div key={item} whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300 }}>
                   <Link href={`#${item.toLowerCase()}`} className="text-gray-300 hover:text-white transition-colors relative group">
+>>>>>>> main
                     {item}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 transition-all group-hover:w-full"></span>
                   </Link>
                 </motion.div>
               ))}
             </div>
+<<<<<<< HEAD
+
+            <div className="flex items-center space-x-4">
+              <Link href="/login">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-slate-800/50"
+                >
+=======
             
             <div className="flex items-center space-x-4">
               <Link href="/login">
                 <Button variant="ghost" size="sm" className="hover:bg-slate-800/50">
+>>>>>>> main
                   Sign In
                 </Button>
               </Link>
               <Link href="/register">
+<<<<<<< HEAD
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/25"
+                  >
+=======
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button variant="secondary" size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/25">
+>>>>>>> main
                     Get Started
                   </Button>
                 </motion.div>
@@ -277,8 +568,16 @@ export default function HomePage() {
       </motion.nav>
 
       {/* Hero Section */}
+<<<<<<< HEAD
+      <section
+        className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden"
+        style={{ zIndex: 5 }}
+      >
+        <motion.div
+=======
       <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden" style={{ zIndex: 5 }}>
         <motion.div 
+>>>>>>> main
           className="max-w-7xl mx-auto text-center"
           variants={containerVariants}
           initial="hidden"
@@ -308,6 +607,45 @@ export default function HomePage() {
           </div>
 
           <motion.div variants={itemVariants} className="mb-8">
+<<<<<<< HEAD
+            <motion.h1
+                className="text-6xl md:text-8xl font-extrabold text-white mb-6 leading-tight tracking-tight font-display"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                Unleash Your Potential with
+                <br />
+                <motion.span
+                  className="text-transparent bg-clip-text bg-gradient-primary"
+                  animate={{
+                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  style={{
+                    backgroundSize: "200% 200%",
+                  }}
+                >
+                  AI-Powered Development
+                </motion.span>
+              </motion.h1>
+          </motion.div>
+
+          <motion.p
+            variants={itemVariants}
+            className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed"
+          >
+            The most advanced AI agent network for developers. Generate
+            production-ready code with multi-agent collaboration, enterprise
+            security, and seamless DevTool integrations.
+          </motion.p>
+
+          <motion.div
+=======
             <motion.h1 
               className="text-6xl md:text-8xl font-extrabold text-white mb-6 leading-tight tracking-tight"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -343,11 +681,24 @@ export default function HomePage() {
           </motion.p>
 
           <motion.div 
+>>>>>>> main
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-6 justify-center mb-20"
           >
             <Link href="/register">
               <motion.div
+<<<<<<< HEAD
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0 20px 40px rgba(168, 85, 247, 0.4)",
+                }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Button
+                  variant="secondary"
+                  size="lg"
+=======
                 whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(168, 85, 247, 0.4)' }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 300 }}
@@ -355,6 +706,7 @@ export default function HomePage() {
                 <Button 
                   variant="secondary" 
                   size="lg" 
+>>>>>>> main
                   className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-8 py-4 text-lg shadow-2xl shadow-purple-500/25 border-0"
                 >
                   Start Free Trial
@@ -362,6 +714,12 @@ export default function HomePage() {
                 </Button>
               </motion.div>
             </Link>
+<<<<<<< HEAD
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="lg"
+=======
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -369,6 +727,7 @@ export default function HomePage() {
               <Button 
                 variant="outline" 
                 size="lg" 
+>>>>>>> main
                 className="w-full sm:w-auto border-slate-600 text-slate-300 hover:bg-slate-800/50 hover:border-slate-500 px-8 py-4 text-lg backdrop-blur-sm"
                 onClick={() => setShowDemo(true)}
               >
@@ -379,25 +738,43 @@ export default function HomePage() {
           </motion.div>
 
           {/* Animated Stats */}
+<<<<<<< HEAD
+          <motion.div
+=======
           <motion.div 
+>>>>>>> main
             variants={itemVariants}
             className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
           >
             {stats.map((stat, index) => (
+<<<<<<< HEAD
+              <motion.div
+=======
               <motion.div 
+>>>>>>> main
                 key={index}
                 className="text-center"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+<<<<<<< HEAD
+                <div className="text-gray-400 mt-2 text-sm md:text-base">
+                  {stat.label}
+                </div>
+=======
                 <div className="text-gray-400 mt-2 text-sm md:text-base">{stat.label}</div>
+>>>>>>> main
               </motion.div>
             ))}
           </motion.div>
 
           {/* Social Proof */}
+<<<<<<< HEAD
+          <motion.div
+=======
           <motion.div 
+>>>>>>> main
             variants={itemVariants}
             className="mt-16 flex flex-col items-center"
           >
@@ -407,31 +784,61 @@ export default function HomePage() {
                   key={i}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
+<<<<<<< HEAD
+                  transition={{
+                    delay: 0.1 * i,
+                    type: "spring",
+                    stiffness: 300,
+                  }}
+=======
                   transition={{ delay: 0.1 * i, type: "spring", stiffness: 300 }}
+>>>>>>> main
                 >
                   <StarIcon className="w-6 h-6 text-yellow-400 fill-current" />
                 </motion.div>
               ))}
             </div>
+<<<<<<< HEAD
+            <p className="text-gray-400">
+              Trusted by 10,000+ developers worldwide
+            </p>
+=======
             <p className="text-gray-400">Trusted by 10,000+ developers worldwide</p>
+>>>>>>> main
           </motion.div>
         </motion.div>
       </section>
 
       {/* Enhanced Features Section */}
       <EnhancedFeatures />
+<<<<<<< HEAD
+
+      {/* Features Section */}
+      <section
+        id="features"
+        className="relative py-24 px-4 sm:px-6 lg:px-8"
+        style={{ zIndex: 5 }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+=======
       
       {/* Features Section */}
       <section id="features" className="relative py-24 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
         <div className="max-w-7xl mx-auto">
           <motion.div 
+>>>>>>> main
             className="text-center mb-20"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
+<<<<<<< HEAD
+            <motion.h2
+=======
             <motion.h2 
+>>>>>>> main
               className="text-4xl md:text-5xl font-bold text-white mb-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -440,13 +847,27 @@ export default function HomePage() {
             >
               Powerful Features for Modern Development
             </motion.h2>
+<<<<<<< HEAD
+            <motion.p
+=======
             <motion.p 
+>>>>>>> main
               className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
+<<<<<<< HEAD
+              Everything you need to build, collaborate, and scale with the most
+              advanced AI-powered development platform.
+            </motion.p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => {
+              const IconComponent = feature.icon;
+=======
               Everything you need to build, collaborate, and scale with the most advanced AI-powered development platform.
             </motion.p>
           </motion.div>
@@ -454,6 +875,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => {
               const IconComponent = feature.icon
+>>>>>>> main
               return (
                 <motion.div
                   key={index}
@@ -461,6 +883,27 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
+<<<<<<< HEAD
+                  whileHover={{
+                    y: -8,
+                    transition: { type: "spring", stiffness: 300, damping: 20 },
+                  }}
+                >
+                  <Card
+                    hover
+                    className="h-full bg-slate-800/50 border-slate-700/50 backdrop-blur-sm overflow-hidden group"
+                  >
+                    <div
+                      className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-500"
+                      style={{
+                        background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
+                      }}
+                    />
+                    <Card.Header className="relative">
+                      <div
+                        className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.gradient} p-4 mb-6 shadow-lg`}
+                      >
+=======
                   whileHover={{ 
                     y: -8,
                     transition: { type: "spring", stiffness: 300, damping: 20 }
@@ -471,6 +914,7 @@ export default function HomePage() {
                          style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }} />
                     <Card.Header className="relative">
                       <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.gradient} p-4 mb-6 shadow-lg`}>
+>>>>>>> main
                         <IconComponent className="w-8 h-8 text-white" />
                       </div>
                       <h3 className="text-2xl font-semibold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">
@@ -478,20 +922,39 @@ export default function HomePage() {
                       </h3>
                     </Card.Header>
                     <Card.Content className="relative">
+<<<<<<< HEAD
+                      <p className="text-gray-300 leading-relaxed text-lg">
+                        {feature.description}
+                      </p>
+                    </Card.Content>
+                  </Card>
+                </motion.div>
+              );
+=======
                       <p className="text-gray-300 leading-relaxed text-lg">{feature.description}</p>
                     </Card.Content>
                   </Card>
                 </motion.div>
               )
+>>>>>>> main
             })}
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
+<<<<<<< HEAD
+      <section
+        className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-800/30"
+        style={{ zIndex: 5 }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+=======
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-800/30" style={{ zIndex: 5 }}>
         <div className="max-w-7xl mx-auto">
           <motion.div 
+>>>>>>> main
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -502,7 +965,12 @@ export default function HomePage() {
               Loved by Developers Worldwide
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+<<<<<<< HEAD
+              Join thousands of developers who have transformed their workflow
+              with our AI agent network.
+=======
               Join thousands of developers who have transformed their workflow with our AI agent network.
+>>>>>>> main
             </p>
           </motion.div>
 
@@ -520,7 +988,14 @@ export default function HomePage() {
                   <Card.Content className="p-8">
                     <div className="flex items-center mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
+<<<<<<< HEAD
+                        <StarIcon
+                          key={i}
+                          className="w-5 h-5 text-yellow-400 fill-current"
+                        />
+=======
                         <StarIcon key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+>>>>>>> main
                       ))}
                     </div>
                     <p className="text-gray-300 mb-6 text-lg leading-relaxed italic">
@@ -528,11 +1003,26 @@ export default function HomePage() {
                     </p>
                     <div className="flex items-center">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold mr-4">
+<<<<<<< HEAD
+                        {testimonial.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white">
+                          {testimonial.name}
+                        </div>
+                        <div className="text-gray-400 text-sm">
+                          {testimonial.role}
+                        </div>
+=======
                         {testimonial.name.split(' ').map(n => n[0]).join('')}
                       </div>
                       <div>
                         <div className="font-semibold text-white">{testimonial.name}</div>
                         <div className="text-gray-400 text-sm">{testimonial.role}</div>
+>>>>>>> main
                       </div>
                     </div>
                   </Card.Content>
@@ -544,13 +1034,47 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Section */}
+<<<<<<< HEAD
+      <section
+        id="pricing"
+        className="py-20 px-4 sm:px-6 lg:px-8"
+        style={{ zIndex: 5 }}
+      >
+=======
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
+>>>>>>> main
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Choose Your Plan
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+<<<<<<< HEAD
+              Flexible pricing for teams of all sizes. Start free and upgrade as
+              you grow.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {pricingPlans.map((plan, index) => (
+              <Card
+                key={index}
+                className={`h-full ${plan.highlighted ? "ring-2 ring-purple-500" : ""}`}
+              >
+                <Card.Header>
+                  <div className="text-center">
+                    <h3 className="text-2xl font-semibold text-white mb-2">
+                      {plan.name}
+                    </h3>
+                    <div className="mb-4">
+                      <span className="text-4xl font-bold text-white">
+                        {plan.price}
+                      </span>
+                      {plan.price !== "Custom" && (
+                        <span className="text-gray-500 ml-2">
+                          {plan.period}
+                        </span>
+=======
               Flexible pricing for teams of all sizes. Start free and upgrade as you grow.
             </p>
           </div>
@@ -568,12 +1092,17 @@ export default function HomePage() {
                       <span className="text-4xl font-bold text-white">{plan.price}</span>
                       {plan.price !== 'Custom' && (
                         <span className="text-gray-500 ml-2">{plan.period}</span>
+>>>>>>> main
                       )}
                     </div>
                     <p className="text-gray-400">{plan.description}</p>
                   </div>
                 </Card.Header>
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> main
                 <Card.Content>
                   <ul className="space-y-3">
                     {plan.features.map((feature, featureIndex) => (
@@ -584,6 +1113,16 @@ export default function HomePage() {
                     ))}
                   </ul>
                 </Card.Content>
+<<<<<<< HEAD
+
+                <Card.Footer>
+                  <Button
+                    variant={plan.highlighted ? "secondary" : "outline"}
+                    size="lg"
+                    className={`w-full ${!plan.highlighted ? "border-gray-600 text-gray-300 hover:bg-gray-800" : ""}`}
+                  >
+                    {plan.price === "Custom" ? "Contact Sales" : "Get Started"}
+=======
                 
                 <Card.Footer>
                   <Button 
@@ -592,6 +1131,7 @@ export default function HomePage() {
                     className={`w-full ${!plan.highlighted ? 'border-gray-600 text-gray-300 hover:bg-gray-800' : ''}`}
                   >
                     {plan.price === 'Custom' ? 'Contact Sales' : 'Get Started'}
+>>>>>>> main
                   </Button>
                 </Card.Footer>
               </Card>
@@ -609,6 +1149,16 @@ export default function HomePage() {
                 Ready to Transform Your Development Process?
               </h2>
               <p className="text-xl mb-8 text-gray-400 max-w-2xl mx-auto">
+<<<<<<< HEAD
+                Join thousands of developers who trust Ethical AI Insider for
+                their AI-powered development needs.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/register">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+=======
                 Join thousands of developers who trust Ethical AI Insider for their AI-powered development needs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -616,15 +1166,22 @@ export default function HomePage() {
                   <Button 
                     variant="secondary" 
                     size="lg" 
+>>>>>>> main
                     className="w-full sm:w-auto"
                   >
                     Start Free Trial
                   </Button>
                 </Link>
                 <Link href="/contact">
+<<<<<<< HEAD
+                  <Button
+                    variant="outline"
+                    size="lg"
+=======
                   <Button 
                     variant="outline" 
                     size="lg" 
+>>>>>>> main
                     className="w-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-700"
                   >
                     Contact Sales
@@ -637,7 +1194,14 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
+<<<<<<< HEAD
+      <footer
+        className="border-t border-slate-700 bg-slate-800 py-12 px-4 sm:px-6 lg:px-8"
+        style={{ zIndex: 5 }}
+      >
+=======
       <footer className="border-t border-slate-700 bg-slate-800 py-12 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
+>>>>>>> main
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -645,6 +1209,133 @@ export default function HomePage() {
                 <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">AI</span>
                 </div>
+<<<<<<< HEAD
+                <span className="text-xl font-bold text-white">
+                  Ethical AI Insider
+                </span>
+              </div>
+              <p className="text-gray-500">
+                Building the future of ethical AI development with secure,
+                collaborative tools.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-4">Product</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="/features"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Features
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/pricing"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/docs"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Documentation
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/api"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    API
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-4">Company</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="/about"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/blog"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/careers"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Careers
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contact"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-4">Support</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="/help"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/community"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Community
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/status"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Status
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/security"
+                    className="text-gray-500 hover:text-white transition-colors"
+                  >
+                    Security
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+=======
                 <span className="text-xl font-bold text-white">Ethical AI Insider</span>
               </div>
               <p className="text-gray-500">
@@ -683,20 +1374,48 @@ export default function HomePage() {
             </div>
           </div>
           
+>>>>>>> main
           <div className="mt-12 pt-8 border-t border-slate-700 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-500">
               © 2024 Ethical AI Insider. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
+<<<<<<< HEAD
+              <Link
+                href="/privacy"
+                className="text-gray-500 hover:text-white transition-colors"
+              >
+                Privacy
+              </Link>
+              <Link
+                href="/terms"
+                className="text-gray-500 hover:text-white transition-colors"
+              >
+                Terms
+              </Link>
+              <Link
+                href="/cookies"
+                className="text-gray-500 hover:text-white transition-colors"
+              >
+                Cookies
+              </Link>
+=======
               <Link href="/privacy" className="text-gray-500 hover:text-white transition-colors">Privacy</Link>
               <Link href="/terms" className="text-gray-500 hover:text-white transition-colors">Terms</Link>
               <Link href="/cookies" className="text-gray-500 hover:text-white transition-colors">Cookies</Link>
+>>>>>>> main
             </div>
           </div>
         </div>
       </footer>
 
       {/* Interactive Demo */}
+<<<<<<< HEAD
+      <InteractiveDemo isOpen={showDemo} onClose={() => setShowDemo(false)} />
+
+      {/* Product Tour */}
+      <ProductTour isOpen={showTour} onClose={() => setShowTour(false)} />
+=======
       <InteractiveDemo 
         isOpen={showDemo} 
         onClose={() => setShowDemo(false)} 
@@ -707,6 +1426,7 @@ export default function HomePage() {
         isOpen={showTour} 
         onClose={() => setShowTour(false)} 
       />
+>>>>>>> main
 
       {/* Structured Data for SEO */}
       <StructuredData data={organizationSchema} />
@@ -714,5 +1434,10 @@ export default function HomePage() {
       <StructuredData data={serviceSchema} />
       <StructuredData data={faqSchema} />
     </div>
+<<<<<<< HEAD
+  );
+}
+=======
   )
 }
+>>>>>>> main

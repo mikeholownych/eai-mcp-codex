@@ -30,7 +30,7 @@ const STATUS_COLORS: Record<string, string> = {
   resolved: 'bg-green-500/10 text-green-400',
 }
 
-const ALERT_ICONS: Record<string, JSX.Element> = {
+const ALERT_ICONS: Record<string, React.JSX.Element> = {
   warning: <ExclamationTriangleIcon className="h-4 w-4 text-yellow-400" />,
   error: <ExclamationTriangleIcon className="h-4 w-4 text-red-400" />,
   success: <CheckCircleIcon className="h-4 w-4 text-green-400" />,
@@ -40,11 +40,9 @@ const ALERT_ICONS: Record<string, JSX.Element> = {
 const getPriorityColor = (priority: string) =>
   PRIORITY_COLORS[priority] ?? 'bg-gray-500/10 text-gray-400'
 
-const getStatusColor = (status: string) =>
-  STATUS_COLORS[status] ?? 'bg-gray-500/10 text-gray-400'
+const getStatusColor = (status: string) => STATUS_COLORS[status] ?? 'bg-gray-500/10 text-gray-400'
 
-const getAlertIcon = (type: string) =>
-  ALERT_ICONS[type] ?? ALERT_ICONS.default
+const getAlertIcon = (type: string) => ALERT_ICONS[type] ?? ALERT_ICONS.default
 
 export default function StaffDashboard() {
   const { user } = useAuth()
@@ -64,11 +62,7 @@ export default function StaffDashboard() {
         <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
         <h3 className="mt-2 text-sm font-medium text-white">Error Loading Dashboard</h3>
         <p className="mt-1 text-sm text-gray-400">{error}</p>
-        <Button 
-          variant="outline" 
-          className="mt-4"
-          onClick={refetch}
-        >
+        <Button variant="outline" className="mt-4" onClick={refetch}>
           Try Again
         </Button>
       </div>
@@ -114,9 +108,7 @@ export default function StaffDashboard() {
     <div className="space-y-8">
       {/* Welcome Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">
-          Staff Dashboard
-        </h1>
+        <h1 className="text-3xl font-bold text-white">Staff Dashboard</h1>
         <p className="mt-2 text-gray-400">
           Welcome back, {user?.name}. Here&apos;s your system overview for today.
         </p>
@@ -124,7 +116,7 @@ export default function StaffDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {systemStats.map((item) => {
+        {systemStats.map(item => {
           const Icon = item.icon
           return (
             <Card key={item.name} className="p-6">
@@ -134,18 +126,12 @@ export default function StaffDashboard() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-400 truncate">
-                      {item.name}
-                    </dt>
+                    <dt className="text-sm font-medium text-gray-400 truncate">{item.name}</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-white">
-                        {item.value}
-                      </div>
+                      <div className="text-2xl font-semibold text-white">{item.value}</div>
                       <div
                         className={`ml-2 flex items-baseline text-sm font-semibold ${
-                          item.changeType === 'increase'
-                            ? 'text-green-400'
-                            : 'text-red-400'
+                          item.changeType === 'increase' ? 'text-green-400' : 'text-red-400'
                         }`}
                       >
                         {item.changeType === 'increase' ? (
@@ -171,14 +157,22 @@ export default function StaffDashboard() {
       <div>
         <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {dashboardData.quick_actions.map((action) => {
-            const IconName = action.icon === 'UserGroupIcon' ? UserGroupIcon 
-                           : action.icon === 'LifebuoyIcon' ? LifebuoyIcon
-                           : ExclamationTriangleIcon
+          {dashboardData.quick_actions.map(action => {
+            const IconName =
+              action.icon === 'UserGroupIcon'
+                ? UserGroupIcon
+                : action.icon === 'LifebuoyIcon'
+                  ? LifebuoyIcon
+                  : ExclamationTriangleIcon
             return (
-              <Card key={action.name} className="p-6 hover:bg-slate-700/50 transition-colors cursor-pointer">
+              <Card
+                key={action.name}
+                className="p-6 hover:bg-slate-700/50 transition-colors cursor-pointer"
+              >
                 <div className="flex items-center">
-                  <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-r ${action.color} rounded-lg flex items-center justify-center`}>
+                  <div
+                    className={`flex-shrink-0 w-12 h-12 bg-gradient-to-r ${action.color} rounded-lg flex items-center justify-center`}
+                  >
                     <IconName className="h-6 w-6 text-white" />
                   </div>
                   <div className="ml-4">
@@ -204,7 +198,7 @@ export default function StaffDashboard() {
           </div>
           <Card className="p-6">
             <div className="space-y-4">
-              {dashboardData.recent_tickets.map((ticket) => (
+              {dashboardData.recent_tickets.map(ticket => (
                 <div
                   key={ticket.id}
                   className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg border border-slate-600"
@@ -212,10 +206,14 @@ export default function StaffDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
                       <h3 className="text-sm font-medium text-white">{ticket.title}</h3>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(ticket.priority)}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(ticket.priority)}`}
+                      >
                         {ticket.priority}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}
+                      >
                         {ticket.status}
                       </span>
                     </div>
@@ -244,14 +242,12 @@ export default function StaffDashboard() {
           </div>
           <Card className="p-6">
             <div className="space-y-4">
-              {dashboardData.system_alerts.map((alert) => (
+              {dashboardData.system_alerts.map(alert => (
                 <div
                   key={alert.id}
                   className="flex items-start space-x-3 p-3 bg-slate-700/30 rounded-lg"
                 >
-                  <div className="flex-shrink-0 mt-0.5">
-                    {getAlertIcon(alert.type)}
-                  </div>
+                  <div className="flex-shrink-0 mt-0.5">{getAlertIcon(alert.type)}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white">{alert.message}</p>
                     <div className="flex items-center mt-1 text-xs text-gray-500">
@@ -278,7 +274,7 @@ export default function StaffDashboard() {
               Detailed View
             </Button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <div className="flex items-center justify-between mb-2">

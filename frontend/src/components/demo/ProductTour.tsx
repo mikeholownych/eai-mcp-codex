@@ -2,15 +2,15 @@
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  XMarkIcon, 
-  ChevronLeftIcon, 
+import {
+  XMarkIcon,
+  ChevronLeftIcon,
   ChevronRightIcon,
   PlayIcon,
   CodeBracketIcon,
   CpuChipIcon,
   ShieldCheckIcon,
-  CommandLineIcon
+  CommandLineIcon,
 } from '@heroicons/react/24/outline'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
@@ -29,59 +29,53 @@ const tourSteps: TourStep[] = [
   {
     id: 'agent-network',
     title: 'AI Agent Network',
-    description: 'Watch multiple specialized AI agents collaborate in real-time to solve complex coding challenges.',
+    description:
+      'Watch multiple specialized AI agents collaborate in real-time to solve complex coding challenges.',
     icon: CpuChipIcon,
     image: '/demo/agent-network.png',
     features: [
       'Claude O3 & Sonnet 4 integration',
       'Multi-agent collaboration',
       'Real-time code review',
-      'Automated testing'
+      'Automated testing',
     ],
-    color: 'from-purple-400 to-pink-400'
+    color: 'from-purple-400 to-pink-400',
   },
   {
     id: 'code-generation',
     title: 'Smart Code Generation',
-    description: 'Transform ideas into production-ready code with context-aware AI that understands your patterns.',
+    description:
+      'Transform ideas into production-ready code with context-aware AI that understands your patterns.',
     icon: CodeBracketIcon,
     image: '/demo/code-generation.png',
     features: [
       'Natural language to code',
       'Pattern recognition',
       'Best practices enforcement',
-      'Multi-language support'
+      'Multi-language support',
     ],
-    color: 'from-blue-400 to-cyan-400'
+    color: 'from-blue-400 to-cyan-400',
   },
   {
     id: 'security',
     title: 'Enterprise Security',
-    description: 'SOC 2 compliant platform with advanced security controls and comprehensive audit logging.',
+    description:
+      'SOC 2 compliant platform with advanced security controls and comprehensive audit logging.',
     icon: ShieldCheckIcon,
     image: '/demo/security.png',
-    features: [
-      'JWT tenant isolation',
-      'Row-level security',
-      'Audit logging',
-      'RBAC controls'
-    ],
-    color: 'from-green-400 to-emerald-400'
+    features: ['JWT tenant isolation', 'Row-level security', 'Audit logging', 'RBAC controls'],
+    color: 'from-green-400 to-emerald-400',
   },
   {
     id: 'integrations',
     title: 'DevTool Integrations',
-    description: 'Seamlessly integrate with your existing workflow through popular development tools.',
+    description:
+      'Seamlessly integrate with your existing workflow through popular development tools.',
     icon: CommandLineIcon,
     image: '/demo/integrations.png',
-    features: [
-      'GitHub integration',
-      'VS Code extension',
-      'CI/CD pipelines',
-      'Slack notifications'
-    ],
-    color: 'from-orange-400 to-red-400'
-  }
+    features: ['GitHub integration', 'VS Code extension', 'CI/CD pipelines', 'Slack notifications'],
+    color: 'from-orange-400 to-red-400',
+  },
 ]
 
 interface ProductTourProps {
@@ -94,11 +88,11 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
   const [isPlaying, setIsPlaying] = useState(false)
 
   const nextStep = () => {
-    setCurrentStep((prev) => (prev + 1) % tourSteps.length)
+    setCurrentStep(prev => (prev + 1) % tourSteps.length)
   }
 
   const prevStep = () => {
-    setCurrentStep((prev) => (prev - 1 + tourSteps.length) % tourSteps.length)
+    setCurrentStep(prev => (prev - 1 + tourSteps.length) % tourSteps.length)
   }
 
   const goToStep = (index: number) => {
@@ -117,7 +111,7 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
     setIsPlaying(true)
     // Auto-advance through steps
     const interval = setInterval(() => {
-      setCurrentStep((prev) => {
+      setCurrentStep(prev => {
         const nextIndex = prev + 1
         if (nextIndex >= tourSteps.length) {
           clearInterval(interval)
@@ -140,13 +134,13 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-          onClick={(e) => e.target === e.currentTarget && onClose()}
+          onClick={e => e.target === e.currentTarget && onClose()}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", duration: 0.3 }}
+            transition={{ type: 'spring', duration: 0.3 }}
             className="max-w-6xl w-full mx-auto"
           >
             <Card className="relative bg-slate-900/95 border-slate-700/50 backdrop-blur-xl overflow-hidden">
@@ -163,16 +157,16 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                 <div className="space-y-6">
                   {/* Header */}
                   <div className="flex items-center space-x-4">
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-4 shadow-lg`}>
+                    <div
+                      className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-4 shadow-lg`}
+                    >
                       <IconComponent className="w-8 h-8 text-white" />
                     </div>
                     <div>
                       <h2 className="text-3xl font-bold text-white mb-2">
                         {currentTourStep.title}
                       </h2>
-                      <p className="text-gray-300 text-lg">
-                        {currentTourStep.description}
-                      </p>
+                      <p className="text-gray-300 text-lg">{currentTourStep.description}</p>
                     </div>
                   </div>
 
@@ -188,7 +182,9 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                           transition={{ delay: index * 0.1 }}
                           className="flex items-center space-x-3 p-3 rounded-lg bg-slate-800/50"
                         >
-                          <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentTourStep.color}`} />
+                          <div
+                            className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentTourStep.color}`}
+                          />
                           <span className="text-gray-300">{feature}</span>
                         </motion.div>
                       ))}
@@ -260,22 +256,24 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                     {/* Placeholder for demo image/video */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center space-y-4">
-                        <div className={`w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-6 shadow-xl`}>
+                        <div
+                          className={`w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r ${currentTourStep.color} p-6 shadow-xl`}
+                        >
                           <IconComponent className="w-12 h-12 text-white" />
                         </div>
                         <div>
                           <h3 className="text-xl font-semibold text-white mb-2">
                             {currentTourStep.title} Demo
                           </h3>
-                          <p className="text-gray-400">
-                            Interactive demo would be shown here
-                          </p>
+                          <p className="text-gray-400">Interactive demo would be shown here</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Animated Border */}
-                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${currentTourStep.color} opacity-20 animate-pulse`} />
+                    <div
+                      className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${currentTourStep.color} opacity-20 animate-pulse`}
+                    />
                   </motion.div>
 
                   {/* Progress Indicator */}
@@ -302,8 +300,8 @@ export default function ProductTour({ isOpen, onClose }: ProductTourProps) {
                     <Button variant="outline" size="sm" className="border-slate-600">
                       Learn More
                     </Button>
-                    <Button 
-                      variant="secondary" 
+                    <Button
+                      variant="secondary"
                       size="sm"
                       className="bg-gradient-to-r from-purple-600 to-pink-600"
                     >

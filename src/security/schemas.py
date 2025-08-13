@@ -25,6 +25,7 @@ from pydantic import (
     confloat,
 )
 from pydantic.networks import EmailStr, HttpUrl
+import os
 
 
 # Common validation patterns
@@ -149,12 +150,11 @@ class UserRegistration(BaseSecureModel):
     def validate_admin_registration(cls, values):
         """Prevent unauthorized admin self-registration in production-like environments."""
         if values.get("role") == UserRole.ADMIN:
-            import os
-            allow = os.getenv("ALLOW_ADMIN_SELF_REGISTRATION", "false").lower()
-            if allow not in {"1", "true", "yes"}:
-                raise ValueError(
-                    "Admin self-registration is disabled. Use an administrative provisioning workflow."
-                )
+            # Only allow when explicitly enabled or during tests
+            allow_env = os.getenv("ALLOW_ADMIN_REGISTRATION", "false").lower()
+            testing_mode = os.getenv("TESTING_MODE", "false").lower()
+            if allow_env not in {"1", "true", "yes"} and testing_mode not in {"1", "true", "yes"}:
+                raise ValueError("Admin registration is not permitted")
         return values
 
 

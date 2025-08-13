@@ -5,11 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { debug } from '@/lib/utils'
-import {
-  getVideoStatusColor,
-  getVideoStatusIcon,
-  getVisibilityColor,
-} from '@/lib/statusHelpers'
+import { getVideoStatusColor, getVideoStatusIcon, getVisibilityColor } from '@/lib/statusHelpers'
 import {
   VideoCameraIcon,
   ArrowUpTrayIcon as CloudUploadIcon,
@@ -41,7 +37,7 @@ const mockVideos = [
     author: {
       name: 'David Kim',
       email: 'david@ethicalai.com',
-      role: 'content'
+      role: 'content',
     },
     views: 3247,
     likes: 89,
@@ -51,7 +47,7 @@ const mockVideos = [
     processing_status: 'completed',
     cdn_status: 'synced',
     auto_captions: true,
-    seo_optimized: true
+    seo_optimized: true,
   },
   {
     id: 'video-002',
@@ -66,7 +62,7 @@ const mockVideos = [
     author: {
       name: 'Sarah Johnson',
       email: 'sarah@ethicalai.com',
-      role: 'content'
+      role: 'content',
     },
     views: 0,
     likes: 0,
@@ -76,12 +72,13 @@ const mockVideos = [
     processing_status: 'encoding',
     cdn_status: 'uploading',
     auto_captions: false,
-    seo_optimized: false
+    seo_optimized: false,
   },
   {
     id: 'video-003',
     title: 'Security Best Practices for AI Agents',
-    description: 'Essential security considerations when deploying AI agents in production environments.',
+    description:
+      'Essential security considerations when deploying AI agents in production environments.',
     duration: 1876,
     thumbnail: '/thumbnails/video-003.jpg',
     video_url: 'https://cdn.ethicalai.com/videos/video-003.mp4',
@@ -91,7 +88,7 @@ const mockVideos = [
     author: {
       name: 'Alex Rivera',
       email: 'alex@ethicalai.com',
-      role: 'content'
+      role: 'content',
     },
     views: 0,
     likes: 0,
@@ -101,11 +98,14 @@ const mockVideos = [
     processing_status: 'pending',
     cdn_status: 'waiting',
     auto_captions: false,
-    seo_optimized: false
-  }
+    seo_optimized: false,
+  },
 ]
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> main
 const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
@@ -119,7 +119,11 @@ export default function VideoContentManagement() {
   const [selectedVisibility, setSelectedVisibility] = useState('all')
   const [selectedTag, setSelectedTag] = useState('all')
   const [showUploadModal, setShowUploadModal] = useState(false)
+<<<<<<< HEAD
+  const [uploadProgress, setUploadProgress] = useState(0)
+=======
     const [uploadProgress, setUploadProgress] = useState(0)
+>>>>>>> main
   const [isUploading, setIsUploading] = useState(false)
 
   // Check if user has permission to manage video content
@@ -136,10 +140,12 @@ export default function VideoContentManagement() {
   }
 
   const filteredVideos = mockVideos.filter(video => {
-    const matchesSearch = video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         video.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch =
+      video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      video.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = selectedStatus === 'all' || video.status === selectedStatus
-    const matchesVisibility = selectedVisibility === 'all' || video.visibility === selectedVisibility
+    const matchesVisibility =
+      selectedVisibility === 'all' || video.visibility === selectedVisibility
     const matchesTag = selectedTag === 'all' || video.tags.includes(selectedTag)
     return matchesSearch && matchesStatus && matchesVisibility && matchesTag
   })
@@ -152,7 +158,7 @@ export default function VideoContentManagement() {
     processing: mockVideos.filter(v => v.status === 'processing').length,
     drafts: mockVideos.filter(v => v.status === 'draft').length,
     total_views: mockVideos.reduce((sum, video) => sum + video.views, 0),
-    total_duration: mockVideos.reduce((sum, video) => sum + video.duration, 0)
+    total_duration: mockVideos.reduce((sum, video) => sum + video.duration, 0),
   }
 
   const handleUploadVideo = () => {
@@ -173,13 +179,13 @@ export default function VideoContentManagement() {
 
   const handlePublishVideo = (videoId: string) => {
     debug('Publish video', { videoId })
-    setShowPublishModal(true)
+    alert(`Publish video ${videoId}`)
   }
 
   const simulateUpload = () => {
     setIsUploading(true)
     setUploadProgress(0)
-    
+
     const interval = setInterval(() => {
       setUploadProgress(prev => {
         if (prev >= 100) {
@@ -200,9 +206,11 @@ export default function VideoContentManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Video Content Management</h1>
-          <p className="text-gray-400">Upload, manage, and publish video content with auto-processing</p>
+          <p className="text-gray-400">
+            Upload, manage, and publish video content with auto-processing
+          </p>
         </div>
-        
+
         <Button variant="primary" onClick={handleUploadVideo}>
           <CloudUploadIcon className="h-4 w-4 mr-2" />
           Upload Video
@@ -266,7 +274,9 @@ export default function VideoContentManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Total Views</p>
-              <p className="text-2xl font-semibold text-white">{videoStats.total_views.toLocaleString()}</p>
+              <p className="text-2xl font-semibold text-white">
+                {videoStats.total_views.toLocaleString()}
+              </p>
             </div>
           </div>
         </Card>
@@ -278,7 +288,9 @@ export default function VideoContentManagement() {
             </div>
             <div className="ml-5">
               <p className="text-sm font-medium text-gray-400">Total Duration</p>
-              <p className="text-2xl font-semibold text-white">{Math.floor(videoStats.total_duration / 3600)}h</p>
+              <p className="text-2xl font-semibold text-white">
+                {Math.floor(videoStats.total_duration / 3600)}h
+              </p>
             </div>
           </div>
         </Card>
@@ -293,14 +305,14 @@ export default function VideoContentManagement() {
               type="text"
               placeholder="Search videos..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="w-full pl-10 bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             />
           </div>
 
           <select
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
+            onChange={e => setSelectedStatus(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             <option value="all">All Status</option>
@@ -312,7 +324,7 @@ export default function VideoContentManagement() {
 
           <select
             value={selectedVisibility}
-            onChange={(e) => setSelectedVisibility(e.target.value)}
+            onChange={e => setSelectedVisibility(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             <option value="all">All Plans</option>
@@ -324,12 +336,14 @@ export default function VideoContentManagement() {
 
           <select
             value={selectedTag}
-            onChange={(e) => setSelectedTag(e.target.value)}
+            onChange={e => setSelectedTag(e.target.value)}
             className="bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           >
             <option value="all">All Tags</option>
             {allTags.map(tag => (
-              <option key={tag} value={tag}>{tag}</option>
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
             ))}
           </select>
 
@@ -347,7 +361,9 @@ export default function VideoContentManagement() {
             <div className="relative aspect-video bg-slate-700 flex items-center justify-center">
               <PlayIcon className="h-12 w-12 text-white/60" />
               <div className="absolute top-2 right-2">
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getVideoStatusColor(video.status)}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getVideoStatusColor(video.status)}`}
+                >
                   {getVideoStatusIcon(video.status)}
                   <span className="ml-1 capitalize">{video.status}</span>
                 </span>
@@ -356,7 +372,7 @@ export default function VideoContentManagement() {
                 {formatDuration(video.duration)}
               </div>
             </div>
-            
+
             {/* Content */}
             <div className="p-4">
               <div className="flex items-start justify-between mb-2">
@@ -364,11 +380,9 @@ export default function VideoContentManagement() {
                   {video.title}
                 </h3>
               </div>
-              
-              <p className="text-sm text-gray-400 line-clamp-2 mb-3">
-                {video.description}
-              </p>
-              
+
+              <p className="text-sm text-gray-400 line-clamp-2 mb-3">{video.description}</p>
+
               {/* Author & Stats */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center">
@@ -382,20 +396,25 @@ export default function VideoContentManagement() {
                   </span>
                 </div>
               </div>
-              
+
               {/* Tags */}
               <div className="flex flex-wrap gap-1 mb-3">
                 {video.tags.slice(0, 3).map(tag => (
-                  <span key={tag} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400">
+                  <span
+                    key={tag}
+                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400"
+                  >
                     <TagIcon className="h-3 w-3 mr-1" />
                     {tag}
                   </span>
                 ))}
               </div>
-              
+
               {/* Plan Access */}
               <div className="flex items-center justify-between mb-4">
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getVisibilityColor(video.visibility)}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getVisibilityColor(video.visibility)}`}
+                >
                   {video.visibility.toUpperCase()}
                 </span>
                 <div className="flex items-center space-x-1">
@@ -411,7 +430,7 @@ export default function VideoContentManagement() {
                   )}
                 </div>
               </div>
-              
+
               {/* Processing Status */}
               {video.status === 'processing' && (
                 <div className="mb-4">
@@ -420,14 +439,14 @@ export default function VideoContentManagement() {
                     <span>CDN: {video.cdn_status}</span>
                   </div>
                   <div className="bg-slate-600 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: '65%' }}
                     ></div>
                   </div>
                 </div>
               )}
-              
+
               {/* Actions */}
               <div className="flex items-center justify-between pt-3 border-t border-slate-600">
                 <div className="flex items-center space-x-2">
@@ -438,7 +457,7 @@ export default function VideoContentManagement() {
                   >
                     <CogIcon className="h-4 w-4" />
                   </button>
-                  
+
                   {video.status === 'published' && (
                     <button
                       className="p-1 text-gray-400 hover:text-green-400 transition-colors"
@@ -447,7 +466,7 @@ export default function VideoContentManagement() {
                       <ShareIcon className="h-4 w-4" />
                     </button>
                   )}
-                  
+
                   {video.status === 'draft' && user.role === 'admin' && (
                     <button
                       onClick={() => handlePublishVideo(video.id)}
@@ -457,7 +476,7 @@ export default function VideoContentManagement() {
                       <CheckCircleIcon className="h-4 w-4" />
                     </button>
                   )}
-                  
+
                   {['admin', 'content'].includes(user.role) && (
                     <button
                       onClick={() => handleDeleteVideo(video.id)}
@@ -468,7 +487,7 @@ export default function VideoContentManagement() {
                     </button>
                   )}
                 </div>
-                
+
                 <div className="text-xs text-gray-500">
                   {new Date(video.updated_at).toLocaleDateString()}
                 </div>
@@ -496,47 +515,36 @@ export default function VideoContentManagement() {
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-slate-800 p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Upload New Video
-            </h3>
-            
+            <h3 className="text-lg font-semibold text-white mb-4">Upload New Video</h3>
+
             {!isUploading ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Video File
-                  </label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Video File</label>
                   <div className="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center">
                     <CloudUploadIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-white mb-2">Drag and drop your video file here</p>
                     <p className="text-sm text-gray-400 mb-4">or click to browse</p>
-                    <input 
-                      type="file" 
-                      accept="video/*" 
-                      className="hidden" 
-                      id="video-upload"
-                    />
-                    <label 
-                      htmlFor="video-upload" 
+                    <input type="file" accept="video/*" className="hidden" id="video-upload" />
+                    <label
+                      htmlFor="video-upload"
                       className="inline-flex items-center px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 cursor-pointer"
                     >
                       Select File
                     </label>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Title
-                    </label>
-                    <input 
-                      type="text" 
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Title</label>
+                    <input
+                      type="text"
                       className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                       placeholder="Enter video title..."
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Plan Access
@@ -549,70 +557,66 @@ export default function VideoContentManagement() {
                     </select>
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Description
                   </label>
-                  <textarea 
+                  <textarea
                     rows={3}
                     className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                     placeholder="Brief description of the video..."
                   ></textarea>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Tags (comma-separated)
                   </label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                     placeholder="Tutorial, MCP, Getting Started"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="flex items-center">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       defaultChecked
                       className="mr-3 rounded bg-slate-700 border-slate-600 text-orange-500 focus:ring-orange-500"
                     />
                     <span className="text-white">Enable auto-captions</span>
                   </label>
-                  
+
                   <label className="flex items-center">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       defaultChecked
                       className="mr-3 rounded bg-slate-700 border-slate-600 text-orange-500 focus:ring-orange-500"
                     />
                     <span className="text-white">Optimize for SEO</span>
                   </label>
-                  
+
                   <label className="flex items-center">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="mr-3 rounded bg-slate-700 border-slate-600 text-orange-500 focus:ring-orange-500"
                     />
                     <span className="text-white">Publish immediately after processing</span>
                   </label>
                 </div>
-                
+
                 <div className="flex space-x-3 mt-6">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="flex-1"
                     onClick={() => setShowUploadModal(false)}
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    variant="primary" 
-                    className="flex-1"
-                    onClick={simulateUpload}
-                  >
+                  <Button variant="primary" className="flex-1" onClick={simulateUpload}>
                     Upload Video
                   </Button>
                 </div>
@@ -622,17 +626,19 @@ export default function VideoContentManagement() {
                 <CloudUploadIcon className="h-16 w-16 text-blue-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-white mb-2">Uploading Video...</h3>
                 <p className="text-gray-400 mb-6">Please don&apos;t close this window</p>
+<<<<<<< HEAD
+
+=======
                 
+>>>>>>> main
                 <div className="bg-slate-700 rounded-full h-4 mb-4">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   ></div>
                 </div>
-                
-                <p className="text-sm text-gray-400">
-                  {Math.round(uploadProgress)}% complete
-                </p>
+
+                <p className="text-sm text-gray-400">{Math.round(uploadProgress)}% complete</p>
               </div>
             )}
           </div>

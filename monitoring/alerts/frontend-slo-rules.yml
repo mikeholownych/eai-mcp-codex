@@ -1,4 +1,4 @@
-# Frontend Performance SLO and Alerting Rules
+# Enhanced Frontend Performance SLO and Alerting Rules
 # Service Level Objectives for MCP Agent Network Frontend
 
 groups:
@@ -50,6 +50,168 @@ groups:
           ) * 100
         labels:
           slo: "web_vitals_compliance"
+          
+      # Additional SLI: Time to First Byte (TTFB) (95th percentile < 200ms)
+      - record: sli:frontend_ttfb_p95
+        expr: histogram_quantile(0.95, rate(nginx_http_request_duration_seconds_bucket{location=~"/api/.*"}[5m]))
+        labels:
+          slo: "ttfb"
+          
+      # SLI: First Contentful Paint (FCP) (95th percentile < 1.8s)
+      - record: sli:frontend_fcp_p95
+        expr: histogram_quantile(0.95, rate(web_vital_fcp_bucket[5m]))
+        labels:
+          slo: "fcp"
+          
+      # SLI: Largest Contentful Paint (LCP) (95th percentile < 2.5s)
+      - record: sli:frontend_lcp_p95
+        expr: histogram_quantile(0.95, rate(web_vital_lcp_bucket[5m]))
+        labels:
+          slo: "lcp"
+          
+      # SLI: Cumulative Layout Shift (CLS) (95th percentile < 0.1)
+      - record: sli:frontend_cls_p95
+        expr: histogram_quantile(0.95, rate(web_vital_cls_bucket[5m]))
+        labels:
+          slo: "cls"
+          
+      # SLI: First Input Delay (FID) (95th percentile < 100ms)
+      - record: sli:frontend_fid_p95
+        expr: histogram_quantile(0.95, rate(web_vital_fid_bucket[5m]))
+        labels:
+          slo: "fid"
+          
+      # SLI: User Engagement (Bounce Rate < 40%)
+      - record: sli:frontend_bounce_rate
+        expr: (rate(frontend_bounces_total[5m]) / rate(frontend_page_views_total[5m])) * 100
+        labels:
+          slo: "user_engagement"
+          
+      # SLI: Conversion Rate (> 2%)
+      - record: sli:frontend_conversion_rate
+        expr: (rate(frontend_conversions_total[5m]) / rate(frontend_sessions_total[5m])) * 100
+        labels:
+          slo: "conversion_rate"
+          
+      # SLI: Session Duration (Average > 3 minutes)
+      - record: sli:frontend_avg_session_duration
+        expr: rate(frontend_session_duration_seconds_sum[5m]) / rate(frontend_session_duration_count[5m])
+        labels:
+          slo: "session_duration"
+          
+      # SLI: Mobile Responsiveness (Mobile score > 70)
+      - record: sli:frontend_mobile_score
+        expr: avg(frontend_mobile_performance_score)
+        labels:
+          slo: "mobile_responsiveness"
+          
+      # SLI: Accessibility Score (> 90%)
+      - record: sli:frontend_accessibility_score
+        expr: avg(frontend_accessibility_score)
+        labels:
+          slo: "accessibility"
+          
+      # SLI: SEO Score (> 85%)
+      - record: sli:frontend_seo_score
+        expr: avg(frontend_seo_score)
+        labels:
+          slo: "seo"
+          
+      # SLI: Page Weight (95th percentile < 2MB)
+      - record: sli:frontend_page_weight_p95
+        expr: histogram_quantile(0.95, rate(frontend_page_weight_bytes_bucket[5m]))
+        labels:
+          slo: "page_weight"
+          
+      # SLI: Resource Loading Time (95th percentile < 3s)
+      - record: sli:frontend_resource_load_time_p95
+        expr: histogram_quantile(0.95, rate(frontend_resource_load_time_bucket[5m]))
+        labels:
+          slo: "resource_loading"
+          
+      # SLI: JavaScript Execution Time (95th percentile < 100ms)
+      - record: sli:frontend_js_execution_time_p95
+        expr: histogram_quantile(0.95, rate(frontend_js_execution_time_bucket[5m]))
+        labels:
+          slo: "js_execution"
+          
+      # SLI: Style Layout Time (95th percentile < 50ms)
+      - record: sli:frontend_style_layout_time_p95
+        expr: histogram_quantile(0.95, rate(frontend_style_layout_time_bucket[5m]))
+        labels:
+          slo: "style_layout"
+          
+      # SLI: Render Time (95th percentile < 200ms)
+      - record: sli:frontend_render_time_p95
+        expr: histogram_quantile(0.95, rate(frontend_render_time_bucket[5m]))
+        labels:
+          slo: "render_time"
+          
+      # SLI: Interactive Time (95th percentile < 3.8s)
+      - record: sli:frontend_interactive_time_p95
+        expr: histogram_quantile(0.95, rate(frontend_interactive_time_bucket[5m]))
+        labels:
+          slo: "interactive_time"
+          
+      # SLI: Network Efficiency (> 80% compression ratio)
+      - record: sli:frontend_compression_ratio
+        expr: (1 - (rate(frontend_compressed_bytes_total[5m]) / rate(frontend_uncompressed_bytes_total[5m]))) * 100
+        labels:
+          slo: "compression_efficiency"
+          
+      # SLI: CDN Hit Rate (> 90%)
+      - record: sli:frontend_cdn_hit_rate
+        expr: (rate(frontend_cdn_hits_total[5m]) / rate(frontend_cdn_requests_total[5m])) * 100
+        labels:
+          slo: "cdn_efficiency"
+          
+      # SLI: Browser Compatibility (> 95% support)
+      - record: sli:frontend_browser_compatibility
+        expr: (rate(frontend_compatible_browsers_total[5m]) / rate(frontend_all_browsers_total[5m])) * 100
+        labels:
+          slo: "browser_compatibility"
+          
+      # SLI: Error Recovery Rate (> 95%)
+      - record: sli:frontend_error_recovery_rate
+        expr: (1 - (rate(frontend_unrecovered_errors_total[5m]) / rate(frontend_all_errors_total[5m]))) * 100
+        labels:
+          slo: "error_recovery"
+          
+      # SLI: User Satisfaction Score (> 8/10)
+      - record: sli:frontend_user_satisfaction
+        expr: avg(frontend_user_satisfaction_score)
+        labels:
+          slo: "user_satisfaction"
+          
+      # SLI: Feature Adoption Rate (> 60%)
+      - record: sli:frontend_feature_adoption
+        expr: (rate(frontend_feature_usage_total[5m]) / rate(frontend_active_users_total[5m])) * 100
+        labels:
+          slo: "feature_adoption"
+          
+      # SLI: A/B Test Performance (No significant degradation)
+      - record: sli:frontend_ab_test_performance
+        expr: abs(rate(frontend_conversion_rate_variant_a[5m]) - rate(frontend_conversion_rate_variant_b[5m])) / rate(frontend_conversion_rate_variant_a[5m]) * 100
+        labels:
+          slo: "ab_test_performance"
+          
+      # SLI: Real User Monitoring (RUM) Coverage (> 80%)
+      - record: sli:frontend_rum_coverage
+        expr: (rate(frontend_rum_sessions_total[5m]) / rate(frontend_all_sessions_total[5m])) * 100
+        labels:
+          slo: "rum_coverage"
+          
+      # SLI: Third-party Script Impact (< 200ms)
+      - record: sli:frontend_third_party_impact_p95
+        expr: histogram_quantile(0.95, rate(frontend_third_party_load_time_bucket[5m]))
+        labels:
+          slo: "third_party_impact"
+          
+      # SLI: Critical Path Optimization (> 90%)
+      - record: sli:frontend_critical_path_optimization
+        expr: (rate(frontend_critical_path_optimized_total[5m]) / rate(frontend_critical_path_total[5m])) * 100
+        labels:
+          slo: "critical_path_optimization"
 
   - name: frontend_slo_alerts
     rules:
@@ -178,6 +340,359 @@ groups:
         annotations:
           summary: "High memory usage on frontend server"
           description: "Memory usage is {{ $value }}%, exceeding 80% threshold"
+          
+      # Critical: TTFB SLO Violation
+      - alert: TTFBSLOViolation
+        expr: sli:frontend_ttfb_p95 > 0.2
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+          slo: ttfb
+        annotations:
+          summary: "Time to First Byte SLO violation"
+          description: "95th percentile TTFB is {{ $value }}s, exceeding 200ms SLO"
+          
+      # Warning: FCP SLO Violation
+      - alert: FCPSLOViolation
+        expr: sli:frontend_fcp_p95 > 1.8
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: fcp
+        annotations:
+          summary: "First Contentful Paint SLO violation"
+          description: "95th percentile FCP is {{ $value }}s, exceeding 1.8s SLO"
+          
+      # Critical: LCP SLO Violation
+      - alert: LCPSLOViolation
+        expr: sli:frontend_lcp_p95 > 2.5
+        for: 2m
+        labels:
+          severity: critical
+          service: frontend
+          slo: lcp
+        annotations:
+          summary: "Largest Contentful Paint SLO violation"
+          description: "95th percentile LCP is {{ $value }}s, exceeding 2.5s SLO"
+          
+      # Warning: CLS SLO Violation
+      - alert: CLSSLOViolation
+        expr: sli:frontend_cls_p95 > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: cls
+        annotations:
+          summary: "Cumulative Layout Shift SLO violation"
+          description: "95th percentile CLS is {{ $value }}, exceeding 0.1 SLO"
+          
+      # Warning: FID SLO Violation
+      - alert: FIDSLOViolation
+        expr: sli:frontend_fid_p95 > 100
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: fid
+        annotations:
+          summary: "First Input Delay SLO violation"
+          description: "95th percentile FID is {{ $value }}ms, exceeding 100ms SLO"
+          
+      # Warning: High Bounce Rate
+      - alert: HighBounceRate
+        expr: sli:frontend_bounce_rate > 40
+        for: 10m
+        labels:
+          severity: warning
+          service: frontend
+          slo: user_engagement
+        annotations:
+          summary: "High bounce rate detected"
+          description: "Bounce rate is {{ $value }}%, exceeding 40% target"
+          
+      # Warning: Low Conversion Rate
+      - alert: LowConversionRate
+        expr: sli:frontend_conversion_rate < 2
+        for: 15m
+        labels:
+          severity: warning
+          service: frontend
+          slo: conversion_rate
+        annotations:
+          summary: "Low conversion rate detected"
+          description: "Conversion rate is {{ $value }}%, below 2% target"
+          
+      # Warning: Short Session Duration
+      - alert: ShortSessionDuration
+        expr: sli:frontend_avg_session_duration < 180
+        for: 10m
+        labels:
+          severity: warning
+          service: frontend
+          slo: session_duration
+        annotations:
+          summary: "Short session duration detected"
+          description: "Average session duration is {{ $value }}s, below 3 minutes target"
+          
+      # Warning: Poor Mobile Performance
+      - alert: PoorMobilePerformance
+        expr: sli:frontend_mobile_score < 70
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: mobile_responsiveness
+        annotations:
+          summary: "Poor mobile performance detected"
+          description: "Mobile performance score is {{ $value }}, below 70 target"
+          
+      # Critical: Low Accessibility Score
+      - alert: LowAccessibilityScore
+        expr: sli:frontend_accessibility_score < 90
+        for: 5m
+        labels:
+          severity: critical
+          service: frontend
+          slo: accessibility
+        annotations:
+          summary: "Low accessibility score detected"
+          description: "Accessibility score is {{ $value }}%, below 90% target"
+          
+      # Warning: Low SEO Score
+      - alert: LowSEOScore
+        expr: sli:frontend_seo_score < 85
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: seo
+        annotations:
+          summary: "Low SEO score detected"
+          description: "SEO score is {{ $value }}%, below 85% target"
+          
+      # Warning: Heavy Page Weight
+      - alert: HeavyPageWeight
+        expr: sli:frontend_page_weight_p95 > 2097152  # 2MB
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: page_weight
+        annotations:
+          summary: "Heavy page weight detected"
+          description: "95th percentile page weight is {{ $value | humanize1024 }}B, exceeding 2MB target"
+          
+      # Warning: Slow Resource Loading
+      - alert: SlowResourceLoading
+        expr: sli:frontend_resource_load_time_p95 > 3
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: resource_loading
+        annotations:
+          summary: "Slow resource loading detected"
+          description: "95th percentile resource load time is {{ $value }}s, exceeding 3s target"
+          
+      # Warning: Slow JavaScript Execution
+      - alert: SlowJavaScriptExecution
+        expr: sli:frontend_js_execution_time_p95 > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: js_execution
+        annotations:
+          summary: "Slow JavaScript execution detected"
+          description: "95th percentile JS execution time is {{ $value }}s, exceeding 100ms target"
+          
+      # Warning: Slow Style Layout
+      - alert: SlowStyleLayout
+        expr: sli:frontend_style_layout_time_p95 > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: style_layout
+        annotations:
+          summary: "Slow style layout detected"
+          description: "95th percentile style layout time is {{ $value }}s, exceeding 50ms target"
+          
+      # Warning: Slow Render Time
+      - alert: SlowRenderTime
+        expr: sli:frontend_render_time_p95 > 0.2
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: render_time
+        annotations:
+          summary: "Slow render time detected"
+          description: "95th percentile render time is {{ $value }}s, exceeding 200ms target"
+          
+      # Warning: Slow Interactive Time
+      - alert: SlowInteractiveTime
+        expr: sli:frontend_interactive_time_p95 > 3.8
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: interactive_time
+        annotations:
+          summary: "Slow interactive time detected"
+          description: "95th percentile interactive time is {{ $value }}s, exceeding 3.8s target"
+          
+      # Warning: Poor Compression Efficiency
+      - alert: PoorCompressionEfficiency
+        expr: sli:frontend_compression_ratio < 80
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: compression_efficiency
+        annotations:
+          summary: "Poor compression efficiency detected"
+          description: "Compression ratio is {{ $value }}%, below 80% target"
+          
+      # Warning: Low CDN Hit Rate
+      - alert: LowCDNHitRate
+        expr: sli:frontend_cdn_hit_rate < 90
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: cdn_efficiency
+        annotations:
+          summary: "Low CDN hit rate detected"
+          description: "CDN hit rate is {{ $value }}%, below 90% target"
+          
+      # Warning: Poor Browser Compatibility
+      - alert: PoorBrowserCompatibility
+        expr: sli:frontend_browser_compatibility < 95
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: browser_compatibility
+        annotations:
+          summary: "Poor browser compatibility detected"
+          description: "Browser compatibility is {{ $value }}%, below 95% target"
+          
+      # Warning: Poor Error Recovery
+      - alert: PoorErrorRecovery
+        expr: sli:frontend_error_recovery_rate < 95
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: error_recovery
+        annotations:
+          summary: "Poor error recovery detected"
+          description: "Error recovery rate is {{ $value }}%, below 95% target"
+          
+      # Warning: Low User Satisfaction
+      - alert: LowUserSatisfaction
+        expr: sli:frontend_user_satisfaction < 8
+        for: 10m
+        labels:
+          severity: warning
+          service: frontend
+          slo: user_satisfaction
+        annotations:
+          summary: "Low user satisfaction detected"
+          description: "User satisfaction score is {{ $value }}, below 8/10 target"
+          
+      # Warning: Low Feature Adoption
+      - alert: LowFeatureAdoption
+        expr: sli:frontend_feature_adoption < 60
+        for: 15m
+        labels:
+          severity: warning
+          service: frontend
+          slo: feature_adoption
+        annotations:
+          summary: "Low feature adoption detected"
+          description: "Feature adoption rate is {{ $value }}%, below 60% target"
+          
+      # Warning: A/B Test Performance Degradation
+      - alert: ABTestPerformanceDegradation
+        expr: sli:frontend_ab_test_performance > 10
+        for: 10m
+        labels:
+          severity: warning
+          service: frontend
+          slo: ab_test_performance
+        annotations:
+          summary: "A/B test performance degradation detected"
+          description: "A/B test performance difference is {{ $value }}%, exceeding 10% threshold"
+          
+      # Warning: Low RUM Coverage
+      - alert: LowRUMCoverage
+        expr: sli:frontend_rum_coverage < 80
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: rum_coverage
+        annotations:
+          summary: "Low RUM coverage detected"
+          description: "RUM coverage is {{ $value }}%, below 80% target"
+          
+      # Warning: High Third-party Impact
+      - alert: HighThirdPartyImpact
+        expr: sli:frontend_third_party_impact_p95 > 0.2
+        for: 2m
+        labels:
+          severity: warning
+          service: frontend
+          slo: third_party_impact
+        annotations:
+          summary: "High third-party impact detected"
+          description: "Third-party impact is {{ $value }}s, exceeding 200ms target"
+          
+      # Warning: Poor Critical Path Optimization
+      - alert: PoorCriticalPathOptimization
+        expr: sli:frontend_critical_path_optimization < 90
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+          slo: critical_path_optimization
+        annotations:
+          summary: "Poor critical path optimization detected"
+          description: "Critical path optimization is {{ $value }}%, below 90% target"
+          
+      # Critical: SLO Budget Critical Burn
+      - alert: SLOBudgetCriticalBurn
+        expr: |
+          (
+            sli:frontend_error_rate > 1 or
+            sli:frontend_page_load_time_p95 > 2500 or
+            sli:frontend_availability < 99.9
+          )
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+          slo: budget_burn
+        annotations:
+          summary: "SLO error budget burning critically fast"
+          description: "Critical SLOs are being violated, immediate attention required"
+          
+      # Critical: Memory Usage Critical
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+          service: frontend
+          slo: resource_utilization
+        annotations:
+          summary: "Critical memory usage on frontend server"
+          description: "Memory usage is {{ $value }}%, exceeding 90% threshold"
 
   - name: frontend_performance_trends
     rules:

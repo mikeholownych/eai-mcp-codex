@@ -3,9 +3,15 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+<<<<<<< HEAD
+import {
+  BellIcon,
+  MagnifyingGlassIcon,
+=======
 import { 
   BellIcon, 
   MagnifyingGlassIcon, 
+>>>>>>> main
   UserCircleIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
@@ -25,10 +31,10 @@ interface HeaderProps {
   }
 }
 
-const Header: React.FC<HeaderProps> = ({ 
-  title, 
-  subtitle, 
-  user = { name: 'John Doe', email: 'john@example.com', role: 'customer' }
+const Header: React.FC<HeaderProps> = ({
+  title,
+  subtitle,
+  user = { name: 'John Doe', email: 'john@example.com', role: 'customer' },
 }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [notifications] = useState([
@@ -55,9 +61,7 @@ const Header: React.FC<HeaderProps> = ({
           {title && (
             <div>
               <h1 className="text-2xl font-semibold text-white">{title}</h1>
-              {subtitle && (
-                <p className="text-sm text-gray-400 mt-1">{subtitle}</p>
-              )}
+              {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
             </div>
           )}
 
@@ -69,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2 w-80 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
@@ -94,20 +98,22 @@ const Header: React.FC<HeaderProps> = ({
                 <h3 className="text-lg font-semibold text-white">Notifications</h3>
               </div>
               <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                {notifications.map((notification) => (
+                {notifications.map(notification => (
                   <Menu.Item key={notification.id}>
                     {({ active }) => (
                       <div
                         className={cn(
                           'flex items-start space-x-3 p-4 cursor-pointer transition-colors',
                           active && 'bg-dark-700',
-                          notification.unread && 'bg-dark-750'
+                          notification.unread && 'bg-dark-750',
                         )}
                       >
-                        <div className={cn(
-                          'w-2 h-2 rounded-full mt-2 flex-shrink-0',
-                          notification.unread ? 'bg-primary-500' : 'bg-gray-600'
-                        )} />
+                        <div
+                          className={cn(
+                            'w-2 h-2 rounded-full mt-2 flex-shrink-0',
+                            notification.unread ? 'bg-primary-500' : 'bg-gray-600',
+                          )}
+                        />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-white">{notification.title}</p>
                           <p className="text-xs text-gray-400 mt-1">{notification.time}</p>
@@ -129,8 +135,13 @@ const Header: React.FC<HeaderProps> = ({
           <Menu as="div" className="relative">
             <Menu.Button className="flex items-center space-x-2 p-2 text-gray-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors">
               {user.avatar ? (
+<<<<<<< HEAD
+                <Image
+                  src={user.avatar}
+=======
                 <Image 
                   src={user.avatar} 
+>>>>>>> main
                   alt={user.name}
                   width={32}
                   height={32}
@@ -152,7 +163,7 @@ const Header: React.FC<HeaderProps> = ({
                     <button
                       className={cn(
                         'flex items-center w-full px-3 py-2 text-sm text-left rounded-lg transition-colors',
-                        active ? 'bg-dark-700 text-white' : 'text-gray-300'
+                        active ? 'bg-dark-700 text-white' : 'text-gray-300',
                       )}
                       onClick={() => router.push('/profile')}
                     >
@@ -166,7 +177,7 @@ const Header: React.FC<HeaderProps> = ({
                     <button
                       className={cn(
                         'flex items-center w-full px-3 py-2 text-sm text-left rounded-lg transition-colors',
-                        active ? 'bg-dark-700 text-white' : 'text-gray-300'
+                        active ? 'bg-dark-700 text-white' : 'text-gray-300',
                       )}
                       onClick={() => router.push('/settings')}
                     >
@@ -181,7 +192,7 @@ const Header: React.FC<HeaderProps> = ({
                     <button
                       className={cn(
                         'flex items-center w-full px-3 py-2 text-sm text-left rounded-lg transition-colors',
-                        active ? 'bg-dark-700 text-error-400' : 'text-error-500'
+                        active ? 'bg-dark-700 text-error-400' : 'text-error-500',
                       )}
                       onClick={handleLogout}
                     >

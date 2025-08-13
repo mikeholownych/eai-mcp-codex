@@ -2,337 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Self-hosted fonts for better performance - replace external import */
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-Regular.woff2') format('woff2');
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-Medium.woff2') format('woff2');
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-Bold.woff2') format('woff2');
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  font-family: 'Mona-Sans';
+  src: url('/fonts/Mona-Sans-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/JetBrainsMono-Medium.woff2') format('woff2');
-  font-weight: 500;
+  font-family: 'Mona-Sans';
+  src: url('/fonts/Mona-Sans-Bold.woff2') format('woff2');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 :root {
-  /* MCP Codex Brand Colors - Purple Theme */
-  --primary-50: #faf5ff;
-  --primary-400: #c084fc;
-  --primary-500: #a855f7;
-  --primary-600: #9333ea;
-  --primary-700: #7c3aed;
-  --secondary-500: #6366f1;
-  --secondary-600: #4f46e5;
-  
-  /* Dark theme - matches Codex deep navy/charcoal background */
-  --background: #0f172a;
+  --primary-500: #14b8a6;
+  --secondary-500: #f97316;
+  --background: #020617;
   --foreground: #f8fafc;
-  --surface: #1e293b;
-  --surface-hover: #334155;
-  --border: #475569;
-  --muted: #64748b;
+  --surface: #0f172a;
+  --border: #1e293b;
+  --muted: #475569;
   --muted-foreground: #94a3b8;
-  
-  /* Semantic colors */
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
-  
-  /* Card and component styling - matches Codex theme */
-  --card-background: #1e293b;
-  --card-border: #334155;
-  --input-background: #334155;
-  --input-border: #475569;
-  
-  /* Code editor theme */
-  --code-background: #0f172a;
-  --code-foreground: #f8fafc;
-  --code-comment: #64748b;
-  --code-keyword: #a855f7;
-  --code-string: #22c55e;
-  --code-number: #2477eb;
-}
-
-/* Professional dark theme variables - now handled by Tailwind config */
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-html {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  overflow-x: hidden;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--surface);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border);
-}
-
-/* Selection styling */
-::selection {
-  background-color: rgba(168, 85, 247, 0.3);
-  color: var(--foreground);
-}
-
-::-moz-selection {
-  background-color: rgba(168, 85, 247, 0.3);
-  color: var(--foreground);
-}
-
-/* Focus ring styling */
-.focus-ring:focus {
-  outline: none;
-  box-shadow: 
-    0 0 0 2px var(--primary-500),
-    0 0 0 4px var(--background);
-}
-
-/* Button animations */
-.btn-animate {
-  transform: scale(1);
-  transition: all 200ms ease-in-out;
-}
-
-.btn-animate:hover {
-  transform: scale(1.05);
-}
-
-.btn-animate:active {
-  transform: scale(0.95);
-}
-
-/* Card hover effects */
-.card-hover {
-  transition: all 300ms ease-in-out;
-}
-
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-  border-color: rgba(168, 85, 247, 0.4);
-}
-
-/* Image optimization */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-.hero-image {
-  max-height: 400px;
-  object-fit: cover;
-  border-radius: 1rem;
-}
-
-.feature-icon {
-  width: 3rem;
-  height: 3rem;
-  flex-shrink: 0;
-}
-
-/* Gradient backgrounds now handled by Tailwind config */
-
-/* Code syntax highlighting */
-.hljs {
-  background: var(--code-background) !important;
-  color: var(--code-foreground) !important;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.hljs-comment {
-  color: var(--code-comment);
-  font-style: italic;
-}
-
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-type {
-  color: var(--code-keyword);
-  font-weight: 600;
-}
-
-.hljs-string,
-.hljs-attr {
-  color: var(--code-string);
-}
-
-.hljs-number,
-.hljs-literal {
-  color: var(--code-number);
-}
-
-/* Loading animations */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(-25%);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-  50% {
-    transform: translateY(0);
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  }
-}
-
-/* Utility classes */
-.spinner {
-  animation: spin 1s linear infinite;
-}
-
-.pulse-animation {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.bounce-animation {
-  animation: bounce 1s infinite;
-}
-
-/* Monaco Editor custom styling */
-.monaco-editor {
-  --vscode-editor-background: var(--code-background) !important;
-  --vscode-editor-foreground: var(--code-foreground) !important;
-  --vscode-editorWidget-background: var(--surface) !important;
-  --vscode-input-background: var(--input-background) !important;
-  --vscode-dropdown-background: var(--surface) !important;
-}
-
-/* Custom scrollbars for components */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: var(--muted) var(--surface);
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: var(--surface);
-  border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--border);
-}
-
-/* Tooltip styling */
-.tooltip {
-  visibility: hidden;
-  position: absolute;
-  z-index: 50;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: white;
-  background-color: var(--surface);
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  opacity: 0;
-  transition: opacity 300ms ease-in-out;
-}
-
-.tooltip-trigger:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
-}
-
-/* Responsive typography */
-@media (max-width: 640px) {
-  html {
-    font-size: 14px;
-  }
-}
-
-@media (min-width: 1024px) {
-  html {
-    font-size: 16px;
-  }
+  font-family: 'Satoshi', sans-serif;
 }

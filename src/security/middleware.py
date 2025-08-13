@@ -24,7 +24,7 @@ from .headers import (
 )
 from .audit_logging import AuditLogger, AuditMiddleware, get_audit_logger
 from ..common.redis_client import RedisClient
-from ..common.settings import Settings
+from ..common.settings import BaseServiceSettings
 
 logger = logging.getLogger(__name__)
 
@@ -38,13 +38,13 @@ class SecurityMiddlewareStack:
         self,
         app: FastAPI,
         redis_client: Optional[RedisClient] = None,
-        settings: Optional[Settings] = None,
+        settings: Optional[BaseServiceSettings] = None,
         config_manager: Optional[SecurityConfigManager] = None,
     ):
 
         self.app = app
         self.redis_client = redis_client
-        self.settings = settings or Settings()
+        self.settings = settings or BaseServiceSettings()
         self.config_manager = config_manager or get_security_config()
 
         # Initialize components
@@ -203,7 +203,7 @@ class SecurityMiddlewareFactory:
     def create_development_stack(
         app: FastAPI,
         redis_client: Optional[RedisClient] = None,
-        settings: Optional[Settings] = None,
+        settings: Optional[BaseServiceSettings] = None,
     ) -> SecurityMiddlewareStack:
         """Create security stack for development environment"""
         from .config import SecurityConfigPresets, SecurityConfigManager
@@ -215,7 +215,7 @@ class SecurityMiddlewareFactory:
 
     @staticmethod
     def create_production_stack(
-        app: FastAPI, redis_client: RedisClient, settings: Settings
+        app: FastAPI, redis_client: RedisClient, settings: BaseServiceSettings
     ) -> SecurityMiddlewareStack:
         """Create security stack for production environment"""
         from .config import SecurityConfigPresets, SecurityConfigManager
@@ -227,7 +227,7 @@ class SecurityMiddlewareFactory:
 
     @staticmethod
     def create_high_security_stack(
-        app: FastAPI, redis_client: RedisClient, settings: Settings
+        app: FastAPI, redis_client: RedisClient, settings: BaseServiceSettings
     ) -> SecurityMiddlewareStack:
         """Create high-security stack for sensitive environments"""
         from .config import SecurityConfigPresets, SecurityConfigManager
@@ -243,7 +243,7 @@ async def setup_security_middleware(
     app: FastAPI,
     environment: str = "production",
     redis_client: Optional[RedisClient] = None,
-    settings: Optional[Settings] = None,
+    settings: Optional[BaseServiceSettings] = None,
     custom_config: Optional[SecurityConfigManager] = None,
 ) -> SecurityMiddlewareStack:
     """

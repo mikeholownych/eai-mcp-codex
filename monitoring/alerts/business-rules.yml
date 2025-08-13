@@ -1,0 +1,518 @@
+# Business Alerting Rules
+# Comprehensive monitoring for workflows, agent collaboration, and business processes
+
+groups:
+  - name: workflow_alerts
+    rules:
+      # Workflow Health
+      - alert: WorkflowFailureRateHigh
+        expr: rate(workflow_failures_total[5m]) / rate(workflow_executions_total[5m]) * 100 > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: workflows
+          category: business
+        annotations:
+          summary: "Workflow failure rate is high"
+          description: "Workflow failure rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/workflow-failure-rate"
+          
+      - alert: WorkflowFailureRateCritical
+        expr: rate(workflow_failures_total[5m]) / rate(workflow_executions_total[5m]) * 100 > 25
+        for: 2m
+        labels:
+          severity: critical
+          service: workflows
+          category: business
+        annotations:
+          summary: "Workflow failure rate is critical"
+          description: "Workflow failure rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/workflow-failure-rate-critical"
+          
+      - alert: WorkflowExecutionTimeHigh
+        expr: histogram_quantile(0.95, rate(workflow_execution_time_seconds_bucket[5m])) > 300
+        for: 5m
+        labels:
+          severity: warning
+          service: workflows
+          category: business
+        annotations:
+          summary: "Workflow execution time is high"
+          description: "95th percentile workflow execution time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/workflow-execution-time"
+          
+      - alert: WorkflowExecutionTimeCritical
+        expr: histogram_quantile(0.95, rate(workflow_execution_time_seconds_bucket[5m])) > 600
+        for: 2m
+        labels:
+          severity: critical
+          service: workflows
+          category: business
+        annotations:
+          summary: "Workflow execution time is critical"
+          description: "95th percentile workflow execution time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/workflow-execution-time-critical"
+      
+      # Workflow Queue
+      - alert: WorkflowQueueBacklog
+        expr: workflow_queue_size > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: workflows
+          category: business
+        annotations:
+          summary: "Workflow queue backlog detected"
+          description: "Workflow queue size is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/workflow-queue-backlog"
+          
+      - alert: WorkflowQueueCritical
+        expr: workflow_queue_size > 500
+        for: 2m
+        labels:
+          severity: critical
+          service: workflows
+          category: business
+        annotations:
+          summary: "Workflow queue is critical"
+          description: "Workflow queue size is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/workflow-queue-critical"
+          
+      - alert: WorkflowQueueStalled
+        expr: rate(workflow_dequeue_rate[5m]) < 0.1 and workflow_queue_size > 10
+        for: 5m
+        labels:
+          severity: critical
+          service: workflows
+          category: business
+        annotations:
+          summary: "Workflow queue is stalled"
+          description: "Workflow queue dequeue rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/workflow-queue-stalled"
+      
+      # Workflow Types
+      - alert: DataProcessingWorkflowFailures
+        expr: rate(workflow_failures_total{type="data_processing"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: workflows
+          category: business
+        annotations:
+          summary: "Data processing workflow failures"
+          description: "Data processing workflow failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/data-processing-workflow-failures"
+          
+      - alert: AnalysisWorkflowFailures
+        expr: rate(workflow_failures_total{type="analysis"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: workflows
+          category: business
+        annotations:
+          summary: "Analysis workflow failures"
+          description: "Analysis workflow failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/analysis-workflow-failures"
+          
+      - alert: ReportGenerationWorkflowFailures
+        expr: rate(workflow_failures_total{type="report_generation"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: workflows
+          category: business
+        annotations:
+          summary: "Report generation workflow failures"
+          description: "Report generation workflow failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/report-generation-workflow-failures"
+
+  - name: agent_collaboration_alerts
+    rules:
+      # Agent Health
+      - alert: AgentOffline
+        expr: agent_status{status="offline"} > 0
+        for: 2m
+        labels:
+          severity: warning
+          service: agent-collaboration
+          category: business
+        annotations:
+          summary: "Agent is offline"
+          description: "Agent {{ $labels.agent_name }} is offline"
+          runbook_url: "https://docs.example.com/runbooks/agent-offline"
+          
+      - alert: AgentUnresponsive
+        expr: agent_response_time > 60
+        for: 5m
+        labels:
+          severity: warning
+          service: agent-collaboration
+          category: business
+        annotations:
+          summary: "Agent is unresponsive"
+          description: "Agent {{ $labels.agent_name }} response time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/agent-unresponsive"
+          
+      - alert: AgentErrorRateHigh
+        expr: rate(agent_errors_total[5m]) / rate(agent_requests_total[5m]) * 100 > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: agent-collaboration
+          category: business
+        annotations:
+          summary: "Agent error rate is high"
+          description: "Agent {{ $labels.agent_name }} error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/agent-error-rate"
+      
+      # Agent Communication
+      - alert: AgentCommunicationFailure
+        expr: rate(agent_communication_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: agent-collaboration
+          category: business
+        annotations:
+          summary: "Agent communication failure"
+          description: "Agent communication failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/agent-communication-failure"
+          
+      - alert: AgentMessageQueueFull
+        expr: agent_message_queue_size > 1000
+        for: 5m
+        labels:
+          severity: critical
+          service: agent-collaboration
+          category: business
+        annotations:
+          summary: "Agent message queue is full"
+          description: "Agent {{ $labels.agent_name }} message queue size is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/agent-message-queue-full"
+          
+      - alert: AgentCollaborationTimeout
+        expr: rate(agent_collaboration_timeouts_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: agent-collaboration
+          category: business
+        annotations:
+          summary: "Agent collaboration timeout"
+          description: "Agent collaboration timeout rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/agent-collaboration-timeout"
+      
+      # Agent Performance
+      - alert: AgentProcessingTimeHigh
+        expr: histogram_quantile(0.95, rate(agent_processing_time_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: agent-collaboration
+          category: business
+        annotations:
+          summary: "Agent processing time is high"
+          description: "95th percentile agent processing time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/agent-processing-time"
+          
+      - alert: AgentResourceUsageHigh
+        expr: agent_memory_usage_bytes / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+          service: agent-collaboration
+          category: business
+        annotations:
+          summary: "Agent resource usage is high"
+          description: "Agent {{ $labels.agent_name }} memory usage is {{ $value }}MB"
+          runbook_url: "https://docs.example.com/runbooks/agent-resource-usage"
+          
+      - alert: AgentTaskQueueBacklog
+        expr: agent_task_queue_size > 50
+        for: 5m
+        labels:
+          severity: warning
+          service: agent-collaboration
+          category: business
+        annotations:
+          summary: "Agent task queue backlog"
+          description: "Agent {{ $labels.agent_name }} task queue size is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/agent-task-queue-backlog"
+
+  - name: business_process_alerts
+    rules:
+      # Data Processing
+      - alert: DataProcessingBacklog
+        expr: data_processing_queue_size > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: business-processes
+          category: business
+        annotations:
+          summary: "Data processing backlog detected"
+          description: "Data processing queue size is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/data-processing-backlog"
+          
+      - alert: DataProcessingFailureRateHigh
+        expr: rate(data_processing_failures_total[5m]) / rate(data_processing_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: business-processes
+          category: business
+        annotations:
+          summary: "Data processing failure rate is high"
+          description: "Data processing failure rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/data-processing-failure-rate"
+          
+      - alert: DataProcessingStalled
+        expr: rate(data_processing_completed_total[5m]) < 0.1 and data_processing_queue_size > 100
+        for: 5m
+        labels:
+          severity: critical
+          service: business-processes
+          category: business
+        annotations:
+          summary: "Data processing is stalled"
+          description: "Data processing completion rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/data-processing-stalled"
+      
+      # Analysis Tasks
+      - alert: AnalysisTasksFailing
+        expr: rate(analysis_task_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: business-processes
+          category: business
+        annotations:
+          summary: "Analysis tasks are failing"
+          description: "Analysis task failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/analysis-tasks-failing"
+          
+      - alert: AnalysisQualityDegraded
+        expr: analysis_quality_score < 0.7
+        for: 5m
+        labels:
+          severity: warning
+          service: business-processes
+          category: business
+        annotations:
+          summary: "Analysis quality is degraded"
+          description: "Analysis quality score is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/analysis-quality-degraded"
+          
+      - alert: AnalysisThroughputLow
+        expr: rate(analysis_tasks_completed_total[5m]) < 1
+        for: 5m
+        labels:
+          severity: warning
+          service: business-processes
+          category: business
+        annotations:
+          summary: "Analysis throughput is low"
+          description: "Analysis task completion rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/analysis-throughput-low"
+      
+      # Report Generation
+      - alert: ReportGenerationFailures
+        expr: rate(report_generation_failures_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: business-processes
+          category: business
+        annotations:
+          summary: "Report generation failures"
+          description: "Report generation failure rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/report-generation-failures"
+          
+      - alert: ReportGenerationDelayed
+        expr: histogram_quantile(0.95, rate(report_generation_time_seconds_bucket[5m])) > 300
+        for: 5m
+        labels:
+          severity: warning
+          service: business-processes
+          category: business
+        annotations:
+          summary: "Report generation is delayed"
+          description: "95th percentile report generation time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/report-generation-delayed"
+          
+      - alert: ReportQueueBacklog
+        expr: report_generation_queue_size > 50
+        for: 5m
+        labels:
+          severity: warning
+          service: business-processes
+          category: business
+        annotations:
+          summary: "Report queue backlog"
+          description: "Report generation queue size is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/report-queue-backlog"
+
+  - name: business_metrics_alerts
+    rules:
+      # User Engagement
+      - alert: UserActivityDrop
+        expr: rate(user_activity_events_total[5m]) < 10
+        for: 10m
+        labels:
+          severity: warning
+          service: business-metrics
+          category: business
+        annotations:
+          summary: "User activity drop detected"
+          description: "User activity rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/user-activity-drop"
+          
+      - alert: UserSessionDurationLow
+        expr: histogram_quantile(0.5, rate(user_session_duration_seconds_bucket[5m])) < 60
+        for: 10m
+        labels:
+          severity: warning
+          service: business-metrics
+          category: business
+        annotations:
+          summary: "User session duration is low"
+          description: "Median user session duration is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/user-session-duration-low"
+          
+      - alert: UserRetentionDrop
+        expr: user_retention_rate < 0.7
+        for: 24h
+        labels:
+          severity: warning
+          service: business-metrics
+          category: business
+        annotations:
+          summary: "User retention rate dropped"
+          description: "User retention rate is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/user-retention-drop"
+      
+      # Business Operations
+      - alert: BusinessProcessErrorRateHigh
+        expr: rate(business_process_errors_total[5m]) / rate(business_process_executions_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: business-metrics
+          category: business
+        annotations:
+          summary: "Business process error rate is high"
+          description: "Business process error rate is {{ $value }}%"
+          runbook_url: "https://docs.example.com/runbooks/business-process-error-rate"
+          
+      - alert: BusinessProcessThroughputLow
+        expr: rate(business_process_completions_total[5m]) < 1
+        for: 5m
+        labels:
+          severity: warning
+          service: business-metrics
+          category: business
+        annotations:
+          summary: "Business process throughput is low"
+          description: "Business process completion rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/business-process-throughput-low"
+          
+      - alert: BusinessProcessLatencyHigh
+        expr: histogram_quantile(0.95, rate(business_process_latency_seconds_bucket[5m])) > 120
+        for: 5m
+        labels:
+          severity: warning
+          service: business-metrics
+          category: business
+        annotations:
+          summary: "Business process latency is high"
+          description: "95th percentile business process latency is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/business-process-latency-high"
+      
+      # Revenue Impact
+      - alert: RevenueImpactDetected
+        expr: revenue_impact_score > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          service: business-metrics
+          category: business
+        annotations:
+          summary: "Revenue impact detected"
+          description: "Revenue impact score is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/revenue-impact"
+          
+      - alert: ConversionRateDrop
+        expr: conversion_rate < 0.02
+        for: 24h
+        labels:
+          severity: warning
+          service: business-metrics
+          category: business
+        annotations:
+          summary: "Conversion rate dropped"
+          description: "Conversion rate is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/conversion-rate-drop"
+          
+      - alert: CustomerSatisfactionDrop
+        expr: customer_satisfaction_score < 3.5
+        for: 24h
+        labels:
+          severity: warning
+          service: business-metrics
+          category: business
+        annotations:
+          summary: "Customer satisfaction dropped"
+          description: "Customer satisfaction score is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/customer-satisfaction-drop"
+
+  - name: business_cross_service_alerts
+    rules:
+      # Overall Business Health
+      - alert: BusinessProcessDegradation
+        expr: business_health_score < 70
+        for: 5m
+        labels:
+          severity: warning
+          service: business
+          category: overview
+        annotations:
+          summary: "Business process degradation detected"
+          description: "Business health score is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/business-process-degradation"
+          
+      - alert: BusinessCriticalFailure
+        expr: business_critical_failures_total > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: business
+          category: overview
+        annotations:
+          summary: "Business critical failure detected"
+          description: "Business critical failure: {{ $labels.failure_type }}"
+          runbook_url: "https://docs.example.com/runbooks/business-critical-failure"
+          
+      - alert: BusinessThroughputDegraded
+        expr: rate(business_throughput_total[5m]) < 5
+        for: 5m
+        labels:
+          severity: warning
+          service: business
+          category: overview
+        annotations:
+          summary: "Business throughput degraded"
+          description: "Business throughput rate is {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/business-throughput-degraded"
+          
+      - alert: BusinessQualityDegraded
+        expr: business_quality_score < 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: business
+          category: overview
+        annotations:
+          summary: "Business quality degraded"
+          description: "Business quality score is {{ $value }}"
+          runbook_url: "https://docs.example.com/runbooks/business-quality-degraded"

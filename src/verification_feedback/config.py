@@ -1,7 +1,7 @@
 """Verification Feedback configuration."""
 
 from pydantic_settings import SettingsConfigDict
-from pydantic import Field
+from pydantic import Field, AliasChoices
 
 from src.common.settings import BaseServiceSettings
 
@@ -12,8 +12,8 @@ class Settings(BaseServiceSettings):
     service_name: str = "verification-feedback"
     service_port: int = 8005
     database_url: str = Field(
-        "postgresql://mcp_user:NoqfMMAgz2TEP0Lcxf6TWWEdIXJqF9o9b4bExZh8@postgres:5432/verification_feedback_db",
-        env="VERIFICATION_FEEDBACK_DATABASE_URL",
+        "postgresql://mcp_user:password@postgres:5432/verification_feedback_db",
+        validation_alias=AliasChoices("DATABASE_URL"),
     )
 
     model_config = SettingsConfigDict(env_prefix="VERIFICATION_FEEDBACK_")

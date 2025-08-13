@@ -9,6 +9,17 @@ interface ParticleBackgroundProps {
 
 const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ className = '' }) => {
   const mountRef = useRef<HTMLDivElement>(null)
+<<<<<<< HEAD
+  const sceneRef = useRef<THREE.Scene | null>(null)
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
+  const particlesRef = useRef<THREE.Points | null>(null)
+  const animationRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!mountRef.current) return
+
+=======
   const sceneRef = useRef<THREE.Scene>()
   const cameraRef = useRef<THREE.PerspectiveCamera>()
   const rendererRef = useRef<THREE.WebGLRenderer>()
@@ -18,6 +29,7 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ className = '' 
   useEffect(() => {
     if (!mountRef.current) return
     
+>>>>>>> main
     const mountRefCurrent = mountRef.current
 
     // Scene setup
@@ -29,15 +41,25 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ className = '' 
       75,
       window.innerWidth / window.innerHeight,
       0.1,
+<<<<<<< HEAD
+      1000,
+=======
       1000
+>>>>>>> main
     )
     camera.position.z = 5
     cameraRef.current = camera
 
     // Renderer setup
+<<<<<<< HEAD
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+=======
     const renderer = new THREE.WebGLRenderer({ 
       alpha: true,
       antialias: true 
+>>>>>>> main
     })
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(window.devicePixelRatio)
@@ -60,6 +82,15 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ className = '' 
       // Color (purple to pink gradient)
       const colorChoice = Math.random()
       if (colorChoice > 0.5) {
+<<<<<<< HEAD
+        colorArray[i] = 0.67 // Purple
+        colorArray[i + 1] = 0.33 // Green
+        colorArray[i + 2] = 0.97 // Blue
+      } else {
+        colorArray[i] = 1.0 // Pink
+        colorArray[i + 1] = 0.0 // Green
+        colorArray[i + 2] = 0.75 // Blue
+=======
         colorArray[i] = 0.67     // Purple
         colorArray[i + 1] = 0.33  // Green
         colorArray[i + 2] = 0.97  // Blue
@@ -67,6 +98,7 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ className = '' 
         colorArray[i] = 1.0      // Pink
         colorArray[i + 1] = 0.0   // Green
         colorArray[i + 2] = 0.75  // Blue
+>>>>>>> main
       }
     }
 
@@ -142,12 +174,21 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ className = '' 
   }, [])
 
   return (
+<<<<<<< HEAD
+    <div
+      ref={mountRef}
+=======
     <div 
       ref={mountRef} 
+>>>>>>> main
       className={`fixed inset-0 pointer-events-none ${className}`}
       style={{ zIndex: 1 }}
     />
   )
 }
 
+<<<<<<< HEAD
 export default ParticleBackground
+=======
+export default ParticleBackground
+>>>>>>> main

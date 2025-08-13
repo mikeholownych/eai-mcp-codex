@@ -1,0 +1,73 @@
+{
+  "_id": "ALERT_SUMMARY",
+  "_type": "visualization",
+  "_source": {
+    "title": "Alert Summary",
+    "type": "metric",
+    "params": {
+      "metric": {
+        "id": "1",
+        "type": "count",
+        "field": "@timestamp"
+      },
+      "bucket": {
+        "id": "2",
+        "type": "date_histogram",
+        "field": "@timestamp",
+        "interval": "auto",
+        "time_zone": "UTC"
+      }
+    },
+    "aggs": [
+      {
+        "id": "1",
+        "enabled": true,
+        "type": "count",
+        "schema": "metric",
+        "params": {
+          "customLabel": "Total Alerts"
+        }
+      },
+      {
+        "id": "2",
+        "enabled": true,
+        "type": "terms",
+        "schema": "group",
+        "params": {
+          "field": "alert_priority",
+          "size": 10,
+          "order": "desc",
+          "orderBy": "1",
+          "customLabel": "Alert Priority"
+        }
+      },
+      {
+        "id": "3",
+        "enabled": true,
+        "type": "terms",
+        "schema": "group",
+        "params": {
+          "field": "alert_severity",
+          "size": 10,
+          "order": "desc",
+          "orderBy": "1",
+          "customLabel": "Alert Severity"
+        }
+      },
+      {
+        "id": "4",
+        "enabled": true,
+        "type": "terms",
+        "schema": "group",
+        "params": {
+          "field": "alert_category",
+          "size": 10,
+          "order": "desc",
+          "orderBy": "1",
+          "customLabel": "Alert Category"
+        }
+      }
+    ],
+    "listeners": {}
+  }
+}

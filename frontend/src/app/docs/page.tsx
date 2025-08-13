@@ -2,15 +2,15 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { 
-  ArrowLeftIcon, 
-  BookOpenIcon, 
-  CodeBracketIcon, 
+import {
+  ArrowLeftIcon,
+  BookOpenIcon,
+  CodeBracketIcon,
   CogIcon,
   ShieldCheckIcon,
   RocketLaunchIcon,
   DocumentTextIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
@@ -25,8 +25,8 @@ const documentationSections = [
       { title: 'Installation & Setup', href: '#installation', time: '5 min' },
       { title: 'Your First AI Agent', href: '#first-agent', time: '10 min' },
       { title: 'Authentication & API Keys', href: '#auth', time: '3 min' },
-      { title: 'Project Configuration', href: '#config', time: '8 min' }
-    ]
+      { title: 'Project Configuration', href: '#config', time: '8 min' },
+    ],
   },
   {
     id: 'api-reference',
@@ -37,8 +37,8 @@ const documentationSections = [
       { title: 'REST API Overview', href: '#rest-api', time: '12 min' },
       { title: 'WebSocket Integration', href: '#websocket', time: '15 min' },
       { title: 'Agent Communication Protocol', href: '#agent-protocol', time: '20 min' },
-      { title: 'Error Handling', href: '#errors', time: '8 min' }
-    ]
+      { title: 'Error Handling', href: '#errors', time: '8 min' },
+    ],
   },
   {
     id: 'security',
@@ -49,8 +49,8 @@ const documentationSections = [
       { title: 'Security Architecture', href: '#security-arch', time: '15 min' },
       { title: 'SOC 2 Compliance', href: '#soc2', time: '10 min' },
       { title: 'Data Encryption', href: '#encryption', time: '12 min' },
-      { title: 'Audit Logging', href: '#audit-logs', time: '8 min' }
-    ]
+      { title: 'Audit Logging', href: '#audit-logs', time: '8 min' },
+    ],
   },
   {
     id: 'configuration',
@@ -61,9 +61,9 @@ const documentationSections = [
       { title: 'Environment Variables', href: '#env-vars', time: '5 min' },
       { title: 'Agent Configuration', href: '#agent-config', time: '12 min' },
       { title: 'Workflow Orchestration', href: '#workflows', time: '18 min' },
-      { title: 'Custom Integrations', href: '#integrations', time: '25 min' }
-    ]
-  }
+      { title: 'Custom Integrations', href: '#integrations', time: '25 min' },
+    ],
+  },
 ]
 
 const quickLinks = [
@@ -72,7 +72,7 @@ const quickLinks = [
   { title: 'Agent Collaboration', href: '#collaboration', category: 'Advanced' },
   { title: 'Troubleshooting', href: '#troubleshooting', category: 'Support' },
   { title: 'Best Practices', href: '#best-practices', category: 'Guide' },
-  { title: 'Performance Tuning', href: '#performance', category: 'Optimization' }
+  { title: 'Performance Tuning', href: '#performance', category: 'Optimization' },
 ]
 
 export default function DocsPage() {
@@ -85,7 +85,10 @@ export default function DocsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center text-slate-300 hover:text-white transition-colors">
+              <Link
+                href="/"
+                className="flex items-center text-slate-300 hover:text-white transition-colors"
+              >
                 <ArrowLeftIcon className="w-5 h-5 mr-2" />
                 Back to Home
               </Link>
@@ -103,13 +106,11 @@ export default function DocsPage() {
       {/* Documentation Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Documentation
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Documentation</h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
             Comprehensive guides and references for the MCP Agent Network platform
           </p>
-          
+
           {/* Search Bar */}
           <div className="max-w-md mx-auto relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -119,7 +120,7 @@ export default function DocsPage() {
               type="text"
               placeholder="Search documentation..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
@@ -153,7 +154,7 @@ export default function DocsPage() {
 
         {/* Documentation Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {documentationSections.map((section) => {
+          {documentationSections.map(section => {
             const IconComponent = section.icon
             return (
               <Card key={section.id} hover>
@@ -166,7 +167,7 @@ export default function DocsPage() {
                   </div>
                   <p className="text-gray-400">{section.description}</p>
                 </Card.Header>
-                
+
                 <Card.Content>
                   <div className="space-y-3">
                     {section.articles.map((article, index) => (
@@ -186,7 +187,7 @@ export default function DocsPage() {
                     ))}
                   </div>
                 </Card.Content>
-                
+
                 <Card.Footer>
                   <Button variant="ghost" size="sm" className="w-full">
                     View All {section.title} Docs
@@ -257,19 +258,21 @@ export default function DocsPage() {
               Comprehensive Documentation Coming Soon
             </h3>
             <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
+<<<<<<< HEAD
+              We&apos;re working on detailed documentation covering every aspect of the MCP Agent
+              Network. In the meantime, reach out to our team for specific questions or
+              implementation guidance.
+=======
               We&apos;re working on detailed documentation covering every aspect of the MCP Agent Network. 
               In the meantime, reach out to our team for specific questions or implementation guidance.
+>>>>>>> main
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact">
-                <Button variant="secondary">
-                  Contact Support
-                </Button>
+                <Button variant="secondary">Contact Support</Button>
               </Link>
               <Link href="/register">
-                <Button variant="outline">
-                  Get Early Access
-                </Button>
+                <Button variant="outline">Get Early Access</Button>
               </Link>
             </div>
           </Card.Content>

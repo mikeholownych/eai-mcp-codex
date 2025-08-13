@@ -135,15 +135,15 @@ class DeveloperProfile(BaseModel):
         self, task_type: TaskType, required_skills: List[str]
     ) -> float:
         """Calculate capability score for a specific task."""
-        base_score = 0.5
+        base_score = 0.45
 
         # Experience level bonus
         experience_bonus = {
             ExperienceLevel.JUNIOR: 0.0,
             ExperienceLevel.INTERMEDIATE: 0.1,
-            ExperienceLevel.SENIOR: 0.2,
-            ExperienceLevel.LEAD: 0.3,
-            ExperienceLevel.ARCHITECT: 0.4,
+            ExperienceLevel.SENIOR: 0.15,
+            ExperienceLevel.LEAD: 0.2,
+            ExperienceLevel.ARCHITECT: 0.25,
         }
         base_score += experience_bonus[self.experience_level]
 
@@ -151,16 +151,16 @@ class DeveloperProfile(BaseModel):
         if task_type in self.preferred_tasks:
             base_score += 0.2
 
-        # Skill match bonus
+        # Skill match bonus (ensure non-matching stays below 0.7 overall)
         skill_matches = len(
             set(required_skills) & set(self.programming_languages + self.frameworks)
         )
         skill_total = len(required_skills) if required_skills else 1
-        base_score += (skill_matches / skill_total) * 0.3
+        # Use 0.1 weight so experience/preference don't push non-matches too high
+        base_score += (skill_matches / skill_total) * 0.1
 
-        # Performance history bonus
-        if self.performance_metrics.overall_score > 0.7:
-            base_score += 0.1
+        # Note: Performance history is factored by assignment engine,
+        # not here. Keep this a pure capability score.
 
         return min(1.0, base_score)
 

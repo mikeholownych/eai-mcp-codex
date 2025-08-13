@@ -1,25 +1,57 @@
 'use client'
 
 import React, { forwardRef } from 'react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { ButtonProps } from '@/types'
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', disabled = false, loading = false, children, onClick, className, ...props }, ref) => {
-    const baseClasses = 'inline-flex items-center justify-center font-medium focus-ring disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200'
-    
+  (
+    {
+      variant = 'primary',
+      size = 'md',
+      disabled = false,
+      loading = false,
+      children,
+      onClick,
+      className,
+      href,
+      ...props
+    },
+    ref,
+  ) => {
+    const baseClasses =
+      'inline-flex items-center justify-center font-medium focus-ring disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200'
+
     const variants = {
+<<<<<<< HEAD
+      primary: 'bg-primary-600 text-white hover:bg-primary-700 active:scale-95 shadow-sm',
+      secondary: 'bg-secondary-600 text-white hover:bg-secondary-700 active:scale-95 shadow-sm',
+      outline:
+        'border border-dark-600 text-dark-300 hover:bg-dark-800 hover:border-dark-500 active:scale-95',
+      ghost: 'text-dark-300 hover:bg-dark-800 active:scale-95',
+      danger: 'bg-error-500 text-white hover:bg-error-600 active:scale-95 shadow-sm',
+=======
       primary: 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95 shadow-sm',
       secondary: 'bg-orange-600 text-white hover:bg-orange-700 active:scale-95 shadow-sm',
       outline: 'border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white active:scale-95',
       ghost: 'text-slate-300 hover:text-white hover:bg-slate-800 active:scale-95',
       danger: 'bg-red-500 text-white hover:bg-red-600 active:scale-95 shadow-sm',
+>>>>>>> main
     }
-    
+
     const sizes = {
       sm: 'px-3 py-1.5 text-sm rounded-md',
       md: 'px-4 py-2 text-base rounded-md',
       lg: 'px-6 py-3 text-base rounded-md',
+    }
+
+    if (href && !disabled && !loading) {
+      return (
+        <Link href={href} className={cn(baseClasses, variants[variant], sizes[size], className)}>
+          {children}
+        </Link>
+      )
     }
 
     return (
@@ -30,7 +62,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           variants[variant],
           sizes[size],
           loading && 'cursor-wait',
-          className
+          className,
         )}
         disabled={disabled || loading}
         onClick={onClick}
@@ -61,7 +93,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </button>
     )
-  }
+  },
 )
 
 Button.displayName = 'Button'

@@ -1,0 +1,250 @@
+# Log Shipping Configuration for MCP Services
+# Configuration for shipping logs from all MCP services to Fluentd
+
+version: 1
+disable_existing_loggers: false
+
+# Formatters for different log output formats
+formatters:
+  # JSON formatter for structured logging
+  json:
+    class: pythonjsonlogger.jsonlogger.JsonFormatter
+    format: "%(asctime)s %(name)s %(levelname)s %(message)s"
+    datefmt: "%Y-%m-%dT%H:%M:%S.%fZ"
+  
+  # Standard text formatter for console output
+  standard:
+    format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  
+  # Detailed formatter with file and line info
+  detailed:
+    format: "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d: %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+# Filters for log processing
+filters:
+  # Filter to add trace correlation
+  trace_correlation:
+    class: src.common.logging_config.TraceCorrelationFilter
+  
+  # Filter to add service metadata
+  service_metadata:
+    class: src.common.logging_config.ServiceMetadataFilter
+  
+  # Filter to sanitize sensitive data
+  sensitive_data:
+    class: src.common.logging_config.SensitiveDataFilter
+  
+  # Filter to add request context
+  request_context:
+    class: src.common.logging_config.RequestContextFilter
+  
+  # Filter to add performance metrics
+  performance_metrics:
+    class: src.common.logging_config.PerformanceMetricsFilter
+
+# Handlers for different log outputs
+handlers:
+  # Console handler for development
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: standard
+    stream: ext://sys.stdout
+    filters: [trace_correlation, service_metadata, sensitive_data]
+  
+  # Fluentd handler for log aggregation
+  fluentd:
+    class: fluent.handler.FluentHandler
+    level: INFO
+    formatter: json
+    tag: mcp
+    host: localhost
+    port: 24224
+    timeout: 3.0
+    verbose: false
+    buffer_chunk_limit: 1048576  # 1MB
+    buffer_queue_limit: 100
+    buffer_overflow_action: block
+    buffer_retry_limit: 3
+    buffer_retry_wait: 1.0
+    msgpack_kwargs:
+      use_bin_type: true
+    filters: [trace_correlation, service_metadata, sensitive_data, request_context]
+  
+  # File handler for local logging
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: json
+    filename: logs/app.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 10
+    encoding: utf8
+    filters: [trace_correlation, service_metadata, sensitive_data, request_context]
+  
+  # Error file handler
+  error_file:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: json
+    filename: logs/error.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 20
+    encoding: utf8
+    filters: [trace_correlation, service_metadata, sensitive_data, request_context]
+  
+  # Performance file handler
+  performance_file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: json
+    filename: logs/performance.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: utf8
+    filters: [trace_correlation, service_metadata, performance_metrics]
+
+# Logger configurations
+loggers:
+  # Root logger
+  "":
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Model Router logger
+  model_router:
+    level: INFO
+    handlers: [console, fluentd, file, performance_file]
+    propagate: false
+  
+  # Plan Management logger
+  plan_management:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Git Worktree logger
+  git_worktree:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Workflow Orchestrator logger
+  workflow_orchestrator:
+    level: INFO
+    handlers: [console, fluentd, file, performance_file]
+    propagate: false
+  
+  # Verification Feedback logger
+  verification_feedback:
+    level: INFO
+    handlers: [console, fluentd, file, error_file]
+    propagate: false
+  
+  # Security logger
+  security:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Performance logger
+  performance:
+    level: INFO
+    handlers: [console, fluentd, file, performance_file]
+    propagate: false
+  
+  # Audit logger
+  audit:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Error logger
+  errors:
+    level: ERROR
+    handlers: [console, fluentd, file, error_file]
+    propagate: false
+  
+  # Third-party library loggers
+  uvicorn:
+    level: INFO
+    handlers: [console, file]
+    propagate: false
+  
+  sqlalchemy:
+    level: WARNING
+    handlers: [file]
+    propagate: false
+  
+  httpx:
+    level: INFO
+    handlers: [file]
+    propagate: false
+  
+  redis:
+    level: WARNING
+    handlers: [file]
+    propagate: false
+  
+  # Application loggers
+  app:
+    level: DEBUG
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # API logger
+  api:
+    level: INFO
+    handlers: [console, fluentd, file, performance_file]
+    propagate: false
+  
+  # Database logger
+  database:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Message queue logger
+  message_queue:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # LLM logger
+  llm:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Collaboration logger
+  collaboration:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Agent logger
+  agent:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Health check logger
+  health:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Monitoring logger
+  monitoring:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false
+  
+  # Tracing logger
+  tracing:
+    level: INFO
+    handlers: [console, fluentd, file]
+    propagate: false

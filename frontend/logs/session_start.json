@@ -1,5 +1,9 @@
 [
   {
+<<<<<<< HEAD
+    "session_id": "b10b9b94-b5e1-4511-aca2-e7d7fca595d6",
+    "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/b10b9b94-b5e1-4511-aca2-e7d7fca595d6.jsonl",
+=======
     "session_id": "50ae73bb-fb52-4aa2-b7f9-e2639a32b3cd",
     "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator-llm-stack-rag-agent/50ae73bb-fb52-4aa2-b7f9-e2639a32b3cd.jsonl",
     "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
@@ -170,6 +174,7 @@
   {
     "session_id": "545c6d76-8359-4365-98f6-8a8ea33c2992",
     "transcript_path": "/home/mike/.claude/projects/-opt-Tmux-Orchestrator/545c6d76-8359-4365-98f6-8a8ea33c2992.jsonl",
+>>>>>>> main
     "cwd": "/opt/Tmux-Orchestrator/llm-stack/rag-agent/frontend",
     "hook_event_name": "SessionStart",
     "source": "compact"

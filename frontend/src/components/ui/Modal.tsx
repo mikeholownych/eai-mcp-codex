@@ -7,13 +7,13 @@ import { cn } from '@/lib/utils'
 import { ModalProps } from '@/types'
 import Button from './Button'
 
-const Modal: React.FC<ModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
-  size = 'md', 
-  className 
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = 'md',
+  className,
 }) => {
   const sizeClasses = {
     sm: 'max-w-md',
@@ -36,11 +36,7 @@ const Modal: React.FC<ModalProps> = ({
   }, [isOpen])
 
   return (
-    <Dialog 
-      open={isOpen} 
-      onClose={onClose}
-      className="relative z-50"
-    >
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
 
@@ -50,15 +46,13 @@ const Modal: React.FC<ModalProps> = ({
           className={cn(
             'w-full bg-dark-800 border border-dark-600 rounded-2xl shadow-2xl overflow-hidden',
             sizeClasses[size],
-            className
+            className,
           )}
         >
           {/* Header */}
           {title && (
             <div className="flex items-center justify-between p-6 border-b border-dark-600">
-              <Dialog.Title className="text-xl font-semibold text-white">
-                {title}
-              </Dialog.Title>
+              <Dialog.Title className="text-xl font-semibold text-white">{title}</Dialog.Title>
               <Button
                 variant="ghost"
                 size="sm"
@@ -71,9 +65,7 @@ const Modal: React.FC<ModalProps> = ({
           )}
 
           {/* Content */}
-          <div className="p-6">
-            {children}
-          </div>
+          <div className="p-6">{children}</div>
         </Dialog.Panel>
       </div>
     </Dialog>

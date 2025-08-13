@@ -24,7 +24,7 @@ export default function LazyImage({
   blurDataURL,
   priority = false,
   onLoad,
-  onError
+  onError,
 }: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false)
   const [isInView, setIsInView] = useState(priority)
@@ -43,8 +43,8 @@ export default function LazyImage({
       },
       {
         threshold: 0.1,
-        rootMargin: '50px'
-      }
+        rootMargin: '50px',
+      },
     )
 
     if (imgRef.current) {
@@ -65,10 +65,7 @@ export default function LazyImage({
   }
 
   return (
-    <div 
-      className={`relative overflow-hidden ${className}`}
-      style={{ width, height }}
-    >
+    <div className={`relative overflow-hidden ${className}`} style={{ width, height }}>
       {/* Placeholder/Loading State */}
       <motion.div
         className="absolute inset-0 bg-slate-800 animate-pulse"
@@ -80,7 +77,7 @@ export default function LazyImage({
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           filter: 'blur(5px)',
-          transform: 'scale(1.1)'
+          transform: 'scale(1.1)',
         }}
       />
 

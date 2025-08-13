@@ -56,7 +56,9 @@ class UserEngagementTracker:
         if not user_events:
             return 0.0
         event_types = {e.event_type for e in user_events}
-        return float(len(user_events) + len(event_types) * 0.25)
+        # Base scoring: unique event types + quarter-weight per event
+        # With two events (login, view) this yields 2 + 0.5 = 2.5
+        return float(len(event_types) + 0.25 * (len(user_events)))
 
     def clear_old_events(self, older_than_minutes: int = 1440) -> None:
         """Remove events older than the specified time window."""

@@ -50,6 +50,9 @@ build/
 site/
 *.tar.gz
 *.whl
+frontend/.next.backup/**
+frontend/.next/**
+staff-frontend/.next/**
 
 # === NODE ===
 node_modules/
@@ -62,7 +65,13 @@ logs/**
 *.tmp
 .cache/
 *.pid
+frontend/logs/**
+staff-frontend/logs/**
 
 cloudflare-tunnel/credentials.json
 o/**
 .claude
+logs/
+
+# === SECRETS ===
+.secrets/

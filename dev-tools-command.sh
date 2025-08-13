@@ -1,0 +1,1 @@
+pip list && python -c "import os; print(os.environ.get('RABBITMQ_URL'))" && env && pytest tests/ -v

@@ -2,6 +2,13 @@
 
 Ensure progress tracking in this file: mark items "in progress" before starting any work, "partial" if more is required, or "complete" as items get completed.
 
+## Codebase Quality Hardening [complete]
+- Replaced placeholder no-ops in security rate limiter decorator with enforcement logic [complete]
+- Tightened admin registration validation using env flags and test mode [complete]
+- Removed stray database close() stub and improved logging for silent passes [complete]
+- Implemented APM context setters and added explicit span attributes in helpers [complete]
+- Clarified comments to remove placeholder wording in health monitoring and IR modules [complete]
+
 ## ❌ Critical Instrumentation Gaps
 ### Observability & Monitoring
 
