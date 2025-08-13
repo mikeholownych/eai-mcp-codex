@@ -71,19 +71,19 @@ class TestRoutingLogic:
              patch('src.model_router.router.get_local_client') as mock_local:
             
             # Mock z.ai client
-            mock_zai_instance = AsyncMock()
+            mock_zai_instance = MagicMock()
             mock_zai_instance.is_available.return_value = True
-            mock_zai_instance.route_and_send.return_value = mock_response
+            mock_zai_instance.route_and_send = AsyncMock(return_value=mock_response)
             mock_zai.return_value = mock_zai_instance
             
             # Mock Claude client
-            mock_claude_instance = AsyncMock()
-            mock_claude_instance.route_and_send.return_value = mock_response
+            mock_claude_instance = MagicMock()
+            mock_claude_instance.route_and_send = AsyncMock(return_value=mock_response)
             mock_claude.return_value = mock_claude_instance
             
             # Mock local client
-            mock_local_instance = AsyncMock()
-            mock_local_instance.route_and_send.return_value = mock_response
+            mock_local_instance = MagicMock()
+            mock_local_instance.route_and_send = AsyncMock(return_value=mock_response)
             mock_local.return_value = mock_local_instance
             
             result = await router_module.route_async(ModelRequest(text="urgent task"))
@@ -113,18 +113,18 @@ class TestRoutingLogic:
              patch('src.model_router.router.get_local_client') as mock_local:
             
             # Mock z.ai client as available
-            mock_zai_instance = AsyncMock()
+            mock_zai_instance = MagicMock()
             mock_zai_instance.is_available.return_value = True
-            mock_zai_instance.route_and_send.return_value = mock_response
+            mock_zai_instance.route_and_send = AsyncMock(return_value=mock_response)
             mock_zai.return_value = mock_zai_instance
             
             # Mock other clients
-            mock_claude_instance = AsyncMock()
-            mock_claude_instance.route_and_send.return_value = mock_response
+            mock_claude_instance = MagicMock()
+            mock_claude_instance.route_and_send = AsyncMock(return_value=mock_response)
             mock_claude.return_value = mock_claude_instance
             
-            mock_local_instance = AsyncMock()
-            mock_local_instance.route_and_send.return_value = mock_response
+            mock_local_instance = MagicMock()
+            mock_local_instance.route_and_send = AsyncMock(return_value=mock_response)
             mock_local.return_value = mock_local_instance
             
             result = await router_module.route_async(ModelRequest(text="complex analysis task"))
@@ -133,69 +133,95 @@ class TestRoutingLogic:
     @pytest.mark.asyncio
     async def test_route_with_zai_unavailable(self) -> None:
         """Test routing when z.ai is unavailable (falls back to Claude)."""
-        mock_response = LLMResponse(
-            id="mock-id",
-            content="Claude fallback response",
-            model="claude-3-5-sonnet-20241022",
-            usage={"input_tokens": 10, "output_tokens": 5},
-            stop_reason="stop",
-            timestamp=datetime.utcnow()
-        )
+        # Disable TESTING_MODE to ensure we hit the actual routing logic
+        original_testing_mode = os.environ.get("TESTING_MODE")
+        os.environ["TESTING_MODE"] = "false"
         
-        with patch('src.model_router.router.get_zai_client') as mock_zai, \
-             patch('src.model_router.router.get_claude_client') as mock_claude, \
-             patch('src.model_router.router.get_local_client') as mock_local:
+        try:
+            mock_response = LLMResponse(
+                id="mock-id",
+                content="Claude fallback response",
+                model="claude-3-5-sonnet-20241022",
+                usage={"input_tokens": 10, "output_tokens": 5},
+                stop_reason="stop",
+                timestamp=datetime.utcnow()
+            )
             
-            # Mock z.ai client as unavailable
-            mock_zai_instance = AsyncMock()
-            mock_zai_instance.is_available.return_value = False
-            mock_zai.return_value = mock_zai_instance
-            
-            # Mock Claude client as available
-            mock_claude_instance = AsyncMock()
-            mock_claude_instance.route_and_send.return_value = mock_response
-            mock_claude.return_value = mock_claude_instance
-            
-            # Mock local client
-            mock_local_instance = AsyncMock()
-            mock_local_instance.route_and_send.return_value = mock_response
-            mock_local.return_value = mock_local_instance
-            
-            result = await router_module.route_async(ModelRequest(text="fallback test"))
-            assert "Claude fallback response" in result.result
+            with patch('src.model_router.router.get_zai_client') as mock_zai, \
+                 patch('src.model_router.router.get_claude_client') as mock_claude, \
+                 patch('src.model_router.router.get_local_client') as mock_local:
+                
+                # Mock z.ai client as unavailable
+                mock_zai_instance = MagicMock()
+                mock_zai_instance.is_available.return_value = False
+                mock_zai.return_value = mock_zai_instance
+                
+                # Mock Claude client as available
+                mock_claude_instance = MagicMock()
+                mock_claude_instance.is_available.return_value = True
+                mock_claude_instance.route_and_send = AsyncMock(return_value=mock_response)
+                mock_claude.return_value = mock_claude_instance
+                
+                # Mock local client
+                mock_local_instance = MagicMock()
+                mock_local_instance.route_and_send = AsyncMock(return_value=mock_response)
+                mock_local.return_value = mock_local_instance
+                
+                result = await router_module.route_async(ModelRequest(text="fallback test"))
+                assert "Claude fallback response" in result.result
+        finally:
+            # Restore original TESTING_MODE
+            if original_testing_mode is not None:
+                os.environ["TESTING_MODE"] = original_testing_mode
+            else:
+                del os.environ["TESTING_MODE"]
 
     @pytest.mark.asyncio
     async def test_route_with_all_cloud_unavailable(self) -> None:
         """Test routing when all cloud models are unavailable (falls back to local)."""
-        mock_response = LLMResponse(
-            id="mock-id",
-            content="Local fallback response",
-            model="mistral",
-            usage={"input_tokens": 10, "output_tokens": 5},
-            stop_reason="stop",
-            timestamp=datetime.utcnow()
-        )
+        # Disable TESTING_MODE to ensure we hit the actual local client fallback
+        original_testing_mode = os.environ.get("TESTING_MODE")
+        os.environ["TESTING_MODE"] = "false"
         
-        with patch('src.model_router.router.get_zai_client') as mock_zai, \
-             patch('src.model_router.router.get_claude_client') as mock_claude, \
-             patch('src.model_router.router.get_local_client') as mock_local:
+        try:
+            mock_response = LLMResponse(
+                id="mock-id",
+                content="Local fallback response",
+                model="mistral",
+                usage={"input_tokens": 10, "output_tokens": 5},
+                stop_reason="stop",
+                timestamp=datetime.utcnow()
+            )
             
-            # Mock all cloud clients as unavailable
-            mock_zai_instance = AsyncMock()
-            mock_zai_instance.is_available.return_value = False
-            mock_zai.return_value = mock_zai_instance
-            
-            mock_claude_instance = AsyncMock()
-            mock_claude_instance.is_available.return_value = False
-            mock_claude.return_value = mock_claude_instance
-            
-            # Mock local client as available
-            mock_local_instance = AsyncMock()
-            mock_local_instance.route_and_send.return_value = mock_response
-            mock_local.return_value = mock_local_instance
-            
-            result = await router_module.route_async(ModelRequest(text="local fallback test"))
-            assert "Local fallback response" in result.result
+            with patch('src.model_router.router.get_zai_client') as mock_zai, \
+                 patch('src.model_router.router.get_claude_client') as mock_claude, \
+                 patch('src.model_router.router.get_local_client') as mock_local:
+                
+                # Mock all cloud clients as unavailable
+                mock_zai_instance = MagicMock()
+                mock_zai_instance.is_available.return_value = False
+                mock_zai.return_value = mock_zai_instance
+                
+                mock_claude_instance = MagicMock()
+                mock_claude_instance.is_available.return_value = False
+                mock_claude.return_value = mock_claude_instance
+                
+                # Mock local client as available
+                mock_local_instance = MagicMock()
+                mock_local_instance.route_and_send.return_value = mock_response
+                mock_local.return_value = mock_local_instance
+                
+                # Mock the local client's route_and_send method to return the mock response
+                mock_local_instance.route_and_send = AsyncMock(return_value=mock_response)
+                
+                result = await router_module.route_async(ModelRequest(text="local fallback test"))
+                assert "Local fallback response" in result.result
+        finally:
+            # Restore original TESTING_MODE
+            if original_testing_mode is not None:
+                os.environ["TESTING_MODE"] = original_testing_mode
+            else:
+                del os.environ["TESTING_MODE"]
 
     def test_routing_table_pattern_matching(self):
         """Test the routing table pattern matching logic."""
@@ -240,7 +266,7 @@ class TestAPIEndpoints:
         response = client.get("/health")
         assert response.status_code == 200
         data = response.json()
-        assert data["status"] == "ok"  # Fixed: health check returns 'ok' not 'healthy'
+        assert data["status"] == "healthy"  # Health check returns 'healthy'
 
     @patch('src.model_router.routes.EnhancedModelRouter')
     def test_route_endpoint_success(self, mock_enhanced_router, client, sample_request, mock_response):
@@ -378,11 +404,15 @@ class TestAPIEndpoints:
     def test_claude_health_endpoint(self, client):
         """Test Claude connection health endpoint."""
         with patch('src.model_router.routes.get_claude_client') as mock_claude:
-            mock_client = AsyncMock()
-            mock_client.is_available.return_value = True
-            mock_client.get_model_info.return_value = {"name": "claude-3-5-sonnet-20241022"}
-            mock_client.test_connection.return_value = True  # Mock the test_connection method
+            # Create a mock client with proper method implementations
+            mock_client = MagicMock()
+            
+            # Mock the async test_connection method
+            mock_client.test_connection = AsyncMock(return_value=True)
+            
+            # Mock the synchronous methods
             mock_client.list_available_models.return_value = ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"]
+            
             mock_claude.return_value = mock_client
             
             response = client.post("/model/health/claude")
