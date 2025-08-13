@@ -21,11 +21,19 @@ import ProductTour from '@/components/demo/ProductTour'
 import ParticleBackground from '@/components/effects/ParticleBackground'
 import EnhancedFeatures from '@/components/effects/ScrollAnimation'
 import InteractiveDemo from '@/components/demo/InteractiveDemo'
+<<<<<<< HEAD
 import StructuredData, {
   organizationSchema,
   softwareApplicationSchema,
   serviceSchema,
   faqSchema,
+=======
+import StructuredData, { 
+  organizationSchema, 
+  softwareApplicationSchema, 
+  serviceSchema, 
+  faqSchema 
+>>>>>>> main
 } from '@/components/seo/StructuredData'
 
 const features = [
@@ -230,6 +238,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
       {/* 3D Particle Background */}
       <ParticleBackground />
+<<<<<<< HEAD
 
       {/* Background Effects */}
       <div
@@ -241,6 +250,13 @@ export default function HomePage() {
         style={{ zIndex: 3 }}
       />
 
+=======
+      
+      {/* Background Effects */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-900" style={{ zIndex: 2 }} />
+      <div className="fixed inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" style={{ zIndex: 3 }} />
+      
+>>>>>>> main
       {/* Navigation */}
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
@@ -263,6 +279,7 @@ export default function HomePage() {
             </motion.div>
 
             <div className="hidden md:flex items-center space-x-8">
+<<<<<<< HEAD
               {['Features', 'Pricing', 'Docs', 'Blog'].map(item => (
                 <motion.div
                   key={item}
@@ -273,6 +290,11 @@ export default function HomePage() {
                     href={`#${item.toLowerCase()}`}
                     className="text-gray-300 hover:text-white transition-colors relative group"
                   >
+=======
+              {['Features', 'Pricing', 'Docs', 'Blog'].map((item) => (
+                <motion.div key={item} whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300 }}>
+                  <Link href={`#${item.toLowerCase()}`} className="text-gray-300 hover:text-white transition-colors relative group">
+>>>>>>> main
                     {item}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 transition-all group-hover:w-full"></span>
                   </Link>
@@ -303,11 +325,16 @@ export default function HomePage() {
       </motion.nav>
 
       {/* Hero Section */}
+<<<<<<< HEAD
       <section
         className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden"
         style={{ zIndex: 5 }}
       >
         <motion.div
+=======
+      <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden" style={{ zIndex: 5 }}>
+        <motion.div 
+>>>>>>> main
           className="max-w-7xl mx-auto text-center"
           variants={containerVariants}
           initial="hidden"
@@ -444,7 +471,11 @@ export default function HomePage() {
 
       {/* Enhanced Features Section */}
       <EnhancedFeatures />
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> main
       {/* Features Section */}
       <section id="features" className="relative py-24 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
         <div className="max-w-7xl mx-auto">
@@ -668,10 +699,14 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
+<<<<<<< HEAD
       <footer
         className="border-t border-dark-700 bg-dark-800 py-12 px-4 sm:px-6 lg:px-8"
         style={{ zIndex: 5 }}
       >
+=======
+      <footer className="border-t border-slate-700 bg-slate-800 py-12 px-4 sm:px-6 lg:px-8" style={{ zIndex: 5 }}>
+>>>>>>> main
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -801,8 +836,16 @@ export default function HomePage() {
       </footer>
 
       {/* Interactive Demo */}
+<<<<<<< HEAD
       <InteractiveDemo isOpen={showDemo} onClose={() => setShowDemo(false)} />
 
+=======
+      <InteractiveDemo 
+        isOpen={showDemo} 
+        onClose={() => setShowDemo(false)} 
+      />
+      
+>>>>>>> main
       {/* Product Tour */}
       <ProductTour isOpen={showTour} onClose={() => setShowTour(false)} />
 

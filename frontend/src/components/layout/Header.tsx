@@ -3,9 +3,15 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+<<<<<<< HEAD
 import {
   BellIcon,
   MagnifyingGlassIcon,
+=======
+import { 
+  BellIcon, 
+  MagnifyingGlassIcon, 
+>>>>>>> main
   UserCircleIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
@@ -129,8 +135,13 @@ const Header: React.FC<HeaderProps> = ({
           <Menu as="div" className="relative">
             <Menu.Button className="flex items-center space-x-2 p-2 text-gray-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors">
               {user.avatar ? (
+<<<<<<< HEAD
                 <Image
                   src={user.avatar}
+=======
+                <Image 
+                  src={user.avatar} 
+>>>>>>> main
                   alt={user.name}
                   width={32}
                   height={32}

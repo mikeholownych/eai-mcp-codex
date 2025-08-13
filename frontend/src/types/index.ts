@@ -261,7 +261,10 @@ export interface ButtonProps {
   className?: string
   type?: 'button' | 'submit' | 'reset'
   title?: string
+<<<<<<< HEAD
   href?: string
+=======
+>>>>>>> main
 }
 
 export interface InputProps {
@@ -392,6 +395,7 @@ export interface ModelStats {
   failed_requests: number
   average_response_time: number
   tokens_used: number
+<<<<<<< HEAD
   model_usage: Record<
     string,
     {
@@ -400,6 +404,13 @@ export interface ModelStats {
       avg_response_time: number
     }
   >
+=======
+  model_usage: Record<string, {
+    requests: number
+    tokens: number
+    avg_response_time: number
+  }>
+>>>>>>> main
 }
 
 // System Health Types

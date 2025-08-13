@@ -37,8 +37,12 @@ opentelemetry-instrumentation-requests>=0.41b0
 opentelemetry-instrumentation-psycopg2>=0.41b0
 opentelemetry-instrumentation-redis>=0.41b0
 opentelemetry-instrumentation-sqlalchemy>=0.41b0
+<<<<<<< HEAD
 opentelemetry-propagator-b3
 opentelemetry-propagator-jaeger
 pika>=1.3.0
 structlog>=23.0.0
 psycopg2-binary>=2.9.9
+=======
+pika>=1.3.0
+>>>>>>> main

@@ -44,7 +44,13 @@ const HEALTH_ICONS: Record<string, React.JSX.Element> = {
 
 const getHealthColor = (status: string) => HEALTH_COLORS[status.toLowerCase()] ?? 'text-gray-400'
 
+<<<<<<< HEAD
 const getHealthIcon = (status: string) => HEALTH_ICONS[status.toLowerCase()] ?? HEALTH_ICONS.loading
+=======
+const getHealthIcon = (status: string) =>
+  HEALTH_ICONS[status.toLowerCase()] ?? HEALTH_ICONS.loading
+
+>>>>>>> main
 
 const mockMetrics = {
   cpu_usage: { current: 45.2, trend: 'up', change: '+5.2%' },
@@ -85,12 +91,16 @@ const mockAlerts = [
 export default function SystemMonitoring() {
   const { user } = useAuth()
   const { loading: statsLoading, error: statsError } = useSystemStats()
+<<<<<<< HEAD
   const {
     health: systemHealth,
     loading: healthLoading,
     error: healthError,
     refetch,
   } = useSystemHealth()
+=======
+  const { health: systemHealth, loading: healthLoading, error: healthError, refetch } = useSystemHealth()
+>>>>>>> main
   const [selectedTimeRange, setSelectedTimeRange] = useState('1h')
   const [autoRefresh, setAutoRefresh] = useState(true)
 

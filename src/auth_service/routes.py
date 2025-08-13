@@ -8,7 +8,11 @@ from src.auth_service.models import (
     UserRegistration, UserLogin, UserResponse, TokenResponse,
     ApiKeyResponse, PasswordChange
 )
+<<<<<<< HEAD
 from src.common.auth import get_auth_manager
+=======
+from src.common.auth import get_auth_manager, AuthResult
+>>>>>>> main
 from src.common.fastapi_auth import get_current_user
 from src.common.logging import get_logger
 

@@ -102,6 +102,10 @@ const mockVideos = [
   },
 ]
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
@@ -115,7 +119,11 @@ export default function VideoContentManagement() {
   const [selectedVisibility, setSelectedVisibility] = useState('all')
   const [selectedTag, setSelectedTag] = useState('all')
   const [showUploadModal, setShowUploadModal] = useState(false)
+<<<<<<< HEAD
   const [uploadProgress, setUploadProgress] = useState(0)
+=======
+    const [uploadProgress, setUploadProgress] = useState(0)
+>>>>>>> main
   const [isUploading, setIsUploading] = useState(false)
 
   // Check if user has permission to manage video content
@@ -618,7 +626,11 @@ export default function VideoContentManagement() {
                 <CloudUploadIcon className="h-16 w-16 text-blue-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-white mb-2">Uploading Video...</h3>
                 <p className="text-gray-400 mb-6">Please don&apos;t close this window</p>
+<<<<<<< HEAD
 
+=======
+                
+>>>>>>> main
                 <div className="bg-slate-700 rounded-full h-4 mb-4">
                   <div
                     className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all duration-300"

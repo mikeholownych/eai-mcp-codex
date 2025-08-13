@@ -24,18 +24,30 @@ const Select: React.FC<SelectProps> = ({
   disabled = false,
   required = false,
   error,
+<<<<<<< HEAD
   className,
+=======
+  className
+>>>>>>> main
 }) => {
   const selectId = label?.toLowerCase().replace(/\s+/g, '-')
 
   return (
     <div className="space-y-1.5">
       {label && (
+<<<<<<< HEAD
         <label
           htmlFor={selectId}
           className={cn(
             'block text-sm font-medium text-slate-300',
             required && 'after:content-["*"] after:ml-0.5 after:text-red-400',
+=======
+        <label 
+          htmlFor={selectId}
+          className={cn(
+            'block text-sm font-medium text-slate-300',
+            required && 'after:content-["*"] after:ml-0.5 after:text-red-400'
+>>>>>>> main
           )}
         >
           {label}
@@ -44,7 +56,11 @@ const Select: React.FC<SelectProps> = ({
       <select
         id={selectId}
         value={value}
+<<<<<<< HEAD
         onChange={e => onValueChange?.(e.target.value)}
+=======
+        onChange={(e) => onValueChange?.(e.target.value)}
+>>>>>>> main
         disabled={disabled}
         required={required}
         className={cn(
@@ -53,19 +69,39 @@ const Select: React.FC<SelectProps> = ({
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           error && 'border-red-500 focus:ring-red-500',
+<<<<<<< HEAD
           className,
         )}
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map(option => (
+=======
+          className
+        )}
+      >
+        {placeholder && (
+          <option value="">{placeholder}</option>
+        )}
+        {options.map((option) => (
+>>>>>>> main
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
       </select>
+<<<<<<< HEAD
       {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+=======
+      {error && (
+        <p className="text-xs text-red-400 mt-1">{error}</p>
+      )}
+>>>>>>> main
     </div>
   )
 }
 
+<<<<<<< HEAD
 export default Select
+=======
+export default Select
+>>>>>>> main

@@ -16,6 +16,7 @@ class SecurityAgent(BaseAgent):
         """Factory compatible with legacy startup scripts."""
         return cls(agent_id=agent_id, name=name)
 
+<<<<<<< HEAD
     def __init__(
         self, agent_id: str | None = None, name: str | None = None, config: AgentConfig | None = None
     ):
@@ -32,6 +33,30 @@ class SecurityAgent(BaseAgent):
                 max_concurrent_tasks=4,
                 heartbeat_interval=30,
             )
+=======
+    def __init__(self, agent_id: str = None, name: str = None, config: AgentConfig = None):
+        if config is None:
+            # Legacy initialization with individual parameters
+            config = AgentConfig(
+                agent_id=agent_id,
+                agent_type="security",
+                name=name or f"Security-{agent_id}",
+                capabilities=[
+                    "vulnerability_analysis",
+                    "security_review",
+                    "compliance_check",
+                    "threat_modeling",
+                    "penetration_testing",
+                    "security_architecture",
+                "authentication_review",
+                "authorization_review",
+                "data_protection_review",
+                "security_audit",
+            ],
+            max_concurrent_tasks=4,
+            heartbeat_interval=30,
+        )
+>>>>>>> main
         super().__init__(config)
 
         self.vulnerability_patterns = self._load_vulnerability_patterns()

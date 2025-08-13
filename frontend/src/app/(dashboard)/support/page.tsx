@@ -59,8 +59,12 @@ const tickets: Ticket[] = [
       },
       {
         id: '2',
+<<<<<<< HEAD
         content:
           'Hi John, thank you for reaching out. We&apos;re investigating this issue. Can you please provide your API key prefix and the timestamp of when you first noticed this issue?',
+=======
+        content: 'Hi John, thank you for reaching out. We&apos;re investigating this issue. Can you please provide your API key prefix and the timestamp of when you first noticed this issue?',
+>>>>>>> main
         isStaff: true,
         author: 'Sarah Support',
         timestamp: new Date('2024-01-20T11:45:00'),
@@ -75,8 +79,12 @@ const tickets: Ticket[] = [
       },
       {
         id: '4',
+<<<<<<< HEAD
         content:
           'Thanks for the details. We&apos;ve identified the issue and are working on a fix. This should be resolved within the next 2 hours.',
+=======
+        content: 'Thanks for the details. We&apos;ve identified the issue and are working on a fix. This should be resolved within the next 2 hours.',
+>>>>>>> main
         isStaff: true,
         author: 'Sarah Support',
         timestamp: new Date('2024-01-21T14:15:00'),
@@ -123,8 +131,12 @@ const tickets: Ticket[] = [
       },
       {
         id: '2',
+<<<<<<< HEAD
         content:
           'We&apos;ve reviewed your account and found the duplicate charge. A refund has been processed and should appear in your account within 3-5 business days.',
+=======
+        content: 'We&apos;ve reviewed your account and found the duplicate charge. A refund has been processed and should appear in your account within 3-5 business days.',
+>>>>>>> main
         isStaff: true,
         author: 'Mike Billing',
         timestamp: new Date('2024-01-18T17:30:00'),
@@ -258,12 +270,16 @@ export default function SupportPage() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Priority</label>
                 <select
                   value={newTicketData.priority}
+<<<<<<< HEAD
                   onChange={e =>
                     setNewTicketData(prev => ({
                       ...prev,
                       priority: e.target.value as 'low' | 'medium' | 'high' | 'urgent',
                     }))
                   }
+=======
+                  onChange={(e) => setNewTicketData(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' | 'urgent' }))}
+>>>>>>> main
                   className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                 >
                   <option value="low">Low</option>
@@ -323,6 +339,7 @@ export default function SupportPage() {
           <div className="lg:col-span-3">
             <Card className="p-6">
               <div className="space-y-6">
+<<<<<<< HEAD
                 {selectedTicket.messages.map(message => (
                   <div
                     key={message.id}
@@ -331,6 +348,11 @@ export default function SupportPage() {
                     <div
                       className={`flex max-w-4xl ${message.isStaff ? 'flex-row' : 'flex-row-reverse'}`}
                     >
+=======
+                {selectedTicket.messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.isStaff ? 'justify-start' : 'justify-end'}`}>
+                    <div className={`flex max-w-4xl ${message.isStaff ? 'flex-row' : 'flex-row-reverse'}`}>
+>>>>>>> main
                       <div className="flex-shrink-0">
                         {message.isStaff ? (
                           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
@@ -516,8 +538,12 @@ export default function SupportPage() {
           <LifebuoyIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-white mb-2">No support tickets</h3>
           <p className="text-gray-400 mb-6">
+<<<<<<< HEAD
             You haven&apos;t created any support tickets yet. If you need help, don&apos;t hesitate
             to reach out!
+=======
+            You haven&apos;t created any support tickets yet. If you need help, don&apos;t hesitate to reach out!
+>>>>>>> main
           </p>
           <Button variant="primary" onClick={() => setShowNewTicketForm(true)}>
             <PlusIcon className="h-4 w-4 mr-2" />

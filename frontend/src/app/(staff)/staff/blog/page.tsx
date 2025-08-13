@@ -6,7 +6,6 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { useRouter } from 'next/navigation'
 import { debug } from '@/lib/utils'
-import { getBlogStatusColor, getBlogStatusIcon } from '@/lib/statusHelpers'
 import {
   PencilSquareIcon,
   DocumentTextIcon,

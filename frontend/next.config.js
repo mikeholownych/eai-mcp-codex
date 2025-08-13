@@ -1,8 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+<<<<<<< HEAD
   output: 'standalone',
 
+=======
+  
+>>>>>>> main
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://newapi.ethical-ai-insider.com',
     NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || 'wss://newapi.ethical-ai-insider.com',
@@ -20,7 +24,11 @@ const nextConfig = {
         destination: '/',
         permanent: false,
       },
+<<<<<<< HEAD
     ]
+=======
+    ];
+>>>>>>> main
   },
 
   async headers() {
@@ -38,6 +46,7 @@ const nextConfig = {
           },
         ],
       },
+<<<<<<< HEAD
     ]
   },
 
@@ -48,3 +57,10 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
+=======
+    ];
+  },
+};
+
+module.exports = nextConfig;
+>>>>>>> main

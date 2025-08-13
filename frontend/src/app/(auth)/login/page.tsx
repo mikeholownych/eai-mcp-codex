@@ -49,7 +49,11 @@ export default function LoginPage() {
           router.push('/staff')
         }
       }
+<<<<<<< HEAD
     } catch {
+=======
+    } catch (_) {
+>>>>>>> main
       setError('Login failed. Please try again.')
     } finally {
       setLoading(false)
@@ -68,7 +72,11 @@ export default function LoginPage() {
       if (result?.error) {
         setError(`${provider} authentication failed`)
       }
+<<<<<<< HEAD
     } catch {
+=======
+    } catch (_) {
+>>>>>>> main
       setError(`${provider} authentication failed`)
     } finally {
       setOauthLoading(null)
@@ -265,6 +273,7 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
+<<<<<<< HEAD
           <p className="text-gray-300">
             Don&apos;t have an account?{' '}
             <Link
@@ -274,6 +283,17 @@ export default function LoginPage() {
               Sign up for free
             </Link>
           </p>
+=======
+                <p className="text-gray-300">
+                  Don&apos;t have an account?{' '}
+                  <Link
+                    href="/register"
+                    className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
+                  >
+                    Sign up for free
+                  </Link>
+                </p>
+>>>>>>> main
         </motion.div>
       </motion.div>
     </div>

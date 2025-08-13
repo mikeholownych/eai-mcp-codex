@@ -54,6 +54,7 @@
     "hook_event_name": "PreCompact",
     "trigger": "auto",
     "custom_instructions": null
+<<<<<<< HEAD
   },
   {
     "session_id": "b10b9b94-b5e1-4511-aca2-e7d7fca595d6",
@@ -62,5 +63,7 @@
     "hook_event_name": "PreCompact",
     "trigger": "auto",
     "custom_instructions": null
+=======
+>>>>>>> main
   }
 ]
